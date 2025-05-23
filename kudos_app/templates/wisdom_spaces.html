@@ -1,0 +1,100 @@
+<!-- kudos_app/templates/wisdom_spaces.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espacios de Sabiduría - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Estilos específicos para espacios de sabiduría */
+        .wisdom-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .wisdom-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .wisdom-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .wisdom-item {
+            flex: 1 1 300px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .wisdom-item h3 {
+            margin-top: 0;
+            color: #1a73e8;
+        }
+        .wisdom-item .preserved {
+            font-weight: bold;
+            color: #f5c518;
+        }
+    </style>
+</head>
+<body>
+    <div class="container wisdom-container">
+        <h1>Espacios de Sabiduría</h1>
+        <p>Contribuye y explora un archivo eterno de conocimiento colectivo.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notification {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Formulario para Contribuir -->
+        <section class="wisdom-form">
+            <h2>Contribuir al Espacio de Sabiduría</h2>
+            <form method="post" action="{% url 'wisdom_spaces' %}">
+                {% csrf_token %}
+                <label for="content">Contenido</label>
+                <textarea name="content" id="content" placeholder="Comparte tu sabiduría..." required rows="5" class="form-control"></textarea>
+
+                <label for="temas">Temas</label>
+                <select name="temas" id="temas" multiple class="form-control" required>
+                    {% for tema in temas %}
+                        <option value="{{ tema }}">{{ tema }}</option>
+                    {% endfor %}
+                </select>
+                <small>Mantén presionado Ctrl (o Cmd) para seleccionar múltiples temas.</small>
+
+                <button type="submit" name="action" value="contribute" class="btn">Agregar Cápsula</button>
+            </form>
+        </section>
+
+        <!-- Lista de Cápsulas de Sabiduría -->
+        <section class="wisdom-list">
+            {% if capsules %}
+                {% for capsule in capsules %}
+                    <div class="wisdom-item">
+                        <h3>{{ capsule.contenido|truncatechars:50 }}</h3>
+                        <p><strong>Autor:</strong> {{ capsule.usuario.alias }}</p>
+                        <p><strong>Temas:</strong> {{ capsule.temas|join:", " }}</p>
+                        <p><strong>Fecha:</strong> {{ capsule.fecha|date:"Y-m-d" }}</p>
+                        <p><strong>Estado:</strong> <span class="preserved">{% if capsule.parameters.preserved_in_blockchain %}Preservada en Blockchain{% else %}No Preservada{% endif %}</span></p>
+                        <a href="{% url 'vr_view' capsule.uid %}" class="btn">Ver en VR</a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No hay cápsulas en los Espacios de Sabiduría en este momento.</p>
+            {% endif %}
+        </section>
+
+        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
+    </div>
+
+    <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!-- kudos_app/templates/research.html -->
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Investigación - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+    <script src="{% static 'js/leaflet-src.js' %}"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        #research-map { height: 400px; margin: 20px 0; border: 2px solid #ccc; }
+        .research-container { max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        .section { margin: 20px 0; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 10px 0; border-bottom: 1px solid #ddd; }
+        form { margin: 10px 0; }
+        input, select, textarea { padding: 8px; margin: 5px 0; width: 100%; }
+        button { padding: 8px 16px; background-color: #FFD700; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #FFC107; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .progress { display: flex; justify-content: space-around; margin: 20px 0; }
+        .progress-box { background-color: #f9f9f9; padding: 15px; border-radius: 5px; text-align: center; }
+        .research-simulation { margin: 20px 0; border: 1px solid #ddd; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Investigación - Kudos</h1>
+
+    <div class="research-container">
+        <!-- Progreso del Usuario -->
+        <div class="section progress">
+            <div class="progress-box">
+                <h3>Cápsulas Completadas</h3>
+                <p>{{ completed_research_capsules }}</p>
+            </div>
+            <div class="progress-box">
+                <h3>Insignias</h3>
+                <p>{{ badges.count }}</p>
+            </div>
+        </div>
+
+        <!-- Crear Proyecto de Investigación -->
+        <div class="section">
+            <h2>Crear Nuevo Proyecto de Investigación</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create_project">
+                <label for="project_title">Título:</label>
+                <input type="text" id="project_title" name="project_title" required>
+                <label for="project_themes">Temas (separados por comas):</label>
+                <input type="text" id="project_themes" name="project_themes" placeholder="Ciencia, Investigación">
+                <label for="project_description">Descripción:</label>
+                <textarea id="project_description" name="project_description" rows="5" required></textarea>
+                <label for="community_id">Comunidad (opcional):</label>
+                <select id="community_id" name="community_id">
+                    <option value="">Ninguna</option>
+                    {% for community in communities %}
+                        <option value="{{ community.id }}">{{ community.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Crear Proyecto</button>
+            </form>
+        </div>
+
+        <!-- Proyectos de Investigación -->
+        <div class="section">
+            <h2>Proyectos de Investigación</h2>
+            {% if research_projects %}
+                <ul>
+                    {% for project in research_projects %}
+                        <li>
+                            {{ project.title }} ({{ project.member_count }} miembros)
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="join_project">
+                                <input type="hidden" name="project_id" value="{{ project.id }}">
+                                <button type="submit">Unirse</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay proyectos de investigación disponibles. ¡Crea uno!</p>
+            {% endif %}
+        </div>
+
+        <!-- Insignias -->
+        <div class="section">
+            <h2>Tus Insignias de Investigación</h2>
+            {% if badges %}
+                <ul>
+                    {% for badge in badges %}
+                        <li>{{ badge.name }}: {{ badge.description }} ({{ badge.timestamp|date:"Y-m-d" }})</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No tienes insignias de investigación aún. ¡Contribuye a la ciencia!</p>
+            {% endif %}
+        </div>
+
+        <!-- Simulación de Investigación -->
+        <div class="section research-simulation">
+            <h2>Simulación de Investigación en AR/VR</h2>
+            {{ research_scene|safe }}
+        </div>
+
+        <!-- Cápsulas de Investigación -->
+        <div class="section">
+            <h2>Cápsulas de Investigación</h2>
+            <div id="research-map"></div>
+            {% if research_capsules %}
+                <ul>
+                    {% for capsule in research_capsules %}
+                        <li>
+                            {{ capsule.contenido }} (Impacto: {{ capsule.parameters.scientific_impact }})
+                            <a href="{% url 'ar_view' capsule.uid %}">Ver en AR</a> |
+                            <a href="{% url 'vr_view' capsule.uid %}">Ver en VR</a>
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="complete_capsule">
+                                <input type="hidden" name="capsule_uid" value="{{ capsule.uid }}">
+                                <button type="submit">Completar</button>
+                            </form>
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="co_create">
+                                <input type="hidden" name="capsule_uid" value="{{ capsule.uid }}">
+                                <input type="text" name="co_content" placeholder="Añade tu contribución científica..." required>
+                                <button type="submit">Co-crear</button>
+                            </form>
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="list_market">
+                                <input type="hidden" name="capsule_uid" value="{{ capsule.uid }}">
+                                <input type="number" name="price" min="0" max="1000" step="0.01" placeholder="Precio (KMT)" required>
+                                <button type="submit">Listar en Mercado</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay cápsulas de investigación disponibles.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Inicializar mapa con Leaflet
+        var map = L.map('research-map').setView([0, 0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            minZoom: 0,
+            maxZoom: 20
+        }).addTo(map);
+
+        var capsuleLayer = L.geoJSON({{ map_data|safe }}, {
+            style: function(feature) {
+                return { color: "#FFD700", weight: 2 };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `<b>${feature.properties.description}</b><br>
+                    Modo: ${feature.properties.mode}<br>
+                    Temas: ${feature.properties.themes.join(', ')}`
+                );
+            }
+        }).addTo(map);
+
+        if (capsuleLayer.getBounds().isValid()) {
+            map.fitBounds(capsuleLayer.getBounds());
+        }
+    </script>
+</body>
+</html>
+```

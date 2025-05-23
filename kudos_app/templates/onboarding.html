@@ -1,0 +1,135 @@
+<!-- kudos_app/templates/onboarding.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incorporación - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Estilos específicos para onboarding */
+        .onboarding-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .step h3 {
+            color: #1a73e8;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container onboarding-container">
+        <h1>Bienvenido a Kudos</h1>
+        <p>Configura tu perfil y comienza a explorar el sistema multidimensional.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notification {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" action="{% url 'onboarding' %}" class="onboarding-form">
+            {% csrf_token %}
+            <!-- Paso 1: Alias -->
+            <div class="step">
+                <h3>Paso 1: Elige tu Alias</h3>
+                <p>Este será tu nombre visible en Kudos.</p>
+                <div class="form-group">
+                    <label for="alias">Alias</label>
+                    <input type="text" name="alias" id="alias" value="{{ user.alias }}" required class="form-control" placeholder="Ejemplo: KudosExplorer">
+                </div>
+            </div>
+
+            <!-- Paso 2: Intereses -->
+            <div class="step">
+                <h3>Paso 2: Selecciona tus Intereses</h3>
+                <p>Estos ayudarán a personalizar tu experiencia.</p>
+                <div class="form-group">
+                    <label for="necesidades">Intereses</label>
+                    <select name="necesidades" id="necesidades" multiple class="form-control" required>
+                        {% for interest in interests %}
+                            <option value="{{ interest }}" {% if interest in user.necesidades %}selected{% endif %}>{{ interest }}</option>
+                        {% endfor %}
+                    </select>
+                    <small>Mantén presionado Ctrl (o Cmd) para seleccionar múltiples intereses.</small>
+                </div>
+            </div>
+
+            <!-- Paso 3: Ubicación -->
+            <div class="step">
+                <h3>Paso 3: Configura tu Ubicación</h3>
+                <p>Esto nos ayudará a mostrarte contenido cercano.</p>
+                <div class="form-group">
+                    <input type="checkbox" name="use_current_location" id="use_current_location" checked>
+                    <label for="use_current_location">Usar mi ubicación actual</label>
+                    <div id="manual-location" style="display: none;">
+                        <input type="number" name="latitude" id="latitude" placeholder="Latitud" step="0.0001" value="41.9028" class="form-control">
+                        <input type="number" name="longitude" id="longitude" placeholder="Longitud" step="0.0001" value="12.4964" class="form-control">
+                    </div>
+                </div>
+                <button type="button" id="get-current-location" class="btn">Obtener Ubicación</button>
+            </div>
+
+            <!-- Paso 4: Introducción -->
+            <div class="step">
+                <h3>Paso 4: Explora Kudos</h3>
+                <p>Kudos es un sistema multidimensional donde puedes crear y explorar cápsulas en 5 dimensiones: contenido, geolocalización, tiempo, temas y climatología. ¡Comienza ahora!</p>
+            </div>
+
+            <button type="submit" class="btn">Completar Incorporación</button>
+        </form>
+
+        <a href="{% url 'home' %}" class="btn">Saltar</a>
+    </div>
+
+    <script src="{% static 'js/scripts.js' %}"></script>
+    <script>
+        // Mostrar/ocultar campos de ubicación manual
+        const useCurrentCheckbox = document.getElementById('use_current_location');
+        const manualLocation = document.getElementById('manual-location');
+        useCurrentCheckbox.addEventListener('change', function() {
+            manualLocation.style.display = this.checked ? 'none' : 'block';
+        });
+
+        // Obtener ubicación actual del navegador
+        document.getElementById('get-current-location').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        document.getElementById('latitude').value = position.coords.latitude;
+                        document.getElementById('longitude').value = position.coords.longitude;
+                        showNotification('Ubicación obtenida exitosamente.', 'success');
+                    },
+                    function(error) {
+                        showNotification('Error al obtener la ubicación: ' + error.message, 'error');
+                    }
+                );
+            } else {
+                showNotification('Geolocalización no soportada por tu navegador.', 'error');
+            }
+        });
+
+        // Validación del formulario
+        document.querySelector('.onboarding-form').addEventListener('submit', function(event) {
+            const alias = document.getElementById('alias').value.trim();
+            if (alias.length < 3) {
+                event.preventDefault();
+                showNotification('El alias debe tener al menos 3 caracteres.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!-- kudos_app/templates/ar_view.html -->
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vista AR - Cápsula</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1 { text-align: center; color: #333; }
+        .ar-container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Vista en Realidad Aumentada</h1>
+
+    <div class="ar-container">
+        <p><strong>Cápsula:</strong> {{ capsule.contenido }}</p>
+        {{ ar_scene|safe }}
+    </div>
+</body>
+</html>
+```

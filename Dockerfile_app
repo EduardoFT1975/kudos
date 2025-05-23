@@ -1,0 +1,43 @@
+FROM ubuntu:22.04
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    gdal-bin \
+    libgdal-dev \
+    libgeos-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Establecer el directorio de trabajo
+WORKDIR /app
+
+# Actualizar pip para evitar problemas con las dependencias
+RUN pip3 install --upgrade pip
+
+# Copiar requirements.txt y verificar que existe
+COPY requirements.txt .
+RUN ls -la /app
+RUN cat /app/requirements.txt
+
+# Instalar dependencias y verificar la instalación
+RUN pip3 install --no-cache-dir -r requirements.txt || { echo 'Failed to install requirements'; exit 1; }
+RUN pip3 install djangorestframework==3.16.0 streamlit==1.44.1 huggingface_hub==0.24.5 || { echo 'Failed to install additional packages'; exit 1; }
+RUN pip3 list
+
+# Configurar GDAL para Django
+ENV GDAL_LIBRARY_PATH=/usr/lib/libgdal.so
+ENV GEOS_LIBRARY_PATH=/usr/lib/libgeos_c.so
+
+# Crear directorios y configurar permisos
+RUN mkdir /app/matplotlib-cache && chmod 777 /app/matplotlib-cache
+RUN mkdir /app/logs && chmod 777 /app/logs
+RUN useradd -m -u 1000 celeryuser
+RUN chown -R celeryuser:celeryuser /app
+
+# Copiar el resto del proyecto
+COPY . .
+
+# Comando para iniciar el servidor
+CMD ["sh", "-c", "./wait-for-it.sh db:5432 --timeout=60 --strict -- echo 'Database is ready!' && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"]

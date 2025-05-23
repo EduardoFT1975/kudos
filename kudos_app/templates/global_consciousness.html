@@ -1,0 +1,140 @@
+<!-- kudos_app/templates/global_consciousness.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conciencia Colectiva Global - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Estilos específicos para conciencia colectiva */
+        .consciousness-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .proposal-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .proposals-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .proposal-item {
+            flex: 1 1 300px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .proposal-item h3 {
+            margin-top: 0;
+            color: #1a73e8;
+        }
+        .vote-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .vote-count {
+            font-weight: bold;
+            color: #f5c518;
+        }
+    </style>
+</head>
+<body>
+    <div class="container consciousness-container">
+        <h1>Conciencia Colectiva Global</h1>
+        <p>Colabora en debates y votaciones sobre el futuro de la humanidad.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notification {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Formulario para Proponer Tema -->
+        <section class="proposal-form">
+            <h2>Proponer un Tema</h2>
+            <form method="post" action="{% url 'global_consciousness' %}">
+                {% csrf_token %}
+                <label for="content">Propuesta</label>
+                <textarea name="content" id="content" placeholder="Describe tu propuesta..." required rows="5" class="form-control"></textarea>
+
+                <label for="temas">Temas</label>
+                <select name="temas" id="temas" multiple class="form-control" required>
+                    {% for tema in temas %}
+                        <option value="{{ tema }}">{{ tema }}</option>
+                    {% endfor %}
+                </select>
+                <small>Mantén presionado Ctrl (o Cmd) para seleccionar múltiples temas.</small>
+
+                <button type="submit" name="action" value="propose" class="btn">Enviar Propuesta</button>
+            </form>
+        </section>
+
+        <!-- Lista de Propuestas -->
+        <section class="proposals-list">
+            {% if proposals %}
+                {% for proposal in proposals %}
+                    <div class="proposal-item">
+                        <h3>{{ proposal.contenido|truncatechars:50 }}</h3>
+                        <p><strong>Autor:</strong> {{ proposal.usuario.alias }}</p>
+                        <p><strong>Temas:</strong> {{ proposal.temas|join:", " }}</p>
+                        <p><strong>Fecha:</strong> {{ proposal.fecha|date:"Y-m-d" }}</p>
+                        <p><strong>Votos:</strong> <span class="vote-count">{{ proposal.variables.votes|default:0 }}</span></p>
+                        <div class="vote-buttons">
+                            <button class="action-btn" data-action="vote_up" data-target="{{ proposal.uid }}">A Favor</button>
+                            <button class="action-btn" data-action="vote_down" data-target="{{ proposal.uid }}">En Contra</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No hay propuestas activas en el congreso en este momento.</p>
+            {% endif %}
+        </section>
+
+        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
+    </div>
+
+    <script src="{% static 'js/scripts.js' %}"></script>
+    <script>
+        // Manejar votaciones
+        document.querySelectorAll('.action-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const action = button.dataset.action;
+                const targetId = button.dataset.target;
+                const vote = action === 'vote_up' ? 'up' : 'down';
+
+                fetch(`/api/vote/${targetId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify({ vote: vote })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const votesSpan = button.parentElement.previousElementSibling.querySelector('.vote-count');
+                        votesSpan.textContent = data.votes;
+                        showNotification(data.message, 'success');
+                    } else {
+                        showNotification('Error al votar', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error de conexión', 'error');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

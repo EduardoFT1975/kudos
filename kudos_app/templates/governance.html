@@ -1,0 +1,143 @@
+# kudos_app/views/governance.py
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gobernanza - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+    <script src="{% static 'js/leaflet-src.js' %}"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        #governance-map { height: 400px; margin: 20px 0; border: 2px solid #ccc; }
+        .governance-container { max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        .section { margin: 20px 0; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 10px 0; border-bottom: 1px solid #ddd; }
+        form { margin: 10px 0; }
+        input, select, textarea { padding: 8px; margin: 5px 0; width: 100%; }
+        button { padding: 8px 16px; background-color: #FFD700; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #FFC107; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .progress { display: flex; justify-content: space-around; margin: 20px 0; }
+        .progress-box { background-color: #f9f9f9; padding: 15px; border-radius: 5px; text-align: center; }
+        .governance-simulation { margin: 20px 0; border: 1px solid #ddd; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Gobernanza - Kudos</h1>
+
+    <div class="governance-container">
+        <!-- Crear Propuesta -->
+        <div class="section">
+            <h2>Crear Nueva Propuesta</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create_proposal">
+                <label for="proposal_title">Título:</label>
+                <input type="text" id="proposal_title" name="proposal_title" required>
+                <label for="proposal_description">Descripción:</label>
+                <textarea id="proposal_description" name="proposal_description" rows="5" required></textarea>
+                <label for="community_id">Comunidad (opcional):</label>
+                <select id="community_id" name="community_id">
+                    <option value="">Ninguna</option>
+                    {% for community in communities %}
+                        <option value="{{ community.id }}">{{ community.name }}</option>
+                    {% endfor %}
+                </select>
+                <label for="funding_amount">Fondos Solicitados (KMT):</label>
+                <input type="number" id="funding_amount" name="funding_amount" min="0" step="0.01" value="0">
+                <button type="submit">Enviar Propuesta</button>
+            </form>
+        </div>
+
+        <!-- Tus Propuestas -->
+        <div class="section">
+            <h2>Tus Propuestas</h2>
+            {% if user_proposals %}
+                <ul>
+                    {% for proposal in user_proposals %}
+                        <li>
+                            {{ proposal.title }} (Estado: {{ proposal.status|title }}) - {{ proposal.created_at|date:"Y-m-d" }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No has creado propuestas aún.</p>
+            {% endif %}
+        </div>
+
+        <!-- Propuestas Abiertas -->
+        <div class="section">
+            <h2>Propuestas Abiertas</h2>
+            {% if proposals %}
+                <ul>
+                    {% for proposal in proposals %}
+                        <li>
+                            {{ proposal.title }} (Estado: {{ proposal.status|title }}) - Creador: {{ proposal.creator.alias }}
+                            {% if proposal.status == 'open' %}
+                                <form method="POST" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="vote_proposal">
+                                    <input type="hidden" name="proposal_id" value="{{ proposal.id }}">
+                                    <select name="vote_choice" required>
+                                        <option value="yes">A favor</option>
+                                        <option value="no">En contra</option>
+                                    </select>
+                                    <button type="submit">Votar</button>
+                                </form>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay propuestas abiertas.</p>
+            {% endif %}
+        </div>
+
+        <!-- Simulación de Gobernanza -->
+        <div class="section governance-simulation">
+            <h2>Simulación de Gobernanza en AR/VR</h2>
+            {{ governance_scene|safe }}
+        </div>
+
+        <!-- Mapa de Propuestas -->
+        <div class="section">
+            <h2>Mapa de Propuestas</h2>
+            <div id="governance-map"></div>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar mapa con Leaflet
+        var map = L.map('governance-map').setView([0, 0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            minZoom: 0,
+            maxZoom: 20
+        }).addTo(map);
+
+        var capsuleLayer = L.geoJSON({{ map_data|safe }}, {
+            style: function(feature) {
+                return { color: "#FFD700", weight: 2 };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `<b>${feature.properties.description}</b><br>
+                    Modo: ${feature.properties.mode}<br>
+                    Temas: ${feature.properties.themes.join(', ')}`
+                );
+            }
+        }).addTo(map);
+
+        if (capsuleLayer.getBounds().isValid()) {
+            map.fitBounds(capsuleLayer.getBounds());
+        }
+    </script>
+</body>
+</html>
+```

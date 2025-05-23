@@ -1,0 +1,132 @@
+<!-- kudos_app/templates/chatbot.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Estilos específicos para el chatbot */
+        .chat-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-history {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .chat-message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
+        }
+        .user-message {
+            background-color: #1a73e8;
+            color: #fff;
+            align-self: flex-end;
+        }
+        .bot-message {
+            background-color: #f1f1f1;
+            color: #333;
+            align-self: flex-start;
+        }
+        .chat-input {
+            display: flex;
+            margin-top: 10px;
+        }
+        .chat-input input {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h1>Chatbot de Kudos</h1>
+        <p>Habla con nuestro asistente IA multidimensional.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notification {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="chat-history" id="chat-history">
+            {% for msg in chat_history %}
+                <div class="chat-message {% if msg.is_user %}user-message{% else %}bot-message{% endif %}">
+                    {{ msg.text }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <form method="post" action="{% url 'chatbot' %}" class="chat-input" id="chat-form">
+            {% csrf_token %}
+            <input type="text" name="message" id="chat-input" placeholder="Escribe tu mensaje..." required>
+            <button type="submit" class="btn">Enviar</button>
+        </form>
+    </div>
+
+    <script src="{% static 'js/scripts.js' %}"></script>
+    <script>
+        // Scripts específicos para el chatbot
+        document.getElementById('chat-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Agregar mensaje del usuario al historial
+            const history = document.getElementById('chat-history');
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-message user-message';
+            userMsg.textContent = message;
+            history.appendChild(userMsg);
+            input.value = '';
+
+            // Enviar mensaje al servidor
+            fetch("{% url 'chatbot' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.response) {
+                    // Agregar respuesta del bot al historial
+                    const botMsg = document.createElement('div');
+                    botMsg.className = 'chat-message bot-message';
+                    botMsg.textContent = data.response;
+                    history.appendChild(botMsg);
+                    history.scrollTop = history.scrollHeight; // Desplazar al final
+                } else {
+                    showNotification('Error al obtener respuesta', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error de conexión', 'error');
+            });
+        });
+
+        // Mantener el historial desplazado al final al cargar
+        const history = document.getElementById('chat-history');
+        history.scrollTop = history.scrollHeight;
+    </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# delete_initial_capsules.py
+import os
+import sys
+import django
+
+# Añadir el directorio raíz del proyecto al sys.path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '.'))
+sys.path.append(project_root)
+
+# Configurar Django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kudos_project.settings')
+django.setup()
+
+# Importar modelos
+from kudos_app.models import Capsule
+
+# Eliminar cápsulas iniciales
+try:
+    Capsule.objects.filter(uid__in=["initial_capsule_1", "initial_capsule_2"]).delete()
+    print("Cápsulas iniciales eliminadas correctamente.")
+    print(f"Total cápsulas: {Capsule.objects.count()}")
+except Exception as e:
+    print(f"Error al eliminar cápsulas iniciales: {e}")
+    sys.exit(1)

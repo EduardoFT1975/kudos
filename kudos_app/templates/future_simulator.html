@@ -1,0 +1,102 @@
+<!-- kudos_app/templates/future_simulator.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador del Futuro - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Estilos específicos para el simulador del futuro */
+        .simulator-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .simulator-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .results-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .result-item {
+            margin-bottom: 15px;
+        }
+        .result-item h3 {
+            color: #1a73e8;
+            margin-top: 0;
+        }
+        .prediction {
+            font-style: italic;
+            color: #f5c518;
+        }
+    </style>
+</head>
+<body>
+    <div class="container simulator-container">
+        <h1>Simulador del Futuro</h1>
+        <p>Explora escenarios futuros basados en cápsulas multidimensionales.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notification {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Formulario para Configurar Simulación -->
+        <section class="simulator-form">
+            <h2>Configura tu Simulación</h2>
+            <form method="post" action="{% url 'future_simulator' %}">
+                {% csrf_token %}
+                <label for="theme">Tema</label>
+                <select name="theme" id="theme" class="form-control" required>
+                    {% for theme in themes %}
+                        <option value="{{ theme }}">{{ theme }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="time_horizon">Horizonte Temporal</label>
+                <select name="time_horizon" id="time_horizon" class="form-control" required>
+                    <option value="1">1 Año</option>
+                    <option value="5">5 Años</option>
+                    <option value="10">10 Años</option>
+                    <option value="50">50 Años</option>
+                </select>
+
+                <label for="variables">Variables Clave</label>
+                <textarea name="variables" id="variables" placeholder="Ejemplo: tecnología, clima, población..." rows="3" class="form-control"></textarea>
+
+                <button type="submit" name="action" value="run_simulation" class="btn">Ejecutar Simulación</button>
+            </form>
+        </section>
+
+        <!-- Resultados de la Simulación -->
+        <section class="results-section">
+            <h2>Resultados de la Simulación</h2>
+            {% if predictions %}
+                {% for prediction in predictions %}
+                    <div class="result-item">
+                        <h3>{{ prediction.theme }} - {{ prediction.time_horizon }} Años</h3>
+                        <p><strong>Variables:</strong> {{ prediction.variables }}</p>
+                        <p><strong>Predicción:</strong> <span class="prediction">{{ prediction.result }}</span></p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No hay resultados de simulación disponibles. Configura y ejecuta una simulación para ver predicciones.</p>
+            {% endif %}
+        </section>
+
+        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
+    </div>
+
+    <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>

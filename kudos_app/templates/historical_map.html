@@ -1,0 +1,104 @@
+<!-- kudos_app/templates/historical_map.html -->
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mapa con Máquina del Tiempo</title>
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+    <script src="{% static 'js/leaflet-src.js' %}"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1 { text-align: center; color: #333; }
+        h2 { color: #444; }
+        #historical-map { height: 400px; margin: 20px 0; border: 2px solid #ccc; }
+        .capsule-list { margin: 20px 0; padding: 10px; background-color: #fff; border-radius: 5px; }
+        .period-selector { margin: 10px 0; text-align: center; }
+        .historical-scene { margin: 20px 0; border: 1px solid #ddd; padding: 10px; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 5px 0; }
+        select { padding: 5px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>Mapa con Máquina del Tiempo</h1>
+
+    <!-- Selector de Época -->
+    <div class="period-selector">
+        <form method="GET">
+            <label for="time_period">Selecciona una Época Histórica:</label>
+            <select name="time_period" id="time_period" onchange="this.form.submit()">
+                {% for period in historical_periods %}
+                    <option value="{{ period }}" {% if period == selected_period %}selected{% endif %}>
+                        {{ period }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <!-- Escena AR/VR -->
+    <div class="historical-scene">
+        <h2>Reconstrucción Histórica en 3D</h2>
+        {{ historical_scene|safe }}
+    </div>
+
+    <!-- Mapa Interactivo -->
+    <div id="historical-map"></div>
+
+    <!-- Lista de Cápsulas -->
+    <div class="capsule-list">
+        <h2>Cápsulas Históricas</h2>
+        <ul>
+            {% for capsule in capsules %}
+                <li>
+                    {{ capsule.contenido }} (Año: {{ capsule.fecha.year }}, Modo: {{ capsule.modo }})
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        // Inicializar mapa con Leaflet
+        var map = L.map('historical-map').setView([41.8902, 12.4924], 13);  // Default: Roma
+
+        // Seleccionar tiles según la época
+        var tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        {% if selected_period == "Edad Media (500-1500)" %}
+            tileUrl = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png';
+        {% elif selected_period == "Renacimiento (1300-1700)" %}
+            tileUrl = 'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png';
+        {% elif selected_period == "Prehistoria (hasta 3000 a.C.)" %}
+            tileUrl = 'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png';
+        {% endif %}
+        L.tileLayer(tileUrl, {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | © Stadia Maps',
+            minZoom: 0,
+            maxZoom: 20
+        }).addTo(map);
+
+        // Añadir capa personalizada para cápsulas y marcadores históricos
+        var historicalLayer = L.geoJSON({{ map_data|safe }}, {
+            style: function(feature) {
+                return { color: feature.properties.mode === 'historical_marker' ? "#FF0000" : "#FFD700", weight: 2 };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `<b>${feature.properties.description}</b><br>
+                    Modo: ${feature.properties.mode}<br>
+                    Temas: ${feature.properties.themes.join(', ')}<br>
+                    Clima: ${feature.properties.weather}<br>
+                    Año: ${feature.properties.year}`
+                );
+            }
+        }).addTo(map);
+
+        // Ajustar vista para mostrar todos los elementos
+        if (historicalLayer.getBounds().isValid()) {
+            map.fitBounds(historicalLayer.getBounds());
+        }
+    </script>
+</body>
+</html>
+```

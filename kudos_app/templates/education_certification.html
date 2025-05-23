@@ -1,0 +1,69 @@
+<!-- kudos_app/templates/education_plan.html -->
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Certificaciones Educativas</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        .certification-container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        .plan-list, .certificate-list { margin: 20px 0; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 10px 0; border-bottom: 1px solid #ddd; }
+        form { display: inline; }
+        button { padding: 8px 16px; background-color: #FFD700; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #FFC107; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Certificaciones Educativas</h1>
+
+    <div class="certification-container">
+        <!-- Planes de Aprendizaje -->
+        <div class="plan-list">
+            <h2>Tus Planes de Aprendizaje</h2>
+            {% if plans %}
+                <ul>
+                    {% for plan in plans %}
+                        <li>
+                            {{ plan.parameters.plan_name }} (Cápsulas: {{ plan.parameters.capsule_ids|length }})
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="plan_uid" value="{{ plan.uid }}">
+                                <button type="submit">Solicitar Certificado</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No tienes planes de aprendizaje creados.</p>
+            {% endif %}
+        </div>
+
+        <!-- Certificados Emitidos -->
+        <div class="certificate-list">
+            <h2>Tus Certificados</h2>
+            {% if certificates %}
+                <ul>
+                    {% for certificate in certificates %}
+                        <li>
+                            {{ certificate.contenido }} (Emitido: {{ certificate.parameters.completion_date }})
+                            {% if certificate.parameters.blockchain_tx_hash %}
+                                <a href="https://explorer.solana.com/tx/{{ certificate.parameters.blockchain_tx_hash }}?cluster=devnet" target="_blank">Ver en Blockchain</a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No tienes certificados emitidos.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
+```

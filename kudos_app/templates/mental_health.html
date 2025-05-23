@@ -1,0 +1,146 @@
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Salud Mental - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+    <script src="{% static 'js/leaflet-src.js' %}"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        #mental-map { height: 400px; margin: 20px 0; border: 2px solid #ccc; }
+        .mental-container { max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        .section { margin: 20px 0; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 10px 0; border-bottom: 1px solid #ddd; }
+        form { margin: 10px 0; }
+        input, select { padding: 8px; margin: 5px 0; width: 100%; }
+        button { padding: 8px 16px; background-color: #FFD700; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #FFC107; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .progress { display: flex; justify-content: space-around; margin: 20px 0; }
+        .progress-box { background-color: #f9f9f9; padding: 15px; border-radius: 5px; text-align: center; }
+        .mental-simulation { margin: 20px 0; border: 1px solid #ddd; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Salud Mental - Kudos</h1>
+
+    <div class="mental-container">
+        <!-- Progreso del Usuario -->
+        <div class="section progress">
+            <div class="progress-box">
+                <h3>Cápsulas Completadas</h3>
+                <p>{{ completed_mental_capsules }}</p>
+            </div>
+            <div class="progress-box">
+                <h3>Insignias</h3>
+                <p>{{ badges.count }}</p>
+            </div>
+            <div class="progress-box">
+                <h3>Estado Emocional</h3>
+                <p>{{ emotional_state|title }}</p>
+            </div>
+        </div>
+
+        <!-- Actualizar Estado Emocional -->
+        <div class="section">
+            <h2>Actualizar Estado Emocional</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_emotional_state">
+                <label for="emotional_state">Estado Emocional:</label>
+                <select id="emotional_state" name="emotional_state" required>
+                    <option value="positivo">Positivo</option>
+                    <option value="neutral" selected>Neutral</option>
+                    <option value="negativo">Negativo</option>
+                </select>
+                <button type="submit">Actualizar</button>
+            </form>
+        </div>
+
+        <!-- Insignias -->
+        <div class="section">
+            <h2>Tus Insignias</h2>
+            {% if badges %}
+                <ul>
+                    {% for badge in badges %}
+                        <li>{{ badge.name }}: {{ badge.description }} ({{ badge.timestamp|date:"Y-m-d" }})</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No tienes insignias de salud mental aún. ¡Completa cápsulas!</p>
+            {% endif %}
+        </div>
+
+        <!-- Simulación de Bienestar -->
+        <div class="section mental-simulation">
+            <h2>Simulación de Bienestar en AR/VR</h2>
+            {{ mental_scene|safe }}
+        </div>
+
+        <!-- Cápsulas de Salud Mental -->
+        <div class="section">
+            <h2>Cápsulas de Salud Mental</h2>
+            <div id="mental-map"></div>
+            {% if mental_capsules %}
+                <ul>
+                    {% for capsule in mental_capsules %}
+                        <li>
+                            {{ capsule.contenido }}
+                            <a href="{% url 'ar_view' capsule.uid %}">Ver en AR</a> |
+                            <a href="{% url 'vr_view' capsule.uid %}">Ver en VR</a>
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="complete_capsule">
+                                <input type="hidden" name="capsule_uid" value="{{ capsule.uid }}">
+                                <button type="submit">Completar</button>
+                            </form>
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="list_market">
+                                <input type="hidden" name="capsule_uid" value="{{ capsule.uid }}">
+                                <input type="number" name="price" min="0" max="1000" step="0.01" placeholder="Precio (KMT)" required>
+                                <button type="submit">Listar en Mercado</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay cápsulas de salud mental disponibles.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Inicializar mapa con Leaflet
+        var map = L.map('mental-map').setView([0, 0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            minZoom: 0,
+            maxZoom: 20
+        }).addTo(map);
+
+        var capsuleLayer = L.geoJSON({{ map_data|safe }}, {
+            style: function(feature) {
+                return { color: "#FFD700", weight: 2 };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `<b>${feature.properties.description}</b><br>
+                    Modo: ${feature.properties.mode}<br>
+                    Temas: ${feature.properties.themes.join(', ')}`
+                );
+            }
+        }).addTo(map);
+
+        if (capsuleLayer.getBounds().isValid()) {
+            map.fitBounds(capsuleLayer.getBounds());
+        }
+    </script>
+</body>
+</html>
+```

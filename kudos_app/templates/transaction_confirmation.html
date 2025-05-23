@@ -1,0 +1,40 @@
+# kudos_app/templates/transaction_confirmation.html
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transacción Confirmada</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        .confirmation-container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; border: 2px solid #FFD700; }
+        p { margin: 10px 0; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Transacción Confirmada</h1>
+
+    <div class="confirmation-container">
+        <h2>Cápsula Adquirida</h2>
+        <p><strong>Contenido:</strong> {{ capsule.contenido }}</p>
+        <p><strong>Modo:</strong> {{ capsule.modo }}</p>
+        <p><strong>Monto:</strong> {{ transaction.amount }} KMT</p>
+        <p><strong>Comisión:</strong> {{ transaction.commission }} KMT</p>
+        {% if capsule.parameters.blockchain_tx_hash %}
+            <p><strong>Blockchain:</strong> 
+                <a href="https://explorer.solana.com/tx/{{ capsule.parameters.blockchain_tx_hash }}?cluster=devnet" target="_blank">
+                    Ver en Solana
+                </a>
+            </p>
+        {% else %}
+            <p><strong>Blockchain:</strong> No registrado en blockchain.</p>
+        {% endif %}
+        <p><a href="{% url 'market_transactions' %}">Volver a Transacciones</a></p>
+    </div>
+</body>
+</html>
+```

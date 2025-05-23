@@ -1,0 +1,44 @@
+# kudos_app/views/news.py
+from django.shortcuts import render
+from kudos_app.models import ExternalData, Capsule, SettingsConfig
+from kudos_app.utils.data_utils import fetch_and_store_external_data
+from datetime import datetime, timedelta
+
+def news(request):
+    config = SettingsConfig.objects.get_or_create(key="news_settings")[0]
+    api_key = config.parameters.get("news_api_key", "TU_API_KEY")  # Configurar en producción
+    categories = config.parameters.get("news_categories", ["Tecnología", "Ciencia", "Cultura", "Salud"])
+
+    category = request.GET.get('category', '')
+    time_range = int(request.GET.get('time_range', 30))
+
+    # Obtener noticias de ExternalData (simulado con NewsAPI)
+    articles = ExternalData.objects.filter(source="NewsAPI")
+    if category:
+        articles = articles.filter(category=category)
+    if time_range:
+        articles = articles.filter(timestamp__gte=datetime.now() - timedelta(days=time_range))
+
+    # Vincular cápsulas relacionadas
+    for article in articles:
+        content = article.content.get('title', '') + ' ' + article.content.get('description', '')
+        related_capsules = Capsule.objects.filter(
+            contenido__icontains=content.split()[0],  # Búsqueda simple por palabra clave
+            privacy='publico'
+        )[:3]
+        article.related_capsules = related_capsules
+
+    # Actualizar noticias si necesario (ejemplo)
+    if not articles.exists() and api_key != "TU_API_KEY":
+        fetch_and_store_external_data(
+            source_name="NewsAPI",
+            url=f"https://newsapi.org/v2/top-headlines?apiKey={api_key}&country=us",
+            category="General"
+        )
+
+    return render(request, 'news.html', {
+        'articles': articles,
+        'categories': categories,
+        'category': category,
+        'time_range': time_range
+    })

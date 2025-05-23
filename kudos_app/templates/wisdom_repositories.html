@@ -1,0 +1,67 @@
+<!-- kudos_app/templates/wisdom_repositories.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repositorios de Sabiduría - Kudos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #1a73e8;
+        }
+        .capsule-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .capsule-card h3 {
+            color: #1a73e8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Repositorios de Sabiduría Multidimensional</h1>
+            <p>Explora cápsulas educativas para aprender y compartir conocimiento global.</p>
+        </div>
+        {% if capsules %}
+            {% for capsule in capsules %}
+                <div class="capsule-card">
+                    <h3>{{ capsule.contenido|truncatechars:50 }}</h3>
+                    <p><strong>Autor:</strong> {{ capsule.usuario.alias }}</p>
+                    <p><strong>Ubicación:</strong> {{ capsule.ubicacion }}</p>
+                    <p><strong>Fecha:</strong> {{ capsule.fecha }}</p>
+                    <p><strong>Temas:</strong> {{ capsule.temas|join:", " }}</p>
+                    <p><strong>Nivel Educativo:</strong> {{ capsule.parameters.educational_level|default:"No especificado" }}</p>
+                    <p><strong>Objetivos de Aprendizaje:</strong> {{ capsule.parameters.learning_objectives|default:"No especificado" }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No se encontraron cápsulas educativas.</p>
+        {% endif %}
+        <div style="text-align: center;">
+            <a href="/" class="btn btn-primary">Volver al Inicio</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!-- kudos_app/templates/promotion_spaces.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espacios de Promoción - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Estilos específicos para espacios de promoción */
+        .promotion-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .promotion-item {
+            flex: 1 1 300px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .promotion-item.promoted {
+            border: 2px solid #f5c518; /* Amarillo para destacar */
+        }
+        .filter-form {
+            margin-bottom: 20px;
+        }
+        .promotion-form {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Espacios de Promoción</h1>
+        <p>Explora y promociona cápsulas destacadas en Kudos.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notification {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Filtros -->
+        <section class="filter-form">
+            <h2>Filtros</h2>
+            <form method="get" action="{% url 'promotion_spaces' %}">
+                <label for="category">Categoría</label>
+                <select name="category" id="category" class="form-control">
+                    <option value="">Todas</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {% if category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="promoted">Estado</label>
+                <select name="promoted" id="promoted" class="form-control">
+                    <option value="">Todos</option>
+                    <option value="true" {% if promoted == 'true' %}selected{% endif %}>Promocionados</option>
+                    <option value="false" {% if promoted == 'false' %}selected{% endif %}>No Promocionados</option>
+                </select>
+
+                <button type="submit" class="btn">Filtrar</button>
+            </form>
+        </section>
+
+        <!-- Promocionar Cápsula -->
+        <section class="promotion-form">
+            <h2>Promocionar una Cápsula</h2>
+            <form method="post" action="{% url 'promotion_spaces' %}">
+                {% csrf_token %}
+                <label for="capsule_id">Selecciona tu Cápsula</label>
+                <select name="capsule_id" id="capsule_id" class="form-control" required>
+                    {% for capsule in user_capsules %}
+                        <option value="{{ capsule.uid }}">{{ capsule.contenido|truncatechars:50 }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="promotion_cost">Costo de Promoción ($)</label>
+                <input type="number" name="promotion_cost" id="promotion_cost" value="{{ promotion_cost|default:'10.0' }}" step="0.1" min="0" class="form-control" readonly>
+
+                <button type="submit" name="action" value="promote" class="btn">Promocionar</button>
+            </form>
+        </section>
+
+        <!-- Espacios de Promoción -->
+        <section class="promotion-container">
+            {% if capsules %}
+                {% for capsule in capsules %}
+                    <div class="promotion-item {% if capsule.parameters.promoted %}promoted{% endif %}">
+                        <h3>{{ capsule.contenido|truncatechars:50 }}</h3>
+                        <p><strong>Autor:</strong> {{ capsule.usuario.alias }}</p>
+                        <p><strong>Modo:</strong> {{ capsule.modo }}</p>
+                        <p><strong>Temas:</strong> {{ capsule.temas|join:", " }}</p>
+                        <p><strong>Estado:</strong> {% if capsule.parameters.promoted %}Promocionado{% else %}No Promocionado{% endif %}</p>
+                        <a href="{% url 'ar_view' capsule.uid %}" class="btn">Ver en AR</a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No hay cápsulas que coincidan con los filtros seleccionados.</p>
+            {% endif %}
+        </section>
+
+        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
+    </div>
+
+    <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>

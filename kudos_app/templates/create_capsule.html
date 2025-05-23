@@ -1,0 +1,72 @@
+<!-- kudos_app/templates/create_capsule.html -->
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crear Cápsula</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1 { text-align: center; color: #333; }
+        .form-container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        input, select, textarea { width: 100%; padding: 8px; margin: 5px 0; }
+        button { padding: 10px 20px; background-color: #FFD700; border: none; cursor: pointer; }
+        button:hover { background-color: #FFC107; }
+    </style>
+</head>
+<body>
+    <h1>Crear Cápsula</h1>
+
+    <div class="form-container">
+        <form method="POST">
+            {% csrf_token %}
+            <label for="content">Contenido:</label>
+            <textarea id="content" name="content" rows="4" placeholder="Describe tu cápsula..."></textarea>
+
+            <label for="mode">Modo:</label>
+            <select id="mode" name="mode" required onchange="toggleEducationalFields()">
+                {% for mode in modes %}
+                    <option value="{{ mode }}">{{ mode|title }}</option>
+                {% endfor %}
+            </select>
+
+            <div id="educational_fields" style="display: none;">
+                <label for="educational_level">Nivel Educativo:</label>
+                <select id="educational_level" name="educational_level">
+                    {% for level in educational_levels %}
+                        <option value="{{ level }}">{{ level }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="learning_objectives">Objetivos de Aprendizaje:</label>
+                <textarea id="learning_objectives" name="learning_objectives" rows="2"></textarea>
+            </div>
+
+            <label for="themes">Temas:</label>
+            <select id="themes" name="themes" multiple required>
+                {% for theme in themes %}
+                    <option value="{{ theme }}">{{ theme }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="latitude">Latitud:</label>
+            <input type="number" id="latitude" name="latitude" step="any" placeholder="0.0">
+
+            <label for="longitude">Longitud:</label>
+            <input type="number" id="longitude" name="longitude" step="any" placeholder="0.0">
+
+            <button type="submit">Crear Cápsula</button>
+        </form>
+    </div>
+
+    <script>
+        function toggleEducationalFields() {
+            var mode = document.getElementById('mode').value;
+            var fields = document.getElementById('educational_fields');
+            fields.style.display = (mode === 'educativo') ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>
+```

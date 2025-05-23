@@ -1,0 +1,31 @@
+<!-- kudos_app/templates/assistant_interaction.html -->
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asistente Personal - Kudos</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        .assistant-container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        p { margin: 10px 0; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Asistente Personal - Kudos</h1>
+
+    <div class="assistant-container">
+        {% if messages %}
+            {% for message in messages %}
+                <p class="{{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+        <p><a href="{% url 'control_panel' %}">Volver al Panel</a></p>
+    </div>
+</body>
+</html>
+```

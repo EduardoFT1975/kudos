@@ -1,0 +1,275 @@
+<!-- kudos_app/templates/map.html -->
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        #map { height: 600px; }
+        .filter-container { margin-bottom: 10px; }
+        .filter-btn { 
+            margin-right: 5px; 
+            padding: 5px 10px; 
+            background-color: #1a73e8; 
+            color: white; 
+            border: none; 
+            border-radius: 3px; 
+            cursor: pointer; 
+        }
+        .filter-btn.active { background-color: #0d47a1; }
+    </style>
+</head>
+<body>
+    <div class="filter-container">
+        <button class="filter-btn active" data-type="all">Todos</button>
+        <button class="filter-btn" data-type="capsule">Cápsulas</button>
+        <button class="filter-btn" data-type="route">Rutas</button>
+        <button class="filter-btn" data-type="poi">POIs</button>
+        <button class="filter-btn" data-type="wisdom_space">Espacios de Sabiduría</button>
+        <button class="filter-btn" data-type="promotion_space">Espacios de Promoción</button>
+        <button class="filter-btn" data-type="social_space">Espacios Sociales</button>
+    </div>
+    <div id="map"></div>
+    <script>
+        // Configuración inicial del mapa con valores por defecto
+        const defaultLat = {{ location.y|default:40.4168 }};
+        const defaultLon = {{ location.x|default:-3.7038 }};
+        const defaultZoom = {{ default_zoom|default:13 }};
+        const apiKey = "{{ api_key }}";
+
+        // Cargar Google Maps API
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+
+        let map;
+        let markers = [];
+        let polylines = [];
+
+        // Función para inicializar el mapa
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: defaultLat, lng: defaultLon },
+                zoom: defaultZoom,
+                mapTypeId: 'roadmap'
+            });
+
+            // Añadir marcadores y calles virtuales iniciales
+            showMarkers('all');
+        }
+
+        // Objeto con los elementos del mapa organizados por tipo
+        const mapItems = {
+            capsule: [
+                {% for capsule in capsules %}
+                    {
+                        lat: {{ capsule.ubicacion.y }},
+                        lon: {{ capsule.ubicacion.x }},
+                        content: "{{ capsule.contenido|truncatechars:50 }}",
+                        author: "{{ capsule.usuario.alias }}",
+                        uid: "{{ capsule.uid }}",
+                        ar_url: "{% url 'ar_view' capsule.uid %}",
+                        type: "audio",  // Simulación, ajustar según modelo real
+                        time: "present",  // Simulación
+                        merits: 5  // Simulación
+                    },
+                {% endfor %}
+            ],
+            route: [
+                {% for route in routes %}
+                    {
+                        lat: {{ route.ubicacion.y }},
+                        lon: {{ route.ubicacion.x }},
+                        content: "{{ route.contenido|truncatechars:50 }}",
+                        author: "{{ route.usuario.alias }}",
+                        uid: "{{ route.uid }}",
+                        ar_url: "{% url 'ar_view' route.uid %}",
+                        type: "video",  // Simulación
+                        time: "future",  // Simulación
+                        merits: 50  // Simulación
+                    },
+                {% endfor %}
+            ],
+            poi: [
+                {% for poi in pois %}
+                    {
+                        lat: {{ poi.ubicacion.y }},
+                        lon: {{ poi.ubicacion.x }},
+                        content: "{{ poi.nombre }}",
+                        author: "N/A",
+                        uid: "{{ poi.uid }}",
+                        ar_url: "{% url 'ar_view' poi.uid %}",
+                        type: "image",  // Simulación
+                        time: "past",  // Simulación
+                        merits: 25  // Simulación
+                    },
+                {% endfor %}
+            ],
+            wisdom_space: [
+                {% for space in wisdom_spaces %}
+                    {
+                        lat: {{ space.ubicacion.y }},
+                        lon: {{ space.ubicacion.x }},
+                        content: "{{ space.name }}",
+                        author: "N/A",
+                        uid: "{{ space.uid }}",
+                        ar_url: "{% url 'ar_view' space.uid %}",
+                        type: "texto",  // Simulación
+                        time: "present",  // Simulación
+                        merits: 10  // Simulación
+                    },
+                {% endfor %}
+            ],
+            promotion_space: [
+                {% for space in promotion_spaces %}
+                    {
+                        lat: {{ space.ubicacion.y }},
+                        lon: {{ space.ubicacion.x }},
+                        content: "{{ space.category }} - {{ space.subcategory }}",
+                        author: "{{ space.user.alias }}",
+                        uid: "{{ space.uid }}",
+                        ar_url: "{% url 'ar_view' space.uid %}",
+                        type: "audio",  // Simulación
+                        time: "future",  // Simulación
+                        merits: 30  // Simulación
+                    },
+                {% endfor %}
+            ],
+            social_space: [
+                {% for space in social_spaces %}
+                    {
+                        lat: {{ space.ubicacion.y }},
+                        lon: {{ space.ubicacion.x }},
+                        content: "{{ space.theme }}",
+                        author: "{{ space.creator.alias }}",
+                        uid: "{{ space.uid }}",
+                        ar_url: "{% url 'ar_view' space.uid %}",
+                        type: "video",  // Simulación
+                        time: "past",  // Simulación
+                        merits: 15  // Simulación
+                    },
+                {% endfor %}
+            ]
+        };
+
+        // Configuración de iconos y estilos
+        const icons = {
+            audio: 'https://img.icons8.com/color/48/000000/audio-wave.png',
+            texto: 'https://img.icons8.com/color/48/000000/document.png',
+            imagen: 'https://img.icons8.com/color/48/000000/image.png',
+            video: 'https://img.icons8.com/color/48/000000/video.png'
+        };
+
+        const timeStyles = {
+            past: '#00008B',
+            present: '#ADD8E6',
+            future: '#D3D3D3'
+        };
+
+        // Función para mostrar marcadores y calles virtuales según el tipo seleccionado
+        function showMarkers(type) {
+            // Eliminar marcadores y polilíneas actuales
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+            polylines.forEach(polyline => polyline.setMap(null));
+            polylines = [];
+
+            let items = [];
+            if (type === 'all') {
+                Object.values(mapItems).forEach(arr => items = items.concat(arr));
+            } else {
+                items = mapItems[type];
+            }
+
+            // Añadir marcadores al mapa
+            items.forEach(item => {
+                const size = item.merits <= 5 ? 20 : item.merits <= 25 ? 30 : 40;
+                const marker = new google.maps.Marker({
+                    position: { lat: item.lat, lng: item.lon },
+                    map: map,
+                    icon: {
+                        url: icons[item.type],
+                        scaledSize: new google.maps.Size(size, size),
+                        labelOrigin: new google.maps.Point(size / 2, size + 10)
+                    },
+                    label: {
+                        text: item.merits.toString(),
+                        color: '#FFD700',
+                        fontSize: '12px',
+                        fontWeight: 'bold'
+                    },
+                    title: item.content
+                });
+
+                // Personalizar fondo según tiempo
+                marker.addListener('click', () => {
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `
+                            <div style="background-color: ${timeStyles[item.time]}; padding: 10px; color: white;">
+                                <b>${item.content}</b><br>
+                                Por: ${item.author}<br>
+                                Méritos: ${item.merits}<br>
+                                <a href="${item.ar_url}" style="color: #FFD700;">Ver en AR (Esfera Infinita)</a>
+                            </div>
+                        `
+                    });
+                    infoWindow.open(map, marker);
+                });
+
+                markers.push(marker);
+            });
+
+            // Dibujar calles virtuales entre nodos cercanos
+            drawVirtualStreets(items);
+        }
+
+        // Función para dibujar calles virtuales
+        function drawVirtualStreets(nodes) {
+            nodes.forEach((node, index) => {
+                if (index < nodes.length - 1) {
+                    const start = { lat: node.lat, lng: node.lon };
+                    const end = { lat: nodes[index + 1].lat, lng: nodes[index + 1].lon };
+
+                    const directionsService = new google.maps.DirectionsService();
+                    directionsService.route({
+                        origin: start,
+                        destination: end,
+                        travelMode: 'WALKING'
+                    }, (response, status) => {
+                        if (status === 'OK') {
+                            const directionsRenderer = new google.maps.DirectionsRenderer({
+                                map: map,
+                                directions: response,
+                                suppressMarkers: true,
+                                polylineOptions: {
+                                    strokeColor: '#00FF00',
+                                    strokeOpacity: 0.8,
+                                    strokeWeight: 5
+                                }
+                            });
+                            polylines.push(directionsRenderer);
+                        }
+                    });
+                }
+            });
+        }
+
+        // Añadir funcionalidad a los botones de filtro
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                showMarkers(btn.dataset.type);
+            });
+        });
+    </script>
+    <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>

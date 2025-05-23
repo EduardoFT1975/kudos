@@ -1,0 +1,49 @@
+# Dependencias principales de Django
+Django==4.2.11
+django-environ==0.11.2
+psycopg2-binary==2.9.9
+djangorestframework==3.15.1
+
+# Servidor WSGI para producción
+gunicorn==22.0.0
+
+# Streamlit para interfaces interactivas
+streamlit==1.28.1
+
+# Bibliotecas para ciencia de datos
+numpy==1.26.4
+pandas==2.2.2
+matplotlib==3.8.4
+seaborn==0.13.2
+
+# Creación de contenido
+wikipedia-api==0.6.0
+geopy==2.4.1
+
+# Procesamiento de audio y vídeo
+gTTS==2.5.3
+moviepy==1.0.3
+
+# Procesamiento de imágenes
+Pillow==10.3.0
+
+# Solana para blockchain (Devnet)
+solana==0.30.2
+
+# Celery para tareas asíncronas
+celery==5.3.6
+redis==5.0.1
+django-celery-results==2.5.1
+
+# Manejo de variables de entorno
+python-dotenv==1.0.1
+
+# Generación de PDFs
+reportlab==4.2.2
+
+# Solicitudes HTTP
+requests==2.31.0
+pytest==7.4.0
+
+# API de OpenAI para asistente
+openai==1.76.0

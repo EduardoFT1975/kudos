@@ -1,0 +1,108 @@
+<!-- kudos_app/templates/trending.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tendencias - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Estilos específicos para tendencias */
+        .trending-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .filter-form {
+            margin-bottom: 20px;
+        }
+        .trending-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .trending-item {
+            flex: 1 1 300px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .trending-item h3 {
+            margin-top: 0;
+            color: #1a73e8;
+        }
+        .trending-item .likes {
+            font-weight: bold;
+            color: #f5c518;
+        }
+    </style>
+</head>
+<body>
+    <div class="container trending-container">
+        <h1>Tendencias en Kudos</h1>
+        <p>Descubre las cápsulas más populares del momento.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notification {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Filtros -->
+        <section class="filter-form">
+            <h2>Filtros</h2>
+            <form method="get" action="{% url 'trending' %}">
+                <label for="category">Categoría</label>
+                <select name="category" id="category" class="form-control">
+                    <option value="">Todas</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {% if category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="time_range">Rango de Tiempo</label>
+                <select name="time_range" id="time_range" class="form-control">
+                    <option value="7" {% if time_range == 7 %}selected{% endif %}>Última Semana</option>
+                    <option value="30" {% if time_range == 30 %}selected{% endif %}>Último Mes</option>
+                    <option value="90" {% if time_range == 90 %}selected{% endif %}>Últimos 3 Meses</option>
+                </select>
+
+                <label for="sort_by">Ordenar Por</label>
+                <select name="sort_by" id="sort_by" class="form-control">
+                    <option value="likes" {% if sort_by == 'likes' %}selected{% endif %}>Likes</option>
+                    <option value="views" {% if sort_by == 'views' %}selected{% endif %}>Vistas</option>
+                    <option value="date" {% if sort_by == 'date' %}selected{% endif %}>Fecha</option>
+                </select>
+
+                <button type="submit" class="btn">Filtrar</button>
+            </form>
+        </section>
+
+        <!-- Lista de Tendencias -->
+        <section class="trending-list">
+            {% if trending_capsules %}
+                {% for capsule in trending_capsules %}
+                    <div class="trending-item">
+                        <h3>{{ capsule.contenido|truncatechars:50 }}</h3>
+                        <p><strong>Autor:</strong> {{ capsule.usuario.alias }}</p>
+                        <p><strong>Modo:</strong> {{ capsule.modo }}</p>
+                        <p><strong>Temas:</strong> {{ capsule.temas|join:", " }}</p>
+                        <p><strong>Likes:</strong> <span class="likes">{{ capsule.likes.count }}</span></p>
+                        <p><strong>Vistas:</strong> {{ capsule.variables.views|default:0 }}</p>
+                        <p><strong>Fecha:</strong> {{ capsule.fecha|date:"Y-m-d" }}</p>
+                        <a href="{% url 'ar_view' capsule.uid %}" class="btn">Ver en AR</a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No hay cápsulas en tendencia que coincidan con los filtros seleccionados.</p>
+            {% endif %}
+        </section>
+
+        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
+    </div>
+
+    <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>

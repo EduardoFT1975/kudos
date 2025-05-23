@@ -1,0 +1,178 @@
+<!-- kudos_app/templates/control.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Estilos específicos para el panel de control */
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .card {
+            flex: 1 1 300px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .card h3 {
+            margin-top: 0;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a73e8;
+        }
+        .notification {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .notification.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .notification.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .action-form, .config-form {
+            margin: 20px 0;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .btn {
+            background-color: #1a73e8;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Panel de Control Avanzado</h1>
+        <p>Gestiona Kudos desde esta interfaz administrativa.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notification {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        {% if not user.is_staff %}
+            <div class="notification error">
+                Acceso denegado. Solo administradores pueden acceder a este panel.
+            </div>
+        {% else %}
+            <!-- Estadísticas Generales -->
+            <section class="dashboard">
+                <div class="card">
+                    <h3>Cápsulas Totales</h3>
+                    <p class="stat-value">{{ total_capsules }}</p>
+                </div>
+                <div class="card">
+                    <h3>Usuarios Activos</h3>
+                    <p class="stat-value">{{ active_users }}</p>
+                </div>
+                <div class="card">
+                    <h3>Ingresos (Última Semana)</h3>
+                    <p class="stat-value">${{ recent_transactions|floatformat:2 }}</p>
+                </div>
+                <div class="card">
+                    <h3>Balance en Solana</h3>
+                    <p class="stat-value">{{ blockchain_balance|floatformat:2 }} SOL</p>
+                </div>
+            </section>
+
+            <!-- Acciones Administrativas -->
+            <section>
+                <h2>Acciones Administrativas</h2>
+                <form method="post" action="{% url 'control' %}" class="action-form">
+                    {% csrf_token %}
+                    <label for="global_message">Enviar Notificación Global</label>
+                    <textarea name="global_message" id="global_message" placeholder="Mensaje para todos los usuarios..." rows="3" class="form-control"></textarea>
+                    <select name="priority" class="form-control">
+                        <option value="baja">Baja</option>
+                        <option value="media">Media</option>
+                        <option value="alta" selected>Alta</option>
+                    </select>
+                    <button type="submit" name="action" value="send_global" class="btn">Enviar</button>
+                </form>
+            </section>
+
+            <!-- Configuraciones Avanzadas -->
+            <section>
+                <h2>Configuraciones Avanzadas</h2>
+                <form method="post" action="{% url 'control' %}" class="config-form">
+                    {% csrf_token %}
+                    <label for="blockchain_network">Red Blockchain (Solana)</label>
+                    <input type="text" name="blockchain_network" id="blockchain_network" value="{{ blockchain_network }}" class="form-control">
+                    <label for="commission_rate">Tasa de Comisión (%)</label>
+                    <input type="number" name="commission_rate" id="commission_rate" value="{{ commission_rate }}" step="0.1" class="form-control">
+                    <button type="submit" name="action" value="update_config" class="btn">Actualizar Configuración</button>
+                </form>
+            </section>
+
+            <!-- Transacciones Recientes -->
+            <section>
+                <h2>Transacciones Recientes (Última Semana)</h2>
+                {% if transactions %}
+                    <table>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Monto</th>
+                            <th>Comisión</th>
+                            <th>Fecha</th>
+                            <th>Hash Blockchain</th>
+                        </tr>
+                        {% for tx in transactions %}
+                            <tr>
+                                <td>{{ tx.uid }}</td>
+                                <td>{{ tx.user.alias }}</td>
+                                <td>${{ tx.amount|floatformat:2 }}</td>
+                                <td>${{ tx.commission|floatformat:2 }}</td>
+                                <td>{{ tx.timestamp|date:"Y-m-d H:i" }}</td>
+                                <td>{{ tx.parameters.blockchain_tx_hash|default:"N/A" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <p>No hay transacciones recientes.</p>
+                {% endif %}
+            </section>
+        {% endif %}
+
+        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
+    </div>
+
+    <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>

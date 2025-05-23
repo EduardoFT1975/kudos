@@ -1,0 +1,133 @@
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Arte y Cultura - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+    <script src="{% static 'js/leaflet-src.js' %}"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        #art-map { height: 400px; margin: 20px 0; border: 2px solid #ccc; }
+        .art-container { max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        .section { margin: 20px 0; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 10px 0; border-bottom: 1px solid #ddd; }
+        form { margin: 10px 0; }
+        input, select, textarea { padding: 8px; margin: 5px 0; width: 100%; }
+        button { padding: 8px 16px; background-color: #FFD700; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #FFC107; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .progress { display: flex; justify-content: space-around; margin: 20px 0; }
+        .progress-box { background-color: #f9f9f9; padding: 15px; border-radius: 5px; text-align: center; }
+        .art-exhibition { margin: 20px 0; border: 1px solid #ddd; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Arte y Cultura - Kudos</h1>
+
+    <div class="art-container">
+        <!-- Progreso del Usuario -->
+        <div class="section progress">
+            <div class="progress-box">
+                <h3>Cápsulas Completadas</h3>
+                <p>{{ completed_art_capsules }}</p>
+            </div>
+            <div class="progress-box">
+                <h3>Insignias</h3>
+                <p>{{ badges.count }}</p>
+            </div>
+        </div>
+
+        <!-- Insignias -->
+        <div class="section">
+            <h2>Tus Insignias Artísticas</h2>
+            {% if badges %}
+                <ul>
+                    {% for badge in badges %}
+                        <li>{{ badge.name }}: {{ badge.description }} ({{ badge.timestamp|date:"Y-m-d" }})</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No tienes insignias artísticas aún. ¡Explora el arte!</p>
+            {% endif %}
+        </div>
+
+        <!-- Exposición Virtual -->
+        <div class="section art-exhibition">
+            <h2>Exposición Virtual en AR/VR</h2>
+            {{ art_scene|safe }}
+        </div>
+
+        <!-- Cápsulas Artísticas -->
+        <div class="section">
+            <h2>Cápsulas Artísticas y Culturales</h2>
+            <div id="art-map"></div>
+            {% if art_capsules %}
+                <ul>
+                    {% for capsule in art_capsules %}
+                        <li>
+                            {{ capsule.contenido }} (Año: {{ capsule.fecha.year }})
+                            <a href="{% url 'ar_view' capsule.uid %}">Ver en AR</a> |
+                            <a href="{% url 'vr_view' capsule.uid %}">Ver en VR</a>
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="complete_capsule">
+                                <input type="hidden" name="capsule_uid" value="{{ capsule.uid }}">
+                                <button type="submit">Completar</button>
+                            </form>
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="co_create">
+                                <input type="hidden" name="capsule_uid" value="{{ capsule.uid }}">
+                                <input type="text" name="co_content" placeholder="Añade tu contribución artística..." required>
+                                <button type="submit">Co-crear</button>
+                            </form>
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="list_market">
+                                <input type="hidden" name="capsule_uid" value="{{ capsule.uid }}">
+                                <input type="number" name="price" min="0" max="1000" step="0.01" placeholder="Precio (KMT)" required>
+                                <button type="submit">Listar en Mercado</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay cápsulas artísticas disponibles.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Inicializar mapa con Leaflet
+        var map = L.map('art-map').setView([0, 0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            minZoom: 0,
+            maxZoom: 20
+        }).addTo(map);
+
+        var capsuleLayer = L.geoJSON({{ map_data|safe }}, {
+            style: function(feature) {
+                return { color: "#FFD700", weight: 2 };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `<b>${feature.properties.description}</b><br>
+                    Modo: ${feature.properties.mode}<br>
+                    Temas: ${feature.properties.themes.join(', ')}`
+                );
+            }
+        }).addTo(map);
+
+        if (capsuleLayer.getBounds().isValid()) {
+            map.fitBounds(capsuleLayer.getBounds());
+        }
+    </script>
+</body>
+</html>
+```

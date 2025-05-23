@@ -1,0 +1,39 @@
+# kudos_app/views/timeline.py
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from kudos_app.models import Capsule, SettingsConfig
+
+@login_required
+def timeline(request):
+    config = SettingsConfig.objects.get_or_create(key="timeline_settings")[0]
+    modos = config.parameters.get("modos", ["social", "comercial", "educativo"])
+    temas = config.parameters.get("temas", ["Arte", "Ciencia", "Cultura"])
+
+    source = request.GET.get('source', 'all')
+    selected_modo = request.GET.get('modo', '')
+    selected_temas = request.GET.getlist('temas')
+
+    if source == 'self':
+        capsules = Capsule.objects.filter(usuario=request.user)
+    elif source == 'following':
+        following = request.user.following.all()
+        capsules = Capsule.objects.filter(usuario__in=following)
+    else:
+        following = request.user.following.all()
+        capsules = Capsule.objects.filter(usuario__in=following | Capsule.objects.filter(usuario=request.user))
+
+    if selected_modo:
+        capsules = capsules.filter(modo=selected_modo)
+    if selected_temas:
+        capsules = capsules.filter(temas__overlap=selected_temas)
+
+    capsules = capsules.order_by('-fecha')[:50]
+
+    return render(request, 'timeline.html', {
+        'capsules': capsules,
+        'source': source,
+        'selected_modo': selected_modo,
+        'selected_temas': selected_temas,
+        'modos': modos,
+        'temas': temas
+    })

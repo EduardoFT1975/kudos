@@ -1,0 +1,45 @@
+<!-- kudos_app/templates/market_reputation.html -->
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reputación de Vendedores</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        .reputation-container { max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        .seller-list { margin: 20px 0; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 10px 0; border-bottom: 1px solid #ddd; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Reputación de Vendedores</h1>
+
+    <div class="reputation-container">
+        <!-- Lista de Vendedores -->
+        <div class="seller-list">
+            <h2>Mejores Vendedores</h2>
+            {% if sellers %}
+                <ul>
+                    {% for seller_data in sellers %}
+                        <li>
+                            <a href="{% url 'market_reputation' seller_data.seller.id %}">
+                                {{ seller_data.seller.alias }}
+                            </a>
+                            (Ventas: {{ seller_data.total_sales }}, Reputación: {{ seller_data.reputation_score }}, Calificación: {{ seller_data.average_rating }}/5)
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay vendedores con transacciones completadas.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
+```

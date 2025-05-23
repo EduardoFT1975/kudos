@@ -1,0 +1,161 @@
+<!-- kudos_app/templates/streaming.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Estilos específicos para streaming */
+        .streaming-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .stream-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .stream-player {
+            flex: 2 1 600px;
+            background-color: #000;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .stream-player video {
+            width: 100%;
+            border-radius: 5px;
+        }
+        .stream-list {
+            flex: 1 1 300px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .stream-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .stream-item.active {
+            background-color: #f5c518;
+            color: #fff;
+        }
+        .start-stream-form {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container streaming-container">
+        <h1>Streaming en Kudos</h1>
+        <p>Transmite y disfruta de eventos en vivo en el sistema multidimensional.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notification {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Formulario para Iniciar Streaming -->
+        <section class="start-stream-form">
+            <h2>Iniciar una Transmisión</h2>
+            <form method="post" action="{% url 'streaming' %}">
+                {% csrf_token %}
+                <label for="title">Título</label>
+                <input type="text" name="title" id="title" placeholder="Ejemplo: Carrera en Vivo" required class="form-control">
+
+                <label for="description">Descripción</label>
+                <textarea name="description" id="description" placeholder="Describe tu transmisión..." rows="3" class="form-control"></textarea>
+
+                <label for="temas">Temas</label>
+                <select name="temas" id="temas" multiple class="form-control">
+                    {% for tema in temas %}
+                        <option value="{{ tema }}">{{ tema }}</option>
+                    {% endfor %}
+                </select>
+                <small>Mantén presionado Ctrl (o Cmd) para seleccionar múltiples temas.</small>
+
+                <button type="submit" name="action" value="start_stream" class="btn">Iniciar Streaming</button>
+            </form>
+        </section>
+
+        <!-- Sección de Streaming -->
+        <section class="stream-section">
+            <div class="stream-player">
+                <h2>Transmisión Activa</h2>
+                {% if active_stream %}
+                    <video id="stream-video" controls autoplay>
+                        <source src="{{ active_stream.stream_url }}" type="video/mp4">
+                        Tu navegador no soporta video HTML5.
+                    </video>
+                    <p><strong>Título:</strong> {{ active_stream.title }}</p>
+                    <p><strong>Autor:</strong> {{ active_stream.usuario.alias }}</p>
+                    <p><strong>Descripción:</strong> {{ active_stream.description }}</p>
+                {% else %}
+                    <p>No hay transmisiones activas seleccionadas.</p>
+                {% endif %}
+            </div>
+
+            <div class="stream-list">
+                <h2>Transmisiones Disponibles</h2>
+                {% if streams %}
+                    {% for stream in streams %}
+                        <div class="stream-item {% if stream == active_stream %}active{% endif %}" data-stream-id="{{ stream.uid }}">
+                            <p><strong>{{ stream.title }}</strong></p>
+                            <p>{{ stream.usuario.alias }} - {{ stream.timestamp|date:"H:i" }}</p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No hay transmisiones disponibles en este momento.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
+    </div>
+
+    <script src="{% static 'js/scripts.js' %}"></script>
+    <script>
+        // Seleccionar una transmisión
+        document.querySelectorAll('.stream-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const streamId = this.dataset.streamId;
+                fetch(`/api/stream/${streamId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const video = document.getElementById('stream-video');
+                        video.src = data.stream_url;
+                        video.play();
+                        document.querySelector('.stream-player h2').textContent = `Transmisión Activa: ${data.title}`;
+                        document.querySelector('.stream-player p:nth-child(2)').textContent = `Autor: ${data.author}`;
+                        document.querySelector('.stream-player p:nth-child(3)').textContent = `Descripción: ${data.description}`;
+                        document.querySelectorAll('.stream-item').forEach(i => i.classList.remove('active'));
+                        this.classList.add('active');
+                    } else {
+                        showNotification('Error al cargar la transmisión', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error de conexión', 'error');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

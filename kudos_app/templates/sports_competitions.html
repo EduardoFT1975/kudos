@@ -1,0 +1,115 @@
+<!-- kudos_app/templates/sports_competitions.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competiciones Multideporte - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Estilos específicos para competiciones deportivas */
+        .sports-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .competition-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .competitions-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .competition-item {
+            flex: 1 1 300px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .competition-item h3 {
+            margin-top: 0;
+            color: #1a73e8;
+        }
+        .competition-item .participants {
+            font-weight: bold;
+            color: #f5c518;
+        }
+        .join-button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container sports-container">
+        <h1>Competiciones Multideporte</h1>
+        <p>Participa y organiza competiciones deportivas en Kudos.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notification {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Formulario para Crear Competición -->
+        <section class="competition-form">
+            <h2>Crear una Competición</h2>
+            <form method="post" action="{% url 'sports_competitions' %}">
+                {% csrf_token %}
+                <label for="sport">Deporte</label>
+                <select name="sport" id="sport" class="form-control" required>
+                    {% for sport in sports %}
+                        <option value="{{ sport }}">{{ sport }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="description">Descripción</label>
+                <textarea name="description" id="description" placeholder="Describe la competición..." required rows="3" class="form-control"></textarea>
+
+                <label for="entry_fee">Costo de Entrada ($)</label>
+                <input type="number" name="entry_fee" id="entry_fee" step="0.1" min="0" value="0.0" class="form-control" required>
+
+                <button type="submit" name="action" value="create_competition" class="btn">Crear Competición</button>
+            </form>
+        </section>
+
+        <!-- Lista de Competiciones -->
+        <section class="competitions-list">
+            {% if competitions %}
+                {% for competition in competitions %}
+                    <div class="competition-item">
+                        <h3>{{ competition.sport }}</h3>
+                        <p><strong>Descripción:</strong> {{ competition.description|truncatechars:50 }}</p>
+                        <p><strong>Creador:</strong> {{ competition.creator.alias }}</p>
+                        <p><strong>Participantes:</strong> <span class="participants">{{ competition.participants.count }}</span></p>
+                        <p><strong>Costo:</strong> ${{ competition.entry_fee|floatformat:2 }}</p>
+                        {% if user in competition.participants.all %}
+                            <p>Ya estás participando</p>
+                            <a href="{% url 'streaming' %}" class="btn">Ver Streaming</a>
+                        {% else %}
+                            <form method="post" action="{% url 'sports_competitions' %}" class="join-button">
+                                {% csrf_token %}
+                                <input type="hidden" name="competition_id" value="{{ competition.uid }}">
+                                <button type="submit" name="action" value="join_competition" class="btn">Unirse</button>
+                            </form>
+                        {% endif %}
+                        <a href="{% url 'vr_view' competition.uid %}" class="btn">Explorar en VR</a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No hay competiciones deportivas disponibles en este momento.</p>
+            {% endif %}
+        </section>
+
+        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
+    </div>
+
+    <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>

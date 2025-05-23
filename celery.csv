@@ -1,0 +1,159 @@
+```python
+from celery import Celery
+from celery.schedules import crontab
+import os
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kudos_project.settings')
+app = Celery('kudos_project')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
+
+# Configurar colas prioritarias
+app.conf.task_queues = {
+    'default': {'exchange': 'default', 'routing_key': 'default'},
+    'critical': {'exchange': 'critical', 'routing_key': 'critical'},
+}
+
+app.conf.beat_schedule = {
+    'send-notifications-every-hour': {
+        'task': 'kudos_app.tasks.send_user_notifications',
+        'schedule': crontab(minute=0, hour='*'),
+        'options': {'queue': 'default'},
+    },
+    'process-expired-capsules-every-day': {
+        'task': 'kudos_app.tasks.process_expired_capsules',
+        'schedule': crontab(hour=0, minute=0),
+        'options': {'queue': 'default'},
+    },
+    'update-statistics-every-hour': {
+        'task': 'kudos_app.tasks.update_global_statistics',
+        'schedule': crontab(minute=0, hour='*'),
+        'options': {'queue': 'default'},
+    },
+    'process-expired-auctions-every-minute': {
+        'task': 'kudos_app.tasks.process_expired_auctions',
+        'schedule': crontab(minute='*/1'),
+        'options': {'queue': 'critical'},
+    },
+    'assign-learning-badges-every-day': {
+        'task': 'kudos_app.tasks.assign_learning_badges',
+        'schedule': crontab(hour=1, minute=0),
+        'options': {'queue': 'default'},
+    },
+    'update-adaptive-recommendations-every-6-hours': {
+        'task': 'kudos_app.tasks.update_adaptive_recommendations',
+        'schedule': crontab(hour='*/6', minute=0),
+        'options': {'queue': 'default'},
+    },
+    'expire-market-listings-every-day': {
+        'task': 'kudos_app.tasks.expire_market_listings',
+        'schedule': crontab(hour=2, minute=0),
+        'options': {'queue': 'default'},
+    },
+    'update-seller-reputation-every-day': {
+        'task': 'kudos_app.tasks.update_seller_reputation',
+        'schedule': crontab(hour=3, minute=0),
+        'options': {'queue': 'default'},
+    },
+    'update-space-data-every-12-hours': {
+        'task': 'kudos_app.tasks.update_space_data',
+        'schedule': crontab(hour='*/12', minute=0),
+        'options': {'queue': 'default'},
+    },
+    'archive-notifications-every-week': {
+        'task': 'kudos_app.tasks.archive_notifications',
+        'schedule': crontab(hour=4, minute=0, day_of_week='mon'),
+        'options': {'queue': 'default'},
+    },
+    'send-mental-health-reminders-every-12-hours': {
+        'task': 'kudos_app.tasks.send_mental_health_reminders',
+        'schedule': crontab(hour='*/12', minute=0),
+        'options': {'queue': 'default'},
+    },
+    'update-mental-health-recommendations-every-6-hours': {
+        'task': 'kudos_app.tasks.update_mental_health_recommendations',
+        'schedule': crontab(hour='*/6', minute=0),
+        'options': {'queue': 'default'},
+    },
+    'curate-art-capsules-every-day': {
+        'task': 'kudos_app.tasks.curate_art_capsules',
+        'schedule': crontab(hour=5, minute=0),
+        'options': {'queue': 'default'},
+    },
+    'update-art-recommendations-every-6-hours': {
+        'task': 'kudos_app.tasks.update_art_recommendations',
+        'schedule': crontab(hour='*/6', minute=0),
+        'options': {'queue': 'default'},
+    },
+    'curate-tourism-capsules-every-day': {
+        'task': 'kudos_app.tasks.curate_tourism_capsules',
+        'schedule': crontab(hour=6, minute=0),
+        'options': {'queue': 'default'},
+    },
+    'update-tourism-recommendations-every-6-hours': {
+        'task': 'kudos_app.tasks.update_tourism_recommendations',
+        'schedule': crontab(hour='*/6', minute=0),
+        'options': {'queue': 'default'},
+    },
+    'curate-innovation-capsules-every-day': {
+        'task': 'kudos_app.tasks.curate_innovation_capsules',
+        'schedule': crontab(hour=7, minute=0),
+        'options': {'queue': 'default'},
+    },
+    'update-innovation-recommendations-every-6-hours': {
+        'task': 'kudos_app.tasks.update_innovation_recommendations',
+        'schedule': crontab(hour='*/6', minute=0),
+        'options': {'queue': 'default'},
+    },
+    'moderate-social-interactions-every-hour': {
+        'task': 'kudos_app.tasks.moderate_social_interactions',
+        'schedule': crontab(minute=0, hour='*'),
+        'options': {'queue': 'default'},
+    },
+    'update-social-recommendations-every-6-hours': {
+        'task': 'kudos_app.tasks.update_social_recommendations',
+        'schedule': crontab(hour='*/6', minute=0),
+        'options': {'queue': 'default'},
+    },
+    'moderate-governance-proposals-every-hour': {
+        'task': 'kudos_app.tasks.moderate_governance_proposals',
+        'schedule': crontab(minute=0, hour='*'),
+        'options': {'queue': 'default'},
+    },
+    'process-governance-votes-every-day': {
+        'task': 'kudos_app.tasks.process_governance_votes',
+        'schedule': crontab(hour=8, minute=0),
+        'options': {'queue': 'critical'},
+    },
+    'curate-research-capsules-every-day': {
+        'task': 'kudos_app.tasks.curate_research_capsules',
+        'schedule': crontab(hour=9, minute=0),
+        'options': {'queue': 'default'},
+    },
+    'update-research-recommendations-every-6-hours': {
+        'task': 'kudos_app.tasks.update_research_recommendations',
+        'schedule': crontab(hour='*/6', minute=0),
+        'options': {'queue': 'default'},
+    },
+    'curate-social-impact-capsules-every-day': {
+        'task': 'kudos_app.tasks.curate_social_impact_capsules',
+        'schedule': crontab(hour=10, minute=0),
+        'options': {'queue': 'default'},
+    },
+    'update-social-impact-recommendations-every-6-hours': {
+        'task': 'kudos_app.tasks.update_social_impact_recommendations',
+        'schedule': crontab(hour='*/6', minute=0),
+        'options': {'queue': 'default'},
+    },
+    'monitor-infrastructure-resources-every-hour': {
+        'task': 'kudos_app.tasks.monitor_infrastructure_resources',
+        'schedule': crontab(minute=0, hour='*'),
+        'options': {'queue': 'critical'},
+    },
+    'optimize-ipfs-storage-every-day': {
+        'task': 'kudos_app.tasks.optimize_ipfs_storage',
+        'schedule': crontab(hour=11, minute=0),
+        'options': {'queue': 'default'},
+    },
+}
+```

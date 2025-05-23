@@ -1,0 +1,116 @@
+<!-- kudos_app/templates/feedback.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retroalimentación - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Estilos específicos para feedback */
+        .feedback-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .rating {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .rating input[type="radio"] {
+            display: none;
+        }
+        .rating label {
+            font-size: 24px;
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.3s ease;
+        }
+        .rating input[type="radio"]:checked ~ label,
+        .rating label:hover,
+        .rating label:hover ~ label {
+            color: #f5c518; /* Amarillo para estrellas */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Retroalimentación</h1>
+        <p>Comparte tus comentarios y ayúdanos a mejorar Kudos.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notification {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" action="{% url 'feedback' %}" class="feedback-form">
+            {% csrf_token %}
+            <!-- Comentario -->
+            <label for="comment">Comentario</label>
+            <textarea name="comment" id="comment" placeholder="¿Qué te parece Kudos? ¿Qué mejorarías?" required rows="5" class="form-control"></textarea>
+
+            <!-- Calificación -->
+            <label>Calificación</label>
+            <div class="rating">
+                <input type="radio" name="rating" id="rating-5" value="5" required>
+                <label for="rating-5">★</label>
+                <input type="radio" name="rating" id="rating-4" value="4">
+                <label for="rating-4">★</label>
+                <input type="radio" name="rating" id="rating-3" value="3">
+                <label for="rating-3">★</label>
+                <input type="radio" name="rating" id="rating-2" value="2">
+                <label for="rating-2">★</label>
+                <input type="radio" name="rating" id="rating-1" value="1">
+                <label for="rating-1">★</label>
+            </div>
+
+            <!-- Categoría -->
+            <label for="category">Categoría</label>
+            <select name="category" id="category" class="form-control" required>
+                <option value="general">General</option>
+                <option value="usabilidad">Usabilidad</option>
+                <option value="funcionalidad">Funcionalidad</option>
+                <option value="contenido">Contenido</option>
+                <option value="rendimiento">Rendimiento</option>
+            </select>
+
+            <!-- Ubicación Opcional -->
+            <label>Ubicación (Opcional)</label>
+            <div class="location-inputs">
+                <input type="checkbox" name="use_current_location" id="use_current_location" checked>
+                <label for="use_current_location">Usar mi ubicación actual</label>
+                <div id="manual-location" style="display: none;">
+                    <input type="number" name="latitude" id="latitude" placeholder="Latitud" step="0.0001" class="form-control" value="41.9028">
+                    <input type="number" name="longitude" id="longitude" placeholder="Longitud" step="0.0001" class="form-control" value="12.4964">
+                </div>
+            </div>
+
+            <button type="submit" class="btn">Enviar Retroalimentación</button>
+        </form>
+
+        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
+    </div>
+
+    <script src="{% static 'js/scripts.js' %}"></script>
+    <script>
+        // Mostrar/ocultar campos de ubicación manual
+        const useCurrentCheckbox = document.getElementById('use_current_location');
+        const manualLocation = document.getElementById('manual-location');
+        useCurrentCheckbox.addEventListener('change', function() {
+            manualLocation.style.display = this.checked ? 'none' : 'block';
+        });
+
+        // Validación adicional del formulario
+        document.querySelector('.feedback-form').addEventListener('submit', function(event) {
+            const comment = document.getElementById('comment').value.trim();
+            if (comment.length < 10) {
+                event.preventDefault();
+                showNotification('El comentario debe tener al menos 10 caracteres.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

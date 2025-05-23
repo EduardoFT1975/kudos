@@ -1,0 +1,164 @@
+<!-- kudos_app/templates/social.html -->
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Social - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+    <script src="{% static 'js/leaflet-src.js' %}"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        #social-map { height: 400px; margin: 20px 0; border: 2px solid #ccc; }
+        .social-container { max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        .section { margin: 20px 0; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 10px 0; border-bottom: 1px solid #ddd; }
+        form { margin: 10px 0; }
+        input, select, textarea { padding: 8px; margin: 5px 0; width: 100%; }
+        button { padding: 8px 16px; background-color: #FFD700; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #FFC107; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .progress { display: flex; justify-content: space-around; margin: 20px 0; }
+        .progress-box { background-color: #f9f9f9; padding: 15px; border-radius: 5px; text-align: center; }
+        .social-event { margin: 20px 0; border: 1px solid #ddd; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Social - Kudos</h1>
+
+    <div class="social-container">
+        <!-- Progreso del Usuario -->
+        <div class="section progress">
+            <div class="progress-box">
+                <h3>Seguidores</h3>
+                <p>{{ followers }}</p>
+            </div>
+            <div class="progress-box">
+                <h3>Siguiendo</h3>
+                <p>{{ following }}</p>
+            </div>
+        </div>
+
+        <!-- Comunidades -->
+        <div class="section">
+            <h2>Comunidades</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create_community">
+                <label for="community_name">Nombre de la Comunidad:</label>
+                <input type="text" id="community_name" name="community_name" required>
+                <label for="community_themes">Temas (separados por comas):</label>
+                <input type="text" id="community_themes" name="community_themes" placeholder="Colaboración, Comunidad">
+                <label for="community_description">Descripción:</label>
+                <textarea id="community_description" name="community_description" rows="3"></textarea>
+                <button type="submit">Crear Comunidad</button>
+            </form>
+            <h3>Comunidades Existentes</h3>
+            {% if communities %}
+                <ul>
+                    {% for community in communities %}
+                        <li>
+                            {{ community.name }} ({{ community.member_count }} miembros)
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="join_community">
+                                <input type="hidden" name="community_id" value="{{ community.id }}">
+                                <button type="submit">Unirse</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay comunidades disponibles. ¡Crea una!</p>
+            {% endif %}
+        </div>
+
+        <!-- Interacciones Sociales -->
+        <div class="section">
+            <h2>Tus Interacciones</h2>
+            {% if interactions %}
+                <ul>
+                    {% for interaction in interactions %}
+                        <li>
+                            {{ interaction.interaction_type|title }}: 
+                            {% if interaction.capsule %}
+                                Cápsula "{{ interaction.capsule.contenido|truncatechars:30 }}" - {{ interaction.content|truncatechars:50 }}
+                            {% elif interaction.target_user %}
+                                Usuario {{ interaction.target_user.alias }}
+                            {% endif %}
+                            ({{ interaction.timestamp|date:"Y-m-d H:i" }})
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No tienes interacciones recientes.</p>
+            {% endif %}
+        </div>
+
+        <!-- Evento Virtual -->
+        <div class="section social-event">
+            <h2>Evento Virtual en AR/VR</h2>
+            {{ social_scene|safe }}
+        </div>
+
+        <!-- Cápsulas Compartidas en Comunidades -->
+        <div class="section">
+            <h2>Cápsulas Compartidas en Comunidades</h2>
+            <div id="social-map"></div>
+            {% if community_capsules %}
+                <ul>
+                    {% for capsule in community_capsules %}
+                        <li>
+                            {{ capsule.contenido }} (Méritos: {{ capsule.parameters.merits }})
+                            <a href="{% url 'ar_view' capsule.uid %}">Ver en AR</a> |
+                            <a href="{% url 'vr_view' capsule.uid %}">Ver en VR</a>
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="comment_capsule">
+                                <input type="hidden" name="capsule_uid" value="{{ capsule.uid }}">
+                                <input type="text" name="comment_text" placeholder="Añade un comentario..." required>
+                                <button type="submit">Comentar</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay cápsulas compartidas en comunidades.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Inicializar mapa con Leaflet
+        var map = L.map('social-map').setView([0, 0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            minZoom: 0,
+            maxZoom: 20
+        }).addTo(map);
+
+        var capsuleLayer = L.geoJSON({{ map_data|safe }}, {
+            style: function(feature) {
+                return { color: "#FFD700", weight: 2 };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `<b>${feature.properties.description}</b><br>
+                    Modo: ${feature.properties.mode}<br>
+                    Temas: ${feature.properties.themes.join(', ')}`
+                );
+            }
+        }).addTo(map);
+
+        if (capsuleLayer.getBounds().isValid()) {
+            map.fitBounds(capsuleLayer.getBounds());
+        }
+    </script>
+</body>
+</html>
+```

@@ -1,0 +1,190 @@
+/* static/css/kudos_styles.css */
+
+/* Importar fuente de Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+/* Estilos generales */
+body {
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    font-family: 'Roboto', sans-serif;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Animación de fondo dinámico */
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.stApp {
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    background-size: 200% 200%;
+    animation: gradient 15s ease infinite;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.map-page {
+    width: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #ffd700 !important;
+    font-weight: 600;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+p {
+    line-height: 1.6;
+    margin-bottom: 10px;
+    color: #e0e0e0 !important;
+}
+
+/* Botones */
+button, .btn, .stButton>button {
+    background-color: #d97706 !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    font-size: 16px !important;
+    border-radius: 5px !important;
+    cursor: pointer;
+    transition: all 0.3s ease !important;
+}
+
+button:hover, .btn:hover, .stButton>button:hover {
+    background-color: #b45309 !important;
+    transform: scale(1.05) !important;
+}
+
+button:disabled, .stButton>button:disabled {
+    background-color: #cccccc !important;
+    cursor: not-allowed !important;
+}
+
+/* Inputs y formularios */
+input, textarea, select, .stTextInput>input, .stTextArea>textarea, .stSelectbox>select {
+    width: 100% !important;
+    padding: 10px !important;
+    margin-bottom: 15px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 5px !important;
+    font-size: 16px !important;
+    box-sizing: border-box !important;
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    color: #333 !important;
+}
+
+textarea {
+    min-height: 100px !important;
+    resize: vertical !important;
+}
+
+/* Mapas */
+#map {
+    width: 100% !important;
+    height: 600px !important;
+    margin-bottom: 20px !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    border: 2px solid #ffd700 !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Estilo para los iconos personalizados */
+.custom-icon {
+    background: none !important;
+    border: none !important;
+    animation: pulse 2s infinite !important;
+}
+
+/* Escenas AR/VR y Esfera Infinita */
+#esfera-infinita {
+    width: 100% !important;
+    height: 400px !important;
+    margin-bottom: 20px !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    border: 2px solid #ffd700 !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Notificaciones */
+.notification {
+    padding: 15px !important;
+    margin-bottom: 15px !important;
+    border-radius: 5px !important;
+    font-size: 16px !important;
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
+    transition: opacity 0.5s !important;
+}
+
+.notification.success {
+    background-color: #d4edda !important;
+    color: #155724 !important;
+    border: 1px solid #c3e6cb !important;
+}
+
+.notification.error {
+    background-color: #f8d7da !important;
+    color: #721c24 !important;
+    border: 1px solid #f5c6cb !important;
+}
+
+.notification.info {
+    background-color: #cce5ff !important;
+    color: #004085 !important;
+    border: 1px solid #b8daff !important;
+}
+
+/* Estilo para el sidebar */
+.css-1d391kg { /* Clase del sidebar en Streamlit */
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6) !important;
+    color: white !important;
+    padding: 20px !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+}
+
+.css-1d391kg .stSelectbox label, .css-1d391kg .stSlider label {
+    color: white !important;
+}
+
+/* Efecto de pulsación para nodos en el mapa */
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .stApp {
+        padding: 10px !important;
+    }
+
+    button, .btn, .stButton>button {
+        width: 100% !important;
+        padding: 12px !important;
+    }
+
+    #map {
+        height: 400px !important;
+    }
+
+    #esfera-infinita {
+        height: 300px !important;
+    }
+}

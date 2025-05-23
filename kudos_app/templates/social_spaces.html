@@ -1,0 +1,114 @@
+<!-- kudos_app/templates/social_spaces.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espacios Sociales - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Estilos específicos para espacios sociales */
+        .social-spaces-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .space-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .spaces-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .space-item {
+            flex: 1 1 300px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .space-item h3 {
+            margin-top: 0;
+            color: #1a73e8;
+        }
+        .space-item .participants {
+            font-weight: bold;
+            color: #f5c518;
+        }
+        .join-button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container social-spaces-container">
+        <h1>Espacios Sociales</h1>
+        <p>Únete a comunidades y comparte experiencias en Kudos.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notification {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Formulario para Crear Espacio Social -->
+        <section class="space-form">
+            <h2>Crear un Espacio Social</h2>
+            <form method="post" action="{% url 'social_spaces' %}">
+                {% csrf_token %}
+                <label for="theme">Tema</label>
+                <select name="theme" id="theme" class="form-control" required>
+                    {% for theme in themes %}
+                        <option value="{{ theme }}">{{ theme }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="description">Descripción</label>
+                <textarea name="description" id="description" placeholder="Describe tu espacio..." required rows="3" class="form-control"></textarea>
+
+                <label for="price">Costo de Entrada ($)</label>
+                <input type="number" name="price" id="price" step="0.1" min="0" value="0.0" class="form-control" required>
+
+                <button type="submit" name="action" value="create_space" class="btn">Crear Espacio</button>
+            </form>
+        </section>
+
+        <!-- Lista de Espacios Sociales -->
+        <section class="spaces-list">
+            {% if spaces %}
+                {% for space in spaces %}
+                    <div class="space-item">
+                        <h3>{{ space.theme }}</h3>
+                        <p><strong>Descripción:</strong> {{ space.description|truncatechars:50 }}</p>
+                        <p><strong>Creador:</strong> {{ space.creator.alias }}</p>
+                        <p><strong>Participantes:</strong> <span class="participants">{{ space.participants.count }}</span></p>
+                        <p><strong>Costo:</strong> ${{ space.price|floatformat:2 }}</p>
+                        {% if user in space.participants.all %}
+                            <p>Ya eres miembro</p>
+                            <a href="{% url 'chatbot' %}" class="btn">Entrar al Chat</a>
+                        {% else %}
+                            <form method="post" action="{% url 'social_spaces' %}" class="join-button">
+                                {% csrf_token %}
+                                <input type="hidden" name="space_id" value="{{ space.uid }}">
+                                <button type="submit" name="action" value="join_space" class="btn">Unirse</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No hay espacios sociales disponibles en este momento.</p>
+            {% endif %}
+        </section>
+
+        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
+    </div>
+
+    <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>

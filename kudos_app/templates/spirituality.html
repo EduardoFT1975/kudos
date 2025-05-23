@@ -1,0 +1,37 @@
+# kudos_app/views/spirituality.py
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from kudos_app.models import Capsule, SettingsConfig
+
+@login_required
+def spirituality(request):
+    config = SettingsConfig.objects.get_or_create(key="spirituality_settings")[0]
+    spirit_types = config.parameters.get("spirit_types", ["Meditación", "Gratitud", "Fe", "Conexión"])
+
+    if request.method == "POST" and request.POST.get("action") == "share_reflection":
+        content = request.POST.get("content")
+        spirit_type = request.POST.get("spirit_type")
+        capsule = Capsule(
+            uid=f"spirit_{request.user.id}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            usuario=request.user,
+            contenido=content,
+            ubicacion=request.user.ubicacion,
+            modo='espiritual',
+            fecha=datetime.now().date(),
+            privacy='publico',
+            time_scale='dia',
+            price=0.0,
+            temas=["Espiritualidad", spirit_type],
+            parameters={'spirit_type': spirit_type},
+            variables={'visibility_range': request.user.notification_distance}
+        )
+        capsule.save()
+        messages.success(request, "Reflexión espiritual compartida.")
+
+    capsules = Capsule.objects.filter(modo='espiritual', privacy='publico').order_by('-timestamp')[:20]
+
+    return render(request, 'spirituality.html', {
+        'capsules': capsules,
+        'spirit_types': spirit_types
+    })
