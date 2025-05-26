@@ -15,7 +15,7 @@ print(f"Variables de entorno cargadas. OPENAI_API_KEY desde os.environ: {os.envi
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
-SECRET_KEY = os.getenv('SECRET_KEY', 'w@pb+i*0cd)utd)lj6t^19@g=+x)3d5hcq^15@tyze+sr_&r-')
+SECRET_KEY = os.getenv('SECRET_KEY', '44c9835f54d7d4e92168faf1abc5dfffce783e170ec015d22f8a3865fec07073')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,app').split(',')
 
@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_celery_results',
+    'django_celery_beat',
 ]
 
 TEMPLATES = [
@@ -85,11 +86,11 @@ WSGI_APPLICATION = 'kudos_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.getenv('DATABASE_NAME', 'kudos_db'),
-        'USER': os.getenv('DATABASE_USER', 'postgres'),
-        'PASSWORD': os.getenv('DATABASE_PASSWORD', 'Po003785'),
-        'HOST': os.getenv('DATABASE_HOST', 'localhost'),
-        'PORT': os.getenv('DATABASE_PORT', '5432'),
+        'NAME': 'kudos_prod',
+        'USER': 'kudos',
+        'PASSWORD': 'kudos123',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -138,8 +139,8 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
 GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY', '')
 
 # Celery Configuration
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/0')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/0')
+CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -256,3 +257,5 @@ print(f"GOOGLE_MAPS_API_KEY cargada: {GOOGLE_MAPS_API_KEY}")
 # kudos_project/settings.py
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+LOGIN_URL = '/accounts/login/'

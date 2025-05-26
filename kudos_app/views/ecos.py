@@ -1,15 +1,13 @@
 # kudos_app/views/ecos.py
 
-import streamlit as st
-import subprocess
-import os
+import random
 
 def generate_eco(capsule, clip_duration=10):
     """
     Genera un clip de video "Eco" de 10-30 segundos a partir de una cápsula.
 
     Args:
-        capsule (dict): Cápsula con datos multidimensionales.
+        capsule (dict): Cápsula con datos multidimensionales (capsule_id, content, images).
         clip_duration (int): Duración del clip en segundos (entre 10 y 30).
 
     Returns:
@@ -21,10 +19,7 @@ def generate_eco(capsule, clip_duration=10):
     # Validar la duración del clip
     clip_duration = max(10, min(30, clip_duration))
 
-    # Simulación: En un entorno real, usaríamos ffmpeg para generar el clip
-    # Ejemplo de comando ffmpeg: ffmpeg -i input.mp4 -t 10 eco.mp4
-    if capsule["classification"]["1D"] in ["video", "audio"]:
-        # Simular la generación del clip
-        eco_url = f"https://kudos-clips.example.com/eco_{capsule['capsule_id']}.mp4"
-        return eco_url
-    return ""
+    # Simulación: generar una URL de clip basada en el ID de la cápsula
+    capsule_id = capsule.get('capsule_id', 'unknown')
+    eco_url = f"https://kudos-clips.example.com/eco_{capsule_id}_{clip_duration}s.mp4"
+    return eco_url

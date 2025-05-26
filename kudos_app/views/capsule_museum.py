@@ -1,6 +1,5 @@
 # kudos_app/views/capsule_museum.py
 
-```python
 import logging
 import random
 from django.shortcuts import render
@@ -205,4 +204,3 @@ def prepare_map_data(capsules):
         geojson["features"].append(feature)
 
     return geojson
-```

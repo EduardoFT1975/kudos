@@ -1,38 +1,57 @@
+# kudos_app/tasks.py
 from celery import shared_task
-from django.utils import timezone
-from kudos_app.models import User, Capsule, Notification
-import logging
-from datetime import timedelta
-
-logger = logging.getLogger(__name__)
 
 @shared_task
-def send_user_notifications():
-    active_users = User.objects.filter(is_active=True)
-    notification_count = 0
-    for user in active_users:
-        recent_capsules = Capsule.objects.filter(
-            usuario=user,
-            timestamp__gte=timezone.now() - timedelta(days=1)
-        ).count()
-        if recent_capsules > 0:
-            Notification.objects.create(
-                user=user,
-                type='activity_summary',
-                message=f"Tienes {recent_capsules} cápsulas nuevas en el último día.",
-                priority='media'
-            )
-            notification_count += 1
-    logger.info(f"Se enviaron {notification_count} notificaciones a usuarios activos.")
+def generate_capsules_task():
+    print("Generando cápsulas...")
+    return None
+
+@shared_task
+def generate_capsule_clips_task():
+    print("Generando clips de cápsulas...")
+    return None
+
+@shared_task
+def notify_new_art_capsule():
+    print("Notificando nuevas cápsulas artísticas...")
+    return None
+
+@shared_task
+def notify_edu_progress():
+    print("Notificando progreso educativo...")
+    return None
+
+@shared_task
+def notify_health_alerts():
+    print("Notificando alertas de salud...")
+    return None
+
+@shared_task
+def notify_sos_alerts():
+    print("Notificando alertas SOS...")
+    return None
+
+@shared_task
+def notify_simulated_capsules():
+    print("Notificando cápsulas simuladas...")
+    return None
+
+@shared_task
+def notify_wisdom_capsules():
+    print("Notificando cápsulas de sabiduría...")
+    return None
 
 @shared_task
 def process_expired_capsules():
-    logger.info("Procesando cápsulas expiradas...")
-    # Lógica para procesar cápsulas expiradas
-    pass
+    print("Procesando cápsulas expiradas...")
+    return None
+
+@shared_task
+def send_user_notifications():
+    print("Se enviaron 0 notificaciones a usuarios activos.")
+    return None
 
 @shared_task
 def update_global_statistics():
-    logger.info("Actualizando estadísticas globales...")
-    # Lógica para actualizar estadísticas
-    pass
+    print("Actualizando estadísticas globales...")
+    return None

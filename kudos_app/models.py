@@ -63,32 +63,6 @@ class AdminAccess(models.Model):
     def __str__(self):
         return f"{self.user.alias} - Nivel {self.access_level}"
 
-class AutomationConfig(models.Model):
-    automation_level = models.IntegerField(default=10)
-    support_automation = models.BooleanField(default=True)
-    support_threshold = models.FloatField(default=0.5)
-    moderation_automation = models.BooleanField(default=True)
-    moderation_threshold = models.FloatField(default=0.2)
-    moderation_review_frequency = models.CharField(max_length=50, choices=[
-        ('daily', 'Diaria'), ('weekly', 'Semanal')
-    ], default='daily')
-    content_creation_frequency = models.CharField(max_length=50, choices=[
-        ('daily', 'Diaria'), ('weekly', 'Semanal')
-    ], default='daily')
-    content_creation_limit = models.IntegerField(default=100)
-    storage_network = models.CharField(max_length=50, default='none')
-    storage_limit_per_user = models.IntegerField(default=1000)
-    processing_network = models.CharField(max_length=50, default='none')
-    max_task_cost = models.FloatField(default=1.0)
-    webgpu_enabled = models.BooleanField(default=True)
-    compression_level = models.IntegerField(default=5)
-    energy_renewable_percentage = models.IntegerField(default=50)
-    energy_reduction_goal = models.IntegerField(default=10)
-
-    def __str__(self):
-        return "Configuración de Automatización"
-
-
 class Capsule(models.Model):
     uid = models.CharField(max_length=100, unique=True)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -102,10 +76,10 @@ class Capsule(models.Model):
     price = models.FloatField(default=0.0)
     temas = models.JSONField(default=list)
     parameters = models.JSONField(default=dict)
+    variables = models.JSONField(default=dict)
 
     def __str__(self):
-        return f"Capsule {self.uid} by {self.usuario.username}"
-
+        return f"Capsule {self.uid} by {self.usuario.username}" 
 
 class Route(models.Model):
     uid = models.CharField(max_length=50, unique=True)

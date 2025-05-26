@@ -1,0 +1,20 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cápsula Creada - Kudos</title>
+</head>
+<body>
+    <h1>Cápsula Creada</h1>
+    <p>Tu cápsula ha sido creada con éxito.</p>
+    <p><strong>Contenido:</strong> {{ capsule.contenido }}</p>
+    <p><strong>Modo:</strong> {{ capsule.modo }}</p>
+    <p><strong>Temas:</strong> {{ capsule.temas|join:", " }}</p>
+    {% if capsule.parameters.educational_level %}
+        <p><strong>Nivel Educativo:</strong> {{ capsule.parameters.educational_level }}</p>
+        <p><strong>Objetivos de Aprendizaje:</strong> {{ capsule.parameters.learning_objectives }}</p>
+    {% endif %}
+    <p><a href="{% url 'create_capsule' %}">Crear otra cápsula</a></p>
+    <p><a href="{% url 'control_panel' %}">Volver al Panel</a></p>
+</body>
+</html>
