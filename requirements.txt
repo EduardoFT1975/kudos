@@ -1,49 +1,27 @@
-# Dependencias principales de Django
-Django==4.2.11
-django-environ==0.11.2
-psycopg2-binary==2.9.9
-djangorestframework==3.15.1
+# Kudos – Dependencias del proyecto.
+# Instalación: pip install -r requirements.txt
 
-# Servidor WSGI para producción
-gunicorn==22.0.0
+# ===== Núcleo (necesario en local y producción) =====
+Django>=4.2,<5.1
+python-dotenv>=1.0.0
 
-# Streamlit para interfaces interactivas
-streamlit==1.28.1
+# ===== Producción =====
+# Servidor WSGI rápido para Render/Railway/Heroku/VPS
+gunicorn>=21.0.0
+# Sirve archivos estáticos sin necesidad de nginx
+whitenoise>=6.5.0
+# Lee la URL de la base de datos PostgreSQL (Render, Heroku, etc.)
+dj-database-url>=2.1.0
+# Driver PostgreSQL (sólo se activa si DATABASE_URL existe)
+psycopg2-binary>=2.9.9
 
-# Bibliotecas para ciencia de datos
-numpy==1.26.4
-pandas==2.2.2
-matplotlib==3.8.4
-seaborn==0.13.2
+# ===== Generación de PDFs (documentos estratégicos) =====
+reportlab>=4.0.0
+markdown>=3.5
 
-# Creación de contenido
-wikipedia-api==0.6.0
-geopy==2.4.1
-
-# Procesamiento de audio y vídeo
-gTTS==2.5.3
-moviepy==1.0.3
-
-# Procesamiento de imágenes
-Pillow==10.3.0
-
-# Solana para blockchain (Devnet)
-solana==0.30.2
-
-# Celery para tareas asíncronas
-celery==5.3.6
-redis==5.0.1
-django-celery-results==2.5.1
-
-# Manejo de variables de entorno
-python-dotenv==1.0.1
-
-# Generación de PDFs
-reportlab==4.2.2
-
-# Solicitudes HTTP
-requests==2.31.0
-pytest==7.4.0
-
-# API de OpenAI para asistente
-openai==1.76.0
+# ===== Opcionales (descomentar si las usas) =====
+# openai>=1.0.0          # Asistente con GPT real
+# Pillow>=10.0.0         # Para subir imágenes
+# requests>=2.31.0       # Llamadas HTTP externas
+# celery>=5.3            # Tareas en segundo plano
+# redis>=5.0             # Backend de Celery

@@ -1,0 +1,62 @@
+DJANGO_APPS_STRUCTURE.md
+Estructura Recomendada de Aplicaciones Django
+
+kudos_project/
+├── manage.py
+├── requirements.txt
+├── .env.example
+├── .gitignore
+├── docs/                    # Documentación (aquí guardamos estos archivos)
+├── kudos_project/           # Configuración principal
+│   ├── settings.py
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── asgi.py
+│
+├── core/                    # App base (modelos compartidos, utilities)
+│   ├── models.py
+│   ├── admin.py
+│   ├── context_processors.py
+│   └── utils.py
+│
+├── users/                   # Usuarios, perfiles, social login, preferencias
+│   ├── models.py            # User custom + Profile + Preferences
+│   ├── views.py
+│   ├── urls.py
+│   └── forms.py
+│
+├── maps/                    # Todo lo relacionado con el mapa multidimensional
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   └── utils.py             # Lógica geo, timeline, etc.
+│
+├── capsules/                # Cápsulas principales (el corazón del contenido)
+│   ├── models.py            # Capsule (6D), CapsuleVersion, Media, etc.
+│   ├── views.py
+│   ├── urls.py
+│   └── tasks.py             # Generación de clips
+│
+├── wisdom/                  # Repositorio de Sabiduría Temático
+│   ├── models.py            # Category, Subcategory, Topic, Article, etc.
+│   ├── views.py
+│   └── urls.py
+│
+├── importing/               # Todo el sistema de importación automática
+│   ├── models.py
+│   ├── management/commands/ # Comandos manage.py
+│   ├── tasks.py
+│   └── sources/             # Wikipedia, UNESCO, Overpass, etc.
+│
+├── ai_generation/           # Generación de clips, voz, enriquecimiento
+│   ├── models.py
+│   ├── services.py          # Motores de IA (local primero)
+│   └── tasks.py
+│
+├── notifications/           # Notificaciones push y de proximidad
+│   ├── models.py
+│   ├── views.py
+│   └── services.py
+│
+└── static/
+└── templates/

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Perfil público – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">👤</div>
+        <div>
+            <h1>Perfil público</h1>
+            <p class="muted"></p>
+        </div>
+    </header>
+    
+<div class="profile-header">
+{% if user_obj.avatar %}<img src="{{ user_obj.avatar }}" class="avatar-img" alt="">{% endif %}
+<div>
+<h2>{{ user_obj.alias }}</h2>
+<p>{{ user_obj.bio|default:'' }}</p>
+<p><strong>Nivel {{ user_obj.level }}</strong> · {{ user_obj.experience_points }} XP</p>
+</div>
+</div>
+<h3>Cápsulas públicas</h3>
+<div class="cards-grid">
+{% for c in capsules %}<article class="capsule-card"><h3><a href="{% url 'capsule_detail' c.uid %}">{{ c.display_title }}</a></h3></article>
+{% empty %}<p class="muted">Sin cápsulas públicas.</p>{% endfor %}
+</div>
+<h3>Insignias</h3>
+<div class="badges-grid">
+{% for b in badges %}<div class="badge-item earned"><div class="badge-icon">{{ b.icon }}</div><div class="badge-name">{{ b.name }}</div></div>{% endfor %}
+</div>
+
+</div>
+{% endblock %}

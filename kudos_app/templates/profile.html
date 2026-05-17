@@ -1,191 +1,36 @@
-<!-- kudos_app/templates/profile.html -->
-
-{% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil - Kudos</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        /* Estilos específicos para el perfil */
-        .profile-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .profile-info, .capsules-list, .connections-list {
-            flex: 1 1 300px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .profile-info h2, .capsules-list h2, .connections-list h2 {
-            margin-top: 0;
-        }
-        .capsules-table, .connections-table {
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Tu Perfil en Kudos</h1>
-        <p>Administra tu información, cápsulas y conexiones.</p>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="notification {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <div class="profile-container">
-            <!-- Información del Perfil -->
-            <section class="profile-info">
-                <h2>Información Personal</h2>
-                <form method="post" action="{% url 'profile' %}" class="profile-form">
-                    {% csrf_token %}
-                    <label for="alias">Alias</label>
-                    <input type="text" name="alias" id="alias" value="{{ user.alias }}" required class="form-control">
-
-                    <label for="email">Email</label>
-                    <input type="email" name="email" id="email" value="{{ user.email }}" required class="form-control">
-
-                    <label for="necesidades">Intereses</label>
-                    <select name="necesidades" id="necesidades" multiple class="form-control">
-                        {% for interest in interests %}
-                            <option value="{{ interest }}" {% if interest in user.necesidades %}selected{% endif %}>{{ interest }}</option>
-                        {% endfor %}
-                    </select>
-                    <small>Mantén presionado Ctrl (o Cmd) para seleccionar múltiples intereses.</small>
-
-                    <label>Ubicación</label>
-                    <div class="location-inputs">
-                        <input type="checkbox" name="use_current_location" id="use_current_location" checked>
-                        <label for="use_current_location">Usar mi ubicación actual</label>
-                        <div id="manual-location" style="display: none;">
-                            <input type="number" name="latitude" id="latitude" value="{{ user.ubicacion.y|default:'41.9028' }}" step="0.0001" class="form-control">
-                            <input type="number" name="longitude" id="longitude" value="{{ user.ubicacion.x|default:'12.4964' }}" step="0.0001" class="form-control">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn">Actualizar Perfil</button>
-                </form>
-                <button id="get-current-location" class="btn">Obtener Ubicación</button>
-            </section>
-
-            <!-- Cápsulas Creadas -->
-            <section class="capsules-list">
-                <h2>Tus Cápsulas</h2>
-                {% if capsules %}
-                    <table class="capsules-table">
-                        <tr>
-                            <th>Contenido</th>
-                            <th>Modo</th>
-                            <th>Fecha</th>
-                        </tr>
-                        {% for capsule in capsules %}
-                            <tr>
-                                <td>{{ capsule.contenido|truncatechars:50 }}</td>
-                                <td>{{ capsule.modo }}</td>
-                                <td>{{ capsule.fecha|date:"Y-m-d" }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                {% else %}
-                    <p>No has creado cápsulas todavía.</p>
-                {% endif %}
-                <a href="{% url 'create_capsule' %}" class="btn">Crear Nueva Cápsula</a>
-            </section>
-
-            <!-- Conexiones -->
-            <section class="connections-list">
-                <h2>Tus Conexiones</h2>
-                {% if following %}
-                    <table class="connections-table">
-                        <tr>
-                            <th>Alias</th>
-                            <th>Acción</th>
-                        </tr>
-                        {% for followed in following %}
-                            <tr>
-                                <td>{{ followed.alias }}</td>
-                                <td>
-                                    <button class="action-btn" data-action="unfollow" data-target="{{ followed.uid }}">Dejar de Seguir</button>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                {% else %}
-                    <p>No sigues a nadie todavía.</p>
-                {% endif %}
-                <a href="{% url 'connect' %}" class="btn">Explorar Conexiones</a>
-            </section>
+{% extends 'base.html' %}
+{% block title %}👤 Mi perfil – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">👤</div>
+        <div>
+            <h1>👤 Mi perfil</h1>
+            <p class="muted"></p>
         </div>
+    </header>
+    
+<div class="profile-header">
+{% if user_obj.avatar %}<img src="{{ user_obj.avatar }}" class="avatar-img" alt="">{% endif %}
+<div>
+<h2>{{ user_obj.alias }}</h2>
+<p class="muted">UID: {{ user_obj.uid }}{% if user_obj.email %} · {{ user_obj.email }}{% endif %}</p>
+<p>{{ user_obj.bio|default:'Sin biografía aún.' }}</p>
+<p><strong>Nivel {{ user_obj.level }}</strong> · {{ user_obj.experience_points }} XP</p>
+<a href="{% url 'edit_profile' %}" class="btn btn-ghost">Editar perfil</a>
+<a href="{% url 'export_capsules' %}" class="btn btn-ghost">📤 Exportar mis cápsulas (CSV)</a>
+</div>
+</div>
+<h3>Mis cápsulas</h3>
+<div class="cards-grid">
+{% for c in capsules %}<article class="capsule-card"><h3><a href="{% url 'capsule_detail' c.uid %}">{{ c.display_title }}</a></h3><p class="muted">{{ c.fecha }}</p></article>
+{% empty %}<p class="muted">Aún no has creado cápsulas.</p>{% endfor %}
+</div>
+<h3>Mis insignias</h3>
+<div class="badges-grid">
+{% for b in badges %}<div class="badge-item earned"><div class="badge-icon">{{ b.icon }}</div><div class="badge-name">{{ b.name }}</div></div>
+{% empty %}<p class="muted">Sin insignias todavía.</p>{% endfor %}
+</div>
 
-        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
-    </div>
-
-    <script src="{% static 'js/scripts.js' %}"></script>
-    <script>
-        // Mostrar/ocultar campos de ubicación manual
-        const useCurrentCheckbox = document.getElementById('use_current_location');
-        const manualLocation = document.getElementById('manual-location');
-        useCurrentCheckbox.addEventListener('change', function() {
-            manualLocation.style.display = this.checked ? 'none' : 'block';
-        });
-
-        // Obtener ubicación actual del navegador
-        document.getElementById('get-current-location').addEventListener('click', function() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        document.getElementById('latitude').value = position.coords.latitude;
-                        document.getElementById('longitude').value = position.coords.longitude;
-                        showNotification('Ubicación obtenida exitosamente.', 'success');
-                    },
-                    function(error) {
-                        showNotification('Error al obtener la ubicación: ' + error.message, 'error');
-                    }
-                );
-            } else {
-                showNotification('Geolocalización no soportada por tu navegador.', 'error');
-            }
-        });
-
-        // Manejar "Dejar de Seguir"
-        document.querySelectorAll('.action-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const action = button.dataset.action;
-                const targetId = button.dataset.target;
-
-                if (action === 'unfollow') {
-                    fetch(`/api/follow/${targetId}/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCSRFToken()
-                        },
-                        body: JSON.stringify({ action: 'unfollow' })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            button.parentElement.parentElement.remove();
-                            showNotification(data.message, 'success');
-                        } else {
-                            showNotification('Error al procesar la acción', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showNotification('Error de conexión', 'error');
-                    });
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+</div>
+{% endblock %}

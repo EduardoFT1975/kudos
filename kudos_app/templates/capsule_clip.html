@@ -1,0 +1,473 @@
+{% extends 'base.html' %}
+{% block title %}🎬 {{ capsule.display_title }} · Clip cinematográfico{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ============================================================
+   CLIP CINEMATOGRÁFICO · pantalla completa
+   ============================================================ */
+.cinema-fullscreen {
+    background: #000; min-height: calc(100vh - 80px);
+    padding: 20px 16px 40px; color: #fff;
+}
+.cinema-wrap { max-width: 1280px; margin: 0 auto; }
+.cinema-eyebrow {
+    display: inline-block; font-size: .7rem; letter-spacing: .25em; text-transform: uppercase;
+    padding: 4px 10px; border: 1px solid rgba(212,175,55,.6); border-radius: 20px;
+    color: #d4af37; margin-bottom: 8px;
+}
+.cinema-h1 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(1.8rem, 3vw, 2.6rem); margin: 6px 0 16px;
+    background: linear-gradient(90deg, #00f0ff, #fff 60%, #ff00d4);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.cinema-stage {
+    position: relative; border-radius: 20px; overflow: hidden;
+    aspect-ratio: 16/9; background: #04081a;
+    border: 1px solid rgba(212,175,55,.4);
+    box-shadow: 0 0 60px rgba(0,240,255,.18);
+}
+.cinema-stage > * { position: absolute; inset: 0; }
+.cinema-bg {
+    background-size: cover; background-position: center;
+    transform: scale(1.1); filter: brightness(.55) saturate(1.15);
+    transition: transform 14s linear, filter 1.4s ease;
+}
+.cinema-stage.playing .cinema-bg {
+    transform: scale(1.35) translate(-3%, -2%);
+    filter: brightness(.7) saturate(1.3);
+}
+.cinema-vignette {
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,.85) 100%);
+}
+.cinema-grain {
+    pointer-events: none; opacity: .12; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+.cinema-particles { pointer-events: none; }
+.cinema-particles span {
+    position: absolute; width: 2px; height: 2px; border-radius: 50%;
+    background: #fff; opacity: 0; animation: float var(--dur,14s) linear infinite;
+    box-shadow: 0 0 6px #00f0ff;
+}
+@keyframes float {
+    0%   { opacity: 0; transform: translateY(0); }
+    8%   { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-110vh) translateX(40px); }
+}
+.cinema-overlay {
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 30px 40px; pointer-events: none;
+}
+.cinema-top { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.cinema-meta-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.cinema-meta-pills span {
+    font-size: .72rem; padding: 3px 10px; border-radius: 12px;
+    background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.18);
+    backdrop-filter: blur(8px);
+}
+.cinema-meta-pills strong { color: #00f0ff; margin-right: 4px; }
+.cinema-center {
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    text-align: center; padding: 0 6%;
+}
+.cinema-title-anim {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(2rem, 5vw, 4rem); line-height: 1.05; margin: 0 0 14px;
+    text-shadow: 0 4px 32px rgba(0,0,0,.85), 0 0 50px rgba(0,240,255,.3);
+    opacity: 0; transform: translateY(24px); transition: opacity 1s, transform 1s;
+}
+.cinema-stage.playing .cinema-title-anim { opacity: 1; transform: translateY(0); }
+.cinema-quote {
+    font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic;
+    font-size: clamp(1.05rem, 1.7vw, 1.4rem);
+    color: #fde68a; max-width: 900px; margin: 0 auto;
+    text-shadow: 0 2px 12px rgba(0,0,0,.85);
+    opacity: 0; transition: opacity 1.2s 0.6s;
+}
+.cinema-stage.playing .cinema-quote { opacity: 1; }
+
+.cinema-bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.cinema-lower-third {
+    background: linear-gradient(90deg, rgba(212,175,55,.95), rgba(212,175,55,0));
+    padding: 8px 16px 8px 12px; border-left: 4px solid #fff;
+    color: #1a1f36; font-weight: 700;
+    transform: translateX(-110%); transition: transform .9s cubic-bezier(.2,.8,.2,1);
+    max-width: 60%;
+}
+.cinema-stage.playing .cinema-lower-third { transform: translateX(0); }
+.cinema-lower-third small {
+    display: block; color: #1e3a8a; font-weight: 500;
+    font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+}
+.cinema-merit {
+    text-align: right; backdrop-filter: blur(8px); padding: 8px 12px; border-radius: 10px;
+    background: rgba(0,0,0,.4); border: 1px solid rgba(212,175,55,.4);
+    font-size: .85rem;
+}
+.cinema-merit .stars { color: #ffae00; letter-spacing: 2px; }
+.cinema-merit small {
+    display: block; color: #94a3b8; font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
+}
+.cinema-caption {
+    position: absolute; left: 8%; right: 8%; bottom: 90px; text-align: center;
+    pointer-events: none; font-size: clamp(1rem, 1.5vw, 1.3rem); font-weight: 500;
+    color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,.85);
+    background: rgba(0,0,0,.4); padding: 10px 18px; border-radius: 12px;
+    backdrop-filter: blur(6px); max-width: 84%; margin: 0 auto;
+    opacity: 0; transition: opacity .25s;
+}
+.cinema-caption.show { opacity: 1; }
+.cinema-minimap {
+    position: absolute; bottom: 26px; right: 26px;
+    width: 130px; height: 130px; border-radius: 50%;
+    background: radial-gradient(circle, #1e3a8a 0%, #04081a 80%);
+    border: 1px solid rgba(0,240,255,.5); box-shadow: 0 0 14px rgba(0,240,255,.4);
+    display: grid; place-items: center;
+}
+.cinema-minimap .pin {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff, #d4af37 50%, transparent);
+    box-shadow: 0 0 14px #d4af37;
+    animation: pinPulse 2s ease-in-out infinite;
+}
+@keyframes pinPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.5); } }
+.cinema-weather {
+    position: absolute; top: 28px; right: 28px; pointer-events: none;
+    background: rgba(0,0,0,.4); padding: 6px 10px; border-radius: 12px;
+    backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.18);
+    font-size: .85rem;
+}
+.cinema-controls {
+    margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+    padding: 14px 18px; background: rgba(8,12,32,.7); border-radius: 14px;
+    border: 1px solid rgba(0,240,255,.25); backdrop-filter: blur(10px);
+}
+.cinema-progress {
+    flex: 1; min-width: 200px; height: 6px; border-radius: 3px;
+    background: rgba(255,255,255,.08); overflow: hidden;
+}
+.cinema-progress > span {
+    display: block; height: 100%; width: 0;
+    background: linear-gradient(90deg, #ff00d4, #00f0ff, #ffae00);
+    transition: width .15s linear; box-shadow: 0 0 12px rgba(0,240,255,.6);
+}
+.cinema-mode-tag { color: #00f0ff; font-size: .85rem; font-weight: 600; min-width: 130px; text-align: right; }
+
+.cinema-credits {
+    margin-top: 22px; padding: 18px 22px; border-radius: 14px;
+    background: rgba(8,12,32,.6); border: 1px solid rgba(0,240,255,.2);
+    backdrop-filter: blur(10px);
+}
+.cinema-credits h3 { color: #a78bfa; font-family: 'Cormorant Garamond', Georgia, serif; margin: 0 0 8px; }
+.btn-neon {
+    padding: 10px 18px; border-radius: 12px;
+    background: linear-gradient(135deg, #00f0ff, #1e3a8a);
+    color: #fff; border: none; cursor: pointer; font-weight: 600;
+    box-shadow: 0 0 18px rgba(0,240,255,.4); transition: all .25s;
+    text-decoration: none; display: inline-block;
+}
+.btn-neon:hover { transform: translateY(-2px); box-shadow: 0 0 28px rgba(0,240,255,.7); color: #fff; }
+.btn-neon.violet { background: linear-gradient(135deg, #a78bfa, #1e3a8a); }
+.btn-neon.amber { background: linear-gradient(135deg, #ffae00, #ff00d4); }
+.btn-neon.ghost { background: rgba(255,255,255,.08); box-shadow: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cinema-fullscreen">
+<div class="cinema-wrap">
+    <span class="cinema-eyebrow">KUDOS · Clip · 1D~5D</span>
+    <h1 class="cinema-h1">{{ capsule.display_title }}</h1>
+    <p class="muted" style="color:#94a3b8; margin-top:-6px;">
+        Narra <strong style="color:#d4af37;">{{ voice_name }}</strong>
+        {% if capsule.lugar %} · 📍 {{ capsule.lugar }}{% endif %}
+        {% if capsule.fecha %} · 📅 {{ capsule.fecha|date:"Y" }}{% endif %}
+    </p>
+
+    <section class="cinema-stage" id="cinema-stage">
+        <div class="cinema-bg" style="background-image: url('{% if capsule.image %}{{ capsule.image }}{% else %}https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Earth_Eastern_Hemisphere.jpg/1200px-Earth_Eastern_Hemisphere.jpg{% endif %}');"></div>
+        <div class="cinema-vignette"></div>
+        <div class="cinema-grain"></div>
+        <div class="cinema-particles"></div>
+        <div class="cinema-weather" id="cinema-weather">
+            <span id="weather-icon">🌍</span> <span id="weather-text">Clima · {{ capsule.get_era_display }}</span>
+        </div>
+        <div class="cinema-overlay">
+            <div class="cinema-top">
+                <span class="cinema-eyebrow">KUDOS · {{ capsule.get_modo_display }}</span>
+                <div class="cinema-meta-pills">
+                    <span><strong>1D</strong> {{ capsule.fecha|date:"Y" }}</span>
+                    {% if capsule.latitud %}<span><strong>2D</strong> {{ capsule.latitud|floatformat:1 }}°, {{ capsule.longitud|floatformat:1 }}°</span>{% endif %}
+                    {% if capsule.altitud %}<span><strong>3D</strong> {{ capsule.altitud }} m</span>{% endif %}
+                    <span><strong>4D</strong> {{ capsule.get_era_display|default:"actual" }}</span>
+                    <span><strong>5D</strong> {{ capsule.get_dimension_layer_display }}</span>
+                </div>
+            </div>
+            <div class="cinema-center">
+                <h2 class="cinema-title-anim">{{ capsule.display_title }}</h2>
+                <p class="cinema-quote">{% if capsule.ai_summary %}{{ capsule.ai_summary|truncatewords:28 }}{% else %}{{ capsule.contenido|truncatewords:24 }}{% endif %}</p>
+            </div>
+            <div class="cinema-bottom">
+                <div class="cinema-lower-third">
+                    <small>narra</small>
+                    {{ voice_name }}
+                </div>
+                <div class="cinema-merit">
+                    <small>Mérito Kudos</small>
+                    <div class="stars">
+                        {% with q=capsule.ai_quality_score|default:5 %}
+                        {% for i in "1234567890"|make_list %}{% if forloop.counter <= q %}★{% else %}☆{% endif %}{% endfor %}
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="cinema-caption"></div>
+        {% if capsule.latitud %}
+        <div class="cinema-minimap">
+            <div class="pin"></div>
+        </div>
+        {% endif %}
+    </section>
+
+    <div class="cinema-controls">
+        <button class="btn-neon amber" id="cinema-viral">⚡ Clip viral · 15s</button>
+        <button class="btn-neon violet" id="cinema-doc">🎬 Documental · 90s</button>
+        <button class="btn-neon ghost" id="cinema-stop">⏹ Parar</button>
+        <button class="btn-neon ghost" id="cinema-mute">🔊</button>
+        <select id="voice-picker" class="btn-neon ghost" style="padding:9px 11px;">
+            <option value="">Voz automática (mejor disponible)</option>
+        </select>
+        <div class="cinema-progress"><span id="cinema-bar"></span></div>
+        <span class="cinema-mode-tag" id="cinema-mode-tag">listo</span>
+        <a class="btn-neon ghost" href="{% url 'capsule_detail' capsule.uid %}">← Volver</a>
+    </div>
+
+    <div class="cinema-credits">
+        <h3>🎬 Sobre este clip</h3>
+        <p>El compositor cinematográfico mezcla <strong>imagen real</strong> de la fuente original con
+        un efecto Ken Burns lento, <strong>tipografía animada por escenas</strong>, partículas, viñeta y grano de
+        cine, datos <strong>1D~5D</strong> superpuestos (tiempo, lugar, altitud, era, capa de realidad), un
+        <strong>mini-mapa pulsante</strong>, marca de mérito y la voz de tu consejero asignado mezclada con
+        <strong>banda sonora ambient procedural</strong> generada en tu navegador con Web Audio.</p>
+        <p class="muted" style="font-size:.9rem; color:#94a3b8;">
+        Sin coste de servidor. Sin APIs externas. Sin descarga. La esencia 5D de Kudos en cada cápsula.</p>
+    </div>
+</div>
+</div>
+
+<script>
+(function(){
+    // Reutilizamos exactamente la misma lógica que en capsule_detail
+    const stage = document.getElementById('cinema-stage');
+    if (!stage) return;
+    const captionEl = stage.querySelector('.cinema-caption');
+    const progressBar = document.getElementById('cinema-bar');
+    const modeTag = document.getElementById('cinema-mode-tag');
+    const voicePicker = document.getElementById('voice-picker');
+    const muteToggle = document.getElementById('cinema-mute');
+    const weatherIcon = document.getElementById('weather-icon');
+    const weatherText = document.getElementById('weather-text');
+
+    function cleanForVoice(s) {
+        if (!s) return '';
+        return s
+            .split(/━{3,}|═{3,}/)[0]
+            .replace(/https?:\/\/\S+/g, '')
+            .replace(/[#—•\*_\[\]\|]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+    const TITLE   = cleanForVoice(`{{ capsule.display_title|escapejs }}`);
+    const TEXT    = cleanForVoice(`{{ capsule.contenido|escapejs }}`);
+    const SUMMARY = cleanForVoice(`{{ capsule.ai_summary|escapejs }}`) || TEXT.slice(0,280);
+    const LUGAR   = `{{ capsule.lugar|default:""|escapejs }}`;
+    const FECHA   = `{{ capsule.fecha|date:"Y" }}`;
+    const DIM     = `{{ capsule.get_dimension_layer_display|escapejs }}`;
+    const ERA     = `{{ capsule.era|escapejs }}`;
+    const VOICE_NAME = `{{ voice_name|escapejs }}`;
+    const VOICE_CODE = `{{ voice_code|escapejs }}`;
+    const TEMAS = `{{ capsule.ai_themes|join:", "|escapejs }}` || `{{ capsule.modo|escapejs }}`;
+
+    // Clima según era (decorativo, sin API)
+    const WEATHER_BY_ERA = {
+        antigua: ['☀', 'Soleado, calzadas de tierra'],
+        media: ['🌫', 'Brumoso medieval'],
+        moderna: ['⛅', 'Templado moderno'],
+        contemporanea: ['🏭', 'Cielos industriales'],
+        actual: ['🌐', 'Atmósfera contemporánea'],
+        futura: ['✨', 'Atmósfera proyectada'],
+    };
+    const w = WEATHER_BY_ERA[ERA] || ['🌍', 'Clima global'];
+    if (weatherIcon) weatherIcon.textContent = w[0];
+    if (weatherText) weatherText.textContent = w[1];
+
+    // Partículas
+    const particles = stage.querySelector('.cinema-particles');
+    if (particles && !particles.children.length) {
+        for (let i = 0; i < 40; i++) {
+            const p = document.createElement('span');
+            p.style.left = Math.random()*100 + '%';
+            p.style.bottom = '-10px';
+            p.style.setProperty('--dur', (10 + Math.random()*16) + 's');
+            p.style.animationDelay = (Math.random()*16) + 's';
+            particles.appendChild(p);
+        }
+    }
+
+    // Voces
+    const CHAR_TUNING = {
+        seneca:      { rate: 0.85, pitch: 0.85, gender: 'male' },
+        confucio:    { rate: 0.78, pitch: 0.80, gender: 'male' },
+        aristoteles: { rate: 0.85, pitch: 0.82, gender: 'male' },
+        newton:      { rate: 0.92, pitch: 0.92, gender: 'male' },
+        tesla:       { rate: 1.00, pitch: 1.05, gender: 'male' },
+        cleopatra:   { rate: 0.92, pitch: 1.20, gender: 'female' },
+        nightingale: { rate: 0.90, pitch: 1.15, gender: 'female' },
+    };
+    function pickVoice() {
+        const voices = speechSynthesis.getVoices();
+        const tuning = CHAR_TUNING[VOICE_CODE] || { gender: 'female' };
+        const isSpa = v => v.lang && v.lang.toLowerCase().startsWith('es');
+        return voices.slice().sort((a,b)=>{
+            let sa=0, sb=0;
+            if (isSpa(a)) sa+=100; if (isSpa(b)) sb+=100;
+            if (a.lang === 'es-ES') sa+=30; if (b.lang === 'es-ES') sb+=30;
+            if (/neural|premium|natural|enhanced|wavenet/i.test(a.name)) sa+=30;
+            if (/neural|premium|natural|enhanced|wavenet/i.test(b.name)) sb+=30;
+            return sb - sa;
+        })[0];
+    }
+    function fillVoices() {
+        if (!voicePicker) return;
+        const voices = speechSynthesis.getVoices().filter(v => v.lang && v.lang.toLowerCase().startsWith('es'));
+        voicePicker.innerHTML = '<option value="">Voz automática</option>' +
+            voices.map(v => `<option value="${v.name}">${v.name} · ${v.lang}</option>`).join('');
+    }
+    if ('speechSynthesis' in window) { speechSynthesis.onvoiceschanged = fillVoices; fillVoices(); }
+
+    // Audio ambient
+    let audioCtx = null, ambientNodes = [], muted = false;
+    function startAmbient(durationSec) {
+        if (muted) return;
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const master = audioCtx.createGain();
+        master.gain.setValueAtTime(0, now);
+        master.gain.linearRampToValueAtTime(0.07, now + 1.5);
+        master.gain.linearRampToValueAtTime(0.07, now + durationSec - 2);
+        master.gain.linearRampToValueAtTime(0, now + durationSec);
+        master.connect(audioCtx.destination);
+        [110, 165, 220].forEach((f, i) => {
+            const o = audioCtx.createOscillator();
+            o.type = i === 0 ? 'sine' : (i === 1 ? 'triangle' : 'sine');
+            o.frequency.setValueAtTime(f, now);
+            o.detune.setValueAtTime(0, now);
+            o.detune.linearRampToValueAtTime(8, now + durationSec/2);
+            o.detune.linearRampToValueAtTime(-8, now + durationSec);
+            const g = audioCtx.createGain();
+            g.gain.setValueAtTime(0.0, now);
+            g.gain.linearRampToValueAtTime(0.4, now + 2);
+            g.gain.linearRampToValueAtTime(0.0, now + durationSec - 1);
+            o.connect(g); g.connect(master);
+            o.start(now); o.stop(now + durationSec + 0.1);
+            ambientNodes.push(o, g);
+        });
+        for (let t = 4; t < durationSec - 2; t += 12) {
+            const bell = audioCtx.createOscillator();
+            const bg = audioCtx.createGain();
+            bell.type = 'sine'; bell.frequency.value = 880 + Math.random()*440;
+            bg.gain.setValueAtTime(0.0, now+t);
+            bg.gain.linearRampToValueAtTime(0.06, now+t+0.05);
+            bg.gain.exponentialRampToValueAtTime(0.0001, now+t+1.2);
+            bell.connect(bg); bg.connect(master);
+            bell.start(now+t); bell.stop(now+t+1.4);
+            ambientNodes.push(bell, bg);
+        }
+    }
+    function stopAmbient() {
+        ambientNodes.forEach(n => { try { n.stop && n.stop(); n.disconnect && n.disconnect(); } catch(e){} });
+        ambientNodes = [];
+    }
+    if (muteToggle) muteToggle.addEventListener('click', () => {
+        muted = !muted; muteToggle.textContent = muted ? '🔇' : '🔊';
+        if (muted) stopAmbient();
+    });
+
+    function showCaption(text){ if(!captionEl) return; captionEl.textContent = text; captionEl.classList.add('show'); }
+    function hideCaption(){ if(captionEl) captionEl.classList.remove('show'); }
+
+    function escenasViral() {
+        return [
+            { t: 0, text: TITLE.toUpperCase() },
+            { t: 4, text: SUMMARY.split('.').slice(0,1).join('.') + '.' },
+            { t: 9, text: (LUGAR ? LUGAR + ' · ' : '') + (FECHA ? FECHA : '') + ' · ' + DIM },
+            { t: 12, text: 'Descúbrelo en KUDOS.' },
+        ];
+    }
+    function escenasDocumental() {
+        const intro = `Hoy viajamos hasta ${LUGAR || 'un lugar de la humanidad'}${FECHA ? ', en el año ' + FECHA : ''}.`;
+        const body = TEXT.length > 600 ? TEXT.slice(0, 1100) : TEXT;
+        const partes = body.split(/\.\s+/).filter(p => p.length > 30);
+        return [
+            { t: 0, text: TITLE },
+            { t: 6, text: intro },
+            { t: 18, text: partes[0] ? partes[0] + '.' : '' },
+            { t: 36, text: partes[1] ? partes[1] + '.' : (partes[0] || '') },
+            { t: 54, text: 'Lo que escuchas no es solo información. Es legado.' },
+            { t: 68, text: `${VOICE_NAME} lo cuenta. La humanidad lo recuerda.` },
+            { t: 82, text: `${TEMAS ? '#' + TEMAS.split(',')[0].trim() + ' · ' : ''}KUDOS · 1D~5D` },
+        ];
+    }
+
+    let timers = [], progressTicker = null, utterance = null;
+    function clearTimers(){ timers.forEach(clearTimeout); timers = []; cancelAnimationFrame(progressTicker); }
+    function stopAll() {
+        speechSynthesis.cancel(); clearTimers(); stopAmbient();
+        stage.classList.remove('playing'); hideCaption();
+        if (progressBar) progressBar.style.width = '0%';
+        if (modeTag) modeTag.textContent = 'listo';
+    }
+    function playFilm(escenas, dur, modeName) {
+        stopAll();
+        stage.classList.add('playing');
+        if (modeTag) modeTag.textContent = modeName;
+        startAmbient(dur);
+        escenas.forEach(esc => timers.push(setTimeout(() => showCaption(esc.text), esc.t * 1000)));
+        timers.push(setTimeout(hideCaption, dur * 1000 - 400));
+        const t0 = performance.now();
+        function tick() {
+            const elapsed = (performance.now() - t0) / 1000;
+            const pct = Math.min(100, elapsed / dur * 100);
+            if (progressBar) progressBar.style.width = pct + '%';
+            if (pct < 100) progressTicker = requestAnimationFrame(tick);
+            else stopAll();
+        }
+        progressTicker = requestAnimationFrame(tick);
+
+        const fullText = escenas.map(e => e.text).join(' ');
+        if ('speechSynthesis' in window) {
+            utterance = new SpeechSynthesisUtterance(fullText);
+            utterance.lang = 'es-ES';
+            const tuning = CHAR_TUNING[VOICE_CODE] || { rate: 0.92, pitch: 1.0 };
+            utterance.rate = dur < 30 ? Math.min(1.1, tuning.rate + 0.1) : tuning.rate;
+            utterance.pitch = tuning.pitch;
+            const customVoice = voicePicker ? voicePicker.value : '';
+            const v = customVoice ? speechSynthesis.getVoices().find(x => x.name === customVoice) : pickVoice();
+            if (v) utterance.voice = v;
+            utterance.volume = muted ? 0 : 0.95;
+            speechSynthesis.speak(utterance);
+        }
+    }
+
+    document.getElementById('cinema-viral').addEventListener('click', () => playFilm(escenasViral(), 15, '⚡ Clip viral 15s'));
+    document.getElementById('cinema-doc').addEventListener('click',   () => playFilm(escenasDocumental(), 90, '🎬 Documental 90s'));
+    document.getElementById('cinema-stop').addEventListener('click', stopAll);
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% block title %}🛰 Cerca de mí · Kudos{% endblock %}
+
+{% block extra_head %}
+<style>
+.near-shell {
+    --neon-cyan: #00f0ff; --gold: #d4af37;
+    background: radial-gradient(900px 600px at 30% 10%, rgba(0,240,255,.08), transparent 70%),
+                linear-gradient(180deg, #04081a, #0a0f2c);
+    color: #e2e8f0; min-height: calc(100vh - 80px); padding: 30px 20px 60px;
+}
+.near-wrap { max-width: 1100px; margin: 0 auto; }
+.near-h1 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(1.8rem, 3.4vw, 2.8rem); margin: 0 0 6px;
+    background: linear-gradient(90deg, var(--neon-cyan), #fff 60%, var(--gold));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.near-radar {
+    position: relative; width: 280px; height: 280px; margin: 24px auto 12px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,240,255,.08), transparent 70%);
+    border: 1px solid rgba(0,240,255,.3);
+}
+.near-radar::before, .near-radar::after {
+    content: ''; position: absolute; inset: 0; border-radius: 50%;
+    border: 1px dashed rgba(0,240,255,.25);
+}
+.near-radar::after { inset: 30px; }
+.near-radar .ring100 {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 1px solid rgba(0,240,255,.4);
+    animation: pulse 3s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{transform:scale(.9);opacity:.4} 50%{transform:scale(1.05);opacity:.8} }
+.near-center {
+    position: absolute; left:50%; top:50%; transform: translate(-50%,-50%);
+    width: 26px; height: 26px; border-radius:50%;
+    background: radial-gradient(circle at 30% 30%, #fff, var(--gold) 50%, transparent);
+    box-shadow: 0 0 24px var(--gold);
+}
+.near-radar .blip {
+    position:absolute; width:8px; height:8px; border-radius:50%;
+    background: var(--neon-cyan); box-shadow: 0 0 12px var(--neon-cyan);
+}
+.near-status {
+    text-align:center; padding:10px; border-radius:10px;
+    background: rgba(8,12,32,.5); border:1px solid rgba(0,240,255,.2);
+    margin-top:14px; font-size:.95rem;
+}
+.near-controls { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin:20px 0 30px; }
+.btn-locate {
+    padding: 12px 22px; border-radius: 12px; cursor: pointer;
+    background: linear-gradient(135deg, var(--neon-cyan), #1e3a8a);
+    color:#fff; border:none; font-weight:700; font-size:1rem;
+    box-shadow: 0 0 20px rgba(0,240,255,.4);
+}
+.btn-locate.warm { background: linear-gradient(135deg, var(--gold), #ff00d4); }
+.zone-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 16px; margin-top: 18px; }
+.zone-card {
+    padding: 16px 18px; border-radius: 14px;
+    background: rgba(8,12,32,.6); border: 1px solid rgba(0,240,255,.2);
+    backdrop-filter: blur(10px); transition: all .25s;
+    text-decoration: none; color: #e2e8f0;
+}
+.zone-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,240,255,.2); border-color: var(--neon-cyan); color:#e2e8f0; }
+.zone-card .zlabel {
+    display:inline-block; padding:3px 10px; border-radius:14px; font-size:.7rem;
+    letter-spacing:.1em; text-transform:uppercase; font-weight:700;
+}
+.zone-zero { background: linear-gradient(90deg, #ff00d4, #ffae00); color:#000; }
+.zone-revelation { background: linear-gradient(90deg, var(--gold), #ff00d4); color:#000; }
+.zone-alert { background: var(--neon-cyan); color:#000; }
+.zone-cosmic { background: rgba(255,255,255,.1); color:#e2e8f0; }
+.zone-card h3 { margin: 8px 0; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.3rem; }
+.zone-card .meta { font-size: .8rem; color: #94a3b8; }
+.zone-card img { width:100%; height:120px; object-fit:cover; border-radius:8px; margin: 8px 0; }
+.zone-card .quality { color: var(--gold); }
+.epiphany-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--gold), #ff00d4); color:#000;
+    padding: 14px 24px; border-radius: 14px; font-weight: 700;
+    box-shadow: 0 0 40px var(--gold);
+    opacity: 0; pointer-events: none; transition: opacity .4s, transform .4s;
+    z-index: 9999;
+}
+.epiphany-toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="near-shell">
+<div class="near-wrap">
+    <span class="cinema-eyebrow" style="font-size:.7rem; letter-spacing:.25em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--gold); border-radius:20px; color:var(--gold);">Kudos · Geofencing dinámico · Memento</span>
+    <h1 class="near-h1">Cerca de ti · La memoria del lugar</h1>
+    <p style="color:#94a3b8;">Tres radios: <strong style="color:#00f0ff;">100m alerta</strong> · <strong style="color:#d4af37;">20m revelación</strong> · <strong style="color:#ff00d4;">5m punto cero</strong>. La ubicación nunca sale de tu navegador hasta que pulsas el botón.</p>
+
+    <div class="near-controls">
+        <button id="btn-locate" class="btn-locate">📍 Activar mi ubicación</button>
+        <button id="btn-radius1" class="btn-locate warm">100m</button>
+        <button id="btn-radius2" class="btn-locate warm">1 km</button>
+        <button id="btn-radius3" class="btn-locate warm">10 km</button>
+    </div>
+
+    <div class="near-radar" id="radar">
+        <div class="ring100"></div>
+        <div class="near-center"></div>
+    </div>
+
+    <div class="near-status" id="status">Pulsa el botón y autoriza la geolocalización para empezar.</div>
+
+    <div class="zone-list" id="results"></div>
+</div>
+</div>
+
+<div class="epiphany-toast" id="toast"></div>
+
+<script>
+const status = document.getElementById('status');
+const results = document.getElementById('results');
+const radar = document.getElementById('radar');
+const toast = document.getElementById('toast');
+let currentRadius = 1000;
+let lastPos = null;
+let watchId = null;
+
+function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 6000);
+}
+
+async function fetchNearby(lat, lon) {
+    status.innerHTML = '🛰 Buscando cápsulas en un radio de ' + currentRadius + 'm...';
+    try {
+        const r = await fetch(`/api/capsules/nearby/?lat=${lat}&lon=${lon}&radius=${currentRadius}&limit=40`);
+        const data = await r.json();
+        renderResults(data);
+        renderRadar(data);
+    } catch (e) {
+        status.textContent = '⚠ No se pudo consultar el servidor.';
+    }
+}
+
+function zoneLabel(z) {
+    return ({
+        zero: 'PUNTO CERO · 5m',
+        revelation: 'REVELACIÓN · 20m',
+        alert: 'ALERTA · 100m',
+        cosmic: 'EN EL RADIO',
+    })[z] || z;
+}
+
+function renderResults(data) {
+    if (!data.capsules.length) {
+        status.textContent = `No hay cápsulas en ${data.radius_m}m a tu alrededor. Prueba un radio mayor.`;
+        results.innerHTML = '';
+        return;
+    }
+    status.innerHTML = `<strong>${data.count}</strong> cápsulas en un radio de ${data.radius_m}m. Más cercana: ${data.capsules[0].distance_m}m.`;
+    results.innerHTML = data.capsules.map(c => `
+      <a class="zone-card" href="/capsules/${c.uid}/">
+        <span class="zlabel zone-${c.zone}">${zoneLabel(c.zone)}</span>
+        <h3>${c.titulo.replace(/</g,'&lt;')}</h3>
+        ${c.image ? `<img src="${c.image}" alt="" loading="lazy">` : ''}
+        <p>${(c.ai_summary || '').replace(/</g,'&lt;').slice(0, 160)}...</p>
+        <div class="meta">📐 ${c.distance_m}m · 🎭 ${c.modo} · ${c.dimension} · <span class="quality">⭐ ${c.quality.toFixed(1)}/10</span></div>
+      </a>`).join('');
+
+    // Notificación de epifanía si hay punto cero o revelación
+    const epi = data.capsules.find(c => c.zone === 'zero' || c.zone === 'revelation');
+    if (epi) {
+        showToast(`✨ Estás donde ocurrió: ${epi.titulo}`);
+        // Notificación push web del navegador
+        if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('Kudos · Estás cerca de un legado', {
+                body: epi.titulo + ' · ' + epi.distance_m + 'm',
+                icon: '/static/img/logo.svg',
+            });
+        }
+    }
+}
+
+function renderRadar(data) {
+    radar.querySelectorAll('.blip').forEach(n => n.remove());
+    const cx = radar.offsetWidth / 2, cy = radar.offsetHeight / 2;
+    const maxR = Math.min(cx, cy) - 20;
+    data.capsules.slice(0, 25).forEach(c => {
+        const ratio = Math.min(1, c.distance_m / data.radius_m);
+        const angle = Math.random() * Math.PI * 2;
+        const x = cx + Math.cos(angle) * maxR * ratio;
+        const y = cy + Math.sin(angle) * maxR * ratio;
+        const b = document.createElement('div');
+        b.className = 'blip';
+        b.style.left = (x - 4) + 'px';
+        b.style.top = (y - 4) + 'px';
+        if (c.zone === 'zero') b.style.background = '#ff00d4';
+        else if (c.zone === 'revelation') b.style.background = '#ffae00';
+        radar.appendChild(b);
+    });
+}
+
+document.getElementById('btn-locate').addEventListener('click', () => {
+    if (!navigator.geolocation) {
+        status.textContent = '⚠ Tu navegador no soporta geolocalización.';
+        return;
+    }
+    if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+    status.textContent = '🛰 Pidiendo permiso de geolocalización...';
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            lastPos = pos.coords;
+            fetchNearby(pos.coords.latitude, pos.coords.longitude);
+            // Vigilancia continua para refrescar al moverte
+            if (watchId) navigator.geolocation.clearWatch(watchId);
+            watchId = navigator.geolocation.watchPosition(
+                p => {
+                    if (lastPos) {
+                        const d = Math.hypot(
+                            (p.coords.latitude - lastPos.latitude) * 111000,
+                            (p.coords.longitude - lastPos.longitude) * 111000 * Math.cos(p.coords.latitude * Math.PI/180)
+                        );
+                        if (d > 30) { lastPos = p.coords; fetchNearby(p.coords.latitude, p.coords.longitude); }
+                    }
+                },
+                () => {}, { enableHighAccuracy: true, maximumAge: 30000 }
+            );
+        },
+        err => {
+            status.textContent = '⚠ Permiso de geolocalización denegado o error: ' + err.message;
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+    );
+});
+
+document.getElementById('btn-radius1').addEventListener('click', () => { currentRadius = 100;   if (lastPos) fetchNearby(lastPos.latitude, lastPos.longitude); });
+document.getElementById('btn-radius2').addEventListener('click', () => { currentRadius = 1000;  if (lastPos) fetchNearby(lastPos.latitude, lastPos.longitude); });
+document.getElementById('btn-radius3').addEventListener('click', () => { currentRadius = 10000; if (lastPos) fetchNearby(lastPos.latitude, lastPos.longitude); });
+</script>
+{% endblock %}

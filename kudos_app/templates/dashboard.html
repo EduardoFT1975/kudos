@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Panel – Kudos{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h1>Hola, <span class="gold">{{ user.alias }}</span> 👋</h1>
+    <p class="muted">Tu panel personal · Nivel {{ level }} · {{ xp }} XP</p>
+
+    <!-- Barra de XP -->
+    <div class="xp-bar">
+        <div class="xp-fill" style="width: {{ progress_pct }}%"></div>
+        <span class="xp-text">{{ xp }} / {{ next_level_xp }} XP – Siguiente nivel</span>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="quick-actions">
+        <a href="{% url 'create_capsule' %}" class="btn btn-gold">✨ Nueva cápsula</a>
+        <a href="{% url 'create_proposal' %}" class="btn btn-ghost">🗳️ Nueva propuesta</a>
+        <a href="{% url 'mental_health' %}" class="btn btn-ghost">💚 Registrar ánimo</a>
+        <a href="{% url 'export_capsules' %}" class="btn btn-ghost">📤 Exportar mis datos</a>
+    </div>
+
+    <!-- Stats personales -->
+    <div class="stats-grid small">
+        <div class="stat-card"><div class="stat-num">{{ user_capsules_count }}</div><div class="stat-lbl">Mis cápsulas</div></div>
+        <div class="stat-card"><div class="stat-num">{{ badges_count }}</div><div class="stat-lbl">Insignias</div></div>
+        <div class="stat-card"><div class="stat-num">{{ unread_count }}</div><div class="stat-lbl">Sin leer</div></div>
+        <div class="stat-card"><div class="stat-num">{{ level }}</div><div class="stat-lbl">Nivel</div></div>
+    </div>
+
+    <!-- Cápsulas recientes -->
+    <section class="section-block">
+        <h2>Tus cápsulas recientes</h2>
+        <div class="cards-grid">
+            {% for capsule in recent_capsules %}
+            <article class="capsule-card">
+                <span class="capsule-mode">{{ capsule.get_modo_display }}</span>
+                <h3><a href="{% url 'capsule_detail' capsule.uid %}">{{ capsule.display_title }}</a></h3>
+                <p class="muted">{{ capsule.fecha }} · {{ capsule.get_privacy_display }}</p>
+                <div class="capsule-meta">
+                    <span>❤ {{ capsule.likes }}</span>
+                    <span>👁 {{ capsule.views }}</span>
+                </div>
+            </article>
+            {% empty %}
+            <p class="muted">Aún no has creado cápsulas. <a href="{% url 'create_capsule' %}">Crea la primera</a>.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <div class="dashboard-row">
+        <!-- Notificaciones -->
+        <section>
+            <h2>🔔 Notificaciones</h2>
+            {% for n in notifications %}
+                <div class="notif-item priority-{{ n.priority }}">
+                    {{ n.message }}
+                    <small>{{ n.timestamp|date:"d/m H:i" }}</small>
+                </div>
+            {% empty %}
+                <p class="muted">Sin notificaciones nuevas. ¡Estás al día!</p>
+            {% endfor %}
+        </section>
+
+        <!-- Insignias -->
+        <section>
+            <h2>🏆 Tus insignias</h2>
+            <div class="badges-grid">
+                {% for b in badges %}
+                <div class="badge-item">
+                    <div class="badge-icon">{{ b.icon }}</div>
+                    <div class="badge-name">{{ b.name }}</div>
+                </div>
+                {% empty %}
+                <p class="muted">Aún no tienes insignias. ¡Empieza a explorar!</p>
+                {% endfor %}
+            </div>
+            <a href="{% url 'achievements' %}" class="link">Ver todos los logros →</a>
+        </section>
+
+        <!-- Estado emocional -->
+        <section>
+            <h2>💚 Tu ánimo</h2>
+            {% for m in recent_moods %}
+                <div class="mood-item">{{ m.get_mood_display }} <small>{{ m.timestamp|date:"d/m" }}</small></div>
+            {% empty %}
+                <p class="muted">Empieza a registrar cómo te sientes en <a href="{% url 'mental_health' %}">Salud Mental</a>.</p>
+            {% endfor %}
+        </section>
+    </div>
+</div>
+{% endblock %}

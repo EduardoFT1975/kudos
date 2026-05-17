@@ -1,154 +1,17 @@
-<!-- kudos_app/templates/art_festival.html -->
+{% extends 'base.html' %}
+{% block title %}🎨 Arte y Festival – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🎨</div>
+        <div>
+            <h1>🎨 Arte y Festival</h1>
+            <p class="muted">Festival multidimensional del arte humano.</p>
+        </div>
+    </header>
+    
+<p>Comparte tus creaciones, descubre las de otros, vota a tus favoritos.</p>
+<a href="{% url 'create_capsule' %}?modo=arte" class="btn btn-gold">+ Aportar obra</a>
 
-{% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Festival de Arte - Kudos</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        /* Estilos específicos para el festival de arte */
-        .festival-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .festival-form {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        .artworks-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .artwork-item {
-            flex: 1 1 300px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .artwork-item h3 {
-            margin-top: 0;
-            color: #1a73e8;
-        }
-        .artwork-item .likes {
-            font-weight: bold;
-            color: #f5c518;
-        }
-    </style>
-</head>
-<body>
-    <div class="container festival-container">
-        <h1>Festival de Arte en Kudos</h1>
-        <p>Explora y comparte obras de arte multidimensionales.</p>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="notification {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <!-- Formulario para Contribuir -->
-        <section class="festival-form">
-            <h2>Contribuir al Festival</h2>
-            <form method="post" action="{% url 'art_festival' %}">
-                {% csrf_token %}
-                <label for="content">Obra de Arte</label>
-                <textarea name="content" id="content" placeholder="Describe tu obra de arte..." required rows="5" class="form-control"></textarea>
-
-                <label for="art_type">Tipo de Arte</label>
-                <select name="art_type" id="art_type" class="form-control" required>
-                    {% for type in art_types %}
-                        <option value="{{ type }}">{{ type }}</option>
-                    {% endfor %}
-                </select>
-
-                <label>Ubicación (Opcional)</label>
-                <div class="location-inputs">
-                    <input type="checkbox" name="use_current_location" id="use_current_location" checked>
-                    <label for="use_current_location">Usar mi ubicación actual</label>
-                    <div id="manual-location" style="display: none;">
-                        <input type="number" name="latitude" id="latitude" placeholder="Latitud" step="0.0001" value="41.9028" class="form-control">
-                        <input type="number" name="longitude" id="longitude" placeholder="Longitud" step="0.0001" value="12.4964" class="form-control">
-                    </div>
-                </div>
-
-                <button type="submit" name="action" value="contribute" class="btn">Agregar Obra</button>
-            </form>
-        </section>
-
-        <!-- Lista de Obras de Arte -->
-        <section class="artworks-list">
-            {% if artworks %}
-                {% for artwork in artworks %}
-                    <div class="artwork-item">
-                        <h3>{{ artwork.contenido|truncatechars:50 }}</h3>
-                        <p><strong>Autor:</strong> {{ artwork.usuario.alias }}</p>
-                        <p><strong>Tipo:</strong> {{ artwork.parameters.art_type }}</p>
-                        <p><strong>Fecha:</strong> {{ artwork.fecha|date:"Y-m-d" }}</p>
-                        <p><strong>Likes:</strong> <span class="likes">{{ artwork.likes.count }}</span></p>
-                        <button class="action-btn" data-action="like" data-target="{{ artwork.uid }}">
-                            Like
-                        </button>
-                        <a href="{% url 'vr_view' artwork.uid %}" class="btn">Ver en VR</a>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p>No hay obras de arte en el festival en este momento.</p>
-            {% endif %}
-        </section>
-
-        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
-    </div>
-
-    <script src="{% static 'js/scripts.js' %}"></script>
-    <script>
-        // Mostrar/ocultar campos de ubicación manual
-        const useCurrentCheckbox = document.getElementById('use_current_location');
-        const manualLocation = document.getElementById('manual-location');
-        useCurrentCheckbox.addEventListener('change', function() {
-            manualLocation.style.display = this.checked ? 'none' : 'block';
-        });
-
-        // Manejar "Likes"
-        document.querySelectorAll('.action-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const action = button.dataset.action;
-                const targetId = button.dataset.target;
-
-                if (action === 'like') {
-                    fetch(`/api/like/${targetId}/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCSRFToken()
-                        },
-                        body: JSON.stringify({ action: 'toggle' })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const isLiked = data.is_liked;
-                            button.textContent = isLiked ? 'Unlike' : 'Like';
-                            button.previousElementSibling.querySelector('.likes').textContent = data.likes_count;
-                            showNotification(isLiked ? '¡Like agregado!' : 'Like removido', 'success');
-                        } else {
-                            showNotification('Error al procesar el like', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showNotification('Error de conexión', 'error');
-                    });
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,128 +1,17 @@
-<!-- kudos_app/templates/space_exploration.html -->
-
-```html
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Exploración Espacial - Kudos</title>
-    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
-    <script src="{% static 'js/leaflet-src.js' %}"></script>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
-        h1, h2 { text-align: center; color: #333; }
-        #space-map { height: 400px; margin: 20px 0; border: 2px solid #ccc; }
-        .space-container { max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
-        .section { margin: 20px 0; }
-        ul { list-style-type: none; padding: 0; }
-        li { padding: 10px 0; border-bottom: 1px solid #ddd; }
-        form { margin: 10px 0; }
-        input, select { padding: 8px; margin: 5px 0; width: 100%; }
-        button { padding: 8px 16px; background-color: #FFD700; border: none; cursor: pointer; border-radius: 4px; }
-        button:hover { background-color: #FFC107; }
-        a { color: #007bff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        .progress { display: flex; justify-content: space-around; margin: 20px 0; }
-        .progress-box { background-color: #f9f9f9; padding: 15px; border-radius: 5px; text-align: center; }
-        .space-simulation { margin: 20px 0; border: 1px solid #ddd; padding: 10px; }
-    </style>
-</head>
-<body>
-    <h1>Exploración Espacial - Kudos</h1>
-
-    <div class="space-container">
-        <!-- Progreso del Usuario -->
-        <div class="section progress">
-            <div class="progress-box">
-                <h3>Cápsulas Espaciales Completadas</h3>
-                <p>{{ completed_space_capsules }}</p>
-            </div>
-            <div class="progress-box">
-                <h3>Insignias Espaciales</h3>
-                <p>{{ badges.count }}</p>
-            </div>
+{% extends 'base.html' %}
+{% block title %}🚀 Exploración espacial – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🚀</div>
+        <div>
+            <h1>🚀 Exploración espacial</h1>
+            <p class="muted">Cápsulas relacionadas con el cosmos.</p>
         </div>
+    </header>
+    
+<p class="muted">Crea cápsulas con ubicaciones cósmicas y compártelas con la humanidad.</p>
+<a href="{% url 'create_capsule' %}" class="btn btn-gold">+ Cápsula cósmica</a>
 
-        <!-- Insignias -->
-        <div class="section">
-            <h2>Tus Insignias Espaciales</h2>
-            {% if badges %}
-                <ul>
-                    {% for badge in badges %}
-                        <li>{{ badge.name }}: {{ badge.description }} ({{ badge.timestamp|date:"Y-m-d" }})</li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>No tienes insignias espaciales aún. ¡Explora el espacio!</p>
-            {% endif %}
-        </div>
-
-        <!-- Simulación Espacial -->
-        <div class="section space-simulation">
-            <h2>Simulación Espacial en AR/VR</h2>
-            {{ space_scene|safe }}
-        </div>
-
-        <!-- Cápsulas Espaciales -->
-        <div class="section">
-            <h2>Cápsulas Espaciales</h2>
-            <div id="space-map"></div>
-            {% if space_capsules %}
-                <ul>
-                    {% for capsule in space_capsules %}
-                        <li>
-                            {{ capsule.contenido }} (Año: {{ capsule.fecha.year }})
-                            <a href="{% url 'ar_view' capsule.uid %}">Ver en AR</a> |
-                            <a href="{% url 'vr_view' capsule.uid %}">Ver en VR</a>
-                            <form method="POST" style="display: inline;">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="complete_capsule">
-                                <input type="hidden" name="capsule_uid" value="{{ capsule.uid }}">
-                                <button type="submit">Completar</button>
-                            </form>
-                            <form method="POST" style="display: inline;">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="list_market">
-                                <input type="hidden" name="capsule_uid" value="{{ capsule.uid }}">
-                                <input type="number" name="price" min="0" max="1000" step="0.01" placeholder="Precio (KMT)" required>
-                                <button type="submit">Listar en Mercado</button>
-                            </form>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>No hay cápsulas espaciales disponibles.</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <script>
-        // Inicializar mapa con Leaflet
-        var map = L.map('space-map').setView([0, 0], 2);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            minZoom: 0,
-            maxZoom: 20
-        }).addTo(map);
-
-        var capsuleLayer = L.geoJSON({{ map_data|safe }}, {
-            style: function(feature) {
-                return { color: "#FFD700", weight: 2 };
-            },
-            onEachFeature: function(feature, layer) {
-                layer.bindPopup(
-                    `<b>${feature.properties.description}</b><br>
-                    Modo: ${feature.properties.mode}<br>
-                    Temas: ${feature.properties.themes.join(', ')}`
-                );
-            }
-        }).addTo(map);
-
-        if (capsuleLayer.getBounds().isValid()) {
-            map.fitBounds(capsuleLayer.getBounds());
-        }
-    </script>
-</body>
-</html>
-```
+</div>
+{% endblock %}

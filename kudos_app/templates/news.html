@@ -1,44 +1,20 @@
-# kudos_app/views/news.py
-from django.shortcuts import render
-from kudos_app.models import ExternalData, Capsule, SettingsConfig
-from kudos_app.utils.data_utils import fetch_and_store_external_data
-from datetime import datetime, timedelta
+{% extends 'base.html' %}
+{% block title %}📰 Noticias del ecosistema – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">📰</div>
+        <div>
+            <h1>📰 Noticias del ecosistema</h1>
+            <p class="muted">Lo que está pasando en Kudos.</p>
+        </div>
+    </header>
+    
+<div class="cards-grid">
+<article class="capsule-card"><h3>Lanzamiento de la Fase Vault 🌱</h3><p class="muted">Hoy</p><p>El almacén multidimensional está activo: sube tus primeras cápsulas.</p></article>
+<article class="capsule-card"><h3>Comité de Sabios convocado 🗳️</h3><p class="muted">Esta semana</p><p>Las primeras propuestas globales esperan tu voto.</p></article>
+<article class="capsule-card"><h3>Mapa global desbloqueado 🌍</h3><p class="muted">Reciente</p><p>Ya puedes geolocalizar tus cápsulas en el mapa interactivo.</p></article>
+</div>
 
-def news(request):
-    config = SettingsConfig.objects.get_or_create(key="news_settings")[0]
-    api_key = config.parameters.get("news_api_key", "TU_API_KEY")  # Configurar en producción
-    categories = config.parameters.get("news_categories", ["Tecnología", "Ciencia", "Cultura", "Salud"])
-
-    category = request.GET.get('category', '')
-    time_range = int(request.GET.get('time_range', 30))
-
-    # Obtener noticias de ExternalData (simulado con NewsAPI)
-    articles = ExternalData.objects.filter(source="NewsAPI")
-    if category:
-        articles = articles.filter(category=category)
-    if time_range:
-        articles = articles.filter(timestamp__gte=datetime.now() - timedelta(days=time_range))
-
-    # Vincular cápsulas relacionadas
-    for article in articles:
-        content = article.content.get('title', '') + ' ' + article.content.get('description', '')
-        related_capsules = Capsule.objects.filter(
-            contenido__icontains=content.split()[0],  # Búsqueda simple por palabra clave
-            privacy='publico'
-        )[:3]
-        article.related_capsules = related_capsules
-
-    # Actualizar noticias si necesario (ejemplo)
-    if not articles.exists() and api_key != "TU_API_KEY":
-        fetch_and_store_external_data(
-            source_name="NewsAPI",
-            url=f"https://newsapi.org/v2/top-headlines?apiKey={api_key}&country=us",
-            category="General"
-        )
-
-    return render(request, 'news.html', {
-        'articles': articles,
-        'categories': categories,
-        'category': category,
-        'time_range': time_range
-    })
+</div>
+{% endblock %}

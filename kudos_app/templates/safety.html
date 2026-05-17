@@ -1,143 +1,21 @@
-<!-- kudos_app/templates/safety.html -->
+{% extends 'base.html' %}
+{% block title %}🛡️ Seguridad y privacidad – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🛡️</div>
+        <div>
+            <h1>🛡️ Seguridad y privacidad</h1>
+            <p class="muted">Tu legado, tu control.</p>
+        </div>
+    </header>
+    
+<ul class="feature-list">
+<li>🔒 Tus cápsulas privadas solo son visibles para ti.</li>
+<li>📤 Puedes exportar tus datos cuando quieras.</li>
+<li>🛑 Puedes borrar tus cápsulas en cualquier momento.</li>
+<li>🗳️ Las decisiones de moderación son colectivas.</li>
+</ul>
 
-{% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seguridad - Kudos</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}">
-    <style>
-        /* Estilos específicos para seguridad */
-        #map {
-            height: 400px;
-            width: 100%;
-            margin-bottom: 20px;
-            border-radius: 8px;
-        }
-        .alerts-table {
-            width: 100%;
-        }
-        .alert-row {
-            transition: background-color 0.3s ease;
-        }
-        .alert-row.active {
-            background-color: #ffe6e6; /* Fondo rojo claro para alertas activas */
-        }
-        .filter-form {
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Seguridad en Kudos</h1>
-        <p>Monitorea alertas y mantente seguro en tu entorno.</p>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="notification {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <!-- Filtros -->
-        <section class="filter-form">
-            <h2>Filtros</h2>
-            <form method="get" action="{% url 'safety' %}">
-                <label for="severity">Severidad</label>
-                <select name="severity" id="severity" class="form-control">
-                    <option value="">Todas</option>
-                    <option value="alta" {% if severity == 'alta' %}selected{% endif %}>Alta</option>
-                    <option value="media" {% if severity == 'media' %}selected{% endif %}>Media</option>
-                    <option value="baja" {% if severity == 'baja' %}selected{% endif %}>Baja</option>
-                </select>
-
-                <label for="radius">Radio de Búsqueda (m)</label>
-                <input type="number" name="radius" id="radius" value="{{ radius|default:5000 }}" min="100" step="100" class="form-control">
-
-                <button type="submit" class="btn">Filtrar</button>
-            </form>
-        </section>
-
-        <!-- Mapa de Alertas -->
-        <section>
-            <h2>Mapa de Alertas</h2>
-            <div id="map"></div>
-        </section>
-
-        <!-- Lista de Alertas -->
-        <section>
-            <h2>Tus Alertas</h2>
-            {% if alerts %}
-                <table class="alerts-table">
-                    <tr>
-                        <th>Mensaje</th>
-                        <th>Tipo</th>
-                        <th>Severidad</th>
-                        <th>Fecha</th>
-                        <th>Ubicación</th>
-                        <th>Estado</th>
-                    </tr>
-                    {% for alert in alerts %}
-                        <tr class="alert-row {% if alert.status == 'activa' %}active{% endif %}">
-                            <td>{{ alert.message|truncatechars:50 }}</td>
-                            <td>{{ alert.type }}</td>
-                            <td>{{ alert.severity|capfirst }}</td>
-                            <td>{{ alert.timestamp|date:"Y-m-d H:i" }}</td>
-                            <td>{% if alert.location %}{{ alert.location.y }}, {{ alert.location.x }}{% else %}N/A{% endif %}</td>
-                            <td>{{ alert.status|capfirst }}</td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            {% else %}
-                <p>No hay alertas en el rango seleccionado.</p>
-            {% endif %}
-        </section>
-
-        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
-    </div>
-
-    <script src="{% static 'js/leaflet.js' %}"></script>
-    <script src="{% static 'js/scripts.js' %}"></script>
-    <script>
-        // Inicializar el mapa con Leaflet
-        const map = L.map('map').setView([{% if user.ubicacion %}{{ user.ubicacion.y }}, {{ user.ubicacion.x }}{% else %}41.9028, 12.4964{% endif %}], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        // Agregar marcador de la ubicación del usuario
-        {% if user.ubicacion %}
-            L.marker([{{ user.ubicacion.y }}, {{ user.ubicacion.x }}]).addTo(map)
-                .bindPopup('Tu ubicación').openPopup();
-        {% endif %}
-
-        // Agregar marcadores para alertas
-        const alerts = [
-            {% for alert in alerts %}
-                {% if alert.location %}
-                    {
-                        lat: {{ alert.location.y }},
-                        lon: {{ alert.location.x }},
-                        message: "{{ alert.message|truncatechars:50 }}",
-                        type: "{{ alert.type }}",
-                        severity: "{{ alert.severity }}"
-                    },
-                {% endif %}
-            {% endfor %}
-        ];
-        alerts.forEach(alert => {
-            L.marker([alert.lat, alert.lon]).addTo(map)
-                .bindPopup(`<b>${alert.message}</b><br>Tipo: ${alert.type}<br>Severidad: ${alert.severity}`);
-        });
-
-        // Ajustar el mapa para mostrar todos los marcadores
-        if (alerts.length > 0) {
-            const group = new L.featureGroup(alerts.map(a => L.marker([a.lat, a.lon])));
-            map.fitBounds(group.getBounds().pad(0.1));
-        }
-    </script>
-</body>
-</html>
+</div>
+{% endblock %}

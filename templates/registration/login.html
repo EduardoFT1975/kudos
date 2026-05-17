@@ -1,22 +1,24 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Iniciar Sesión - Kudos</title>
-</head>
-<body>
-    <h1>Iniciar Sesión</h1>
-    {% if messages %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    {% endif %}
+{% extends 'base.html' %}
+
+{% block title %}Entrar – Kudos{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <h1>Iniciar sesión</h1>
     <form method="post">
         {% csrf_token %}
-        <p><label>UID:</label><input type="text" name="username" required></p>
-        <p><label>Contraseña:</label><input type="password" name="password" required></p>
-        <button type="submit">Iniciar Sesión</button>
+        {% if form.errors %}
+        <div class="message message-error">UID o contraseña incorrectos.</div>
+        {% endif %}
+        <label>UID
+            <input type="text" name="username" required autofocus>
+        </label>
+        <label>Contraseña
+            <input type="password" name="password" required>
+        </label>
+        <button type="submit" class="btn btn-gold">Entrar</button>
+        <input type="hidden" name="next" value="{{ next }}">
     </form>
-    <a href="{% url 'control_panel' %}">Volver al Panel</a>
-</body>
-</html>
+    <p class="muted center">¿No tienes cuenta? <a href="{% url 'register' %}">Crea una</a>.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}Aprendizaje – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+<header class="personal-header">
+    <h1>📚 Plan de aprendizaje</h1>
+    <p class="muted">Libros, cursos, papers, vídeos.</p>
+</header>
+
+<nav class="personal-tabs">
+    <a href="{% url 'personal_dashboard' %}">📊 Resumen</a>
+    <a href="{% url 'personal_journal' %}">📔 Diario</a>
+    <a href="{% url 'personal_learning' %}" class="active">📚 Aprendizaje</a>
+    <a href="{% url 'personal_health' %}">💪 Salud</a>
+    <a href="{% url 'personal_crypto' %}">🪙 Cripto</a>
+    <a href="{% url 'assistant_characters' %}">🎭 Consejero</a>
+</nav>
+
+<details class="card">
+    <summary class="btn btn-gold">+ Añadir item al plan</summary>
+    <form method="post" class="form-stacked">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add">
+        <div class="form-row">
+            <label>Tipo<select name="type">{% for c, l in types %}<option value="{{ c }}">{{ l }}</option>{% endfor %}</select></label>
+            <label>Prioridad<select name="priority"><option value="1">Alta</option><option value="2" selected>Media</option><option value="3">Baja</option></select></label>
+        </div>
+        <label>Título<input type="text" name="title" required></label>
+        <label>Autor<input type="text" name="author"></label>
+        <label>URL (opcional)<input type="url" name="url"></label>
+        <label>Notas<textarea name="notes" rows="2"></textarea></label>
+        <button class="btn btn-gold">Añadir</button>
+    </form>
+</details>
+
+<h2>📖 En curso ({{ in_progress|length }})</h2>
+<div class="cards-grid">
+{% for it in in_progress %}
+<article class="card learn-card">
+    <span class="learn-type">{{ it.get_type_display }}</span>
+    <h3>{{ it.title }}</h3>
+    <p class="muted">{{ it.author }}</p>
+    <form method="post" class="progress-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_progress">
+        <input type="hidden" name="item_id" value="{{ it.id }}">
+        <input type="hidden" name="status" value="en_curso">
+        <input type="range" name="progress" min="0" max="100" value="{{ it.progress_percent }}" oninput="this.nextElementSibling.textContent=this.value+'%'">
+        <span>{{ it.progress_percent }}%</span>
+        <button class="btn btn-ghost">Actualizar</button>
+    </form>
+</article>
+{% empty %}<p class="muted">Sin lecturas activas.</p>{% endfor %}
+</div>
+
+<h2>📋 Por leer ({{ to_read|length }})</h2>
+<div class="cards-grid">
+{% for it in to_read %}
+<article class="card learn-card priority-{{ it.priority }}">
+    <span class="learn-type">{{ it.get_type_display }}</span>
+    <h3>{{ it.title }}</h3>
+    <p class="muted">{{ it.author }}</p>
+    {% if it.notes %}<p>{{ it.notes|truncatechars:120 }}</p>{% endif %}
+    <form method="post" style="margin-top:8px">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_progress">
+        <input type="hidden" name="item_id" value="{{ it.id }}">
+        <input type="hidden" name="status" value="en_curso">
+        <input type="hidden" name="progress" value="1">
+        <button class="btn btn-ghost">Empezar</button>
+    </form>
+</article>
+{% endfor %}
+</div>
+
+{% if done %}
+<h2>✅ Completados</h2>
+<div class="cards-grid">
+{% for it in done %}<article class="card learn-card done"><h3>{{ it.title }}</h3><small>{{ it.finished|date:"M Y" }}</small></article>{% endfor %}
+</div>
+{% endif %}
+</div>
+
+<style>
+.personal-header { background: linear-gradient(135deg, #7C3AED, #1E3A8A); color: white; padding: 28px; border-radius: var(--radius); margin-bottom: 20px; }
+.personal-header h1 { color: white; }
+.personal-header .muted { color: rgba(255,255,255,0.85); }
+.personal-tabs { display: flex; gap: 4px; flex-wrap: wrap; padding: 4px; background: var(--surface-2); border-radius: var(--radius); margin-bottom: 20px; }
+.personal-tabs a { padding: 10px 16px; border-radius: var(--radius-sm); color: var(--text); font-weight: 600; }
+.personal-tabs a.active { background: var(--primary); color: white; }
+.card { background: var(--surface); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 12px; }
+.learn-card { border-left: 4px solid var(--border); }
+.learn-card.priority-1 { border-left-color: var(--gold); }
+.learn-card.done { opacity: 0.7; }
+.learn-type { background: var(--surface-2); color: var(--primary); padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; }
+.progress-form { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.progress-form input[type=range] { flex: 1; }
+</style>
+{% endblock %}

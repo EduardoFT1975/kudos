@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel del Fundador – Kudos{% endblock %}
+
+{% block content %}
+<div class="container">
+
+<div class="founder-header">
+    <div>
+        <span class="founder-badge">⭐ FUNDADOR</span>
+        <h1>Panel de control privado</h1>
+        <p class="muted">Hola {{ user.alias }} · {{ user.role|title }} · Lv {{ user.level }}</p>
+    </div>
+</div>
+
+<nav class="founder-tabs">
+    <a href="{% url 'founder_panel' %}" class="active">📊 Pulso</a>
+    <a href="{% url 'founder_organization' %}">🏛 Organigrama</a>
+    <a href="{% url 'founder_strategic' %}">🎯 Estrategia</a>
+    <a href="{% url 'founder_tactical' %}">⚙ Táctica</a>
+    <a href="{% url 'founder_financial' %}">💰 Finanzas</a>
+    <a href="{% url 'personal_dashboard' %}">🌿 Mi vida</a>
+    <a href="{% url 'assistant_characters' %}">🎭 Consejeros</a>
+</nav>
+
+<style>
+.founder-tabs { display: flex; gap: 4px; flex-wrap: wrap; padding: 4px; background: var(--surface-2); border-radius: var(--radius); margin-bottom: 24px; }
+.founder-tabs a { padding: 10px 18px; border-radius: var(--radius-sm); color: var(--text); font-weight: 600; }
+.founder-tabs a.active { background: var(--primary); color: white; }
+.founder-tabs a:hover:not(.active) { background: var(--surface); }
+</style>
+
+<!-- ============== STATS GLOBALES ============== -->
+<h2>📊 Pulso del ecosistema</h2>
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-num">{{ totals.total_capsules }}</div>
+        <div class="stat-lbl">Cápsulas totales</div>
+        <small>+{{ capsules_day }} hoy</small>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ totals.total_users }}</div>
+        <div class="stat-lbl">Usuarios</div>
+        <small>+{{ users_day }} hoy · +{{ users_week }} sem</small>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ totals.total_proposals }}</div>
+        <div class="stat-lbl">Propuestas</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ official_capsules }}</div>
+        <div class="stat-lbl">Cápsulas oficiales</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ capsules_week }}</div>
+        <div class="stat-lbl">Nuevas (7d)</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-num">{{ totals.total_spaces }}</div>
+        <div class="stat-lbl">Espacios sociales</div>
+    </div>
+</div>
+
+<!-- ============== ACCIONES RÁPIDAS ============== -->
+<h2>⚡ Acciones rápidas</h2>
+<div class="founder-actions">
+    <form method="post" class="action-card">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="run_daily_tasks">
+        <h3>🔄 Ejecutar tareas diarias</h3>
+        <p class="muted">Calcula tendencias, otorga insignias automáticas, limpia notificaciones.</p>
+        <button type="submit" class="btn btn-gold">Ejecutar ahora</button>
+    </form>
+
+    <form method="post" class="action-card">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="import_official">
+        <h3>📚 Importar contenido oficial</h3>
+        <p class="muted">Cápsulas de sabiduría clásica, UNESCO, ciencia y arte (dominio público).</p>
+        <button type="submit" class="btn btn-gold">Importar</button>
+    </form>
+
+    <form method="post" class="action-card">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="import_massive">
+        <h3>🌍 IMPORTACIÓN MASIVA</h3>
+        <p class="muted">+700 cápsulas: UNESCO completo, capitales, eventos históricos, citas célebres.</p>
+        <button type="submit" class="btn btn-gold">Importar masivo</button>
+    </form>
+
+    <form method="post" class="action-card">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="import_wikipedia">
+        <h3>📖 Importar Wikipedia</h3>
+        <p class="muted">Trae 100 artículos geolocalizados desde la API de Wikipedia. Tarda ~1 min.</p>
+        <button type="submit" class="btn btn-gold">Importar Wikipedia</button>
+    </form>
+
+    <form method="post" class="action-card">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="enrich_sources">
+        <h3>📚 Enriquecer con fuentes abiertas</h3>
+        <p class="muted">Conecta Wikidata (CC0), Met Museum (CC0), NASA (Dominio Público), LibriVox (Audiolibros DP), Internet Archive y Open-Meteo. Tarda ~2-3 min.</p>
+        <button type="submit" class="btn btn-gold">Conectar fuentes</button>
+    </form>
+
+    <form method="post" class="action-card">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="seed_demo">
+        <h3>🌱 Cargar datos demo</h3>
+        <p class="muted">Cuenta de demostración con cápsulas, propuestas y espacios.</p>
+        <button type="submit" class="btn btn-gold">Cargar</button>
+    </form>
+
+    <a href="{% url 'admin:index' %}" class="action-card link-card">
+        <h3>🛠️ Admin de Django</h3>
+        <p class="muted">Acceso completo a todos los datos.</p>
+        <span class="btn btn-ghost">Abrir admin</span>
+    </a>
+</div>
+
+{% if output %}
+<details class="output-block">
+    <summary>📋 Salida de la última acción</summary>
+    <pre>{{ output }}</pre>
+</details>
+{% endif %}
+
+<!-- ============== TOP CÁPSULAS (con moderación) ============== -->
+<h2>🔥 Top cápsulas</h2>
+<table class="founder-table">
+    <thead>
+        <tr><th>Cápsula</th><th>Autor</th><th>Likes</th><th>Vistas</th><th>Acciones</th></tr>
+    </thead>
+    <tbody>
+    {% for c in top_capsules %}
+    <tr>
+        <td><a href="{% url 'capsule_detail' c.uid %}">{{ c.display_title|truncatechars:50 }}</a></td>
+        <td>{{ c.usuario.alias }}</td>
+        <td>❤ {{ c.likes }}</td>
+        <td>👁 {{ c.views }}</td>
+        <td class="mod-actions">
+            <form method="post" action="{% url 'founder_moderate_capsule' c.uid %}" style="display:inline" onsubmit="return confirm('¿Mover a privado?')">
+                {% csrf_token %}
+                <input type="hidden" name="mod_action" value="private">
+                <button class="btn btn-ghost">🔒</button>
+            </form>
+            <form method="post" action="{% url 'founder_moderate_capsule' c.uid %}" style="display:inline" onsubmit="return confirm('¿BORRAR cápsula?')">
+                {% csrf_token %}
+                <input type="hidden" name="mod_action" value="delete">
+                <button class="btn btn-ghost danger">🗑</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- ============== TOP USUARIOS ============== -->
+<h2>🏆 Top usuarios</h2>
+<table class="founder-table">
+    <thead><tr><th>#</th><th>Alias</th><th>Rol</th><th>Nivel</th><th>XP</th></tr></thead>
+    <tbody>
+    {% for u in top_users %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td><a href="{% url 'public_profile' u.alias %}">{{ u.alias }}</a></td>
+        <td>{{ u.get_role_display }}</td>
+        <td>Lv {{ u.level }}</td>
+        <td>{{ u.experience_points }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- ============== PROPUESTAS RECIENTES ============== -->
+<h2>🗳️ Propuestas recientes</h2>
+<div class="cards-grid">
+{% for p in recent_proposals %}
+<article class="capsule-card">
+    <span class="capsule-mode">{{ p.get_status_display }}</span>
+    <h3>{{ p.title|truncatechars:60 }}</h3>
+    <p class="muted">{{ p.user.alias }} · {{ p.timestamp|date:"d/m/Y" }}</p>
+    <div class="capsule-meta">
+        <span>👍 {{ p.votes_for }}</span>
+        <span>👎 {{ p.votes_against }}</span>
+    </div>
+</article>
+{% empty %}
+<p class="muted">Sin propuestas aún.</p>
+{% endfor %}
+</div>
+
+</div>
+
+<style>
+.founder-header { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: white; padding: 32px; border-radius: var(--radius); margin-bottom: 32px; }
+.founder-header h1 { color: white; }
+.founder-header .muted { color: rgba(255,255,255,0.8); }
+.founder-badge { background: var(--gold); color: var(--primary-dark); padding: 4px 12px; border-radius: 999px; font-weight: 800; font-size: 0.85rem; letter-spacing: 1px; }
+.founder-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 32px; }
+.action-card { background: var(--surface); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border-left: 4px solid var(--gold); display: flex; flex-direction: column; gap: 8px; }
+.action-card.link-card { text-decoration: none; color: var(--text); }
+.action-card h3 { margin: 0; }
+.action-card .muted { font-size: 0.88rem; flex: 1; }
+.output-block { background: var(--surface); padding: 16px; border-radius: var(--radius); margin: 24px 0; box-shadow: var(--shadow); }
+.output-block pre { background: #1a1a1a; color: #00ff88; padding: 14px; border-radius: var(--radius-sm); overflow-x: auto; font-size: 0.85rem; }
+.founder-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); margin: 16px 0 32px; }
+.founder-table th, .founder-table td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+.founder-table th { background: var(--surface-2); color: var(--primary); font-weight: 700; }
+.founder-table tr:last-child td { border-bottom: none; }
+.mod-actions { white-space: nowrap; }
+.mod-actions .btn { padding: 4px 10px; font-size: 0.85rem; }
+</style>
+{% endblock %}
+  

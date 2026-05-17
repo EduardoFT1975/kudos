@@ -1,107 +1,23 @@
-<!-- kudos_app/templates/notifications.html -->
+{% extends 'base.html' %}
+{% block title %}🔔 Notificaciones – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🔔</div>
+        <div>
+            <h1>🔔 Notificaciones</h1>
+            <p class="muted">Tu actividad reciente en el ecosistema.</p>
+        </div>
+    </header>
+    
+<div class="notif-list">
+{% for n in notifications %}
+<div class="notif-item priority-{{ n.priority }} {% if n.read %}read{% endif %}">
+<div>{{ n.message }}<small>{{ n.timestamp|date:"d/m/Y H:i" }}</small></div>
+{% if not n.read %}<a href="{% url 'mark_notification_read' n.id %}" class="btn btn-ghost">Marcar leída</a>{% endif %}
+</div>
+{% empty %}<p class="muted">Sin notificaciones.</p>{% endfor %}
+</div>
 
-{% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notificaciones - Kudos</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        /* Estilos específicos para notificaciones */
-        .notifications-table {
-            width: 100%;
-        }
-        .filter-form {
-            margin-bottom: 20px;
-        }
-        .notification-row {
-            transition: background-color 0.3s ease;
-        }
-        .notification-row.read {
-            background-color: #f9f9f9;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Notificaciones</h1>
-        <p>Revisa y gestiona tus notificaciones en Kudos.</p>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="notification {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <!-- Filtros -->
-        <section class="filter-form">
-            <h2>Filtros</h2>
-            <form method="get" action="{% url 'notifications' %}">
-                <label for="priority">Prioridad</label>
-                <select name="priority" id="priority" class="form-control">
-                    <option value="">Todas</option>
-                    <option value="alta" {% if priority == 'alta' %}selected{% endif %}>Alta</option>
-                    <option value="media" {% if priority == 'media' %}selected{% endif %}>Media</option>
-                    <option value="baja" {% if priority == 'baja' %}selected{% endif %}>Baja</option>
-                </select>
-
-                <label for="type">Tipo</label>
-                <select name="type" id="type" class="form-control">
-                    <option value="">Todos</option>
-                    {% for type in notification_types %}
-                        <option value="{{ type }}" {% if type == selected_type %}selected{% endif %}>{{ type }}</option>
-                    {% endfor %}
-                </select>
-
-                <label for="time_range">Rango de Tiempo</label>
-                <select name="time_range" id="time_range" class="form-control">
-                    <option value="7" {% if time_range == 7 %}selected{% endif %}>Última Semana</option>
-                    <option value="30" {% if time_range == 30 %}selected{% endif %}>Último Mes</option>
-                    <option value="90" {% if time_range == 90 %}selected{% endif %}>Últimos 3 Meses</option>
-                </select>
-
-                <button type="submit" class="btn">Filtrar</button>
-            </form>
-        </section>
-
-        <!-- Lista de Notificaciones -->
-        <section>
-            <h2>Tus Notificaciones</h2>
-            {% if notifications %}
-                <table class="notifications-table">
-                    <tr>
-                        <th>Mensaje</th>
-                        <th>Tipo</th>
-                        <th>Prioridad</th>
-                        <th>Fecha</th>
-                        <th>Acción</th>
-                    </tr>
-                    {% for notification in notifications %}
-                        <tr class="notification-row {% if notification.status == 'Leída' %}read{% endif %}">
-                            <td>{{ notification.message }}</td>
-                            <td>{{ notification.type }}</td>
-                            <td>{{ notification.priority|capfirst }}</td>
-                            <td>{{ notification.timestamp|date:"Y-m-d H:i" }}</td>
-                            <td>
-                                {% if notification.status != 'Leída' %}
-                                    <button class="action-btn" data-action="mark-read" data-target="{{ notification.id }}">Marcar como Leída</button>
-                                {% else %}
-                                    <span>Leída</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            {% else %}
-                <p>No tienes notificaciones que coincidan con los filtros seleccionados.</p>
-            {% endif %}
-        </section>
-
-        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
-    </div>
-
-    <script src="{% static 'js/scripts.js' %}"></script>
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block title %}🎯 Mis preferencias · Kudos{% endblock %}
+
+{% block extra_head %}
+<style>
+.pref-shell {
+    background: radial-gradient(800px 500px at 30% 0%, rgba(0,240,255,.06), transparent 70%),
+                linear-gradient(180deg, var(--bg), var(--surface));
+    min-height: calc(100vh - 80px); padding: 30px 20px;
+}
+.pref-form { max-width: 880px; margin: 0 auto; background: var(--surface);
+    padding: 32px 36px; border-radius: 18px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+.pref-form h1 { font-family:'Cormorant Garamond', Georgia, serif; font-size: 2rem; margin: 0 0 6px; }
+.pref-form .muted { margin-bottom: 18px; }
+.pref-form fieldset { border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin: 18px 0; }
+.pref-form legend { color: var(--gold); font-weight: 700; padding: 0 8px; }
+.interests-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.interest-chip {
+    padding: 6px 14px; border-radius: 20px; cursor: pointer;
+    background: var(--surface-2); border: 1px solid var(--border);
+    transition: all .2s; font-size: .9rem;
+}
+.interest-chip.selected { background: var(--gold); color: #000; border-color: var(--gold); font-weight: 700; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+.row > * { flex: 1; min-width: 200px; }
+label { display: block; margin: 10px 0 4px; font-weight: 600; color: var(--text); font-size: .9rem; }
+select, input[type=text], input[type=number] {
+    width: 100%; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text);
+}
+.checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.checks label { display: flex; gap: 8px; align-items: center; font-weight: 400; }
+.btn-save {
+    padding: 12px 28px; border-radius: 12px; cursor: pointer;
+    background: linear-gradient(135deg, var(--gold), #ff00d4);
+    color: #000; border: none; font-weight: 700; font-size: 1rem;
+    margin-top: 16px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pref-shell">
+<form method="post" class="pref-form">{% csrf_token %}
+    <h1>🎯 Mis preferencias</h1>
+    <p class="muted">Kudos Mind usa esto para construir tu feed y disparar las notificaciones del Espejo de la Verdad.</p>
+
+    <fieldset>
+        <legend>Intereses (Algoritmo R)</legend>
+        <p class="muted" style="font-size:.9rem;">Pulsa los temas que te interesan. La IA priorizará cápsulas de esos temas.</p>
+        <div class="interests-grid" id="grid">
+            {% for t in all_interests %}
+                <span class="interest-chip {% if t in pref.interests %}selected{% endif %}" data-tag="{{ t }}">{{ t }}</span>
+            {% endfor %}
+        </div>
+        <input type="hidden" name="interests" id="interests-input" value="{{ pref.interests|join:',' }}">
+    </fieldset>
+
+    <fieldset>
+        <legend>Capa de realidad y era</legend>
+        <div class="row">
+            <div>
+                <label>Capa preferida (5D)</label>
+                <select name="preferred_dimension">
+                    <option value="" {% if not pref.preferred_dimension %}selected{% endif %}>Todas</option>
+                    <option value="fisica" {% if pref.preferred_dimension == 'fisica' %}selected{% endif %}>🌍 Física</option>
+                    <option value="emocional" {% if pref.preferred_dimension == 'emocional' %}selected{% endif %}>💗 Emocional</option>
+                    <option value="cognitiva" {% if pref.preferred_dimension == 'cognitiva' %}selected{% endif %}>🧠 Cognitiva</option>
+                    <option value="social" {% if pref.preferred_dimension == 'social' %}selected{% endif %}>👥 Social</option>
+                    <option value="espiritual" {% if pref.preferred_dimension == 'espiritual' %}selected{% endif %}>✨ Espiritual</option>
+                </select>
+            </div>
+            <div>
+                <label>Era preferida (4D)</label>
+                <select name="preferred_era">
+                    <option value="">Todas</option>
+                    <option value="antigua" {% if pref.preferred_era == 'antigua' %}selected{% endif %}>Antigua</option>
+                    <option value="media" {% if pref.preferred_era == 'media' %}selected{% endif %}>Media</option>
+                    <option value="moderna" {% if pref.preferred_era == 'moderna' %}selected{% endif %}>Moderna</option>
+                    <option value="contemporanea" {% if pref.preferred_era == 'contemporanea' %}selected{% endif %}>Contemporánea</option>
+                    <option value="actual" {% if pref.preferred_era == 'actual' %}selected{% endif %}>Actual</option>
+                    <option value="futura" {% if pref.preferred_era == 'futura' %}selected{% endif %}>Futura</option>
+                </select>
+            </div>
+            <div>
+                <label>Consejero narrador preferido</label>
+                <select name="preferred_voice">
+                    <option value="">Auto (la IA decide)</option>
+                    <option value="aristoteles" {% if pref.preferred_voice == 'aristoteles' %}selected{% endif %}>🏛 Aristóteles · filosofía</option>
+                    <option value="seneca" {% if pref.preferred_voice == 'seneca' %}selected{% endif %}>📜 Séneca · estoicismo</option>
+                    <option value="cleopatra" {% if pref.preferred_voice == 'cleopatra' %}selected{% endif %}>👑 Cleopatra · historia</option>
+                    <option value="newton" {% if pref.preferred_voice == 'newton' %}selected{% endif %}>🔬 Newton · ciencia</option>
+                    <option value="tesla" {% if pref.preferred_voice == 'tesla' %}selected{% endif %}>⚡ Tesla · tecnología</option>
+                    <option value="confucio" {% if pref.preferred_voice == 'confucio' %}selected{% endif %}>🌿 Confucio · sabiduría</option>
+                    <option value="nightingale" {% if pref.preferred_voice == 'nightingale' %}selected{% endif %}>💚 Nightingale · salud</option>
+                </select>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Geofencing y notificaciones (Protocolo de Asistencia Proactiva)</legend>
+        <div class="row">
+            <div>
+                <label>Radio de búsqueda (m)</label>
+                <input type="number" name="notif_radius_m" value="{{ pref.notif_radius_m }}" min="50" max="50000" step="50">
+            </div>
+            <div>
+                <label>Nivel Kudos Mind</label>
+                <select name="intervention_level">
+                    <option value="zen" {% if pref.intervention_level == 'zen' %}selected{% endif %}>🧘 Zen (solo emergencias)</option>
+                    <option value="guide" {% if pref.intervention_level == 'guide' %}selected{% endif %}>🧭 Guía (equilibrado)</option>
+                    <option value="guardian" {% if pref.intervention_level == 'guardian' %}selected{% endif %}>🌿 Guardián (proactivo)</option>
+                </select>
+            </div>
+        </div>
+        <div class="checks" style="margin-top:14px;">
+            <label><input type="checkbox" name="notif_zero" {% if pref.notif_zero %}checked{% endif %}> 🎯 Punto cero (5m) — clip inmersivo</label>
+            <label><input type="checkbox" name="notif_revelation" {% if pref.notif_revelation %}checked{% endif %}> ✨ Revelación (20m) — push web</label>
+            <label><input type="checkbox" name="notif_alert" {% if pref.notif_alert %}checked{% endif %}> 🛰 Alerta (100m) — pre-carga</label>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Mi hogar (Nodo Core de referencia)</legend>
+        <p class="muted" style="font-size:.85rem;">Las recompensas $AXN de tu zona se priorizan a este punto.</p>
+        <div class="row">
+            <div>
+                <label>Latitud</label>
+                <input type="text" name="home_lat" value="{{ pref.home_lat|default:'' }}" placeholder="40.4168">
+            </div>
+            <div>
+                <label>Longitud</label>
+                <input type="text" name="home_lon" value="{{ pref.home_lon|default:'' }}" placeholder="-3.7038">
+            </div>
+        </div>
+    </fieldset>
+
+    <button type="submit" class="btn-save">💾 Guardar preferencias</button>
+</form>
+</div>
+
+<script>
+const grid = document.getElementById('grid');
+const input = document.getElementById('interests-input');
+function syncInput() {
+    const tags = Array.from(grid.querySelectorAll('.selected')).map(c => c.dataset.tag);
+    input.value = tags.join(',');
+}
+grid.addEventListener('click', e => {
+    if (e.target.classList.contains('interest-chip')) {
+        e.target.classList.toggle('selected');
+        syncInput();
+    }
+});
+syncInput();
+</script>
+{% endblock %}

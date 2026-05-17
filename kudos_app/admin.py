@@ -1,84 +1,259 @@
 # kudos_app/admin.py
-
+"""Configuración del panel de administración de Django."""
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import (
-    User, Capsule, Route, POI, Alert, WisdomSpace, PromotionSpace, SocialSpace,
-    SettingsConfig, Notification, Character, ExternalData, ImprovementProposal,
-    Transaction, Feedback, Activity, VirtualOperation, Badge
+from kudos_app.models import (
+    User, Capsule, Review, Like, Activity, VirtualOperation,
+    Badge, Certificate, Proposal, Vote, Notification,
+    SocialSpace, Competition, MoodEntry, SettingsConfig,
+    Department, Role, KPI, Goal, BudgetLine, HistoricalCharacter, StrategicDocument,
+    Habit, HabitLog, JournalEntry, LearningItem, HealthMetric,
+    CryptoWatch, CryptoOperation,
+    AIAgent, AIAction, AIInsight, AIDirective,
+    Follow, DirectMessage, Bookmark, FeedItem,
 )
 
-# Configuración personalizada para el modelo User
+
+@admin.register(AIAgent)
+class AIAgentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'kind', 'is_active', 'runs_total', 'successes', 'failures', 'last_run')
+    list_filter = ('kind', 'is_active')
+
+
+@admin.register(AIAction)
+class AIActionAdmin(admin.ModelAdmin):
+    list_display = ('timestamp', 'agent', 'action', 'level', 'summary')
+    list_filter = ('level', 'agent')
+    search_fields = ('action', 'summary')
+
+
+@admin.register(AIInsight)
+class AIInsightAdmin(admin.ModelAdmin):
+    list_display = ('title', 'kind', 'impact', 'created', 'is_archived')
+    list_filter = ('kind', 'is_archived', 'impact')
+
+
+@admin.register(AIDirective)
+class AIDirectiveAdmin(admin.ModelAdmin):
+    list_display = ('title', 'scope', 'priority', 'is_active', 'created')
+    list_filter = ('scope', 'is_active')
+
+
+admin.site.register(Follow)
+admin.site.register(DirectMessage)
+admin.site.register(Bookmark)
+admin.site.register(FeedItem)
+
+
+@admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ('uid', 'alias', 'email', 'role', 'ubicacion', 'is_staff', 'is_active')
+    list_display = ('uid', 'alias', 'email', 'role', 'level', 'experience_points', 'is_staff', 'is_active')
     list_filter = ('role', 'is_staff', 'is_active')
     search_fields = ('uid', 'alias', 'email')
     fieldsets = (
         (None, {'fields': ('uid', 'alias', 'email', 'password')}),
-        ('Personal Info', {'fields': ('ubicacion', 'notification_distance', 'notification_privacy', 'necesidades')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'role')}),
-        ('Advanced', {'fields': ('parameters', 'variables')}),
+        ('Perfil', {'fields': ('bio', 'avatar', 'latitud', 'longitud', 'privacy', 'dark_mode')}),
+        ('Gamificación', {'fields': ('experience_points', 'level')}),
+        ('Permisos', {'fields': ('is_active', 'is_staff', 'is_superuser', 'role',
+                                 'groups', 'user_permissions')}),
+        ('Datos avanzados', {'fields': ('necesidades', 'parameters', 'variables', 'notification_distance')}),
     )
     add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('uid', 'alias', 'email', 'password1', 'password2', 'role', 'is_staff', 'is_active')}
-        ),
+        (None, {'classes': ('wide',),
+                'fields': ('uid', 'alias', 'email', 'password1', 'password2',
+                           'role', 'is_staff', 'is_active')}),
     )
     ordering = ('alias',)
+    filter_horizontal = ('groups', 'user_permissions')
 
-# Configuración personalizada para Capsule
+
+@admin.register(Capsule)
 class CapsuleAdmin(admin.ModelAdmin):
-    list_display = ('uid', 'usuario', 'contenido_short', 'ubicacion', 'fecha', 'privacy', 'price')
-    list_filter = ('privacy', 'modo', 'time_scale')
-    search_fields = ('uid', 'contenido', 'usuario__alias')
-    readonly_fields = ('uid',)
+    list_display = ('display_title', 'usuario', 'modo', 'fecha', 'privacy', 'likes', 'views')
+    list_filter = ('modo', 'privacy', 'time_scale')
+    search_fields = ('uid', 'titulo', 'contenido', 'lugar')
+    readonly_fields = ('uid', 'timestamp', 'likes', 'views')
     fieldsets = (
-        (None, {'fields': ('uid', 'usuario', 'contenido', 'ubicacion')}),
-        ('Details', {'fields': ('modo', 'fecha', 'privacy', 'time_scale', 'price', 'temas')}),
-        ('Advanced', {'fields': ('parameters', 'variables')}),
+        (None, {'fields': ('uid', 'usuario', 'titulo', 'contenido')}),
+        ('Multidimensional', {'fields': ('modo', 'fecha', 'time_scale', 'temas',
+                                         'lugar', 'latitud', 'longitud')}),
+        ('Privacidad y métricas', {'fields': ('privacy', 'likes', 'views', 'timestamp')}),
+        ('Multimedia', {'fields': ('image', 'audio', 'video')}),
+        ('Avanzado', {'fields': ('parameters', 'variables', 'source')}),
     )
 
-    def contenido_short(self, obj):
-        return obj.contenido[:50] + '...' if len(obj.contenido) > 50 else obj.contenido
-    contenido_short.short_description = 'Contenido'
 
-# Configuración personalizada para Notification
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('user', 'capsule', 'rating', 'timestamp')
+    list_filter = ('rating',)
+
+
+@admin.register(Like)
+class LikeAdmin(admin.ModelAdmin):
+    list_display = ('user', 'capsule', 'timestamp')
+
+
+@admin.register(Activity)
+class ActivityAdmin(admin.ModelAdmin):
+    list_display = ('uid', 'usuario', 'descripcion', 'timestamp')
+    search_fields = ('descripcion', 'usuario__alias')
+
+
+@admin.register(VirtualOperation)
+class VirtualOperationAdmin(admin.ModelAdmin):
+    list_display = ('title', 'user', 'operation_type', 'price', 'is_active', 'timestamp')
+    list_filter = ('operation_type', 'is_active')
+    search_fields = ('title', 'description', 'city')
+
+
+@admin.register(Badge)
+class BadgeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'user', 'icon', 'date_awarded')
+    search_fields = ('name', 'user__alias')
+
+
+@admin.register(Certificate)
+class CertificateAdmin(admin.ModelAdmin):
+    list_display = ('user', 'plan', 'date_issued')
+
+
+@admin.register(Proposal)
+class ProposalAdmin(admin.ModelAdmin):
+    list_display = ('title', 'user', 'status', 'votes_for', 'votes_against', 'timestamp')
+    list_filter = ('status',)
+    search_fields = ('title', 'description')
+
+
+@admin.register(Vote)
+class VoteAdmin(admin.ModelAdmin):
+    list_display = ('proposal', 'user', 'in_favor', 'timestamp')
+
+
+@admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'type', 'message_short', 'priority', 'timestamp', 'status')
-    list_filter = ('type', 'priority', 'status')
-    search_fields = ('user__alias', 'message')
-    fieldsets = (
-        (None, {'fields': ('user', 'type', 'message')}),
-        ('Details', {'fields': ('priority', 'location', 'timestamp', 'status')}),
-        ('Advanced', {'fields': ('parameters', 'variables')}),
-    )
+    list_display = ('user', 'type', 'priority', 'read', 'timestamp')
+    list_filter = ('priority', 'read', 'type')
 
-    def message_short(self, obj):
-        return obj.message[:50] + '...' if len(obj.message) > 50 else obj.message
-    message_short.short_description = 'Mensaje'
 
-# Registro de modelos en el admin
-admin.site.register(User, UserAdmin)
-admin.site.register(Capsule, CapsuleAdmin)
-admin.site.register(Route)
-admin.site.register(POI)
-admin.site.register(Alert)
-admin.site.register(WisdomSpace)
-admin.site.register(PromotionSpace)
-admin.site.register(SocialSpace)
-admin.site.register(SettingsConfig)
-admin.site.register(Notification, NotificationAdmin)
-admin.site.register(Character)
-admin.site.register(ExternalData)
-admin.site.register(ImprovementProposal)
-admin.site.register(Transaction)  # Corregido de Transactions a Transaction
-admin.site.register(Feedback)
-admin.site.register(Activity)
-admin.site.register(VirtualOperation)
-admin.site.register(Badge)
+@admin.register(SocialSpace)
+class SocialSpaceAdmin(admin.ModelAdmin):
+    list_display = ('name', 'creator', 'icon', 'timestamp')
+    search_fields = ('name', 'description')
 
-# Personalización del sitio de administración
+
+@admin.register(Competition)
+class CompetitionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'creator', 'sport', 'start_date', 'is_virtual', 'entry_price')
+    list_filter = ('sport', 'is_virtual')
+
+
+@admin.register(MoodEntry)
+class MoodEntryAdmin(admin.ModelAdmin):
+    list_display = ('user', 'mood', 'timestamp')
+    list_filter = ('mood',)
+
+
+@admin.register(SettingsConfig)
+class SettingsConfigAdmin(admin.ModelAdmin):
+    list_display = ('key', 'updated')
+    search_fields = ('key',)
+
+
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ('icon', 'name', 'code', 'head_label', 'is_active', 'order')
+    list_filter = ('is_active',)
+    search_fields = ('name', 'code')
+    list_editable = ('order',)
+
+
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ('title', 'department', 'holder_label', 'is_executive')
+    list_filter = ('department', 'is_executive')
+    search_fields = ('title', 'code')
+
+
+@admin.register(KPI)
+class KPIAdmin(admin.ModelAdmin):
+    list_display = ('icon', 'name', 'department', 'current_value', 'target_value', 'unit', 'last_updated')
+    list_filter = ('department',)
+    search_fields = ('name', 'code')
+
+
+@admin.register(Goal)
+class GoalAdmin(admin.ModelAdmin):
+    list_display = ('title', 'level', 'status', 'progress', 'department', 'end_date')
+    list_filter = ('level', 'status', 'phase', 'department')
+    search_fields = ('title',)
+    list_editable = ('progress', 'status')
+
+
+@admin.register(BudgetLine)
+class BudgetLineAdmin(admin.ModelAdmin):
+    list_display = ('year', 'type', 'category', 'label', 'amount_eur', 'is_recurring')
+    list_filter = ('year', 'type', 'category', 'is_recurring')
+    search_fields = ('label', 'category')
+
+
+@admin.register(HistoricalCharacter)
+class HistoricalCharacterAdmin(admin.ModelAdmin):
+    list_display = ('icon', 'name', 'title', 'theme', 'is_active', 'order')
+    list_filter = ('is_active',)
+    list_editable = ('order',)
+
+
+@admin.register(StrategicDocument)
+class StrategicDocumentAdmin(admin.ModelAdmin):
+    list_display = ('title', 'kind', 'department', 'version', 'last_updated')
+    list_filter = ('kind', 'department')
+    search_fields = ('title', 'code')
+
+
+@admin.register(Habit)
+class HabitAdmin(admin.ModelAdmin):
+    list_display = ('icon', 'name', 'category', 'user', 'streak_days', 'is_active')
+    list_filter = ('category', 'is_active')
+
+
+@admin.register(HabitLog)
+class HabitLogAdmin(admin.ModelAdmin):
+    list_display = ('habit', 'date', 'completed')
+    list_filter = ('completed', 'date')
+
+
+@admin.register(JournalEntry)
+class JournalEntryAdmin(admin.ModelAdmin):
+    list_display = ('date', 'kind', 'user', 'mood')
+    list_filter = ('kind', 'mood')
+    search_fields = ('content',)
+
+
+@admin.register(LearningItem)
+class LearningItemAdmin(admin.ModelAdmin):
+    list_display = ('title', 'type', 'status', 'progress_percent', 'rating', 'user')
+    list_filter = ('type', 'status', 'priority')
+    search_fields = ('title', 'author')
+
+
+@admin.register(HealthMetric)
+class HealthMetricAdmin(admin.ModelAdmin):
+    list_display = ('date', 'metric', 'value', 'user')
+    list_filter = ('metric', 'date')
+
+
+@admin.register(CryptoWatch)
+class CryptoWatchAdmin(admin.ModelAdmin):
+    list_display = ('symbol', 'name', 'user', 'target_buy_eur', 'target_sell_eur', 'is_active')
+
+
+@admin.register(CryptoOperation)
+class CryptoOperationAdmin(admin.ModelAdmin):
+    list_display = ('date', 'type', 'symbol', 'amount', 'total_eur', 'user')
+    list_filter = ('type', 'symbol')
+
+
 admin.site.site_header = "Kudos Administration"
 admin.site.site_title = "Kudos Admin"
-admin.site.index_title = "Welcome to Kudos Management"
+admin.site.index_title = "Panel de Administración Kudos"

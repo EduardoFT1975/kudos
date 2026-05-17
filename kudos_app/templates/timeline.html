@@ -1,39 +1,26 @@
-# kudos_app/views/timeline.py
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from kudos_app.models import Capsule, SettingsConfig
+{% extends 'base.html' %}
+{% block title %}🕰️ Línea temporal – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🕰️</div>
+        <div>
+            <h1>🕰️ Línea temporal</h1>
+            <p class="muted">Cápsulas ordenadas por fecha.</p>
+        </div>
+    </header>
+    
+<div class="timeline">
+{% for c in capsules %}
+<div class="timeline-item">
+<div class="timeline-date">{{ c.fecha|date:"d M Y" }}</div>
+<div class="timeline-content">
+<a href="{% url 'capsule_detail' c.uid %}"><strong>{{ c.display_title }}</strong></a>
+<small>{{ c.usuario.alias }}</small>
+</div>
+</div>
+{% empty %}<p class="muted">Línea temporal vacía.</p>{% endfor %}
+</div>
 
-@login_required
-def timeline(request):
-    config = SettingsConfig.objects.get_or_create(key="timeline_settings")[0]
-    modos = config.parameters.get("modos", ["social", "comercial", "educativo"])
-    temas = config.parameters.get("temas", ["Arte", "Ciencia", "Cultura"])
-
-    source = request.GET.get('source', 'all')
-    selected_modo = request.GET.get('modo', '')
-    selected_temas = request.GET.getlist('temas')
-
-    if source == 'self':
-        capsules = Capsule.objects.filter(usuario=request.user)
-    elif source == 'following':
-        following = request.user.following.all()
-        capsules = Capsule.objects.filter(usuario__in=following)
-    else:
-        following = request.user.following.all()
-        capsules = Capsule.objects.filter(usuario__in=following | Capsule.objects.filter(usuario=request.user))
-
-    if selected_modo:
-        capsules = capsules.filter(modo=selected_modo)
-    if selected_temas:
-        capsules = capsules.filter(temas__overlap=selected_temas)
-
-    capsules = capsules.order_by('-fecha')[:50]
-
-    return render(request, 'timeline.html', {
-        'capsules': capsules,
-        'source': source,
-        'selected_modo': selected_modo,
-        'selected_temas': selected_temas,
-        'modos': modos,
-        'temas': temas
-    })
+</div>
+{% endblock %}

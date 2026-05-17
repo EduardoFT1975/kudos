@@ -1,33 +1,16 @@
-# kudos_app/views/geolocation.py
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from kudos_app.models import Capsule
-from kudos_app.utils import get_point
-from django.contrib.gis.db.models.functions import Distance
+{% extends 'base.html' %}
+{% block title %}📍 Geolocalización – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">📍</div>
+        <div>
+            <h1>📍 Geolocalización</h1>
+            <p class="muted">Tu ubicación importa: ancla tus cápsulas al territorio.</p>
+        </div>
+    </header>
+    
+<p>Cuando crees una cápsula, añade latitud y longitud. Visita el <a href="{% url 'map' %}">mapa</a> para ver el resultado.</p>
 
-@login_required
-def geolocation(request):
-    search_radius = 5000  # Metros
-
-    if request.method == "POST" and request.POST.get("action") == "update_location":
-        latitude = float(request.POST.get("latitude"))
-        longitude = float(request.POST.get("longitude"))
-        request.user.ubicacion = get_point(latitude, longitude)
-        request.user.save()
-        messages.success(request, "Ubicación actualizada exitosamente.")
-
-    nearby_capsules = []
-    if request.user.ubicacion:
-        nearby_capsules = Capsule.objects.filter(
-            privacy='publico',
-            ubicacion__distance_lte=(request.user.ubicacion, search_radius)
-        ).annotate(
-            distance=Distance('ubicacion', request.user.ubicacion)
-        ).order_by('distance')[:10]
-
-    return render(request, 'geolocation.html', {
-        'user': request.user,
-        'nearby_capsules': nearby_capsules,
-        'search_radius': search_radius
-    })
+</div>
+{% endblock %}

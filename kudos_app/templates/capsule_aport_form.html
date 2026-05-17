@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Aportar · {{ capsule.display_title }}{% endblock %}
+{% block extra_head %}
+<style>
+.aport-shell { background: linear-gradient(180deg, var(--bg), var(--surface)); min-height: calc(100vh - 80px); padding: 30px 20px; }
+.aport-form { max-width: 760px; margin: 0 auto; background: var(--surface); padding: 28px 32px; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+.aport-form h1 { font-family:'Cormorant Garamond', Georgia, serif; font-size: 1.8rem; margin: 0 0 6px; }
+.layer-tabs { display: flex; gap: 10px; margin: 16px 0; }
+.layer-tab {
+    flex: 1; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px;
+    cursor: pointer; transition: all .25s; background: var(--surface-2);
+}
+.layer-tab.active { border-color: var(--gold); background: rgba(212,175,55,.1); }
+.layer-tab h3 { margin: 0 0 4px; font-size: 1rem; }
+.layer-tab p { margin: 0; font-size: .85rem; color: var(--text-muted); }
+label { display:block; margin: 12px 0 4px; font-weight: 600; font-size: .9rem; }
+input[type=text], input[type=url], textarea, select {
+    width: 100%; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    font-family: inherit;
+}
+textarea { min-height: 120px; }
+.fact-fields { display: none; padding: 14px; border: 1px dashed rgba(0,240,255,.3); border-radius: 10px; margin-top: 12px; background: rgba(0,240,255,.04); }
+.fact-fields.show { display: block; }
+.btn-submit { padding: 12px 28px; border-radius: 10px; background: linear-gradient(135deg, #00f0ff, var(--gold)); color: #000; font-weight: 700; border: none; cursor: pointer; margin-top: 18px; font-size: 1rem; }
+.note { font-size: .82rem; color: var(--text-muted); margin-top: 6px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="aport-shell">
+<form method="post" class="aport-form">{% csrf_token %}
+    <p><a href="{% url 'capsule_detail' capsule.uid %}">← Volver a la cápsula</a></p>
+    <h1>📚 Aportar a · {{ capsule.display_title }}</h1>
+    <p class="muted">Tu aporte enriquece el Vault. Hay dos capas según el tipo de contribución.</p>
+
+    <div class="layer-tabs">
+        <label class="layer-tab active" id="tab-dialog">
+            <input type="radio" name="layer" value="dialog" checked style="margin-right:6px;">
+            <h3>💬 Diálogo</h3>
+            <p>Opinión, anécdota, reflexión personal. Se publica al instante. No se valida.</p>
+        </label>
+        <label class="layer-tab" id="tab-fact">
+            <input type="radio" name="layer" value="fact" style="margin-right:6px;">
+            <h3>🔬 Hecho</h3>
+            <p>Dato verificable que mejora la cápsula. Pasa por consenso IA → Misioneros → CCO.</p>
+        </label>
+    </div>
+
+    <label>Tu aporte</label>
+    <textarea name="body" required placeholder="Escribe aquí lo que quieres aportar..."></textarea>
+    <p class="note">Mínimo 10 caracteres. Para hechos, cuanto más detalle y fuentes, más posibilidades de validación.</p>
+
+    <label>URL de imagen o vídeo (opcional)</label>
+    <input type="url" name="media_url" placeholder="https://...">
+
+    <div class="fact-fields" id="fact-fields">
+        <strong style="color:#00f0ff;">🔬 Validación 3 capas</strong>
+        <p class="note">Solo aportes verificables (no opiniones). Si propones modificar la cápsula:</p>
+
+        <label>Campo a modificar (opcional)</label>
+        <select name="proposed_field">
+            <option value="">— No modifico, solo añado información —</option>
+            <option value="titulo">Título</option>
+            <option value="contenido">Contenido</option>
+            <option value="image">URL de imagen principal</option>
+        </select>
+
+        <label>Valor propuesto (si modificas un campo)</label>
+        <textarea name="proposed_value"></textarea>
+
+        <label>Fuentes (URLs separadas por coma) <strong style="color:#d4af37;">muy recomendado</strong></label>
+        <input type="text" name="sources" placeholder="https://es.wikipedia.org/..., https://unesco.org/...">
+    </div>
+
+    <button type="submit" class="btn-submit">📤 Enviar aporte</button>
+</form>
+</div>
+<script>
+const tabs = document.querySelectorAll('.layer-tab');
+const fact = document.getElementById('fact-fields');
+tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    fact.classList.toggle('show', t.id === 'tab-fact');
+}));
+</script>
+{% endblock %}

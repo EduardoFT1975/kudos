@@ -1,104 +1,25 @@
-<!-- kudos_app/templates/kudos_legacy.html -->
+{% extends 'base.html' %}
+{% block title %}📜 Legado Kudos – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">📜</div>
+        <div>
+            <h1>📜 Legado Kudos</h1>
+            <p class="muted">Las cápsulas que perdurarán.</p>
+        </div>
+    </header>
+    
+<div class="cards-grid">
+{% for c in capsules %}
+<article class="capsule-card {% if c.image %}has-image{% endif %}">
+{% if c.image %}<a href="{% url 'capsule_detail' c.uid %}" class="capsule-thumb"><img src="{{ c.image }}" alt="" loading="lazy">{% if c.video %}<span class="play-badge">▶</span>{% endif %}</a>{% endif %}
+<div class="capsule-card-body">
+<h3><a href="{% url 'capsule_detail' c.uid %}">{{ c.display_title }}</a></h3>
+<p class="muted">{{ c.usuario.alias }} · {{ c.fecha }}</p></div>
+</article>
+{% empty %}<p class="muted">Aún no se ha forjado legado público.</p>{% endfor %}
+</div>
 
-{% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Legado de Kudos</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        /* Estilos específicos para el legado de Kudos */
-        .legacy-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .legacy-form {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        .legacy-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .legacy-item {
-            flex: 1 1 300px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .legacy-item h3 {
-            margin-top: 0;
-            color: #1a73e8;
-        }
-        .legacy-item .preserved {
-            font-weight: bold;
-            color: #f5c518;
-        }
-    </style>
-</head>
-<body>
-    <div class="container legacy-container">
-        <h1>Legado de Kudos</h1>
-        <p>Preserva cápsulas benéficas para las generaciones futuras.</p>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="notification {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <!-- Formulario para Crear Cápsula Benéfica -->
-        <section class="legacy-form">
-            <h2>Crear Cápsula Benéfica</h2>
-            <form method="post" action="{% url 'kudos_legacy' %}">
-                {% csrf_token %}
-                <label for="content">Contenido</label>
-                <textarea name="content" id="content" placeholder="Describe tu legado..." required rows="5" class="form-control"></textarea>
-
-                <label for="temas">Temas</label>
-                <select name="temas" id="temas" multiple class="form-control" required>
-                    {% for tema in temas %}
-                        <option value="{{ tema }}">{{ tema }}</option>
-                    {% endfor %}
-                </select>
-                <small>Mantén presionado Ctrl (o Cmd) para seleccionar múltiples temas.</small>
-
-                <label for="beneficiary">Beneficiario</label>
-                <input type="text" name="beneficiary" id="beneficiary" placeholder="Ejemplo: Humanidad, Niños del Futuro" class="form-control" required>
-
-                <button type="submit" name="action" value="create_legacy" class="btn">Crear y Preservar</button>
-            </form>
-        </section>
-
-        <!-- Lista de Cápsulas Benéficas -->
-        <section class="legacy-list">
-            {% if capsules %}
-                {% for capsule in capsules %}
-                    <div class="legacy-item">
-                        <h3>{{ capsule.contenido|truncatechars:50 }}</h3>
-                        <p><strong>Autor:</strong> {{ capsule.usuario.alias }}</p>
-                        <p><strong>Temas:</strong> {{ capsule.temas|join:", " }}</p>
-                        <p><strong>Beneficiario:</strong> {{ capsule.parameters.beneficiary }}</p>
-                        <p><strong>Fecha:</strong> {{ capsule.fecha|date:"Y-m-d" }}</p>
-                        <p><strong>Estado:</strong> <span class="preserved">{% if capsule.parameters.preserved_in_blockchain %}Preservada en Blockchain{% else %}No Preservada{% endif %}</span></p>
-                        <a href="{% url 'vr_view' capsule.uid %}" class="btn">Ver en VR</a>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p>No hay cápsulas benéficas en el legado en este momento.</p>
-            {% endif %}
-        </section>
-
-        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
-    </div>
-
-    <script src="{% static 'js/scripts.js' %}"></script>
-</body>
-</html>
+</div>
+{% endblock %}

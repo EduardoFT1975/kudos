@@ -1,47 +1,96 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Crear Cápsula - Kudos</title>
-</head>
-<body>
-    <h1>Crear una Nueva Cápsula</h1>
-    <form method="post">
+{% extends 'base.html' %}
+
+{% block title %}Crear cápsula – Kudos{% endblock %}
+
+{% block content %}
+<div class="container narrow">
+    <h1>✨ Nueva cápsula multidimensional</h1>
+    <p class="muted">Una cápsula encapsula un fragmento del legado humano: contenido, tiempo, lugar, temas.</p>
+
+    <form method="post" class="form-stacked">
         {% csrf_token %}
-        <p><label>Contenido:</label><br>
-        <textarea name="contenido" rows="5" cols="50" required></textarea></p>
-        <p><label>Modo:</label><br>
-        <select name="modo" required>
-            {% for modo in modos %}
-                <option value="{{ modo }}">{{ modo }}</option>
-            {% endfor %}
-        </select></p>
-        <p><label>Temas (selecciona uno o más):</label><br>
-        <select name="temas" multiple>
-            {% for tema in temas %}
-                <option value="{{ tema }}">{{ tema }}</option>
-            {% endfor %}
-        </select></p>
-        <p><label>Privacidad:</label><br>
-        <select name="privacy">
-            <option value="publico">Público</option>
-            <option value="solo_yo">Solo Yo</option>
-            <option value="familia">Familia</option>
-            <option value="amigos">Amigos</option>
-        </select></p>
-        <p><label>Latitud:</label><br>
-        <input type="number" step="any" name="latitude" value="0"></p>
-        <p><label>Longitud:</label><br>
-        <input type="number" step="any" name="longitude" value="0"></p>
-        <p><label>Nivel Educativo (si aplica):</label><br>
-        <select name="educational_level">
-            <option value="">Ninguno</option>
-            <option value="Básico">Básico</option>
-            <option value="Intermedio">Intermedio</option>
-            <option value="Avanzado">Avanzado</option>
-        </select></p>
-        <button type="submit">Crear Cápsula</button>
+        <label>Título <small>(opcional)</small>
+            <input type="text" name="titulo" maxlength="200" placeholder="Un título evocador...">
+        </label>
+
+        <label>Contenido *
+            <textarea name="contenido" rows="6" required placeholder="Comparte tu sabiduría, recuerdo, idea o reflexión..."></textarea>
+        </label>
+
+        <div class="form-row">
+            <label>Modo
+                <select name="modo">
+                    {% for code, label in modos %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
+                </select>
+            </label>
+            <label>Privacidad
+                <select name="privacy">
+                    <option value="publico">🌐 Público</option>
+                    <option value="amigos">👥 Solo amigos</option>
+                    <option value="privado">🔒 Privado</option>
+                </select>
+            </label>
+        </div>
+
+        <label>Lugar <small>(texto libre)</small>
+            <input type="text" name="lugar" maxlength="255" placeholder="Madrid, Roma, Cima del Everest...">
+        </label>
+
+        <div class="form-row">
+            <label>Latitud <small>(opcional)</small>
+                <input type="number" name="latitud" step="0.000001" min="-90" max="90" placeholder="40.4168">
+            </label>
+            <label>Longitud <small>(opcional)</small>
+                <input type="number" name="longitud" step="0.000001" min="-180" max="180" placeholder="-3.7038">
+            </label>
+        </div>
+
+        <label>Temas <small>(separados por comas)</small>
+            <input type="text" name="temas" placeholder="filosofía, ciencia, ética">
+        </label>
+
+        <fieldset class="multimedia-fields" style="background:linear-gradient(135deg,rgba(0,240,255,.06),rgba(124,58,237,.06)); border:1px solid rgba(0,240,255,.3);">
+            <legend>🌌 Dimensiones extra (3D · 4D · 5D)</legend>
+            <div class="form-row">
+                <label>Altitud (m) <small>(3D · opcional)</small>
+                    <input type="number" name="altitud" step="1" placeholder="650 (Madrid) / 8848 (Everest)">
+                </label>
+                <label>Era histórica <small>(4D)</small>
+                    <select name="era">
+                        <option value="actual">Era Actual (2000 → hoy)</option>
+                        <option value="contemporanea">Edad Contemporánea (1789 → 2000)</option>
+                        <option value="moderna">Edad Moderna (1492 → 1789)</option>
+                        <option value="media">Edad Media (476 → 1492)</option>
+                        <option value="antigua">Edad Antigua (-3000 → 476)</option>
+                        <option value="futura">Futuro proyectado</option>
+                    </select>
+                </label>
+            </div>
+            <label>Capa de realidad <small>(5D)</small>
+                <select name="dimension_layer">
+                    <option value="fisica">🌍 Física - lo que ocurrió</option>
+                    <option value="emocional">💗 Emocional - lo que se sintió</option>
+                    <option value="cognitiva">🧠 Cognitiva - lo que se pensó</option>
+                    <option value="social">👥 Social - lo colectivo</option>
+                    <option value="espiritual">✨ Espiritual - lo trascendente</option>
+                </select>
+            </label>
+        </fieldset>
+
+        <fieldset class="multimedia-fields">
+            <legend>🎬 Multimedia <small>(opcional · pega URLs públicas)</small></legend>
+            <label>📷 Imagen (URL)
+                <input type="url" name="image" placeholder="https://...jpg / .png / .webp">
+            </label>
+            <label>🎥 Vídeo (URL de YouTube o .mp4)
+                <input type="url" name="video" placeholder="https://www.youtube.com/watch?v=... o .mp4">
+            </label>
+            <label>🎵 Audio (URL .mp3 / .wav / .ogg)
+                <input type="url" name="audio" placeholder="https://...mp3">
+            </label>
+        </fieldset>
+
+        <button type="submit" class="btn btn-gold btn-lg">✨ Crear cápsula</button>
     </form>
-    <p><a href="{% url 'control_panel' %}">Volver al Panel</a></p>
-</body>
-</html>
+</div>
+{% endblock %}

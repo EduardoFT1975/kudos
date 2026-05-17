@@ -1,157 +1,22 @@
-<!-- kudos_app/templates/connect.html -->
+{% extends 'base.html' %}
+{% block title %}🔗 Kudos Connect – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🔗</div>
+        <div>
+            <h1>🔗 Kudos Connect</h1>
+            <p class="muted">Fase 2 del ecosistema: red social inmersiva.</p>
+        </div>
+    </header>
+    
+<p>Connect te permite compartir multiformato (texto, audio, vídeo) y transitar mundos virtuales construidos por la comunidad.</p>
+<div class="cards-grid">
+<article class="capsule-card"><h3>📡 Importa tus redes</h3><p>Trae tus contactos y contenidos desde otras plataformas.</p></article>
+<article class="capsule-card"><h3>🌍 Mundo virtual</h3><p>Explora un mapa social transitable en VR/AR.</p></article>
+<article class="capsule-card"><h3>💬 Charlas multiformato</h3><p>Conversaciones que combinan texto, voz y vídeo en hilos enriquecidos.</p></article>
+</div>
+<a href="{% url 'social' %}" class="btn btn-gold">Empieza por los Espacios sociales →</a>
 
-{% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conectar - Kudos</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <div class="container">
-        <h1>Conectar en Kudos</h1>
-        <p>Encuentra y conecta con otros usuarios y comunidades en Kudos.</p>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="notification {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <!-- Buscar Usuarios -->
-        <section>
-            <h2>Buscar Usuarios</h2>
-            <form method="get" action="{% url 'connect' %}" class="search-form">
-                <input type="text" name="query" placeholder="Busca por alias o intereses..." value="{{ query }}" required>
-                <button type="submit" class="btn">Buscar</button>
-            </form>
-
-            {% if users %}
-                <h3>Resultados</h3>
-                <table>
-                    <tr>
-                        <th>Alias</th>
-                        <th>Intereses</th>
-                        <th>Acción</th>
-                    </tr>
-                    {% for user in users %}
-                        <tr>
-                            <td>{{ user.alias }}</td>
-                            <td>{{ user.necesidades|join:", " }}</td>
-                            <td>
-                                {% if user in request.user.following.all %}
-                                    <button class="action-btn" data-action="unfollow" data-target="{{ user.uid }}">Dejar de Seguir</button>
-                                {% else %}
-                                    <button class="action-btn" data-action="follow" data-target="{{ user.uid }}">Seguir</button>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            {% else %}
-                <p>No se encontraron usuarios para "{{ query }}".</p>
-            {% endif %}
-        </section>
-
-        <!-- Espacios Sociales -->
-        <section>
-            <h2>Espacios Sociales</h2>
-            <p>Explora y únete a comunidades virtuales.</p>
-            {% if spaces %}
-                <table>
-                    <tr>
-                        <th>Tema</th>
-                        <th>Descripción</th>
-                        <th>Participantes</th>
-                        <th>Acción</th>
-                    </tr>
-                    {% for space in spaces %}
-                        <tr>
-                            <td>{{ space.theme }}</td>
-                            <td>{{ space.description|truncatechars:50 }}</td>
-                            <td>{{ space.participants.count }}</td>
-                            <td>
-                                {% if user in space.participants.all %}
-                                    <span>Miembro</span>
-                                {% else %}
-                                    <form method="post" action="{% url 'connect' %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="join_space">
-                                        <input type="hidden" name="space_id" value="{{ space.uid }}">
-                                        <button type="submit" class="btn">Unirse - ${{ space.price }}</button>
-                                    </form>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            {% else %}
-                <p>No hay espacios sociales disponibles en este momento.</p>
-            {% endif %}
-        </section>
-
-        <!-- Conexiones Actuales -->
-        <section>
-            <h2>Tus Conexiones</h2>
-            {% if following %}
-                <table>
-                    <tr>
-                        <th>Alias</th>
-                        <th>Acción</th>
-                    </tr>
-                    {% for followed in following %}
-                        <tr>
-                            <td>{{ followed.alias }}</td>
-                            <td>
-                                <button class="action-btn" data-action="unfollow" data-target="{{ followed.uid }}">Dejar de Seguir</button>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            {% else %}
-                <p>No sigues a nadie todavía.</p>
-            {% endif %}
-        </section>
-
-        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
-    </div>
-
-    <script src="{% static 'js/scripts.js' %}"></script>
-    <script>
-        // Scripts específicos para connect.html
-        document.querySelectorAll('.action-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const action = button.dataset.action;
-                const targetId = button.dataset.target;
-
-                if (action === 'follow' || action === 'unfollow') {
-                    fetch(`/api/follow/${targetId}/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCSRFToken()
-                        },
-                        body: JSON.stringify({ action: action })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            button.textContent = action === 'follow' ? 'Dejar de Seguir' : 'Seguir';
-                            button.dataset.action = action === 'follow' ? 'unfollow' : 'follow';
-                            showNotification(data.message, 'success');
-                        } else {
-                            showNotification('Error al procesar la acción', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showNotification('Error de conexión', 'error');
-                    });
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+</div>
+{% endblock %}

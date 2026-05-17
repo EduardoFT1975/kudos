@@ -1,0 +1,17 @@
+{
+  "uid": "test_0008",
+  "contenido": "Esta es una cápsula de prueba #8. Aquí iría la descripción real del lugar (museo, monumento, etc.).",
+  "ubicacion": {
+    "lat": 12.453545,
+    "lon": -124.384648
+  },
+  "temas": [
+    "Naturaleza",
+    "Gastronomía",
+    "Turismo"
+  ],
+  "fecha": "2025-11-16",
+  "image": "https://via.placeholder.com/800x600/336699/ffffff?text=MUSEO+PRUEBA",
+  "audio": null,
+  "source": "prueba_rapida"
+}

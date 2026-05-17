@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load kudos_extras %}
+{% block title %}Mi vida – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+<header class="personal-header">
+    <h1>🌿 Tu vida</h1>
+    <p class="muted">Hábitos · Diario · Aprendizaje · Salud · Cripto</p>
+</header>
+
+<nav class="personal-tabs">
+    <a href="{% url 'personal_dashboard' %}" class="active">📊 Resumen</a>
+    <a href="{% url 'personal_journal' %}">📔 Diario</a>
+    <a href="{% url 'personal_learning' %}">📚 Aprendizaje</a>
+    <a href="{% url 'personal_health' %}">💪 Salud</a>
+    <a href="{% url 'personal_crypto' %}">🪙 Cripto</a>
+    <a href="{% url 'assistant_characters' %}">🎭 Consejero</a>
+</nav>
+
+<!-- HÁBITOS DE HOY -->
+<section class="card">
+    <h2>✅ Hábitos de hoy <small class="muted">{{ habits_completed_today }}/{{ habits_total }}</small></h2>
+    <div class="habit-list">
+    {% for h in habits %}
+    <form method="post" action="{% url 'personal_habit_toggle' h.id %}" class="habit-row">
+        {% csrf_token %}
+        <button type="submit" class="habit-toggle {% if h.id in today_completed_ids %}done{% endif %}">
+            {% if h.id in today_completed_ids %}✅{% else %}⬜{% endif %}
+        </button>
+        <span class="habit-icon">{{ h.icon }}</span>
+        <strong>{{ h.name }}</strong>
+        <small class="muted">· {{ h.get_category_display }} · racha {{ h.streak_days }}d 🔥</small>
+    </form>
+    {% empty %}
+    <p class="muted">Sin hábitos. Ejecuta <code>setup_personal_assistant</code> para cargar el plan inicial.</p>
+    {% endfor %}
+    </div>
+</section>
+
+<div class="grid-2">
+    <section class="card">
+        <h2>📔 Diario</h2>
+        {% if days_no_journal == 0 %}
+            <p>✨ Has escrito hoy.</p>
+        {% elif days_no_journal == 1 %}
+            <p>⚠ Hace 1 día que no escribes.</p>
+        {% else %}
+            <p>⚠ Hace {{ days_no_journal }} días que no escribes.</p>
+        {% endif %}
+        <a href="{% url 'personal_journal' %}" class="btn btn-gold">Escribir ahora</a>
+    </section>
+
+    <section class="card">
+        <h2>💪 Salud hoy</h2>
+        <ul class="health-quick">
+        {% for code, label in health_metric_choices %}
+            <li>{{ label }}: <strong>{% if code in health_today %}{{ health_today|get_item:code }}{% else %}—{% endif %}</strong></li>
+        {% endfor %}
+        </ul>
+        <a href="{% url 'personal_health' %}" class="btn btn-gold">Registrar</a>
+    </section>
+</div>
+
+<div class="grid-2">
+    <section class="card">
+        <h2>📚 Aprendizaje en curso</h2>
+        {% for it in learning_in_progress %}
+        <div class="learn-row">
+            <strong>{{ it.title }}</strong> <small class="muted">{{ it.author }}</small>
+            <div class="kpi-bar"><div class="kpi-fill" style="width: {{ it.progress_percent }}%"></div></div>
+            <small>{{ it.progress_percent }}%</small>
+        </div>
+        {% empty %}<p class="muted">No tienes nada en curso.</p>{% endfor %}
+        <a href="{% url 'personal_learning' %}" class="btn btn-ghost">Ver plan completo →</a>
+    </section>
+
+    <section class="card">
+        <h2>🪙 Cripto vigilada</h2>
+        <ul>
+        {% for w in crypto_watches %}
+            <li><strong>{{ w.symbol }}</strong> {{ w.name }} {% if w.target_buy_eur %}<small>compra<{{ w.target_buy_eur }}€</small>{% endif %}</li>
+        {% empty %}<li class="muted">No vigilas ninguna cripto.</li>{% endfor %}
+        </ul>
+        <a href="{% url 'personal_crypto' %}" class="btn btn-ghost">Ver tracker →</a>
+    </section>
+</div>
+</div>
+
+<style>
+.personal-header { background: linear-gradient(135deg, #1E3A8A, #16A34A); color: white; padding: 28px; border-radius: var(--radius); margin-bottom: 20px; }
+.personal-header h1 { color: white; }
+.personal-header .muted { color: rgba(255,255,255,0.85); }
+.personal-tabs { display: flex; gap: 4px; flex-wrap: wrap; padding: 4px; background: var(--surface-2); border-radius: var(--radius); margin-bottom: 20px; }
+.personal-tabs a { padding: 10px 16px; border-radius: var(--radius-sm); color: var(--text); font-weight: 600; }
+.personal-tabs a.active { background: var(--primary); color: white; }
+.card { background: var(--surface); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 16px; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.habit-list { display: flex; flex-direction: column; gap: 6px; }
+.habit-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--radius-sm); background: var(--surface-2); }
+.habit-toggle { background: none; border: none; cursor: pointer; font-size: 1.4rem; }
+.habit-toggle.done { color: #16A34A; }
+.habit-icon { font-size: 1.3rem; }
+.health-quick { list-style: none; padding: 0; }
+.health-quick li { padding: 4px 0; border-bottom: 1px solid var(--border); }
+.learn-row { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.kpi-bar { height: 6px; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin: 4px 0; }
+.kpi-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--gold)); }
+</style>
+{% endblock %}

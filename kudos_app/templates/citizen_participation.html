@@ -1,72 +1,26 @@
-<!-- kudos_app/templates/citizen_participation.html -->
+{% extends 'base.html' %}
+{% block title %}🗳️ Participación ciudadana – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🗳️</div>
+        <div>
+            <h1>🗳️ Participación ciudadana</h1>
+            <p class="muted">Tu voz también construye el futuro.</p>
+        </div>
+    </header>
+    
+<a href="{% url 'create_proposal' %}" class="btn btn-gold">+ Propuesta</a>
+<div class="cards-grid">
+{% for p in proposals %}
+<article class="capsule-card">
+<span class="capsule-mode">{{ p.get_status_display }}</span>
+<h3>{{ p.title }}</h3>
+<p class="muted">{{ p.user.alias }} · {{ p.timestamp|date:"d/m/Y" }}</p>
+<p>{{ p.description|truncatechars:160 }}</p></div>
+</article>
+{% empty %}<p class="muted">Sin propuestas aún.</p>{% endfor %}
+</div>
 
-{% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Participación Ciudadana - Kudos</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        .citizen-container { max-width: 1200px; margin: 0 auto; }
-        .initiative-form { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
-        .initiatives-list { display: flex; flex-wrap: wrap; gap: 20px; }
-        .initiative-item { flex: 1 1 300px; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }
-        .initiative-item h3 { margin-top: 0; color: #1a73e8; }
-        .vote-count { font-weight: bold; color: #f5c518; }
-    </style>
-</head>
-<body>
-    <div class="container citizen-container">
-        <h1>Participación Ciudadana</h1>
-        <p>Propón y vota iniciativas para la comunidad Kudos.</p>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="notification {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <!-- Formulario para Proponer Iniciativa -->
-        <section class="initiative-form">
-            <h2>Proponer Iniciativa</h2>
-            <form method="post" action="{% url 'citizen_participation' %}">
-                {% csrf_token %}
-                <label for="content">Iniciativa</label>
-                <textarea name="content" id="content" placeholder="Describe tu iniciativa..." required rows="5" class="form-control"></textarea>
-
-                <label for="theme">Tema</label>
-                <select name="theme" id="theme" class="form-control" required>
-                    {% for theme in themes %}
-                        <option value="{{ theme }}">{{ theme }}</option>
-                    {% endfor %}
-                </select>
-
-                <button type="submit" name="action" value="propose_initiative" class="btn">Proponer</button>
-            </form>
-        </section>
-
-        <!-- Lista de Iniciativas -->
-        <section class="initiatives-list">
-            {% if initiatives %}
-                {% for initiative in initiatives %}
-                    <div class="initiative-item">
-                        <h3>{{ initiative.contenido|truncatechars:50 }}</h3>
-                        <p><strong>Autor:</strong> {{ initiative.usuario.username }}</p>
-                        <p><strong>Tema:</strong> {{ initiative.temas.0 }}</p>
-                        <p><strong>Fecha:</strong> {{ initiative.fecha|date:"Y-m-d" }}</p>
-                        <p><strong>Votos:</strong> <span class="vote-count">{{ initiative.parameters.votes|default:0 }}</span></p>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p>No hay iniciativas disponibles en este momento.</p>
-            {% endif %}
-        </section>
-
-        <a href="{% url 'home' %}" class="btn">Volver al Inicio</a>
-    </div>
-
-    <script src="{% static 'js/scripts.js' %}"></script>
-</body>
-</html>
+</div>
+{% endblock %}

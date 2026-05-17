@@ -5,8 +5,19 @@ Módulo utilitario para gestionar operaciones de AR/VR en Kudos.
 Proporciona funciones para generar y personalizar experiencias inmersivas.
 """
 
-from kudos_app.models import SettingsConfig
 import json
+import os  # Para variables de entorno
+
+# Configuración estática en lugar de SettingsConfig
+AR_VR_CONFIG = {
+    "default_vr_sky": "https://example.com/default_sky.jpg",
+    "character_models": {
+        "Filosofía": "https://example.com/socrates_vr.glb",
+        "Ciencia": "https://example.com/einstein_vr.glb",
+        "Arte": "https://example.com/leonardo_vr.glb",
+        "Historia": "https://example.com/cleopatra_vr.glb"
+    }
+}
 
 def get_aframe_template(is_vr=True, sky_url=None, height=500):
     """
@@ -20,8 +31,7 @@ def get_aframe_template(is_vr=True, sky_url=None, height=500):
     Returns:
         str: Plantilla HTML de A-Frame.
     """
-    config = SettingsConfig.objects.get_or_create(key="ar_vr_settings")[0]
-    default_sky = config.parameters.get("default_vr_sky", "https://example.com/default_sky.jpg")
+    default_sky = os.getenv('DEFAULT_VR_SKY', AR_VR_CONFIG["default_vr_sky"])
 
     template = f"""
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -46,23 +56,23 @@ def add_text_to_scene(content, position="0 1.5 -5", color="white", width=4):
     Returns:
         str: Código A-Frame para el elemento de texto.
     """
-    return f'<a-text value="{content[:100]}" position="{position}" align="center" color="{color}" width="{width}"></a-text>'
+    return f'<a-text value="{content}" position="{position}" color="{color}" width="{width}"></a-text>'
 
-def add_model_to_scene(model_url, position="0 0 -5", scale="0.5 0.5 0.5", rotation_animation=True):
+def add_model_to_scene(model_url, position="0 1 -5", scale="1 1 1", animation=''):
     """
-    Agrega un modelo 3D a una escena A-Frame.
+    Agrega un modelo 3D a una escena A-Frame con animación opcional.
 
     Args:
         model_url (str): URL del modelo GLTF/GLB.
-        position (str): Posición en el espacio 3D. Default: "0 0 -5".
-        scale (str): Escala del modelo. Default: "0.5 0.5 0.5".
-        rotation_animation (bool): Añadir animación de rotación. Default: True.
+        position (str): Posición en el espacio 3D. Default: "0 1 -5".
+        scale (str): Escala del modelo. Default: "1 1 1".
+        animation (str, optional): Animación A-Frame (e.g., rotación).
 
     Returns:
-        str: Código A-Frame para el modelo.
+        str: Código A-Frame para el elemento de modelo.
     """
-    animation = 'animation="property: rotation; to: 0 360 0; loop: true; dur: 10000"' if rotation_animation else ''
-    return f'<a-entity gltf-model="{model_url}" position="{position}" scale="{scale}" {animation}></a-entity>'
+    rotation_animation = 'animation="property: rotation; to: 0 360 0; loop: true; dur: 10000"' if animation else ''
+    return f'<a-entity gltf-model="{model_url}" position="{position}" scale="{scale}" {rotation_animation}></a-entity>'
 
 def generate_ar_vr_scene(content, is_vr=True, sky_url=None, model_url=None, height=500):
     """
@@ -94,11 +104,5 @@ def get_character_model(theme):
     Returns:
         str: URL del modelo GLTF/GLB o None si no hay coincidencia.
     """
-    config = SettingsConfig.objects.get_or_create(key="ar_vr_settings")[0]
-    character_models = config.parameters.get("character_models", {
-        "Filosofía": "https://example.com/socrates_vr.glb",
-        "Ciencia": "https://example.com/einstein_vr.glb",
-        "Arte": "https://example.com/leonardo_vr.glb",
-        "Historia": "https://example.com/cleopatra_vr.glb"
-    })
+    character_models = AR_VR_CONFIG["character_models"]
     return character_models.get(theme)

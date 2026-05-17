@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Historial · {{ capsule.display_title }}{% endblock %}
+{% block extra_head %}
+<style>
+.versions-shell { background: linear-gradient(180deg, var(--bg), var(--surface)); min-height: calc(100vh - 80px); padding: 30px 20px; }
+.versions-wrap { max-width: 920px; margin: 0 auto; }
+.versions-h1 { font-family:'Cormorant Garamond', Georgia, serif; font-size: 2rem; margin: 0 0 6px; }
+.timeline { position: relative; margin: 28px 0; padding-left: 28px; border-left: 2px solid rgba(212,175,55,.4); }
+.version-item {
+    position: relative; padding: 16px 18px; margin-bottom: 14px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+}
+.version-item::before {
+    content: ''; position: absolute; left: -36px; top: 22px; width: 14px; height: 14px;
+    border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, var(--gold) 60%, transparent);
+    box-shadow: 0 0 12px var(--gold);
+}
+.version-item .num { color: var(--gold); font-weight: 700; font-size: 1.1rem; }
+.version-item .meta { color: var(--text-muted); font-size: .85rem; margin: 4px 0 8px; }
+.version-item .body-preview { background: var(--surface-2); padding: 10px 14px; border-radius: 8px; font-size: .9rem; max-height: 120px; overflow-y: auto; }
+.btn-revert { padding: 8px 16px; border-radius: 8px; background: linear-gradient(135deg, #ff00d4, #d4af37); color:#000; border:none; cursor:pointer; font-weight: 700; margin-top: 8px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="versions-shell">
+<div class="versions-wrap">
+    <p><a href="{% url 'capsule_detail' capsule.uid %}">← Volver a la cápsula</a></p>
+    <span class="cinema-eyebrow" style="font-size:.7rem; letter-spacing:.18em; text-transform:uppercase; color: var(--gold);">Memento · Versionado</span>
+    <h1 class="versions-h1">📜 Historial de {{ capsule.display_title }}</h1>
+    <p class="muted">Cada cambio de la cápsula queda registrado de forma inmutable. {% if is_author %}Como autor, puedes <strong>revertir</strong> a cualquier versión anterior.{% endif %}</p>
+
+    <div class="timeline">
+        {% for v in versions %}
+        <div class="version-item">
+            <span class="num">v{{ v.version_number }}</span>
+            <div class="meta">
+                {{ v.created|date:"d M Y · H:i" }} · por
+                {% if v.created_by %}<a href="{% url 'public_profile' v.created_by.alias %}">{{ v.created_by.alias }}</a>{% else %}sistema{% endif %}
+                {% if v.change_summary %} · <em>{{ v.change_summary }}</em>{% endif %}
+            </div>
+            <div class="body-preview">
+                <strong>{{ v.titulo|default:'(sin título)' }}</strong><br>
+                {{ v.contenido|truncatewords:40 }}
+            </div>
+            {% if is_author %}
+            <form method="post" action="{% url 'capsule_version_revert' capsule.uid v.id %}" onsubmit="return confirm('¿Revertir a v{{ v.version_number }}?')">
+                {% csrf_token %}
+                <button type="submit" class="btn-revert">⏮ Revertir a esta versión</button>
+            </form>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p class="muted">No hay versiones anteriores. Esta es la cápsula original.</p>
+        {% endfor %}
+    </div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Mensajes · Kudos{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <h1>📨 Mensajes</h1>
+    <p class="muted">Conversa directamente con otros pioneros del ecosistema.</p>
+</section>
+
+<section class="grid-2">
+    <div class="card">
+        <h2>📥 Recibidos</h2>
+        <ul class="msg-list">
+            {% for m in received %}
+            <li>
+                <strong>{{ m.sender.alias }}</strong>
+                <small class="muted">{{ m.timestamp|date:"d M H:i" }}</small>
+                <p>{{ m.body }}</p>
+            </li>
+            {% empty %}
+            <li class="muted">No tienes mensajes recibidos.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="card">
+        <h2>✉ Enviar mensaje</h2>
+        <form method="post" action="{% url 'messages_send' %}">{% csrf_token %}
+            <label>Para (alias)</label>
+            <input type="text" name="to" placeholder="alias del destinatario" required>
+            <label>Mensaje</label>
+            <textarea name="body" rows="4" required></textarea>
+            <button class="btn btn-gold">Enviar</button>
+        </form>
+        <h3 style="margin-top:24px;">📤 Enviados</h3>
+        <ul class="msg-list">
+            {% for m in sent %}
+            <li>
+                <strong>→ {{ m.recipient.alias }}</strong>
+                <small class="muted">{{ m.timestamp|date:"d M H:i" }}</small>
+                <p>{{ m.body }}</p>
+            </li>
+            {% empty %}
+            <li class="muted">Aún no has enviado mensajes.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
+{% endblock %}

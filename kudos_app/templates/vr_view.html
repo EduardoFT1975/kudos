@@ -1,24 +1,194 @@
-<!-- kudos_app/templates/vr_view.html -->
+{% extends 'base.html' %}
+{% block title %}🥽 VR · {{ capsule.display_title }}{% endblock %}
 
-```html
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Vista VR - Cápsula</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
-        h1 { text-align: center; color: #333; }
-        .vr-container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
-    </style>
-</head>
-<body>
-    <h1>Vista en Realidad Virtual</h1>
+{% block extra_head %}
+<style>
+.vr-shell {
+    position: relative;
+    background: #000;
+    color: #fff;
+    min-height: calc(100vh - 80px);
+    overflow: hidden;
+}
+.vr-canvas { width: 100%; height: calc(100vh - 80px); display: block; }
+.vr-overlay {
+    position: absolute; top: 14px; left: 14px; right: 14px;
+    padding: 12px 16px; z-index: 10;
+    background: rgba(8,12,32,.7); backdrop-filter: blur(14px);
+    border: 1px solid rgba(0,240,255,.3); border-radius: 14px;
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+}
+.vr-overlay h2 { margin: 0; font-family:'Cormorant Garamond', Georgia, serif; font-size: 1.2rem; flex: 1; }
+.vr-overlay .btn { padding: 6px 12px; border-radius: 10px; background: rgba(0,240,255,.2);
+    border: 1px solid rgba(0,240,255,.4); color: #fff; cursor: pointer; text-decoration: none; }
+.vr-overlay .btn:hover { background: rgba(0,240,255,.35); }
+.vr-bottom {
+    position: absolute; bottom: 14px; left: 14px; right: 14px;
+    z-index: 10; padding: 14px 18px;
+    background: rgba(8,12,32,.7); backdrop-filter: blur(14px);
+    border: 1px solid rgba(212,175,55,.3); border-radius: 14px;
+    max-height: 45%; overflow-y: auto;
+}
+.vr-bottom .voice { font-family:'Cormorant Garamond', Georgia, serif; color: #d4af37; font-size: 1.2rem; }
+</style>
+{% endblock %}
 
-    <div class="vr-container">
-        <p><strong>Cápsula:</strong> {{ capsule.contenido }}</p>
-        {{ vr_scene|safe }}
+{% block content %}
+<div class="vr-shell">
+    <div class="vr-overlay">
+        <h2>🥽 {{ capsule.display_title }}</h2>
+        <button class="btn" id="vr-narrate">▶ Que {{ voice_name }} narre</button>
+        <button class="btn" id="vr-stop">⏹</button>
+        <button class="btn" id="vr-enter">🥽 Entrar en VR</button>
+        <a class="btn" href="{% url 'capsule_detail' capsule.uid %}">← Volver</a>
     </div>
-</body>
-</html>
-```
+
+    <canvas id="vr-canvas" class="vr-canvas"></canvas>
+
+    <div class="vr-bottom">
+        <div class="voice">{{ voice_name }} cuenta:</div>
+        <p>{{ capsule.contenido|linebreaks }}</p>
+        {% if capsule.lugar %}<p class="muted">📍 {{ capsule.lugar }}{% if capsule.fecha %} · 📅 {{ capsule.fecha }}{% endif %}</p>{% endif %}
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// Escena VR / 3D inmersiva con three.js
+const canvas = document.getElementById('vr-canvas');
+const W = canvas.clientWidth || window.innerWidth;
+const H = canvas.clientHeight || (window.innerHeight - 80);
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setSize(W, H);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.xr.enabled = true;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x04081a, 0.02);
+
+const camera = new THREE.PerspectiveCamera(72, W/H, 0.1, 1000);
+camera.position.set(0, 1.6, 5);
+
+// Iluminación
+const ambient = new THREE.AmbientLight(0x404880, 0.7);
+scene.add(ambient);
+const key = new THREE.PointLight(0x00f0ff, 1.5, 50); key.position.set(3, 4, 5); scene.add(key);
+const rim = new THREE.PointLight(0xd4af37, 1.2, 50); rim.position.set(-4, 3, -2); scene.add(rim);
+
+// Suelo holográfico
+const floorGeo = new THREE.PlaneGeometry(60, 60, 30, 30);
+const floorMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true, opacity: 0.18, transparent: true });
+const floor = new THREE.Mesh(floorGeo, floorMat);
+floor.rotation.x = -Math.PI / 2; floor.position.y = -1.2;
+scene.add(floor);
+
+// Cielo de estrellas
+const starsGeo = new THREE.BufferGeometry();
+const starPos = [];
+for (let i=0; i<2000; i++) {
+    starPos.push((Math.random()-0.5)*200, (Math.random()-0.5)*200, (Math.random()-0.5)*200);
+}
+starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+const stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.4 }));
+scene.add(stars);
+
+// Cápsula central (esfera con anillos orbitales)
+const capsuleGroup = new THREE.Group();
+const sphereGeo = new THREE.SphereGeometry(1, 48, 48);
+const sphereMat = new THREE.MeshPhongMaterial({
+    color: 0xd4af37, emissive: 0x1e3a8a, emissiveIntensity: 0.6,
+    shininess: 60, specular: 0x00f0ff,
+});
+const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+capsuleGroup.add(sphere);
+
+// Anillos orbitales
+function ring(radius, color, opacity=0.6) {
+    const g = new THREE.TorusGeometry(radius, 0.02, 8, 96);
+    const m = new THREE.MeshBasicMaterial({ color, opacity, transparent: true });
+    return new THREE.Mesh(g, m);
+}
+const r1 = ring(1.6, 0x00f0ff); r1.rotation.x = Math.PI / 3; capsuleGroup.add(r1);
+const r2 = ring(2.1, 0xff00d4, 0.5); r2.rotation.x = Math.PI / 2; capsuleGroup.add(r2);
+const r3 = ring(2.7, 0xffae00, 0.4); r3.rotation.x = Math.PI / 4; capsuleGroup.add(r3);
+capsuleGroup.position.set(2, 1.6, 0);
+scene.add(capsuleGroup);
+
+// Avatar del consejero (cápsula simplificada con cabeza esférica)
+const avatarGroup = new THREE.Group();
+const headColor = 0xfde68a;
+const robeColor = {{ character.color|default:"'#1E3A8A'"|cut:"#"|default:"0x1e3a8a" }} ? 0x1e3a8a : 0x1e3a8a;
+const head = new THREE.Mesh(new THREE.SphereGeometry(0.35, 24, 24), new THREE.MeshPhongMaterial({ color: headColor }));
+head.position.y = 1.7;
+avatarGroup.add(head);
+const robe = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.7, 1.5, 16), new THREE.MeshPhongMaterial({ color: robeColor }));
+robe.position.y = 0.7;
+avatarGroup.add(robe);
+// Ojos
+const eye1 = new THREE.Mesh(new THREE.SphereGeometry(0.04, 12, 12), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+eye1.position.set(-0.1, 1.78, 0.32); avatarGroup.add(eye1);
+const eye2 = eye1.clone(); eye2.position.set(0.1, 1.78, 0.32); avatarGroup.add(eye2);
+// Boca
+const mouth = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 12), new THREE.MeshBasicMaterial({ color: 0x7c2d12 }));
+mouth.position.set(0, 1.6, 0.32);
+avatarGroup.add(mouth);
+avatarGroup.position.set(-2, 0, 0);
+scene.add(avatarGroup);
+
+// Resize
+window.addEventListener('resize', () => {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+});
+
+// VR button (WebXR)
+document.getElementById('vr-enter').addEventListener('click', async () => {
+    if ('xr' in navigator) {
+        try {
+            const session = await navigator.xr.requestSession('immersive-vr', { optionalFeatures: ['local-floor'] });
+            renderer.xr.setSession(session);
+        } catch (e) {
+            alert('Tu dispositivo no soporta VR inmersiva. Usa el modo 3D.');
+        }
+    } else {
+        alert('WebXR no disponible. Disfruta del modo 3D!');
+    }
+});
+
+// Narración con boca animada
+const TEXT = `{{ capsule.contenido|escapejs }}`;
+let speaking = false;
+function narrate() {
+    if (!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(TEXT);
+    u.lang = 'es-ES'; u.rate = 0.95;
+    const voices = speechSynthesis.getVoices();
+    const es = voices.find(v => v.lang && v.lang.startsWith('es'));
+    if (es) u.voice = es;
+    u.onstart = () => speaking = true;
+    u.onend = () => speaking = false;
+    speechSynthesis.speak(u);
+}
+document.getElementById('vr-narrate').addEventListener('click', narrate);
+document.getElementById('vr-stop').addEventListener('click', () => { speechSynthesis.cancel(); speaking = false; });
+
+// Animación
+let t = 0;
+function animate() {
+    t += 0.012;
+    capsuleGroup.rotation.y += 0.005;
+    r1.rotation.z += 0.01; r2.rotation.z -= 0.007; r3.rotation.z += 0.005;
+    sphere.scale.setScalar(1 + Math.sin(t) * 0.02);
+    stars.rotation.y -= 0.0006;
+    // Boca abre/cierra cuando narra
+    const target = speaking ? (Math.random() > 0.5 ? 0.09 : 0.04) : 0.05;
+    mouth.scale.y = THREE.MathUtils.lerp(mouth.scale.y, target / 0.05, 0.3);
+    // Cabeza balancea
+    head.rotation.y = Math.sin(t) * 0.1;
+}
+
+renderer.setAnimationLoop(() => { animate(); renderer.render(scene, camera); });
+</script>
+{% endblock %}

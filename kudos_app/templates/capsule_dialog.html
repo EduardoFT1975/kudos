@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Diálogo · {{ capsule.display_title }}{% endblock %}
+{% block extra_head %}
+<style>
+.dialog-shell { background: linear-gradient(180deg, var(--bg), var(--surface)); min-height: calc(100vh - 80px); padding: 30px 20px; }
+.dialog-wrap { max-width: 980px; margin: 0 auto; }
+.dialog-h1 { font-family:'Cormorant Garamond', Georgia, serif; font-size: 2rem; margin: 0 0 6px; }
+.layer-section { margin: 28px 0; padding: 22px 26px; background: var(--surface); border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+.layer-section h2 { font-family:'Cormorant Garamond', Georgia, serif; margin: 0 0 8px; }
+.layer-section.fact { border-left: 4px solid #00f0ff; }
+.layer-section.dialog { border-left: 4px solid #d4af37; }
+.layer-section.pending { border-left: 4px solid #ff00d4; opacity: .9; }
+.aport-card {
+    padding: 14px 16px; margin: 10px 0;
+    background: var(--surface-2); border-radius: 10px; border-left: 3px solid var(--gold);
+}
+.aport-card .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.aport-card .head strong { color: var(--text); }
+.aport-card .head small { color: var(--text-muted); }
+.aport-card .body { line-height: 1.55; }
+.aport-card .meta-pills { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.aport-card .pill { font-size: .72rem; padding: 2px 8px; border-radius: 10px; background: rgba(212,175,55,.15); color: var(--gold); border: 1px solid rgba(212,175,55,.3); }
+.aport-card .pill.score { background: rgba(0,240,255,.15); color: #00f0ff; border-color: rgba(0,240,255,.3); }
+.aport-card .pill.kds { background: rgba(255,0,212,.15); color: #ff00d4; border-color: rgba(255,0,212,.3); }
+.validate-form { display: flex; gap: 8px; margin-top: 8px; }
+.validate-form button { padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; font-size: .85rem; }
+.validate-form .ok { background: #10b981; color: #fff; }
+.validate-form .ko { background: #dc2626; color: #fff; }
+.cta-aport { display: inline-block; padding: 12px 22px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--gold), #ff00d4); color: #000; font-weight: 700;
+    text-decoration: none; margin-top: 14px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="dialog-shell">
+<div class="dialog-wrap">
+    <p><a href="{% url 'capsule_detail' capsule.uid %}">← Volver a la cápsula</a></p>
+    <span class="cinema-eyebrow" style="font-size:.7rem; letter-spacing:.18em; text-transform:uppercase; color: var(--gold);">Memento · Capa de verdad</span>
+    <h1 class="dialog-h1">🗣 {{ capsule.display_title }}</h1>
+    <p class="muted">Lo que es <strong>hecho</strong> verificado vive en una capa inmutable. Lo que es <strong>diálogo</strong> (opiniones, anécdotas) vive en otra capa, transparente y sin filtro.</p>
+
+    {% if user.is_authenticated %}
+    <a href="{% url 'capsule_aport_create' capsule.uid %}" class="cta-aport">📤 Hacer un aporte</a>
+    {% endif %}
+
+    <!-- CAPA HECHO -->
+    <section class="layer-section fact">
+        <h2>🔬 Capa de Hecho · datos verificados</h2>
+        <p class="muted">Aceptados por consenso de 3 capas (IA → Misioneros → CCO). Inmutables.</p>
+        {% for a in facts %}
+        <div class="aport-card">
+            <div class="head">
+                <strong>{{ a.user.alias }}</strong>
+                <small>{{ a.resolved|date:"d M Y H:i" }}</small>
+            </div>
+            <div class="body">{{ a.body|linebreaks }}</div>
+            {% if a.proposed_field %}
+            <p class="muted" style="font-size:.85rem;">↳ Modificó <code>{{ a.proposed_field }}</code></p>
+            {% endif %}
+            {% if a.sources %}<p class="muted" style="font-size:.82rem;">Fuentes: {% for s in a.sources %}<a href="{{ s }}" target="_blank">[{{ forloop.counter }}]</a> {% endfor %}</p>{% endif %}
+            <div class="meta-pills">
+                <span class="pill score">⭐ score IA {{ a.ai_score|floatformat:2 }}</span>
+                {% if a.kudos_awarded %}<span class="pill kds">+{{ a.kudos_awarded }} $KDS</span>{% endif %}
+                <span class="pill">{{ a.validators.count }} misioneros</span>
+            </div>
+        </div>
+        {% empty %}
+        <p class="muted">Aún no hay hechos validados.</p>
+        {% endfor %}
+    </section>
+
+    <!-- CAPA PENDIENTE (Misioneros) -->
+    {% if pending %}
+    <section class="layer-section pending">
+        <h2>⏳ Aportes en validación</h2>
+        <p class="muted">Esperando consenso de 3 misioneros (XP ≥ 100).</p>
+        {% for a in pending %}
+        <div class="aport-card">
+            <div class="head">
+                <strong>{{ a.user.alias }}</strong>
+                <small>{{ a.created|date:"d M H:i" }}</small>
+            </div>
+            <div class="body">{{ a.body|linebreaks }}</div>
+            {% if a.proposed_field %}<p class="muted" style="font-size:.85rem;">↳ Propone modificar <code>{{ a.proposed_field }}</code> → {{ a.proposed_value|truncatechars:80 }}</p>{% endif %}
+            {% if a.sources %}<p class="muted" style="font-size:.82rem;">Fuentes: {% for s in a.sources %}<a href="{{ s }}" target="_blank">[{{ forloop.counter }}]</a> {% endfor %}</p>{% endif %}
+            <div class="meta-pills">
+                <span class="pill score">⭐ IA {{ a.ai_score|floatformat:2 }}</span>
+                <span class="pill">{{ a.validators.count }}/3 misioneros</span>
+                <span class="pill">{{ a.get_status_display }}</span>
+            </div>
+            {% if is_mission %}
+            <form method="post" action="{% url 'capsule_aport_validate' capsule.uid a.id %}" class="validate-form">
+                {% csrf_token %}
+                <button type="submit" name="decision" value="accept" class="ok">✓ Validar</button>
+                <button type="submit" name="decision" value="reject" class="ko">✗ Rechazar</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    <!-- CAPA DIÁLOGO -->
+    <section class="layer-section dialog">
+        <h2>💬 Capa de Diálogo · opiniones e interpretaciones</h2>
+        <p class="muted">Sin filtro, sin validación. Espacio libre para que cada persona aporte su mirada.</p>
+        {% for a in aports %}
+        <div class="aport-card">
+            <div class="head">
+                <strong>{{ a.user.alias }}</strong>
+                <small>{{ a.created|date:"d M Y H:i" }}</small>
+            </div>
+            <div class="body">{{ a.body|linebreaks }}</div>
+            {% if a.media_url %}<p><img src="{{ a.media_url }}" style="max-width:100%; max-height:280px; border-radius:8px; margin-top:8px;"></p>{% endif %}
+            <div class="meta-pills">
+                <span class="pill">❤ {{ a.likes }}</span>
+            </div>
+        </div>
+        {% empty %}
+        <p class="muted">Aún no hay opiniones. Sé el primero en compartir tu reflexión.</p>
+        {% endfor %}
+    </section>
+</div>
+</div>
+{% endblock %}

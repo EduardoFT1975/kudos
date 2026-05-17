@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Nueva propuesta al Comité – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🗳️</div>
+        <div>
+            <h1>Nueva propuesta al Comité</h1>
+            <p class="muted">Propón un tema para el debate global.</p>
+        </div>
+    </header>
+    
+<form method="post" class="form-stacked">
+    {% csrf_token %}
+    <label>Título *<input type="text" name="title" required maxlength="200"></label>
+    <label>Descripción *<textarea name="description" rows="6" required></textarea></label>
+    <label>Temas <small>(separados por comas)</small><input type="text" name="themes" placeholder="sostenibilidad, tecnología"></label>
+    <button class="btn btn-gold">Enviar al Comité</button>
+</form>
+
+</div>
+{% endblock %}

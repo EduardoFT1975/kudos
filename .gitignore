@@ -1,6 +1,44 @@
-venv/
-*.pyc
+# ===== Python =====
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ===== Entornos virtuales =====
+venv/
+env/
+ENV/
+.venv
+
+# ===== Django =====
 *.log
-ar_vr/node_modules/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+logs/
+
+# ===== Variables de entorno =====
 .env
+.env.local
+.env.production
+
+# ===== Editores =====
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ===== Sistema =====
+*.pem
+*.key
+node_modules/
+ar_vr/node_modules/
+
+# ===== Archivos generados por la IA =====
+*.bak
+*.tmp

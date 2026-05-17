@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Competición – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🏆</div>
+        <div>
+            <h1>Competición</h1>
+            <p class="muted"></p>
+        </div>
+    </header>
+    
+<h2>{{ competition.name }}</h2>
+<p class="muted">{{ competition.sport }} · {{ competition.start_date|date:"d/m/Y H:i" }} · {{ competition.entry_price }} K</p>
+<p>{{ competition.description }}</p>
+{% if user.is_authenticated %}<a href="{% url 'join_competition' competition.id %}" class="btn btn-gold">Inscribirme</a>{% endif %}
+<h3>Participantes ({{ competition.participants.count }})</h3>
+<div class="badges-grid">
+{% for p in competition.participants.all %}
+<div class="badge-item"><div class="badge-icon">🏃</div><div class="badge-name">{{ p.alias }}</div></div>
+{% empty %}<p class="muted">Aún no hay inscritos.</p>{% endfor %}
+</div>
+
+</div>
+{% endblock %}

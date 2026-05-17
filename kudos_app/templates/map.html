@@ -1,275 +1,167 @@
-<!-- kudos_app/templates/map.html -->
-
+{% extends 'base.html' %}
 {% load static %}
+{% block title %}Mapa 5D · Kudos{% endblock %}
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa de Kudos</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        #map { height: 600px; }
-        .filter-container { margin-bottom: 10px; }
-        .filter-btn { 
-            margin-right: 5px; 
-            padding: 5px 10px; 
-            background-color: #1a73e8; 
-            color: white; 
-            border: none; 
-            border-radius: 3px; 
-            cursor: pointer; 
-        }
-        .filter-btn.active { background-color: #0d47a1; }
-    </style>
-</head>
-<body>
-    <div class="filter-container">
-        <button class="filter-btn active" data-type="all">Todos</button>
-        <button class="filter-btn" data-type="capsule">Cápsulas</button>
-        <button class="filter-btn" data-type="route">Rutas</button>
-        <button class="filter-btn" data-type="poi">POIs</button>
-        <button class="filter-btn" data-type="wisdom_space">Espacios de Sabiduría</button>
-        <button class="filter-btn" data-type="promotion_space">Espacios de Promoción</button>
-        <button class="filter-btn" data-type="social_space">Espacios Sociales</button>
+{% block extra_head %}
+{# AXÓN D7 · Leaflet servido local (independencia CDN) + markercluster CDN (vendoring offline pendiente) #}
+<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">
+<script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+{# AXÓN D7 · Estilos extraídos a archivo único (mismas reglas, sin cambios visuales) #}
+<link rel="stylesheet" href="{% static 'css/map5d.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="map5d-shell">
+<div class="map5d-grid">
+
+<!-- ╔═════════════ PANEL LATERAL ═════════════╗ -->
+<aside class="map5d-side">
+    <span class="eyebrow">Mapa 5D · Vault</span>
+    <h1>Atlas multidimensional</h1>
+    <p class="muted" style="color:#94a3b8;">5 dimensiones · 1D&nbsp;tiempo&nbsp;· 2D&nbsp;mapa · 3D&nbsp;altitud · 4D&nbsp;era · 5D&nbsp;capa</p>
+
+    <div class="map5d-counter">
+        <div class="num" id="visible-count">{{ total_capsules }}</div>
+        <small>cápsulas visibles</small>
     </div>
-    <div id="map"></div>
-    <script>
-        // Configuración inicial del mapa con valores por defecto
-        const defaultLat = {{ location.y|default:40.4168 }};
-        const defaultLon = {{ location.x|default:-3.7038 }};
-        const defaultZoom = {{ default_zoom|default:13 }};
-        const apiKey = "{{ api_key }}";
 
-        // Cargar Google Maps API
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
+    <div class="map5d-section">
+        <h3>5D · Capa de realidad</h3>
+        <div class="dim-btns">
+            <button class="dim-btn active" data-dim="">🌐 Todas</button>
+            <button class="dim-btn" data-dim="fisica">🌍 Física</button>
+            <button class="dim-btn" data-dim="emocional">💗 Emocional</button>
+            <button class="dim-btn" data-dim="cognitiva">🧠 Cognitiva</button>
+            <button class="dim-btn" data-dim="social">👥 Social</button>
+            <button class="dim-btn" data-dim="espiritual">✨ Espiritual</button>
+        </div>
+    </div>
 
-        let map;
-        let markers = [];
-        let polylines = [];
+    <div class="map5d-section">
+        <h3>Tipo de cápsula</h3>
+        <div class="modo-pills" id="modo-pills">
+            <span class="modo-pill active" data-modo="">Todas</span>
+            <span class="modo-pill" data-modo="historico">📜 Histórico</span>
+            <span class="modo-pill" data-modo="museo">🏛 Museo</span>
+            <span class="modo-pill" data-modo="monumento">🗿 Monumento</span>
+            <span class="modo-pill" data-modo="paisaje">🏞 Paisaje</span>
+            <span class="modo-pill" data-modo="negocio">🏪 Negocio</span>
+            <span class="modo-pill" data-modo="sabiduria">🧠 Sabiduría</span>
+            <span class="modo-pill" data-modo="arte">🎨 Arte</span>
+            <span class="modo-pill" data-modo="espiritual">✨ Espiritual</span>
+            <span class="modo-pill" data-modo="ciudadano">🗳 Ciudadano</span>
+            <span class="modo-pill" data-modo="comercial">🛍 Comercial</span>
+            <span class="modo-pill" data-modo="personal">🌿 Personal</span>
+            <span class="modo-pill" data-modo="eterno">♾ Eterno</span>
+        </div>
+    </div>
 
-        // Función para inicializar el mapa
-        function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: defaultLat, lng: defaultLon },
-                zoom: defaultZoom,
-                mapTypeId: 'roadmap'
-            });
+    <div class="map5d-section">
+        <h3>Vista del planeta</h3>
+        <div class="dim-btns">
+            <button class="dim-btn active" data-tile="dark">🌑 Oscura</button>
+            <button class="dim-btn" data-tile="osm">🗺 Clásica</button>
+            <button class="dim-btn" data-tile="satellite">🛰 Satélite</button>
+            <button class="dim-btn" data-tile="terrain">⛰ Terreno</button>
+        </div>
+    </div>
 
-            // Añadir marcadores y calles virtuales iniciales
-            showMarkers('all');
-        }
+    <div class="map5d-section">
+        <h3>Atajos</h3>
+        <button class="dim-btn" onclick="goTo(0,0,2)">🌐 Mundo</button>
+        <button class="dim-btn" onclick="goTo(50,10,4)">🇪🇺 Europa</button>
+        <button class="dim-btn" onclick="goTo(0,20,3)">🌍 África</button>
+        <button class="dim-btn" onclick="goTo(35,105,3)">🌏 Asia</button>
+        <button class="dim-btn" onclick="goTo(40,-100,3)">🌎 N. América</button>
+        <button class="dim-btn" onclick="goTo(-15,-60,3)">🌎 S. América</button>
+        <button class="dim-btn" onclick="goTo(-25,135,3)">🌏 Oceanía</button>
+        <button class="dim-btn" onclick="goTo(0,0,1)">🛰 Vista satélite total</button>
+    </div>
+</aside>
 
-        // Objeto con los elementos del mapa organizados por tipo
-        const mapItems = {
-            capsule: [
-                {% for capsule in capsules %}
-                    {
-                        lat: {{ capsule.ubicacion.y }},
-                        lon: {{ capsule.ubicacion.x }},
-                        content: "{{ capsule.contenido|truncatechars:50 }}",
-                        author: "{{ capsule.usuario.alias }}",
-                        uid: "{{ capsule.uid }}",
-                        ar_url: "{% url 'ar_view' capsule.uid %}",
-                        type: "audio",  // Simulación, ajustar según modelo real
-                        time: "present",  // Simulación
-                        merits: 5  // Simulación
-                    },
-                {% endfor %}
-            ],
-            route: [
-                {% for route in routes %}
-                    {
-                        lat: {{ route.ubicacion.y }},
-                        lon: {{ route.ubicacion.x }},
-                        content: "{{ route.contenido|truncatechars:50 }}",
-                        author: "{{ route.usuario.alias }}",
-                        uid: "{{ route.uid }}",
-                        ar_url: "{% url 'ar_view' route.uid %}",
-                        type: "video",  // Simulación
-                        time: "future",  // Simulación
-                        merits: 50  // Simulación
-                    },
-                {% endfor %}
-            ],
-            poi: [
-                {% for poi in pois %}
-                    {
-                        lat: {{ poi.ubicacion.y }},
-                        lon: {{ poi.ubicacion.x }},
-                        content: "{{ poi.nombre }}",
-                        author: "N/A",
-                        uid: "{{ poi.uid }}",
-                        ar_url: "{% url 'ar_view' poi.uid %}",
-                        type: "image",  // Simulación
-                        time: "past",  // Simulación
-                        merits: 25  // Simulación
-                    },
-                {% endfor %}
-            ],
-            wisdom_space: [
-                {% for space in wisdom_spaces %}
-                    {
-                        lat: {{ space.ubicacion.y }},
-                        lon: {{ space.ubicacion.x }},
-                        content: "{{ space.name }}",
-                        author: "N/A",
-                        uid: "{{ space.uid }}",
-                        ar_url: "{% url 'ar_view' space.uid %}",
-                        type: "texto",  // Simulación
-                        time: "present",  // Simulación
-                        merits: 10  // Simulación
-                    },
-                {% endfor %}
-            ],
-            promotion_space: [
-                {% for space in promotion_spaces %}
-                    {
-                        lat: {{ space.ubicacion.y }},
-                        lon: {{ space.ubicacion.x }},
-                        content: "{{ space.category }} - {{ space.subcategory }}",
-                        author: "{{ space.user.alias }}",
-                        uid: "{{ space.uid }}",
-                        ar_url: "{% url 'ar_view' space.uid %}",
-                        type: "audio",  // Simulación
-                        time: "future",  // Simulación
-                        merits: 30  // Simulación
-                    },
-                {% endfor %}
-            ],
-            social_space: [
-                {% for space in social_spaces %}
-                    {
-                        lat: {{ space.ubicacion.y }},
-                        lon: {{ space.ubicacion.x }},
-                        content: "{{ space.theme }}",
-                        author: "{{ space.creator.alias }}",
-                        uid: "{{ space.uid }}",
-                        ar_url: "{% url 'ar_view' space.uid %}",
-                        type: "video",  // Simulación
-                        time: "past",  // Simulación
-                        merits: 15  // Simulación
-                    },
-                {% endfor %}
-            ]
-        };
+<!-- ╔═════════════ CANVAS DEL MAPA ═════════════╗ -->
+<section class="map5d-canvas">
+    <div class="hud-top">
+        <div>
+            <div class="hud-label">Año mostrado</div>
+            <div class="hud-value" id="hud-year">{{ now_year|default:"2026" }}</div>
+        </div>
+        <div>
+            <div class="hud-label">Capa</div>
+            <div class="hud-value" id="hud-dim">Todas</div>
+        </div>
+        <div>
+            <div class="hud-label">Visibles</div>
+            <div class="hud-value" id="hud-count">0</div>
+        </div>
+        <div>
+            <div class="hud-label">Era</div>
+            <div class="hud-value" id="era-label" style="font-size:1rem;">—</div>
+        </div>
+        <div style="margin-left:auto;">
+            <div class="hud-label">Vista</div>
+            <div class="hud-value" id="hud-view">2D</div>
+        </div>
+    </div>
 
-        // Configuración de iconos y estilos
-        const icons = {
-            audio: 'https://img.icons8.com/color/48/000000/audio-wave.png',
-            texto: 'https://img.icons8.com/color/48/000000/document.png',
-            imagen: 'https://img.icons8.com/color/48/000000/image.png',
-            video: 'https://img.icons8.com/color/48/000000/video.png'
-        };
+    <div class="view-toggle">
+        <button class="active" data-view="map">🗺 Mapa</button>
+        <button data-view="galaxy">🌌 Galaxia</button>
+        <button data-view="timeline">📜 Timeline</button>
+    </div>
 
-        const timeStyles = {
-            past: '#00008B',
-            present: '#ADD8E6',
-            future: '#D3D3D3'
-        };
+    <!-- Buscador estilo Google Maps -->
+    <div style="position:absolute; top:14px; left:50%; transform:translateX(-50%); z-index:999; width: 360px; max-width: 90vw;">
+        <div style="background: rgba(8,12,32,.85); border: 1px solid rgba(0,240,255,.3); border-radius: 14px; backdrop-filter: blur(12px); display:flex; align-items:center; padding: 6px 8px; box-shadow: 0 0 24px rgba(0,240,255,.2);">
+            <span style="font-size: 1.2rem; padding: 0 8px;">🔎</span>
+            <input id="search-input" type="text" placeholder="Buscar ciudad, monumento, museo..."
+                   autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
+                   style="flex:1; background:transparent; border:none; color:#fff; outline:none; padding: 10px 8px; font-size:16px;">
+            <button id="locate-btn" title="Mi ubicación"
+                    style="background: rgba(0,240,255,.15); color: #00f0ff; border: 1px solid rgba(0,240,255,.4); border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 1rem;">📍</button>
+        </div>
+        <ul id="search-results" style="margin: 4px 0 0; padding: 0; list-style: none; background: rgba(8,12,32,.92); border: 1px solid rgba(0,240,255,.3); border-radius: 10px; max-height: 280px; overflow-y: auto; color: #cbd5e1; font-size: .85rem;"></ul>
+    </div>
 
-        // Función para mostrar marcadores y calles virtuales según el tipo seleccionado
-        function showMarkers(type) {
-            // Eliminar marcadores y polilíneas actuales
-            markers.forEach(marker => marker.setMap(null));
-            markers = [];
-            polylines.forEach(polyline => polyline.setMap(null));
-            polylines = [];
+    <div id="map" style="height:100%;"></div>
+    <div id="alt-view" style="display:none; height:100%; padding:60px 40px 100px; overflow:auto; color:#e2e8f0; position:absolute; inset:0; background:#050a1f;"></div>
 
-            let items = [];
-            if (type === 'all') {
-                Object.values(mapItems).forEach(arr => items = items.concat(arr));
-            } else {
-                items = mapItems[type];
-            }
+    <div class="time-slider">
+        <div class="ts-row">
+            <div class="ts-label" id="ts-label">2026</div>
+            <input type="range" id="ts-range" min="-3000" max="2050" value="2026" step="1">
+        </div>
+        <div class="ts-controls">
+            <button class="ts-btn" onclick="setYear(-1000)">−1000 a.C.</button>
+            <button class="ts-btn" onclick="setYear(0)">Año 0</button>
+            <button class="ts-btn" onclick="setYear(500)">500</button>
+            <button class="ts-btn" onclick="setYear(1000)">Edad Media</button>
+            <button class="ts-btn" onclick="setYear(1500)">Renacimiento</button>
+            <button class="ts-btn" onclick="setYear(1800)">Industrial</button>
+            <button class="ts-btn" onclick="setYear(1900)">Siglo XX</button>
+            <button class="ts-btn" onclick="setYear(2000)">2000</button>
+            <button class="ts-btn" onclick="setYear(2026)">HOY</button>
+            <button class="ts-btn" onclick="setYear(2050)">Futuro</button>
+            <button class="ts-btn" id="play-btn" onclick="togglePlay()">▶ Reproducir</button>
+        </div>
+    </div>
+</section>
 
-            // Añadir marcadores al mapa
-            items.forEach(item => {
-                const size = item.merits <= 5 ? 20 : item.merits <= 25 ? 30 : 40;
-                const marker = new google.maps.Marker({
-                    position: { lat: item.lat, lng: item.lon },
-                    map: map,
-                    icon: {
-                        url: icons[item.type],
-                        scaledSize: new google.maps.Size(size, size),
-                        labelOrigin: new google.maps.Point(size / 2, size + 10)
-                    },
-                    label: {
-                        text: item.merits.toString(),
-                        color: '#FFD700',
-                        fontSize: '12px',
-                        fontWeight: 'bold'
-                    },
-                    title: item.content
-                });
+</div>
+</div>
 
-                // Personalizar fondo según tiempo
-                marker.addListener('click', () => {
-                    const infoWindow = new google.maps.InfoWindow({
-                        content: `
-                            <div style="background-color: ${timeStyles[item.time]}; padding: 10px; color: white;">
-                                <b>${item.content}</b><br>
-                                Por: ${item.author}<br>
-                                Méritos: ${item.merits}<br>
-                                <a href="${item.ar_url}" style="color: #FFD700;">Ver en AR (Esfera Infinita)</a>
-                            </div>
-                        `
-                    });
-                    infoWindow.open(map, marker);
-                });
-
-                markers.push(marker);
-            });
-
-            // Dibujar calles virtuales entre nodos cercanos
-            drawVirtualStreets(items);
-        }
-
-        // Función para dibujar calles virtuales
-        function drawVirtualStreets(nodes) {
-            nodes.forEach((node, index) => {
-                if (index < nodes.length - 1) {
-                    const start = { lat: node.lat, lng: node.lon };
-                    const end = { lat: nodes[index + 1].lat, lng: nodes[index + 1].lon };
-
-                    const directionsService = new google.maps.DirectionsService();
-                    directionsService.route({
-                        origin: start,
-                        destination: end,
-                        travelMode: 'WALKING'
-                    }, (response, status) => {
-                        if (status === 'OK') {
-                            const directionsRenderer = new google.maps.DirectionsRenderer({
-                                map: map,
-                                directions: response,
-                                suppressMarkers: true,
-                                polylineOptions: {
-                                    strokeColor: '#00FF00',
-                                    strokeOpacity: 0.8,
-                                    strokeWeight: 5
-                                }
-                            });
-                            polylines.push(directionsRenderer);
-                        }
-                    });
-                }
-            });
-        }
-
-        // Añadir funcionalidad a los botones de filtro
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                showMarkers(btn.dataset.type);
-            });
-        });
-    </script>
-    <script src="{% static 'js/scripts.js' %}"></script>
-</body>
-</html>
+{# AXÓN D7 · Módulos JS en orden estricto de dependencias #}
+<script src="{% static 'js/map5d/core.js' %}"></script>
+<script src="{% static 'js/map5d/layers.js' %}"></script>
+<script src="{% static 'js/map5d/clustering.js' %}"></script>
+<script src="{% static 'js/map5d/popups.js' %}"></script>
+<script src="{% static 'js/map5d/share.js' %}"></script>
+<script src="{% static 'js/map5d/markers.js' %}"></script>
+<script src="{% static 'js/map5d/search.js' %}"></script>
+<script src="{% static 'js/map5d/timeline.js' %}"></script>
+<script src="{% static 'js/map5d/mobile.js' %}"></script>
+<script src="{% static 'js/map5d/ui.js' %}"></script>
+{% endblock %}

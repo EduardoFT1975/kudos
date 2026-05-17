@@ -1,23 +1,17 @@
-<!-- kudos_app/templates/ar_view.html -->
-```html
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Vista AR - Cápsula</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
-        h1 { text-align: center; color: #333; }
-        .ar-container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
-    </style>
-</head>
-<body>
-    <h1>Vista en Realidad Aumentada</h1>
-
-    <div class="ar-container">
-        <p><strong>Cápsula:</strong> {{ capsule.contenido }}</p>
-        {{ ar_scene|safe }}
-    </div>
-</body>
-</html>
-```
+{% extends 'base.html' %}
+{% block title %}AR – {{ capsule.display_title }}{% endblock %}
+{% block extra_head %}
+<script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+{% endblock %}
+{% block content %}
+<div class="container">
+<h1>🎭 Realidad Aumentada</h1>
+<p class="muted">Cápsula: <a href="{% url 'capsule_detail' capsule.uid %}">{{ capsule.display_title }}</a></p>
+<a-scene embedded style="height: 70vh; width: 100%;">
+    <a-sky color="#1E3A8A"></a-sky>
+    <a-text value="{{ capsule.display_title|escapejs }}" position="0 2 -3" color="#D4AF37" align="center" width="6"></a-text>
+    <a-text value="{{ capsule.contenido|truncatechars:200|escapejs }}" position="0 0.5 -3" color="white" align="center" width="4"></a-text>
+    <a-camera position="0 1.6 0"></a-camera>
+</a-scene>
+</div>
+{% endblock %}
