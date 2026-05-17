@@ -61,6 +61,25 @@ def _site_stats():
 # ============================================================
 # PÁGINAS PRINCIPALES
 # ============================================================
+def healthcheck(request):
+    """AXÓN · debug-home · Ruta minimal sin DB, sin template, sin context.
+
+    Aislamiento de runtime errors en `/`. Si esta vista responde 200,
+    el problema está en `home` (template, queries, context processor).
+    Si esta vista también falla 500, el problema está en middleware /
+    settings / DB connection / WSGI.
+
+    Reversión: ver `views.py.snapshot.debug-home.*` y `urls.py.snapshot.debug-home.*`.
+    """
+    from django.http import HttpResponse
+    return HttpResponse(
+        "KUDOS LIVE · v0.9-axon-core · healthcheck OK\n"
+        "Si ves esto, infra Render+Gunicorn+Django+WhiteNoise responden bien.\n"
+        "Revertir: ver KNOWN_DEBTS.md / DEBUG_HOME_500.md.",
+        content_type="text/plain; charset=utf-8",
+    )
+
+
 def home(request):
     recent_capsules = Capsule.objects.filter(privacy='publico').order_by('-timestamp')[:6]
     trending_capsules = Capsule.objects.filter(privacy='publico').order_by('-likes', '-views')[:3]

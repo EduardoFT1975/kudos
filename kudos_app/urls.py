@@ -10,7 +10,11 @@ app_name = None  # Sin namespace para que {% url 'home' %} funcione
 
 urlpatterns = [
     # Páginas principales
-    path('', views.home, name='home'),
+    # AXÓN · debug-home · / apunta temporalmente a healthcheck para aislar
+    # bug 500 en producción. Revertir tras diagnosticar.
+    # Línea original: path('', views.home, name='home'),
+    path('', views.healthcheck, name='home'),
+    path('home/', views.home, name='home_full'),   # home original accesible aquí
     path('dashboard/', views.dashboard, name='dashboard'),
     path('control_panel/', views.dashboard, name='control_panel'),
     path('onboarding/', views.onboarding, name='onboarding'),
