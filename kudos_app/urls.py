@@ -10,11 +10,13 @@ app_name = None  # Sin namespace para que {% url 'home' %} funcione
 
 urlpatterns = [
     # Páginas principales
-    # AXÓN · debug-home · / apunta temporalmente a healthcheck para aislar
-    # bug 500 en producción. Revertir tras diagnosticar.
-    # Línea original: path('', views.home, name='home'),
-    path('', views.healthcheck, name='home'),
-    path('home/', views.home, name='home_full'),   # home original accesible aquí
+    # AXÓN · home real restaurado tras el debug-home temporal. Si vuelve
+    # a aparecer un 500 en `/`, NO ocultar de nuevo · diagnosticar la vista
+    # `home` directamente (template, queries, context processor). El
+    # healthcheck queda accesible para infra checks en /api/health/.
+    path('', views.home, name='home'),
+    path('home/', views.home, name='home_full'),   # alias estable
+    path('healthcheck/', views.healthcheck, name='healthcheck'),   # infra ping
     path('dashboard/', views.dashboard, name='dashboard'),
     path('control_panel/', views.dashboard, name='control_panel'),
     path('onboarding/', views.onboarding, name='onboarding'),
@@ -162,6 +164,10 @@ urlpatterns = [
     # API simple
     path('api/capsules/', views.api_capsules, name='api_capsules'),
     path('api/stats/', views.api_stats, name='api_stats'),
+
+    # AXÓN · Phase 0 fundación contextual
+    path('api/health/', views.api_health, name='api_health'),
+    path('api/places/<slug:slug>/', views.api_place_detail, name='api_place_detail'),
 
     # PANEL DEL FUNDADOR (privado)
     path('founder/', views.founder_panel, name='founder_panel'),
