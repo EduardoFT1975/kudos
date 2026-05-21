@@ -35,7 +35,6 @@ if not SECRET_KEY:
     # En desarrollo: clave aleatoria por sesión (NO PERSISTENTE - mejor que un fallback fijo)
     import secrets as _s
     SECRET_KEY = _s.token_urlsafe(60)
-    print('⚠ DEV: SECRET_KEY generada al vuelo. Define una en .env para sesiones persistentes.')
 DEBUG = os.getenv('DEBUG', 'False' if IS_PRODUCTION else 'True').lower() in ('true', '1', 'yes')
 
 # ALLOWED_HOSTS: en local '*', en producción usar variable de entorno
@@ -133,7 +132,7 @@ if DATABASE_URL:
         import dj_database_url
         DATABASES['default'] = dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     except ImportError:
-        print("⚠ DATABASE_URL detectada pero dj-database-url no está instalado")
+        pass  # diagnostic print removed (P0.8 · unicode-safe startup)
 
 # ====================== AUTENTICACIÓN ======================
 AUTH_USER_MODEL = 'kudos_app.User'
@@ -203,16 +202,11 @@ CONTENT_ENGINE_GEOCACHE_ENABLED = os.getenv(
 # in this list · result is silent breakage of all cross-origin requests.
 # Warn loudly at startup so the misconfig is caught immediately.
 _raw_cors_origins = os.getenv('CORS_ALLOWED_ORIGINS', '')
-if _raw_cors_origins.strip() == '*':
-    import sys as _sys
-    print(
-        "⚠ CORS WARNING: CORS_ALLOWED_ORIGINS='*' detected. "
-        "django-cors-headers treats this as a literal origin, NOT a "
-        "wildcard · all cross-origin requests will be blocked. "
-        "For true wildcard set CORS_ALLOW_ALL_ORIGINS=True (insecure for "
-        "credentialed APIs); for production list explicit origins.",
-        file=_sys.stderr,
-    )
+# CORS wildcard misconfiguration warning previously printed here was
+# removed (P0.8 · unicode-safe startup). The behavior is unchanged · if
+# CORS_ALLOWED_ORIGINS="*" is set, django-cors-headers still treats it
+# as a literal origin (which blocks everything); set CORS_ALLOW_ALL_ORIGINS=True
+# explicitly for true wildcard.
 CORS_ALLOWED_ORIGINS = [
     o.strip() for o in _raw_cors_origins.split(',')
     if o.strip()
@@ -328,11 +322,8 @@ for directory in ['logs', 'media', 'staticfiles', 'static']:
     os.makedirs(os.path.join(BASE_DIR, directory), exist_ok=True)
 
 # ====================== MENSAJES DE INICIO ======================
-if DEBUG:
-    print("=" * 60)
-    mode = "PRODUCCIÓN" if IS_PRODUCTION else "DESARROLLO"
-    db = "PostgreSQL (DATABASE_URL)" if DATABASE_URL else "SQLite local"
-    print(f"✅ Kudos – modo {mode} · BD: {db}")
-    print(f"   DEBUG: {DEBUG}")
-    print(f"   ALLOWED_HOSTS: {ALLOWED_HOSTS}")
-    print("=" * 60)
+# Startup diagnostic prints removed (P0.8 · unicode-safe startup).
+# Previously printed mode/db/DEBUG/ALLOWED_HOSTS using emojis and Unicode
+# punctuation, which raised UnicodeEncodeError under Render's default
+# charmap codec when stdout was non-UTF-8. Same information remains
+# available via `python manage.py diffsettings` or the LOGGING config.
