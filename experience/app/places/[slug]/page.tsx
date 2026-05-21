@@ -185,7 +185,7 @@ function PlaceCard({ place }: { place: Place }) {
         <p style={{ margin: 0, lineHeight: 1.6 }}>{place.description}</p>
       )}
       <dl style={{ marginTop: place.summary || place.description ? 16 : 0, display: "grid", gap: 8, fontSize: 13 }}>
-        {place.lat !== undefined && place.lon !== undefined && (
+        {typeof place.lat === "number" && typeof place.lon === "number" && (
           <Row label="coords" value={`${place.lat.toFixed(4)}, ${place.lon.toFixed(4)}`} mono />
         )}
         {place.era_range && (
