@@ -27,7 +27,6 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { PageAtmosphere } from "@/components/capsule/PageAtmosphere";
 import { SpatialAnchor } from "@/components/capsule/SpatialAnchor";
-import { HeroMedia } from "@/components/media/HeroMedia";
 import { contextualReveal } from "@/motion/ambient";
 import { staggerContainer } from "@/motion/transitions";
 import { ShareMoment } from "@/features/capsule/ShareMoment";
@@ -113,14 +112,12 @@ export function CapsuleSuccess({
           animate="visible"
           className="space-y-10 text-center"
         >
-          {/* P1.1 · Hero media block · 16:9 · imagen real si el payload
-              backend la trae (image_url / hero_image / pageimage /
-              thumbnail / media[] / images[] / gallery[] / URLs en
-              snippets). Gallery rail de thumbnails debajo cuando hay >1.
-              Fallback aurora gradient si no hay media real. Debug signal
-              MEDIA: REAL/FALLBACK en esquina (temporal). */}
+          {/* P1.2 · Inline hero placeholder · zero-dependency visual
+              hierarchy hasta que backend exponga media fields. */}
           <motion.div variants={contextualReveal}>
-            <HeroMedia capsule={capsule} />
+            <div className="aspect-video w-full rounded-2xl bg-gradient-to-br from-indigo-900 via-slate-900 to-black mb-8 flex items-center justify-center text-white/40 text-sm">
+              MEMORIA VISUAL · COMING SOON
+            </div>
           </motion.div>
 
           {/* Verified indicator · accent dot + mono label */}
