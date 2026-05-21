@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Editar perfil – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">👤</div>
+        <div>
+            <h1>Editar perfil</h1>
+            <p class="muted"></p>
+        </div>
+    </header>
+    
+<form method="post" class="form-stacked">{% csrf_token %}
+<label>Alias<input type="text" name="alias" value="{{ user_obj.alias }}"></label>
+<label>Email<input type="email" name="email" value="{{ user_obj.email|default:'' }}"></label>
+<label>Bio<textarea name="bio" rows="3">{{ user_obj.bio }}</textarea></label>
+<label>Avatar (URL)<input type="url" name="avatar" value="{{ user_obj.avatar }}"></label>
+<button class="btn btn-gold">Guardar</button>
+</form>
+
+</div>
+{% endblock %}

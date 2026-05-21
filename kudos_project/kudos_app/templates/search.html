@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}🔎 Búsqueda global – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🔎</div>
+        <div>
+            <h1>🔎 Búsqueda global</h1>
+            <p class="muted">Encuentra cápsulas, usuarios, propuestas y espacios.</p>
+        </div>
+    </header>
+    
+<form method="get" class="search-form">
+<input type="text" name="q" value="{{ query }}" placeholder="Busca cualquier cosa..." autofocus>
+<button class="btn btn-gold">Buscar</button>
+</form>
+{% if has_query %}
+<p class="muted">{{ total }} resultados para "<strong>{{ query }}</strong>"</p>
+{% if capsules %}<h3>📦 Cápsulas</h3><div class="cards-grid">
+{% for c in capsules %}<article class="capsule-card"><h3><a href="{% url 'capsule_detail' c.uid %}">{{ c.display_title }}</a></h3><p>{{ c.contenido|truncatechars:120 }}</p></article>{% endfor %}
+</div>{% endif %}
+{% if users %}<h3>👤 Usuarios</h3><div class="badges-grid">
+{% for u in users %}<a href="{% url 'public_profile' u.alias %}" class="badge-item"><div class="badge-icon">👤</div><div class="badge-name">{{ u.alias }}</div></a>{% endfor %}
+</div>{% endif %}
+{% if proposals %}<h3>🗳️ Propuestas</h3><div class="cards-grid">
+{% for p in proposals %}<article class="capsule-card"><h3>{{ p.title }}</h3><p>{{ p.description|truncatechars:120 }}</p></article>{% endfor %}
+</div>{% endif %}
+{% if spaces %}<h3>🌐 Espacios</h3><div class="cards-grid">
+{% for s in spaces %}<article class="capsule-card"><h3>{{ s.icon }} <a href="{% url 'social_space_detail' s.id %}">{{ s.name }}</a></h3><p>{{ s.description|truncatechars:120 }}</p></article>{% endfor %}
+</div>{% endif %}
+{% endif %}
+
+</div>
+{% endblock %}

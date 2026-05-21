@@ -1,0 +1,13 @@
+﻿# kudos_project/.dockerignore
+
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+.env
+.git
+.gitignore
+node_modules
+ar_vr/node_modules

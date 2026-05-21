@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}KUDOS MIND · Piloto automático{% endblock %}
+
+{% block content %}
+<section class="hero hero-mind">
+    <div class="hero-inner">
+        <div class="hero-orb pulse"></div>
+        <h1 class="hero-title">
+            <span class="gold">KUDOS MIND</span><br>
+            La IA que mantiene vivo el ecosistema 24/7
+        </h1>
+        <p class="hero-sub">
+            Múltiples agentes coordinados importan, curan, moderan, analizan, narran y recomiendan sin parar.
+            Tú das directivas. Ellos las ejecutan.
+        </p>
+    </div>
+</section>
+
+<section class="mind-stats">
+    <div class="stat-card"><div class="stat-num">{{ stats.agents_active }}/{{ stats.agents_total }}</div><div class="stat-lbl">Agentes activos</div></div>
+    <div class="stat-card"><div class="stat-num">{{ stats.actions_total }}</div><div class="stat-lbl">Acciones registradas</div></div>
+    <div class="stat-card"><div class="stat-num">{{ stats.insights_total }}</div><div class="stat-lbl">Insights vigentes</div></div>
+    <div class="stat-card"><div class="stat-num">{{ stats.success_pct }}%</div><div class="stat-lbl">Éxito promedio</div></div>
+</section>
+
+<section class="section-block">
+    <div class="row-between">
+        <h2 class="section-title">Agentes</h2>
+        <form method="post" class="inline-form">{% csrf_token %}
+            <input type="hidden" name="action" value="cycle">
+            <button class="btn btn-gold">▶ Ejecutar ciclo completo ahora</button>
+        </form>
+    </div>
+    <div class="agents-grid">
+        {% for a in agents %}
+        <article class="agent-card">
+            <div class="agent-head">
+                <span class="agent-icon">{{ a.icon }}</span>
+                <div>
+                    <h3>{{ a.name }}</h3>
+                    <p class="muted">{{ a.get_kind_display }}</p>
+                </div>
+                <span class="agent-status status-{{ a.last_status }}">{{ a.last_status }}</span>
+            </div>
+            <p>{{ a.description }}</p>
+            <ul class="agent-meta">
+                <li>⏱ Cada {{ a.interval_seconds }}s</li>
+                <li>🔁 {{ a.runs_total }} ciclos</li>
+                <li>✓ {{ a.successes }} ok / ✗ {{ a.failures }} ko</li>
+                <li>⚡ {{ a.actions_total }} acciones</li>
+                <li>📈 {{ a.success_rate }}% éxito</li>
+            </ul>
+            <form method="post" class="inline-form">{% csrf_token %}
+                <input type="hidden" name="action" value="agent">
+                <input type="hidden" name="agent_code" value="{{ a.code }}">
+                <button class="btn btn-ghost">Lanzar ahora</button>
+            </form>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section-block">
+    <h2 class="section-title">🧭 Directivas que has dado al autopiloto</h2>
+    <form method="post" class="card directive-form">{% csrf_token %}
+        <input type="hidden" name="action" value="directive">
+        <input type="text" name="title" placeholder="Título corto (ej: importar más arte)" required>
+        <textarea name="instruction" placeholder="Instrucción detallada para el agente..." required></textarea>
+        <div class="row">
+            <select name="scope">
+                <option value="global">Global · todos los agentes</option>
+                <option value="importer">Importador</option>
+                <option value="curator">Curador</option>
+                <option value="moderator">Moderador</option>
+                <option value="recommender">Recomendador</option>
+                <option value="guardian">Guardián personal</option>
+            </select>
+            <button class="btn btn-gold">Añadir directiva</button>
+        </div>
+    </form>
+    <ul class="directive-list">
+        {% for d in directives %}
+        <li class="directive-item">
+            <strong>{{ d.title }}</strong>
+            <small class="muted">· ámbito: {{ d.scope }} · prioridad {{ d.priority }}</small>
+            <p>{{ d.instruction }}</p>
+            <form method="post" action="{% url 'ai_directive_toggle' d.id %}" class="inline-form">{% csrf_token %}
+                <button class="btn btn-ghost btn-sm">Pausar / activar</button>
+            </form>
+        </li>
+        {% empty %}
+        <li class="muted">Aún no has dado ninguna directiva. La IA trabaja con sus heurísticas por defecto.</li>
+        {% endfor %}
+    </ul>
+</section>
+
+<section class="section-block">
+    <h2 class="section-title">💡 Insights recientes</h2>
+    <div class="cards-grid">
+        {% for i in insights %}
+        <article class="insight-card impact-{{ i.impact }}">
+            <header>
+                <span class="insight-kind">{{ i.get_kind_display }}</span>
+                <small class="muted">{{ i.created|date:"d M H:i" }}</small>
+            </header>
+            <h3>{{ i.title }}</h3>
+            <p>{{ i.body }}</p>
+            <footer>
+                {% if i.related_url %}<a href="{{ i.related_url }}" class="btn btn-ghost btn-sm">Ver</a>{% endif %}
+                <form method="post" action="{% url 'ai_insight_accept' i.id %}" class="inline-form">{% csrf_token %}
+                    <button class="btn btn-gold btn-sm" title="Acepta y ejecuta lo que propone">✓ Aceptar y ejecutar</button>
+                </form>
+                <form method="post" action="{% url 'ai_insight_archive' i.id %}" class="inline-form">{% csrf_token %}
+                    <button class="btn btn-ghost btn-sm">Archivar</button>
+                </form>
+            </footer>
+            {% if i.parameters.execution_summary %}
+            <p style="margin-top:8px; padding:6px 10px; background:rgba(16,185,129,.1); border-left:3px solid #10b981; border-radius:6px; font-size:.85rem;">
+                ✓ Ejecutado: {{ i.parameters.execution_summary }}
+            </p>
+            {% endif %}
+        </article>
+        {% empty %}
+        <p class="muted">Aún no hay insights. Lanza un ciclo del autopiloto para generarlos.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section-block">
+    <h2 class="section-title">📜 Acciones recientes (caja negra)</h2>
+    <div class="action-log">
+        <table class="data-table">
+            <thead>
+                <tr><th>Cuándo</th><th>Agente</th><th>Acción</th><th>Nivel</th><th>Resumen</th></tr>
+            </thead>
+            <tbody>
+            {% for a in actions %}
+                <tr class="lvl-{{ a.level }}">
+                    <td><small>{{ a.timestamp|date:"d M H:i:s" }}</small></td>
+                    <td>{% if a.agent %}{{ a.agent.icon }} {{ a.agent.name }}{% else %}—{% endif %}</td>
+                    <td>{{ a.action }}</td>
+                    <td>{{ a.get_level_display }}</td>
+                    <td><small>{{ a.summary }}</small></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5" class="muted">Aún no hay acciones registradas.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════ -->
+<!-- ║ CHAT con Kudos Mind                                              -->
+<!-- ╚══════════════════════════════════════════════════════════════════ -->
+<section class="section-block">
+    <h2 class="section-title">💬 Habla con Kudos Mind</h2>
+    <p class="muted">Conversación directa con la IA interna. Si configuras <code>ANTHROPIC_API_KEY</code> en <code>.env</code>, responderá Claude. Sin clave, modo heurístico local.</p>
+    <div style="background: rgba(8,12,32,.6); border: 1px solid rgba(124,58,237,.3); border-radius: 14px; padding: 18px; backdrop-filter: blur(10px);">
+        <div id="chat-stream" style="min-height: 280px; max-height: 460px; overflow-y: auto; padding: 12px; background: rgba(0,0,0,.3); border-radius: 10px; margin-bottom: 12px;">
+            <div style="color: #a78bfa; font-style: italic;">🧠 Kudos Mind: Hola Eduardo. Soy tu IA interna. Pregúntame cualquier cosa o dame una orden ("lanza atlas", "muestra estado de los agentes", "haz un post viral sobre el Coliseo"...).</div>
+        </div>
+        <form id="chat-form" style="display: flex; gap: 8px;">
+            {% csrf_token %}
+            <input type="text" id="chat-input" placeholder="Escribe tu mensaje a Kudos Mind..."
+                   style="flex:1; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(167,139,250,.4); background: rgba(0,0,0,.3); color: #fff; font-size: 1rem;" autofocus>
+            <button type="submit" class="btn btn-gold">Enviar</button>
+        </form>
+    </div>
+</section>
+
+<script>
+document.getElementById('chat-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('chat-input');
+    const stream = document.getElementById('chat-stream');
+    const msg = input.value.trim();
+    if (!msg) return;
+    stream.innerHTML += `<div style="margin-top:10px; text-align:right;"><strong>Tú:</strong> ${msg.replace(/</g,'&lt;')}</div>`;
+    input.value = '';
+    stream.scrollTop = stream.scrollHeight;
+    const fd = new FormData();
+    fd.append('message', msg);
+    fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    stream.innerHTML += `<div id="thinking" style="margin-top:8px; color:#94a3b8;">🧠 Mind está pensando...</div>`;
+    stream.scrollTop = stream.scrollHeight;
+    try {
+        const r = await fetch('{% url "ai_chat" %}', { method: 'POST', body: fd });
+        const data = await r.json();
+        document.getElementById('thinking')?.remove();
+        const sourceTag = data.source === 'claude' ? '⚡ Claude' : data.source === 'fallback' ? '⚠ Local' : '🧠 Local';
+        stream.innerHTML += `<div style="margin-top:10px; padding: 10px 14px; background: rgba(124,58,237,.1); border-left: 3px solid #a78bfa; border-radius: 8px;">
+            <strong style="color:#a78bfa;">Kudos Mind <small style="color:#94a3b8;">[${sourceTag}]</small>:</strong><br>
+            ${(data.reply||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')}
+        </div>`;
+    } catch (err) {
+        document.getElementById('thinking')?.remove();
+        stream.innerHTML += `<div style="margin-top:10px; color:#dc2626;">Error: ${err.message}</div>`;
+    }
+    stream.scrollTop = stream.scrollHeight;
+});
+</script>
+{% endblock %}

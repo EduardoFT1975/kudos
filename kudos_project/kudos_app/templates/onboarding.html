@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Bienvenido a Kudos{% endblock %}
+
+{% block content %}
+<div class="onboarding-container">
+    <h1>🚀 Tu viaje empieza aquí</h1>
+    <p class="lead">{{ PROJECT_TAGLINE }}</p>
+
+    <div class="onboarding-steps">
+        <div class="step">
+            <div class="step-number">1</div>
+            <h3>Crea tu cuenta</h3>
+            <p>Tu identidad en Kudos: un alias y un UID únicos.</p>
+            {% if user.is_authenticated %}
+                <span class="step-done">✓ Hecho</span>
+            {% else %}
+                <a href="{% url 'register' %}" class="btn btn-gold">Crear cuenta</a>
+            {% endif %}
+        </div>
+
+        <div class="step">
+            <div class="step-number">2</div>
+            <h3>Crea tu primera cápsula</h3>
+            <p>Cápsulas multidimensionales: contenido, ubicación, tiempo, temas.</p>
+            <a href="{% url 'create_capsule' %}" class="btn btn-ghost">Crear cápsula</a>
+        </div>
+
+        <div class="step">
+            <div class="step-number">3</div>
+            <h3>Explora el mapa</h3>
+            <p>Visualiza el legado de la humanidad geolocalizado.</p>
+            <a href="{% url 'map' %}" class="btn btn-ghost">Ver mapa</a>
+        </div>
+
+        <div class="step">
+            <div class="step-number">4</div>
+            <h3>Vota en el Comité</h3>
+            <p>Participa en el Congreso de la Conciencia Colectiva Global.</p>
+            <a href="{% url 'global_consciousness' %}" class="btn btn-ghost">Ver propuestas</a>
+        </div>
+    </div>
+
+    <h2>¿Qué hace especial a Kudos?</h2>
+    <ul class="feature-list">
+        <li>🌌 <strong>Eternidad:</strong> Tu legado preservado para las generaciones futuras.</li>
+        <li>🔗 <strong>Multidimensional:</strong> 5 dimensiones de información: contenido, lugar, tiempo, tema, contexto.</li>
+        <li>⚖ <strong>Mérito:</strong> Sistema de XP, niveles e insignias por contribuir.</li>
+        <li>🏛 <strong>Descentralización:</strong> Comunidad como base de la red y la economía.</li>
+    </ul>
+</div>
+{% endblock %}

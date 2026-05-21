@@ -81,16 +81,22 @@ export function CapsuleEmptyZone({
           Este lugar guarda silencio.
         </motion.p>
 
-        {/* Subtitle · regular weight · the gentle context */}
+        {/* Subtitle · regular weight · the gentle context.
+            P0.9 WOW pilot · el último renglón guía al usuario hacia las
+            ciudades donde KUDOS tiene densidad probada (Roma · Salamanca).
+            Sin promesa hueca · invitación específica. Reduce el "meh"
+            cuando la geo cae en zona vacía y el usuario se va. */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.6, ease: "easeOut", delay: 1.4 }}
-          className="mx-auto max-w-[400px] text-[14px] leading-[1.7] text-white/45"
+          className="mx-auto max-w-[420px] text-[14px] leading-[1.7] text-white/45"
         >
           Volverá a hablar cuando tenga más historia que ofrecer.
           <br />
-          Mientras tanto, prueba un punto cercano.
+          Mientras tanto, KUDOS escucha más fuerte en{" "}
+          <span className="text-[var(--kudos-accent-bright)]/80">Roma</span> o{" "}
+          <span className="text-[var(--kudos-accent-bright)]/80">Salamanca</span>.
         </motion.p>
 
         {/* Phase 14.5 recovery pills · only render when callbacks exist.

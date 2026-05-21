@@ -16,7 +16,11 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 
-const HIDDEN_PREFIXES = ["/descubrir", "/capsules", "/places", "/time"];
+// P0.9 · liberamos /descubrir, /capsules y /time del beta gate.
+// Solo /places sigue oculto porque su backend (/api/places/<slug>/) no
+// está implementado y la ruta renderiza un panel "endpoint pendiente"
+// reputacionalmente malo para usuario final.
+const HIDDEN_PREFIXES = ["/places"];
 
 export function middleware(req: NextRequest) {
   if (process.env.BETA_HIDE_DORMANT !== "1") {
@@ -35,9 +39,6 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/descubrir/:path*",
-    "/capsules/:path*",
     "/places/:path*",
-    "/time/:path*",
   ],
 };

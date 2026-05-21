@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}🌐 Espacios sociales – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🌐</div>
+        <div>
+            <h1>🌐 Espacios sociales</h1>
+            <p class="muted">Comunidades temáticas. Crea o únete.</p>
+        </div>
+    </header>
+    
+{% if user.is_authenticated %}
+<details class="form-collapsible"><summary class="btn btn-gold">+ Crear espacio</summary>
+<form method="post" class="form-stacked">
+    {% csrf_token %}
+    <div class="form-row">
+        <label>Nombre *<input type="text" name="name" required maxlength="100"></label>
+        <label>Icono<input type="text" name="icon" maxlength="10" value="🌐"></label>
+    </div>
+    <label>Descripción *<textarea name="description" rows="3" required></textarea></label>
+    <button class="btn btn-gold">Crear</button>
+</form>
+</details>
+{% endif %}
+<div class="cards-grid">
+    {% for s in spaces %}
+    <article class="capsule-card">
+        <h3>{{ s.icon }} <a href="{% url 'social_space_detail' s.id %}">{{ s.name }}</a></h3>
+        <p class="muted">{{ s.member_count }} miembros · creado por {{ s.creator.alias }}</p>
+        <p>{{ s.description|truncatechars:140 }}</p>
+    </article>
+    {% empty %}
+    <p class="muted">Sé el primero en crear un espacio social.</p>
+    {% endfor %}
+</div>
+
+</div>
+{% endblock %}

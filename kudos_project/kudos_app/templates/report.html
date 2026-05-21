@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}🚨 Reportar contenido – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🚨</div>
+        <div>
+            <h1>🚨 Reportar contenido</h1>
+            <p class="muted">Ayúdanos a mantener Kudos sano.</p>
+        </div>
+    </header>
+    
+<form method="post" class="form-stacked">{% csrf_token %}
+<label>UID de la cápsula<input type="text" name="capsule_uid"></label>
+<label>Motivo<textarea name="reason" rows="3"></textarea></label>
+<button class="btn btn-gold">Enviar reporte</button>
+</form>
+<p class="muted">Las denuncias se revisan por moderadores y el Comité.</p>
+
+</div>
+{% endblock %}

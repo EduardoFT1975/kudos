@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}🏆 Logros e insignias – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🏆</div>
+        <div>
+            <h1>🏆 Logros e insignias</h1>
+            <p class="muted">Tu progreso en el ecosistema.</p>
+        </div>
+    </header>
+    
+<h3>Insignias conseguidas ({{ badges|length }})</h3>
+<div class="badges-grid">
+{% for b in badges %}<div class="badge-item earned"><div class="badge-icon">{{ b.icon }}</div><div class="badge-name">{{ b.name }}</div><small>{{ b.date_awarded|date:"d/m/Y" }}</small></div>
+{% empty %}<p class="muted">Aún no tienes insignias.</p>{% endfor %}
+</div>
+<h3>Por conseguir</h3>
+<div class="badges-grid">
+{% for name, desc, icon in catalog %}{% if name not in earned %}<div class="badge-item locked"><div class="badge-icon">{{ icon }}</div><div class="badge-name">{{ name }}</div><small>{{ desc }}</small></div>{% endif %}{% endfor %}
+</div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}🎨 Arte y Festival – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🎨</div>
+        <div>
+            <h1>🎨 Arte y Festival</h1>
+            <p class="muted">Festival multidimensional del arte humano.</p>
+        </div>
+    </header>
+    
+<p>Comparte tus creaciones, descubre las de otros, vota a tus favoritos.</p>
+<a href="{% url 'create_capsule' %}?modo=arte" class="btn btn-gold">+ Aportar obra</a>
+
+</div>
+{% endblock %}

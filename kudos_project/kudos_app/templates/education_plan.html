@@ -1,0 +1,103 @@
+<!-- kudos_app/templates/education_plan.html -->
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crear Plan de Aprendizaje</title>
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+    <script src="{% static 'js/leaflet-src.js' %}"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        #plan-map { height: 300px; margin: 20px 0; border: 2px solid #ccc; }
+        .form-container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        .capsule-list { margin: 20px 0; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 5px 0; }
+        input, select, textarea { width: 100%; padding: 8px; margin: 5px 0; }
+        button { padding: 10px 20px; background-color: #FFD700; border: none; cursor: pointer; }
+        button:hover { background-color: #FFC107; }
+    </style>
+</head>
+<body>
+    <h1>Crear Plan de Aprendizaje</h1>
+
+    <div class="form-container">
+        <form method="POST">
+            {% csrf_token %}
+            <label for="plan_name">Nombre del Plan:</label>
+            <input type="text" id="plan_name" name="plan_name" required>
+
+            <label for="description">Descripción:</label>
+            <textarea id="description" name="description" rows="4"></textarea>
+
+            <label for="themes">Temas:</label>
+            <select id="themes" name="themes" multiple required>
+                {% for theme in themes %}
+                    <option value="{{ theme }}">{{ theme }}</option>
+                {% endfor %}
+            </select>
+
+            <h2>Seleccionar Cápsulas (máximo 10)</h2>
+            <div class="capsule-list">
+                <ul>
+                    {% for capsule in capsules %}
+                        <li>
+                            <input type="checkbox" name="capsules" value="{{ capsule.uid }}" class="capsule-checkbox">
+                            {{ capsule.contenido }} (Modo: {{ capsule.modo }}, Año: {{ capsule.fecha.year }})
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <button type="submit">Crear Plan</button>
+        </form>
+    </div>
+
+    <!-- Mapa Interactivo -->
+    <div id="plan-map"></div>
+
+    <script>
+        // Inicializar mapa con Leaflet
+        var map = L.map('plan-map').setView([41.8902, 12.4924], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            minZoom: 0,
+            maxZoom: 20
+        }).addTo(map);
+
+        var capsuleLayer = L.geoJSON({{ map_data|safe }}, {
+            style: function(feature) {
+                return { color: "#FFD700", weight: 2 };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `<b>${feature.properties.description}</b><br>
+                    Modo: ${feature.properties.mode}<br>
+                    Temas: ${feature.properties.themes.join(', ')}<br>
+                    Clima: ${feature.properties.weather}`
+                );
+            }
+        }).addTo(map);
+
+        if (capsuleLayer.getBounds().isValid()) {
+            map.fitBounds(capsuleLayer.getBounds());
+        }
+
+        // Limitar selección de cápsulas a 10
+        document.querySelectorAll('.capsule-checkbox').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                var checkedCount = document.querySelectorAll('.capsule-checkbox:checked').length;
+                if (checkedCount > 10) {
+                    this.checked = false;
+                    alert('No puedes seleccionar más de 10 cápsulas.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+```

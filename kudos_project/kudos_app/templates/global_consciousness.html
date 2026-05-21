@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}🗳️ Comité de Sabios – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🗳️</div>
+        <div>
+            <h1>🗳️ Comité de Sabios</h1>
+            <p class="muted">El Congreso de la Conciencia Colectiva Global. Propón, debate, vota.</p>
+        </div>
+    </header>
+    
+<a href="{% url 'create_proposal' %}" class="btn btn-gold">+ Nueva propuesta</a>
+<div class="cards-grid">
+    {% for p in proposals %}
+    <article class="capsule-card">
+        <span class="capsule-mode">{{ p.get_status_display }}</span>
+        <h3>{{ p.title }}</h3>
+        <p class="muted">por {{ p.user.alias }} · {{ p.timestamp|date:"d/m/Y" }}</p>
+        <p>{{ p.description|truncatechars:200 }}</p>
+        <div class="vote-bar">
+            <div class="vote-yes" style="width: {{ p.support_percentage }}%"></div>
+        </div>
+        <div class="capsule-meta">
+            <span>👍 {{ p.votes_for }}</span>
+            <span>👎 {{ p.votes_against }}</span>
+        </div>
+        {% if user.is_authenticated %}
+        <div class="capsule-actions">
+            <a href="{% url 'vote_proposal' p.id 'favor' %}" class="btn btn-ghost">A favor</a>
+            <a href="{% url 'vote_proposal' p.id 'contra' %}" class="btn btn-ghost">En contra</a>
+        </div>
+        {% endif %}
+    </article>
+    {% empty %}
+    <p class="muted">Aún no hay propuestas en debate.</p>
+    {% endfor %}
+</div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}🔔 Notificaciones – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🔔</div>
+        <div>
+            <h1>🔔 Notificaciones</h1>
+            <p class="muted">Tu actividad reciente en el ecosistema.</p>
+        </div>
+    </header>
+    
+<div class="notif-list">
+{% for n in notifications %}
+<div class="notif-item priority-{{ n.priority }} {% if n.read %}read{% endif %}">
+<div>{{ n.message }}<small>{{ n.timestamp|date:"d/m/Y H:i" }}</small></div>
+{% if not n.read %}<a href="{% url 'mark_notification_read' n.id %}" class="btn btn-ghost">Marcar leída</a>{% endif %}
+</div>
+{% empty %}<p class="muted">Sin notificaciones.</p>{% endfor %}
+</div>
+
+</div>
+{% endblock %}

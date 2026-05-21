@@ -1,0 +1,30 @@
+<!-- kudos_app/templates/capsule_created.html -->
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cápsula Creada</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1 { text-align: center; color: #333; }
+        .success-container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Cápsula Creada</h1>
+
+    <div class="success-container">
+        <p>Tu cápsula ha sido creada con éxito.</p>
+        <p><strong>Contenido:</strong> {{ capsule.contenido }}</p>
+        <p><strong>Modo:</strong> {{ capsule.modo }}</p>
+        <p><strong>Temas:</strong> {{ capsule.temas|join:", " }}</p>
+        {% if capsule.parameters.educational_level %}
+            <p><strong>Nivel Educativo:</strong> {{ capsule.parameters.educational_level }}</p>
+            <p><strong>Objetivos de Aprendizaje:</strong> {{ capsule.parameters.learning_objectives }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>
+```

@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Museo Universal de Cápsulas - Kudos</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .capsule { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Museo Universal de Cápsulas</h1>
+    <div>
+        {{ museum_scene|safe }}
+    </div>
+    <h2>Cápsulas Exhibidas</h2>
+    {% for capsule in capsules %}
+        <div class="capsule">
+            <p><strong>{{ capsule.contenido }}</strong> (Modo: {{ capsule.modo }})</p>
+            <p>Temas: {{ capsule.temas|join:", " }}</p>
+            {% if capsule.parameters.clip_url %}
+                <p><a href="{{ capsule.parameters.clip_url }}">Ver Clip</a></p>
+            {% endif %}
+        </div>
+    {% empty %}
+        <p>No hay cápsulas para exhibir.</p>
+    {% endfor %}
+    <div id="capsuleMap" style="height: 400px;"></div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script>
+        const map = L.map('capsuleMap').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        const geojson = {{ map_data|safe }};
+        L.geoJSON(geojson, {
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(feature.properties.description);
+            }
+        }).addTo(map);
+    </script>
+    <p><a href="{% url 'control_panel' %}">Volver al Panel</a></p>
+</body>
+</html>

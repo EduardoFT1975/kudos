@@ -1,0 +1,175 @@
+{% load static %}
+{% load feature_tags %}
+<!DOCTYPE html>
+<html lang="es" data-theme="{% if user_dark_mode %}dark{% else %}light{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1E3A8A">
+    <title>{% block title %}Kudos – Preserva tu legado{% endblock %}</title>
+    <meta name="description" content="{{ PROJECT_TAGLINE }}">
+    <meta property="og:title" content="{% block og_title %}Kudos · Civilización digital{% endblock %}">
+    <meta property="og:description" content="{{ PROJECT_TAGLINE }}">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Saltar al contenido</a>
+
+<header class="topbar">
+    <div class="topbar-inner">
+        <a href="{% url 'home' %}" class="brand" aria-label="Inicio Kudos">
+            <span class="brand-orb"></span>
+            <span class="brand-text">{{ PROJECT_NAME }}</span>
+            <span class="brand-tag">multidimensional</span>
+        </a>
+
+        <button class="hamburger" aria-label="Abrir menú"
+                onclick="document.body.classList.toggle('nav-open')">☰</button>
+
+        {# ── AXÓN · PUBLIC CORE NAV (7 sistemas) ─────────────────────────── #}
+        <nav class="main-nav" aria-label="Navegación principal">
+            <a href="{% url 'home' %}">🏠 Inicio</a>
+            <a href="{% url 'capsule_list' %}">🌌 Cápsulas</a>
+            <a href="{% url 'map' %}">🌍 Mapa</a>
+            <a href="{% url 'search' %}">🔎 Buscar</a>
+            <a href="{% url 'timeline' %}">📜 Timeline</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'ai_panel' %}">🧠 Mind</a>
+            {% endif %}
+        </nav>
+
+        <form action="{% url 'search' %}" method="get" class="searchbar" role="search">
+            <input type="text" name="q" placeholder="🔎 Buscar en todo Kudos…"
+                   value="{{ request.GET.q|default_if_none:'' }}"
+                   aria-label="Buscar">
+        </form>
+
+        <div class="user-area">
+            {% if user.is_authenticated %}
+                {% if user.is_superuser or user.role == 'founder' or user.role == 'admin' %}
+                    {% if_feature "founder_panel" %}
+                        <a href="{% url 'founder_panel' %}" class="btn btn-gold sm" title="Panel del Fundador">⭐</a>
+                    {% endif_feature %}
+                    <a href="{% url 'ai_panel' %}" class="btn btn-mind sm" title="KUDOS MIND · IA interna">🧠</a>
+                    {% if_feature "personal_life" %}
+                        <a href="{% url 'personal_dashboard' %}" class="btn btn-ghost sm" title="Mi vida personal">🌿</a>
+                    {% endif_feature %}
+                {% endif %}
+                {% if_feature "feed_social" %}
+                    <a href="{% url 'messages_inbox' %}" class="btn btn-ghost sm" title="Mensajes">📨</a>
+                {% endif_feature %}
+                {% if_feature "notifications" %}
+                    <a href="{% url 'notifications' %}" class="notif-link" title="Notificaciones">
+                        🔔{% if unread_notifications %}<span class="badge">{{ unread_notifications }}</span>{% endif %}
+                    </a>
+                {% endif_feature %}
+                <a href="{% url 'dashboard' %}" class="btn btn-ghost sm">Panel</a>
+                <a href="{% url 'profile' %}" class="user-pill" title="Mi perfil">
+                    {% if user.avatar %}<img src="{{ user.avatar }}" alt=""/>{% else %}👤{% endif %}
+                    <span class="user-pill-name">{{ user.alias }}</span>
+                    <small class="lvl">Lv {{ user.level }}</small>
+                </a>
+                {% if_feature "dark_mode_toggle" %}
+                    <button class="dark-toggle" onclick="toggleDarkMode()" title="Modo oscuro" aria-label="Cambiar modo">🌓</button>
+                {% endif_feature %}
+                <a href="{% url 'logout' %}" class="btn btn-ghost sm">Salir</a>
+            {% else %}
+                {% if_feature "dark_mode_toggle" %}
+                    <button class="dark-toggle" onclick="toggleDarkMode()" title="Modo oscuro" aria-label="Cambiar modo">🌓</button>
+                {% endif_feature %}
+                <a href="{% url 'login' %}" class="btn btn-ghost sm">Entrar</a>
+                <a href="{% url 'register' %}" class="btn btn-gold sm">Crear cuenta</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+{% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+        <div class="message message-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<main id="main-content" class="page-content">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+    <div class="footer-grid">
+        <div>
+            <h4><span class="brand-orb tiny"></span> {{ PROJECT_NAME }}</h4>
+            <p class="muted">{{ PROJECT_TAGLINE }}</p>
+            <p class="muted">© 2026 · Civilización multidimensional 1D~5D</p>
+        </div>
+        <div>
+            <h4>Fases</h4>
+            {% for ph in PROJECT_PHASES %}
+                {% if ph.code == 'connect' %}
+                    {% if_feature "connect" %}
+                        <a href="{% url 'connect' %}">{{ ph.icon }} {{ ph.name }}</a><br>
+                    {% endif_feature %}
+                    {% unless_feature "connect" %}
+                        <a href="{% url 'capsule_list' %}">{{ ph.icon }} {{ ph.name }}</a><br>
+                    {% endunless_feature %}
+                {% elif ph.code == 'mind' %}
+                    <a href="{% url 'ai_panel' %}">{{ ph.icon }} {{ ph.name }}</a><br>
+                {% else %}
+                    <a href="{% url 'capsule_list' %}">{{ ph.icon }} {{ ph.name }}</a><br>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div>
+            <h4>Explora</h4>
+            <a href="{% url 'map' %}">🌍 Mapa 5D</a><br>
+            <a href="{% url 'capsule_list' %}">🌌 Cápsulas</a><br>
+            <a href="{% url 'timeline' %}">📜 Línea temporal</a><br>
+            <a href="{% url 'search' %}">🔎 Buscar</a>
+            {% if_feature "trending" %}<br><a href="{% url 'trending' %}">🔥 Tendencias</a>{% endif_feature %}
+            {% if_feature "achievements" %}<br><a href="{% url 'achievements' %}">🏆 Logros</a>{% endif_feature %}
+            {% if_feature "data_analysis" %}<br><a href="{% url 'data_analysis' %}">📊 Análisis</a>{% endif_feature %}
+        </div>
+        <div>
+            <h4>Comunidad</h4>
+            <a href="{% url 'manifesto' %}">📜 Manifiesto</a><br>
+            <a href="{% url 'about' %}">ℹ Acerca de</a>
+            {% if_feature "report_feedback" %}<br><a href="{% url 'feedback' %}">Feedback</a>{% endif_feature %}
+            {% if_feature "report_feedback" %}<br><a href="{% url 'safety' %}">Seguridad</a>{% endif_feature %}
+        </div>
+        <div>
+            <h4>Legal</h4>
+            <a href="{% url 'terms' %}">Términos</a><br>
+            <a href="{% url 'privacy' %}">Privacidad</a>
+            {% if_feature "report_feedback" %}<br><a href="{% url 'report' %}">Reportar</a>{% endif_feature %}<br>
+            <a href="/admin/" class="muted">Admin</a>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <small>{{ PROJECT_NAME }} · IA interna activa 24/7 · Construido con cariño en Madrid</small>
+    </div>
+</footer>
+
+{# ── AXÓN · FAB Mind (sólo PUBLIC; resto, oculto) ──────────────────────── #}
+{% if user.is_authenticated %}
+    {% if user.is_superuser or user.role == 'founder' or user.role == 'admin' %}
+        <a href="{% url 'ai_panel' %}" class="fab-mind" title="KUDOS MIND · IA interna">🧠</a>
+    {% else %}
+        {% if_feature "feed_social" %}
+            <a href="{% url 'feed' %}" class="fab-mind" title="Feed">🧠</a>
+        {% endif_feature %}
+        {% unless_feature "feed_social" %}
+            <a href="{% url 'ai_panel' %}" class="fab-mind" title="KUDOS MIND · IA interna">🧠</a>
+        {% endunless_feature %}
+    {% endif %}
+{% endif %}
+
+<script src="{% static 'js/scripts.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

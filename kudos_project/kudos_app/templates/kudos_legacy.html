@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}📜 Legado Kudos – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">📜</div>
+        <div>
+            <h1>📜 Legado Kudos</h1>
+            <p class="muted">Las cápsulas que perdurarán.</p>
+        </div>
+    </header>
+    
+<div class="cards-grid">
+{% for c in capsules %}
+<article class="capsule-card {% if c.image %}has-image{% endif %}">
+{% if c.image %}<a href="{% url 'capsule_detail' c.uid %}" class="capsule-thumb"><img src="{{ c.image }}" alt="" loading="lazy">{% if c.video %}<span class="play-badge">▶</span>{% endif %}</a>{% endif %}
+<div class="capsule-card-body">
+<h3><a href="{% url 'capsule_detail' c.uid %}">{{ c.display_title }}</a></h3>
+<p class="muted">{{ c.usuario.alias }} · {{ c.fecha }}</p></div>
+</article>
+{% empty %}<p class="muted">Aún no se ha forjado legado público.</p>{% endfor %}
+</div>
+
+</div>
+{% endblock %}

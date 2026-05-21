@@ -1,0 +1,1026 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-05-20T13:52:42.575089+00:00",
+  "finished_at": "2026-05-20T13:53:54.889342+00:00",
+  "duration_s": 72.314253,
+  "filters": {
+    "group": null,
+    "limit": null
+  },
+  "total_tests": 19,
+  "summary": {
+    "pass": 14,
+    "warn": 2,
+    "fail": 3,
+    "by_group": {
+      "A": {
+        "pass": 3,
+        "warn": 0,
+        "fail": 1
+      },
+      "B": {
+        "pass": 1,
+        "warn": 2,
+        "fail": 1
+      },
+      "C": {
+        "pass": 3,
+        "warn": 0,
+        "fail": 1
+      },
+      "D": {
+        "pass": 4,
+        "warn": 0,
+        "fail": 0
+      },
+      "E": {
+        "pass": 3,
+        "warn": 0,
+        "fail": 0
+      }
+    }
+  },
+  "confidence_buckets": {
+    "0.00-0.25": 0,
+    "0.25-0.50": 0,
+    "0.50-0.75": 0,
+    "0.75-1.00": 10
+  },
+  "flags_summary": {},
+  "tests": [
+    {
+      "label": "Madrid · Puerta del Sol",
+      "group": "A",
+      "expected_mode": "direct_landmark",
+      "input": {
+        "lat": 40.4168,
+        "lng": -3.7038,
+        "radius_m": 500
+      },
+      "candidate_count": 10,
+      "winner_entity_id": "Q2807",
+      "winner_title": "Madrid",
+      "winner_classes": [
+        "Q2074737",
+        "Q1200957",
+        "Q200250"
+      ],
+      "winner_sitelinks_count": 301,
+      "rank_score": 0.8887,
+      "confidence": 0.96,
+      "via_landmark_override": false,
+      "failure_class": null,
+      "ux_state": "success",
+      "ux_source": "direct",
+      "latency_ms": 4994,
+      "pool_classes_by_qid": {
+        "Q2465181": [
+          "Q10267336"
+        ],
+        "Q427163": [
+          "Q174782"
+        ],
+        "Q5848907": [
+          "Q860861"
+        ],
+        "Q5754166": [
+          "Q13402009"
+        ],
+        "Q1766008": [
+          "Q928830",
+          "Q22808403"
+        ],
+        "Q2807": [
+          "Q2074737",
+          "Q1200957",
+          "Q200250"
+        ],
+        "Q8350144": [
+          "Q930164"
+        ],
+        "Q1165987": [
+          "Q139554557"
+        ],
+        "Q9067027": [
+          "Q5281655"
+        ],
+        "Q6105157": []
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-001",
+      "verdict": "PASS",
+      "flags": []
+    },
+    {
+      "label": "Barcelona · Plaça Catalunya",
+      "group": "A",
+      "expected_mode": "direct_landmark",
+      "input": {
+        "lat": 41.387,
+        "lng": 2.17,
+        "radius_m": 500
+      },
+      "candidate_count": 10,
+      "winner_entity_id": null,
+      "winner_title": null,
+      "winner_classes": [],
+      "winner_sitelinks_count": null,
+      "rank_score": 0.6008,
+      "confidence": null,
+      "via_landmark_override": false,
+      "failure_class": "UNGROUNDED",
+      "ux_state": "empty_zone",
+      "ux_source": null,
+      "latency_ms": 4443,
+      "pool_classes_by_qid": {
+        "Q3816697": [
+          "Q4688003"
+        ],
+        "Q800447": [
+          "Q928830",
+          "Q55488",
+          "Q22808403",
+          "Q1342434"
+        ],
+        "Q1577019": [
+          "Q15079663"
+        ],
+        "Q678390": [
+          "Q15079663"
+        ],
+        "Q822881": [
+          "Q174782",
+          "Q2298537"
+        ],
+        "Q16726061": [
+          "Q18247357",
+          "Q17537576",
+          "Q860861"
+        ],
+        "Q16004135": [
+          "Q860861"
+        ],
+        "Q11704263": [
+          "Q24354"
+        ],
+        "Q13405928": [
+          "Q860861"
+        ],
+        "Q63536451": [
+          "Q655686"
+        ]
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-002",
+      "verdict": "FAIL",
+      "flags": []
+    },
+    {
+      "label": "Roma · Coliseo",
+      "group": "A",
+      "expected_mode": "direct_landmark",
+      "input": {
+        "lat": 41.8902,
+        "lng": 12.4922,
+        "radius_m": 300
+      },
+      "candidate_count": 9,
+      "winner_entity_id": "Q10285",
+      "winner_title": "Coliseo",
+      "winner_classes": [
+        "Q7362268",
+        "Q839954",
+        "Q570116",
+        "Q483110",
+        "Q112132548",
+        "Q3867560",
+        "Q112132522",
+        "Q124830411",
+        "Q133444874"
+      ],
+      "winner_sitelinks_count": 145,
+      "rank_score": 0.9476666666666667,
+      "confidence": 0.96,
+      "via_landmark_override": false,
+      "failure_class": "DEDUPE_HIT",
+      "ux_state": "success",
+      "ux_source": "direct",
+      "latency_ms": 1466,
+      "pool_classes_by_qid": {
+        "Q10285": [
+          "Q7362268",
+          "Q839954",
+          "Q570116",
+          "Q483110",
+          "Q112132548",
+          "Q3867560",
+          "Q112132522",
+          "Q124830411",
+          "Q133444874"
+        ],
+        "Q1229235": [
+          "Q928830",
+          "Q22808403"
+        ],
+        "Q1570519": [
+          "Q1779653",
+          "Q26883973"
+        ],
+        "Q1924755": [
+          "Q483453",
+          "Q839954",
+          "Q684740",
+          "Q19860854"
+        ],
+        "Q5786": [
+          "Q839954",
+          "Q684740",
+          "Q143912"
+        ],
+        "Q430792": [
+          "Q867143",
+          "Q14752696",
+          "Q44539"
+        ],
+        "Q1232473": [
+          "Q641226",
+          "Q839954",
+          "Q10505195",
+          "Q7362268",
+          "Q14752696"
+        ],
+        "Q967948": [
+          "Q54050"
+        ],
+        "Q622438": [
+          "Q839954",
+          "Q14752696",
+          "Q16560",
+          "Q252021",
+          "Q112132548",
+          "Q3867560",
+          "Q112132522",
+          "Q782970",
+          "Q124830411",
+          "Q136351774"
+        ]
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-003",
+      "verdict": "PASS",
+      "flags": []
+    },
+    {
+      "label": "Paris · Tour Eiffel",
+      "group": "A",
+      "expected_mode": "direct_landmark",
+      "input": {
+        "lat": 48.8584,
+        "lng": 2.2945,
+        "radius_m": 300
+      },
+      "candidate_count": 7,
+      "winner_entity_id": "Q243",
+      "winner_title": "Torre Eiffel",
+      "winner_classes": [
+        "Q1440476",
+        "Q1440300",
+        "Q570116",
+        "Q2319498"
+      ],
+      "winner_sitelinks_count": 189,
+      "rank_score": 1.0,
+      "confidence": 0.96,
+      "via_landmark_override": false,
+      "failure_class": "DEDUPE_HIT",
+      "ux_state": "success",
+      "ux_source": "direct",
+      "latency_ms": 1506,
+      "pool_classes_by_qid": {
+        "Q243": [
+          "Q1440476",
+          "Q1440300",
+          "Q570116",
+          "Q2319498"
+        ],
+        "Q2928782": [
+          "Q860861"
+        ],
+        "Q41795716": [
+          "Q276173",
+          "Q19860854"
+        ],
+        "Q4454110": [
+          "Q35273",
+          "Q19860854"
+        ],
+        "Q106456486": [
+          "Q102421356"
+        ],
+        "Q540781": [
+          "Q3397526",
+          "Q158438"
+        ],
+        "Q509404": [
+          "Q43229"
+        ]
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-004",
+      "verdict": "PASS",
+      "flags": []
+    },
+    {
+      "label": "Carracedelo (Bierzo)",
+      "group": "B",
+      "expected_mode": "rural_generic",
+      "input": {
+        "lat": 42.5689,
+        "lng": -6.6362,
+        "radius_m": 500
+      },
+      "candidate_count": null,
+      "winner_entity_id": null,
+      "winner_title": null,
+      "winner_classes": [],
+      "winner_sitelinks_count": null,
+      "rank_score": 0.31035352603657346,
+      "confidence": null,
+      "via_landmark_override": false,
+      "failure_class": "UNGROUNDED",
+      "ux_state": "empty_zone",
+      "ux_source": null,
+      "latency_ms": 5456,
+      "pool_classes_by_qid": {},
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-005",
+      "verdict": "WARN",
+      "flags": []
+    },
+    {
+      "label": "O Cebreiro (Lugo)",
+      "group": "B",
+      "expected_mode": "rural_generic",
+      "input": {
+        "lat": 42.7072,
+        "lng": -7.0436,
+        "radius_m": 500
+      },
+      "candidate_count": 1,
+      "winner_entity_id": null,
+      "winner_title": null,
+      "winner_classes": [],
+      "winner_sitelinks_count": null,
+      "rank_score": 0.4188,
+      "confidence": null,
+      "via_landmark_override": false,
+      "failure_class": "UNGROUNDED",
+      "ux_state": "empty_zone",
+      "ux_source": null,
+      "latency_ms": 4336,
+      "pool_classes_by_qid": {
+        "Q503695": [
+          "Q12397176"
+        ]
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-006",
+      "verdict": "WARN",
+      "flags": []
+    },
+    {
+      "label": "Las Médulas sparse entry",
+      "group": "B",
+      "expected_mode": "sparse_override",
+      "input": {
+        "lat": 42.4213,
+        "lng": -7.0436,
+        "radius_m": 1500
+      },
+      "candidate_count": 9,
+      "winner_entity_id": null,
+      "winner_title": null,
+      "winner_classes": [],
+      "winner_sitelinks_count": null,
+      "rank_score": 0.4379,
+      "confidence": null,
+      "via_landmark_override": false,
+      "failure_class": "UNGROUNDED",
+      "ux_state": "empty_zone",
+      "ux_source": null,
+      "latency_ms": 5423,
+      "pool_classes_by_qid": {
+        "Q11001291": [
+          "Q12397176"
+        ],
+        "Q112164187": [
+          "Q20541692",
+          "Q674950"
+        ],
+        "Q112165194": [
+          "Q20541692"
+        ],
+        "Q12386898": [
+          "Q12397176"
+        ],
+        "Q12401997": [
+          "Q12397176"
+        ],
+        "Q12383228": [
+          "Q12397176"
+        ],
+        "Q112164664": [
+          "Q20541692"
+        ],
+        "Q1618272": [
+          "Q2276925"
+        ],
+        "Q112183724": [
+          "Q20541692"
+        ]
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-007",
+      "verdict": "FAIL",
+      "flags": []
+    },
+    {
+      "label": "Magaz de Abajo (Bierzo)",
+      "group": "B",
+      "expected_mode": "rural_generic",
+      "input": {
+        "lat": 42.5867,
+        "lng": -6.67,
+        "radius_m": 500
+      },
+      "candidate_count": 1,
+      "winner_entity_id": "Q256740",
+      "winner_title": "Camponaraya",
+      "winner_classes": [
+        "Q2074737"
+      ],
+      "winner_sitelinks_count": 35,
+      "rank_score": 0.58835,
+      "confidence": 0.96,
+      "via_landmark_override": false,
+      "failure_class": null,
+      "ux_state": "success",
+      "ux_source": "direct",
+      "latency_ms": 5428,
+      "pool_classes_by_qid": {
+        "Q256740": [
+          "Q2074737"
+        ]
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-008",
+      "verdict": "PASS",
+      "flags": []
+    },
+    {
+      "label": "Castillo de Manzanares el Real",
+      "group": "C",
+      "expected_mode": "direct_landmark",
+      "input": {
+        "lat": 40.7268,
+        "lng": -3.8628,
+        "radius_m": 300
+      },
+      "candidate_count": 4,
+      "winner_entity_id": "Q55483",
+      "winner_title": "Manzanares el Real",
+      "winner_classes": [
+        "Q2074737"
+      ],
+      "winner_sitelinks_count": 46,
+      "rank_score": 0.7610833333333333,
+      "confidence": 0.86,
+      "via_landmark_override": false,
+      "failure_class": null,
+      "ux_state": "success",
+      "ux_source": "direct",
+      "latency_ms": 4816,
+      "pool_classes_by_qid": {
+        "Q1013093": [
+          "Q23413",
+          "Q4989906",
+          "Q272999"
+        ],
+        "Q116198306": [
+          "Q6126497"
+        ],
+        "Q5762037": [],
+        "Q55483": [
+          "Q2074737"
+        ]
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-009",
+      "verdict": "PASS",
+      "flags": []
+    },
+    {
+      "label": "Ávila · Catedral del Salvador",
+      "group": "C",
+      "expected_mode": "direct_landmark",
+      "input": {
+        "lat": 40.6563,
+        "lng": -4.6963,
+        "radius_m": 300
+      },
+      "candidate_count": 10,
+      "winner_entity_id": null,
+      "winner_title": null,
+      "winner_classes": [],
+      "winner_sitelinks_count": null,
+      "rank_score": null,
+      "confidence": null,
+      "via_landmark_override": false,
+      "failure_class": "AMBIGUOUS_WINNER",
+      "ux_state": "empty_zone",
+      "ux_source": null,
+      "latency_ms": 2087,
+      "pool_classes_by_qid": {
+        "Q27732235": [
+          "Q33506"
+        ],
+        "Q33597524": [
+          "Q16970",
+          "Q4989906"
+        ],
+        "Q29920770": [
+          "Q41176"
+        ],
+        "Q59876884": [
+          "Q16560"
+        ],
+        "Q5727826": [
+          "Q7075",
+          "Q12317349"
+        ],
+        "Q26702891": [
+          "Q7075",
+          "Q12317349"
+        ],
+        "Q6058643": [
+          "Q16560",
+          "Q5383482",
+          "Q4989906"
+        ],
+        "Q1402296": [
+          "Q56242215"
+        ],
+        "Q15640601": [
+          "Q16560"
+        ],
+        "Q19950761": [
+          "Q16560"
+        ]
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-010",
+      "verdict": "FAIL",
+      "flags": []
+    },
+    {
+      "label": "Alhambra (Granada)",
+      "group": "C",
+      "expected_mode": "direct_landmark",
+      "input": {
+        "lat": 37.1761,
+        "lng": -3.5881,
+        "radius_m": 500
+      },
+      "candidate_count": 10,
+      "winner_entity_id": "Q47476",
+      "winner_title": "Alhambra",
+      "winner_classes": [
+        "Q1497375",
+        "Q570116",
+        "Q16560",
+        "Q1107656",
+        "Q61760621"
+      ],
+      "winner_sitelinks_count": 92,
+      "rank_score": 0.9408000000000001,
+      "confidence": 0.96,
+      "via_landmark_override": false,
+      "failure_class": null,
+      "ux_state": "success",
+      "ux_source": "direct",
+      "latency_ms": 5473,
+      "pool_classes_by_qid": {
+        "Q47476": [
+          "Q1497375",
+          "Q570116",
+          "Q16560",
+          "Q1107656",
+          "Q61760621"
+        ],
+        "Q110722978": [],
+        "Q2479372": [
+          "Q44613",
+          "Q1128397"
+        ],
+        "Q73415072": [
+          "Q1088552",
+          "Q16970"
+        ],
+        "Q119211795": [
+          "Q20034791"
+        ],
+        "Q5574170": [
+          "Q9332842"
+        ],
+        "Q43080083": [
+          "Q839954"
+        ],
+        "Q72622974": [
+          "Q276173",
+          "Q16560"
+        ],
+        "Q2046808": [
+          "Q16560"
+        ],
+        "Q4270926": [
+          "Q737988"
+        ]
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-011",
+      "verdict": "PASS",
+      "flags": []
+    },
+    {
+      "label": "Catedral de Burgos",
+      "group": "C",
+      "expected_mode": "direct_landmark",
+      "input": {
+        "lat": 42.3406,
+        "lng": -3.7044,
+        "radius_m": 300
+      },
+      "candidate_count": 10,
+      "winner_entity_id": "Q744420",
+      "winner_title": "Catedral de Burgos",
+      "winner_classes": [
+        "Q56242215"
+      ],
+      "winner_sitelinks_count": 54,
+      "rank_score": 0.7103333333333333,
+      "confidence": 0.96,
+      "via_landmark_override": false,
+      "failure_class": "DEDUPE_HIT",
+      "ux_state": "success",
+      "ux_source": "direct",
+      "latency_ms": 1431,
+      "pool_classes_by_qid": {
+        "Q5748388": [
+          "Q108325"
+        ],
+        "Q5748365": [
+          "Q108325"
+        ],
+        "Q5748246": [
+          "Q56750734"
+        ],
+        "Q5748374": [
+          "Q108325"
+        ],
+        "Q744420": [
+          "Q56242215"
+        ],
+        "Q5910998": [
+          "Q16970",
+          "Q4989906"
+        ],
+        "Q5761858": [
+          "Q1549731"
+        ],
+        "Q8203738": [
+          "Q143912",
+          "Q82117",
+          "Q4989906",
+          "Q97466153"
+        ],
+        "Q16552283": [
+          "Q41176"
+        ],
+        "Q59537317": [
+          "Q12280"
+        ]
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-012",
+      "verdict": "PASS",
+      "flags": []
+    },
+    {
+      "label": "Atlantic ocean (0,0)",
+      "group": "D",
+      "expected_mode": "empty",
+      "input": {
+        "lat": 0.0,
+        "lng": 0.0,
+        "radius_m": 1000
+      },
+      "candidate_count": 2,
+      "winner_entity_id": null,
+      "winner_title": null,
+      "winner_classes": [],
+      "winner_sitelinks_count": null,
+      "rank_score": 0.73,
+      "confidence": null,
+      "via_landmark_override": false,
+      "failure_class": "UNGROUNDED",
+      "ux_state": "empty_zone",
+      "ux_source": null,
+      "latency_ms": 5895,
+      "pool_classes_by_qid": {
+        "Q16896007": [
+          "Q960648",
+          "Q16686448",
+          "Q67937253",
+          "Q6619693"
+        ],
+        "Q41430": [
+          "Q39594"
+        ]
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-013",
+      "verdict": "PASS",
+      "flags": []
+    },
+    {
+      "label": "Spanish interior mountains",
+      "group": "D",
+      "expected_mode": "empty",
+      "input": {
+        "lat": 40.15,
+        "lng": -1.0,
+        "radius_m": 500
+      },
+      "candidate_count": null,
+      "winner_entity_id": null,
+      "winner_title": null,
+      "winner_classes": [],
+      "winner_sitelinks_count": null,
+      "rank_score": null,
+      "confidence": null,
+      "via_landmark_override": false,
+      "failure_class": "NO_CANDIDATES",
+      "ux_state": "empty_zone",
+      "ux_source": null,
+      "latency_ms": 687,
+      "pool_classes_by_qid": {},
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-014",
+      "verdict": "PASS",
+      "flags": []
+    },
+    {
+      "label": "Random road segment",
+      "group": "D",
+      "expected_mode": "empty",
+      "input": {
+        "lat": 41.5,
+        "lng": -4.0,
+        "radius_m": 300
+      },
+      "candidate_count": null,
+      "winner_entity_id": null,
+      "winner_title": null,
+      "winner_classes": [],
+      "winner_sitelinks_count": null,
+      "rank_score": null,
+      "confidence": null,
+      "via_landmark_override": false,
+      "failure_class": "NO_CANDIDATES",
+      "ux_state": "empty_zone",
+      "ux_source": null,
+      "latency_ms": 733,
+      "pool_classes_by_qid": {},
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-015",
+      "verdict": "PASS",
+      "flags": []
+    },
+    {
+      "label": "Mediterranean offshore",
+      "group": "D",
+      "expected_mode": "empty",
+      "input": {
+        "lat": 35.5,
+        "lng": 5.5,
+        "radius_m": 1000
+      },
+      "candidate_count": null,
+      "winner_entity_id": null,
+      "winner_title": null,
+      "winner_classes": [],
+      "winner_sitelinks_count": null,
+      "rank_score": null,
+      "confidence": null,
+      "via_landmark_override": false,
+      "failure_class": "NO_CANDIDATES",
+      "ux_state": "empty_zone",
+      "ux_source": null,
+      "latency_ms": 685,
+      "pool_classes_by_qid": {},
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-016",
+      "verdict": "PASS",
+      "flags": []
+    },
+    {
+      "label": "London · Trafalgar Square",
+      "group": "E",
+      "expected_mode": "direct_landmark",
+      "input": {
+        "lat": 51.508,
+        "lng": -0.1281,
+        "radius_m": 300
+      },
+      "candidate_count": 10,
+      "winner_entity_id": "Q129143",
+      "winner_title": "Trafalgar Square",
+      "winner_classes": [
+        "Q174782",
+        "Q570116"
+      ],
+      "winner_sitelinks_count": 73,
+      "rank_score": 0.9492499999999999,
+      "confidence": 0.96,
+      "via_landmark_override": false,
+      "failure_class": null,
+      "ux_state": "success",
+      "ux_source": "direct",
+      "latency_ms": 6037,
+      "pool_classes_by_qid": {
+        "Q129143": [
+          "Q174782",
+          "Q570116"
+        ],
+        "Q842089": [
+          "Q1930585"
+        ],
+        "Q7604481": [
+          "Q860861"
+        ],
+        "Q195905": [
+          "Q1220959"
+        ],
+        "Q2447222": [
+          "Q245260"
+        ],
+        "Q17527074": [
+          "Q179700"
+        ],
+        "Q216185": [
+          "Q4989906",
+          "Q2755753"
+        ],
+        "Q84": [
+          "Q200250",
+          "Q1066984",
+          "Q515",
+          "Q208511",
+          "Q174844",
+          "Q51929311",
+          "Q108178728"
+        ],
+        "Q174193": [
+          "Q3624078",
+          "Q3024240",
+          "Q20181813",
+          "Q6256"
+        ],
+        "Q2083043": [
+          "Q210167"
+        ]
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-017",
+      "verdict": "PASS",
+      "flags": []
+    },
+    {
+      "label": "New York · Times Square",
+      "group": "E",
+      "expected_mode": "direct_landmark",
+      "input": {
+        "lat": 40.758,
+        "lng": -73.9855,
+        "radius_m": 300
+      },
+      "candidate_count": 10,
+      "winner_entity_id": "Q11259",
+      "winner_title": "Times Square",
+      "winner_classes": [
+        "Q174782",
+        "Q123705",
+        "Q570116"
+      ],
+      "winner_sitelinks_count": 72,
+      "rank_score": 0.9030833333333335,
+      "confidence": 0.86,
+      "via_landmark_override": false,
+      "failure_class": null,
+      "ux_state": "success",
+      "ux_source": "direct",
+      "latency_ms": 6319,
+      "pool_classes_by_qid": {
+        "Q29974043": [
+          "Q61037771",
+          "Q9637047"
+        ],
+        "Q1973105": [
+          "Q5429679",
+          "Q2223653"
+        ],
+        "Q827638": [
+          "Q11303"
+        ],
+        "Q3062716": [
+          "Q24354"
+        ],
+        "Q11259": [
+          "Q174782",
+          "Q123705",
+          "Q570116"
+        ],
+        "Q659652": [
+          "Q11303"
+        ],
+        "Q5903297": [
+          "Q27686"
+        ],
+        "Q938773": [
+          "Q4830453",
+          "Q726870",
+          "Q1941779"
+        ],
+        "Q6772686": [
+          "Q24354"
+        ],
+        "Q901251": [
+          "Q174782"
+        ]
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-018",
+      "verdict": "PASS",
+      "flags": []
+    },
+    {
+      "label": "Tokyo · Imperial Palace",
+      "group": "E",
+      "expected_mode": "direct_landmark",
+      "input": {
+        "lat": 35.6852,
+        "lng": 139.7528,
+        "radius_m": 500
+      },
+      "candidate_count": 5,
+      "winner_entity_id": "Q500681",
+      "winner_title": "Kōkyo",
+      "winner_classes": [
+        "Q53536964",
+        "Q134962447"
+      ],
+      "winner_sitelinks_count": 45,
+      "rank_score": 0.6707500000000001,
+      "confidence": 0.96,
+      "via_landmark_override": false,
+      "failure_class": null,
+      "ux_state": "success",
+      "ux_source": "direct",
+      "latency_ms": 5011,
+      "pool_classes_by_qid": {
+        "Q500681": [
+          "Q53536964",
+          "Q134962447"
+        ],
+        "Q188712": [
+          "Q3024240",
+          "Q48349"
+        ],
+        "Q1191897": [
+          "Q210167"
+        ],
+        "Q785697": [
+          "Q2085381"
+        ],
+        "Q865913": [
+          "Q1081138",
+          "Q11482300"
+        ]
+      },
+      "pipeline_exception": null,
+      "run_id": "master-20260520-135242-019",
+      "verdict": "PASS",
+      "flags": []
+    }
+  ]
+}

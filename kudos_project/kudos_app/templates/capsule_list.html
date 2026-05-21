@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Cápsulas – Kudos{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <h1>📦 Todas las cápsulas</h1>
+        <a href="{% url 'create_capsule' %}" class="btn btn-gold">✨ Crear nueva</a>
+    </header>
+
+    <nav class="filter-bar">
+        <a href="{% url 'capsule_list' %}" class="{% if not modo_seleccionado %}active{% endif %}">Todos</a>
+        {% for code, label in modos %}
+        <a href="?modo={{ code }}" class="{% if modo_seleccionado == code %}active{% endif %}">{{ label }}</a>
+        {% endfor %}
+    </nav>
+
+    <div class="cards-grid">
+        {% for capsule in capsules %}
+        <article class="capsule-card {% if capsule.image %}has-image{% endif %}">
+            {% if capsule.image %}
+            <a href="{% url 'capsule_detail' capsule.uid %}" class="capsule-thumb">
+                <img src="{{ capsule.image }}" alt="" loading="lazy">
+                {% if capsule.video %}<span class="play-badge">▶</span>{% endif %}
+            </a>
+            {% endif %}
+            <div class="capsule-card-body">
+                <span class="capsule-mode">{{ capsule.get_modo_display }}</span>
+                <h3><a href="{% url 'capsule_detail' capsule.uid %}">{{ capsule.display_title }}</a></h3>
+                <p class="muted">{{ capsule.usuario.alias|default:'anónimo' }} · {{ capsule.fecha }}</p>
+                <p>{{ capsule.contenido|truncatechars:140 }}</p>
+                <div class="capsule-meta">
+                    <span>❤ {{ capsule.likes }}</span>
+                    <span>👁 {{ capsule.views }}</span>
+                    {% if capsule.lugar %}<span>📍 {{ capsule.lugar }}</span>{% endif %}
+                </div>
+            </div>
+        </article>
+        {% empty %}
+        <p class="muted">No hay cápsulas en este filtro.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

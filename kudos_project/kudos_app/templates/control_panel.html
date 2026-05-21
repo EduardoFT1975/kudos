@@ -1,0 +1,474 @@
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Panel de Control - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+    <script src="{% static 'js/leaflet-src.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+        #control-map {
+            height: 300px;
+            margin: 20px 0;
+            border: 2px solid #ccc;
+        }
+        .control-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin: 20px 0;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        form {
+            margin: 10px 0;
+        }
+        input, select, textarea {
+            padding: 8px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #FFD700;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #FFC107;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .stat-box {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            flex: 1;
+            margin: 5px;
+            min-width: 150px;
+            transition: transform 0.2s;
+        }
+        .stat-box:hover {
+            transform: scale(1.05);
+        }
+        .chart-container {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        canvas {
+            max-width: 100%;
+        }
+        .filter {
+            margin: 10px 0;
+            text-align: center;
+        }
+        .filter select {
+            width: 200px;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .infrastructure-panel {
+            background-color: #e6f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        @media (max-width: 768px) {
+            .stat-box {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Panel de Control - Kudos</h1>
+
+    <div class="control-container">
+        <!-- Filtros -->
+        <div class="section filter">
+            <label for="module-filter">Filtrar por Módulo:</label>
+            <select id="module-filter" onchange="filterStats()">
+                <option value="all">Todos</option>
+                <option value="capsules">Archivo Universal</option>
+                <option value="education">Educación</option>
+                <option value="market">Mercado Global</option>
+                <option value="social">Social</option>
+                <option value="governance">Gobernanza</option>
+                <option value="infrastructure">Infraestructura</option>
+                <option value="research">Investigación</option>
+                <option value="social_impact">Impacto Social</option>
+                <option value="mental_health">Salud Mental</option>
+                <option value="tourism">Turismo Sostenible</option>
+                <option value="space">Exploración Espacial</option>
+                <option value="innovation">Innovación Tecnológica</option>
+                <option value="art">Arte y Cultura</option>
+            </select>
+        </div>
+
+        <!-- Estadísticas Generales -->
+        <div class="section stats" id="stats-section">
+            <div class="stat-box" data-module="capsules">
+                <h3>Cápsulas Totales</h3>
+                <p>{{ stats.total_capsules }}</p>
+            </div>
+            <div class="stat-box" data-module="all">
+                <h3>Usuarios Activos</h3>
+                <p>{{ stats.active_users }}</p>
+            </div>
+            <div class="stat-box" data-module="market">
+                <h3>Transacciones Totales</h3>
+                <p>{{ stats.total_transactions }}</p>
+            </div>
+            <div class="stat-box" data-module="market">
+                <h3>Ingresos (7 días)</h3>
+                <p>${{ stats.recent_transactions|floatformat:2 }}</p>
+            </div>
+            <div class="stat-box" data-module="education">
+                <h3>Certificados Emitidos</h3>
+                <p>{{ stats.total_certificates }}</p>
+            </div>
+            <div class="stat-box" data-module="mental_health">
+                <h3>Cápsulas Salud Mental</h3>
+                <p>{{ stats.total_mental_capsules }}</p>
+            </div>
+            <div class="stat-box" data-module="art">
+                <h3>Cápsulas Artísticas</h3>
+                <p>{{ stats.total_art_capsules }}</p>
+            </div>
+            <div class="stat-box" data-module="tourism">
+                <h3>Cápsulas Turismo</h3>
+                <p>{{ stats.total_tourism_capsules }}</p>
+            </div>
+            <div class="stat-box" data-module="innovation">
+                <h3>Cápsulas Innovación</h3>
+                <p>{{ stats.total_innovation_capsules }}</p>
+            </div>
+            <div class="stat-box" data-module="social">
+                <h3>Interacciones Sociales</h3>
+                <p>{{ stats.total_social_interactions }}</p>
+            </div>
+            <div class="stat-box" data-module="social">
+                <h3>Comunidades Activas</h3>
+                <p>{{ stats.total_communities }}</p>
+            </div>
+            <div class="stat-box" data-module="governance">
+                <h3>Propuestas Gobernanza</h3>
+                <p>{{ stats.total_proposals }}</p>
+            </div>
+            <div class="stat-box" data-module="research">
+                <h3>Cápsulas Investigación</h3>
+                <p>{{ stats.total_research_capsules }}</p>
+            </div>
+            <div class="stat-box" data-module="research">
+                <h3>Proyectos Investigación</h3>
+                <p>{{ stats.total_research_projects }}</p>
+            </div>
+            <div class="stat-box" data-module="social_impact">
+                <h3>Cápsulas Impacto Social</h3>
+                <p>{{ stats.total_social_impact_capsules }}</p>
+            </div>
+            <div class="stat-box" data-module="infrastructure">
+                <h3>Cápsulas Infraestructura</h3>
+                <p>{{ stats.total_infrastructure_capsules }}</p>
+            </div>
+        </div>
+
+        <!-- Panel de Infraestructura -->
+        <div class="section infrastructure-panel" data-module="infrastructure">
+            <h2>Monitoreo de Infraestructura</h2>
+            <div class="stats">
+                <div class="stat-box">
+                    <h3>Almacenamiento IPFS (MB)</h3>
+                    <p>{{ stats.infrastructure_stats.ipfs_storage_used }}</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Transacciones Solana</h3>
+                    <p>{{ stats.infrastructure_stats.solana_transactions }}</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Uso WebGPU (%)</h3>
+                    <p>{{ stats.infrastructure_stats.webgpu_usage }}</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Nodos IPFS</h3>
+                    <p>{{ stats.infrastructure_stats.ipfs_nodes }}</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Solana TPS</h3>
+                    <p>{{ stats.infrastructure_stats.solana_tps }}</p>
+                </div>
+                <div class="stat-box">
+                    <h3>Último Monitoreo</h3>
+                    <p>{{ stats.infrastructure_stats.last_monitoring }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="section chart-container">
+            <h2>Visualizaciones</h2>
+            <div>
+                <h3>Cápsulas por Módulo</h3>
+                <canvas id="capsulesChart"></canvas>
+            </div>
+            <div>
+                <h3>Actividad de Usuarios (Últimos 7 días)</h3>
+                <canvas id="activityChart"></canvas>
+            </div>
+            <div>
+                <h3>Métricas de Infraestructura</h3>
+                <canvas id="infrastructureChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Mapa de Cápsulas Recientes -->
+        <div class="section">
+            <h2>Cápsulas Recientes (Últimos 7 días)</h2>
+            <div id="control-map"></div>
+        </div>
+
+        <!-- Crear Usuario -->
+        <div class="section">
+            <h2>Crear Nuevo Usuario</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create_user">
+                <label for="new_uid">UID:</label>
+                <input type="text" id="new_uid" name="new_uid" required>
+                <label for="new_alias">Alias:</label>
+                <input type="text" id="new_alias" name="new_alias" required>
+                <label for="new_email">Email:</label>
+                <input type="email" id="new_email" name="new_email" required>
+                <label for="new_password">Contraseña:</label>
+                <input type="password" id="new_password" name="new_password" required>
+                <label for="new_role">Rol:</label>
+                <input type="text" id="new_role" name="new_role" required>
+                <label><input type="checkbox" name="new_is_active" checked> Activo</label>
+                <button type="submit">Crear Usuario</button>
+            </form>
+        </div>
+
+        <!-- Simular Transacción -->
+        <div class="section">
+            <h2>Simular Transacción</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="simulate_transaction">
+                <label for="capsule_uid">UID Cápsula:</label>
+                <input type="text" id="capsule_uid" name="capsule_uid" required>
+                <button type="submit">Simular</button>
+            </form>
+        </div>
+
+        <!-- Configuración de Automatización -->
+        <div class="section">
+            <h2>Configuración de Automatización</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_automation">
+                <label for="automation_level">Nivel de Automatización (0-10):</label>
+                <input type="number" id="automation_level" name="automation_level" min="0" max="10" value="{{ automation_config.value }}">
+                <label><input type="checkbox" name="auto_approve_commerce" {% if automation_config.parameters.auto_approve_commerce %}checked{% endif %}> Aprobar Comercio Automáticamente</label>
+                <label for="max_price">Precio Máximo (KMT):</label>
+                <input type="number" id="max_price" name="max_price" step="0.01" value="{{ automation_config.parameters.max_price }}">
+                <label for="listing_expiration_days">Días Expiración Listados:</label>
+                <input type="number" id="listing_expiration_days" name="listing_expiration_days" value="{{ automation_config.parameters.listing_expiration_days }}">
+                <label for="notification_archive_days">Días Archivo Notificaciones:</label>
+                <input type="number" id="notification_archive_days" name="notification_archive_days" value="{{ automation_config.parameters.notification_archive_days }}">
+                <label for="reminder_frequency_hours">Frecuencia Recordatorios Salud Mental (horas):</label>
+                <input type="number" id="reminder_frequency_hours" name="reminder_frequency_hours" value="{{ mental_config.parameters.reminder_frequency_hours }}">
+                <label for="curation_merits_threshold">Umbral Curación Arte (méritos):</label>
+                <input type="number" id="curation_merits_threshold" name="curation_merits_threshold" value="{{ art_config.parameters.curation_merits_threshold }}">
+                <label for="curation_impact_threshold">Umbral Curación Turismo:</label>
+                <input type="number" id="curation_impact_threshold" name="curation_impact_threshold" value="{{ tourism_config.parameters.curation_impact_threshold }}">
+                <label for="curation_impact_threshold_innovation">Umbral Curación Innovación:</label>
+                <input type="number" id="curation_impact_threshold_innovation" name="curation_impact_threshold" value="{{ innovation_config.parameters.curation_impact_threshold }}">
+                <label for="moderation_threshold">Umbral Moderación Social:</label>
+                <input type="number" id="moderation_threshold" name="moderation_threshold" step="0.01" value="{{ social_config.parameters.moderation_threshold }}">
+                <label for="moderation_threshold_governance">Umbral Moderación Gobernanza:</label>
+                <input type="number" id="moderation_threshold_governance" name="moderation_threshold_governance" step="0.01" value="{{ governance_config.parameters.moderation_threshold }}">
+                <label for="voting_duration_days">Duración Votaciones (días):</label>
+                <input type="number" id="voting_duration_days" name="voting_duration_days" value="{{ governance_config.parameters.voting_duration_days }}">
+                <label for="min_votes">Votos Mínimos:</label>
+                <input type="number" id="min_votes" name="min_votes" value="{{ governance_config.parameters.min_votes }}">
+                <label for="approval_threshold">Umbral Aprobación:</label>
+                <input type="number" id="approval_threshold" name="approval_threshold" step="0.01" value="{{ governance_config.parameters.approval_threshold }}">
+                <label for="curation_impact_threshold_research">Umbral Curación Investigación:</label>
+                <input type="number" id="curation_impact_threshold_research" name="curation_impact_threshold_research" value="{{ research_config.parameters.curation_impact_threshold }}">
+                <label for="curation_impact_threshold_social_impact">Umbral Curación Impacto Social:</label>
+                <input type="number" id="curation_impact_threshold_social_impact" name="curation_impact_threshold_social_impact" value="{{ social_impact_config.parameters.curation_impact_threshold }}">
+                <label><input type="checkbox" name="webgpu_enabled" {% if infrastructure_config.parameters.webgpu_enabled %}checked{% endif %}> Habilitar WebGPU</label>
+                <label for="ipfs_storage_limit">Límite Almacenamiento IPFS (MB):</label>
+                <input type="number" id="ipfs_storage_limit" name="ipfs_storage_limit" value="{{ infrastructure_config.parameters.ipfs_storage_limit }}">
+                <label for="ipfs_cleanup_days">Días Limpieza IPFS:</label>
+                <input type="number" id="ipfs_cleanup_days" name="ipfs_cleanup_days" value="{{ infrastructure_config.parameters.ipfs_cleanup_days }}">
+                <button type="submit">Guardar Configuración</button>
+            </form>
+        </div>
+
+        <!-- Notificaciones Recientes -->
+        <div class="section">
+            <h2>Notificaciones Recientes (Últimas 24 horas)</h2>
+            {% if recent_notifications %}
+                <ul>
+                    {% for notification in recent_notifications %}
+                        <li>{{ notification.message }} ({{ notification.timestamp|date:"Y-m-d H:i" }})</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay notificaciones recientes.</p>
+            {% endif %}
+        </div>
+
+        <!-- Estado de Tareas Celery -->
+        <div class="section">
+            <h2>Estado de Tareas Celery</h2>
+            <p>Tareas Activas: {{ tasks_status.active }}</p>
+            <h3>Tareas Programadas</h3>
+            {% if tasks_status.scheduled %}
+                <ul>
+                    {% for task in tasks_status.scheduled %}
+                        <li>{{ task.name }}: {{ task.schedule }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay tareas programadas.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Inicializar mapa con Leaflet
+        var map = L.map('control-map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            minZoom: 0,
+            maxZoom: 20
+        }).addTo(map);
+        var capsuleLayer = L.geoJSON({{ map_data|safe }}, {
+            style: function(feature) {
+                return { color: "#FFD700", weight: 2 };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `<b>${feature.properties.description}</b><br>
+                    Modo: ${feature.properties.mode}<br>
+                    Temas: ${feature.properties.themes.join(', ')}`
+                );
+            }
+        }).addTo(map);
+        if (capsuleLayer.getBounds().isValid()) {
+            map.fitBounds(capsuleLayer.getBounds());
+        }
+
+        // Filtrar estadísticas
+        function filterStats() {
+            var filter = document.getElementById('module-filter').value;
+            var statBoxes = document.querySelectorAll('.stat-box');
+            statBoxes.forEach(box => {
+                var module = box.getAttribute('data-module');
+                box.style.display = (filter === 'all' || module === filter) ? 'block' : 'none';
+            });
+            var infrastructurePanel = document.querySelector('.infrastructure-panel');
+            infrastructurePanel.style.display = (filter === 'all' || filter === 'infrastructure') ? 'block' : 'none';
+        }
+
+        // Inicializar gráficos con Chart.js
+        // Gráfico de Cápsulas por Módulo (Barras)
+        var capsulesData = JSON.parse('{{ stats.chart_data.capsules_by_mode|safe }}');
+        var capsulesChart = new Chart(document.getElementById('capsulesChart'), {
+            type: 'bar',
+            data: {
+                labels: capsulesData.map(item => item.modo),
+                datasets: [{
+                    label: 'Cápsulas por Módulo',
+                    data: capsulesData.map(item => item.count),
+                    backgroundColor: '#FFD700',
+                    borderColor: '#FFC107',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Gráfico de Actividad de Usuarios (Líneas)
+        var activityData = JSON.parse('{{ stats.chart_data.user_activity|safe }}');
+        var activityChart = new Chart(document.getElementById('activityChart'), {
+            type: 'line',
+            data: {
+                labels: activityData.labels,
+                datasets: [{
+                    label: 'Cápsulas Creadas',
+                    data: activityData.data,
+                    borderColor: '#007bff',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Gráfico de Métricas de Infraestructura (Dona)
+        var infraData = JSON.parse('{{ stats.chart_data.infrastructure_metrics|safe }}');
+        var infrastructureChart = new Chart(document.getElementById('infrastructureChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['IPFS Storage (MB)', 'Solana Transactions', 'WebGPU Usage (%)'],
+                datasets: [{
+                    data: [infraData.ipfs_storage, infraData.solana_transactions, infraData.webgpu_usage],
+                    backgroundColor: ['#FFD700', '#007bff', '#28a745']
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    </script>
+</body>
+</html>
+```

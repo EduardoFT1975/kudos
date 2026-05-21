@@ -1,22 +1,27 @@
 /**
  * KUDOS Experience · / (root redirect)
  *
- * Phase 14.10 beta unblock · root path is now the entry funnel into the
- * live geolocation experience. The previous curated DiscoveryFeed lives
- * at `/descubrir` for users who want the cinematic browse instead.
+ * P0.9 surface assembly · root path is the atlas entry. KUDOS es producto
+ * de exploración (atlas / discovery / time / mapa) · no una landing de
+ * capsule. La primera impresión debe comunicar surface de navegación, no
+ * un único place card.
  *
- * Why a server-side redirect instead of a soft client-side router push:
- *   - Zero flash of unrelated content.
- *   - SEO + share previews still resolve `/` predictably.
- *   - No JS required for the redirect to fire.
+ * Decisión: `/` → `/mapa`. El Atlas multidimensional es la superficie que
+ * mejor expone el producto: mapa global + tap-to-explore + capsule en
+ * panel inferior. El usuario aterriza en algo navegable, no en un loop
+ * de permisos.
  *
- * If product positioning shifts back to "curated home" later, flip this
- * file to render DiscoveryFeed again and add a CTA out to /aqui.
+ * Las otras superficies siguen accesibles vía Header (Aquí · Descubrir ·
+ * Mapa · Tiempo). El capsule live (/aqui) sigue siendo el surface de
+ * "lo que tienes debajo de los pies" — pero deja de ser la primera
+ * impresión del producto.
+ *
+ * Server-side redirect porque: zero flash, SEO predecible, no requiere JS.
  */
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default function RootPage(): never {
-  redirect("/aqui");
+  redirect("/mapa");
 }

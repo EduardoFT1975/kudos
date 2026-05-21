@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}🗳️ Participación ciudadana – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🗳️</div>
+        <div>
+            <h1>🗳️ Participación ciudadana</h1>
+            <p class="muted">Tu voz también construye el futuro.</p>
+        </div>
+    </header>
+    
+<a href="{% url 'create_proposal' %}" class="btn btn-gold">+ Propuesta</a>
+<div class="cards-grid">
+{% for p in proposals %}
+<article class="capsule-card">
+<span class="capsule-mode">{{ p.get_status_display }}</span>
+<h3>{{ p.title }}</h3>
+<p class="muted">{{ p.user.alias }} · {{ p.timestamp|date:"d/m/Y" }}</p>
+<p>{{ p.description|truncatechars:160 }}</p></div>
+</article>
+{% empty %}<p class="muted">Sin propuestas aún.</p>{% endfor %}
+</div>
+
+</div>
+{% endblock %}

@@ -31,6 +31,7 @@ import { contextualReveal } from "@/motion/ambient";
 import { staggerContainer } from "@/motion/transitions";
 import { ShareMoment } from "@/features/capsule/ShareMoment";
 import { RecoveryPill } from "@/features/capsule/RecoveryPill";
+import { RememberPill } from "@/features/memory/RememberPill";
 import { track } from "@/lib/analytics/plausible";
 import type { CapsuleData } from "@/types/capsule-state";
 
@@ -42,6 +43,12 @@ interface CapsuleSuccessProps {
   /** Phase 14.6 loop · "Otra cápsula" (secondary). Opens the manual
    *  city picker · lets the user jump somewhere else entirely. */
   onNext?: () => void;
+  /** P0.9 Memory Graph · coords con las que se solicitó la cápsula.
+   *  El RememberPill las persiste en el memory store para poder volver
+   *  a renderizar la memoria sin nuevo fetch al backend. Pueden ser null
+   *  si la cápsula vino sin geo (e.g., /capsules/<slug> directo). */
+  lat?: number | null;
+  lng?: number | null;
 }
 
 const successStagger = staggerContainer(0.18, 0.1);
@@ -50,9 +57,25 @@ export function CapsuleSuccess({
   capsule,
   onExploreNearby,
   onNext,
+  lat = null,
+  lng = null,
 }: CapsuleSuccessProps) {
   const hasRefs = capsule.source_refs && capsule.source_refs.length > 0;
   const hasLoop = Boolean(onExploreNearby || onNext);
+
+  // P0.9 Memory Graph · snapshot del entry para el RememberPill. Memoized
+  // para que el botón no se re-renderice en cada parent render.
+  const memoryEntry = React.useMemo(
+    () => ({
+      id: capsule.id,
+      title: capsule.title,
+      factual_anchor: capsule.factual_anchor ?? "",
+      lat: typeof lat === "number" ? lat : null,
+      lng: typeof lng === "number" ? lng : null,
+      savedAt: Date.now(),
+    }),
+    [capsule.id, capsule.title, capsule.factual_anchor, lat, lng],
+  );
 
   // Phase P0.5 · sources collapsed by default. The previous always-
   // visible "Fuentes verificadas" footnote block exposed raw Wikidata
@@ -180,8 +203,15 @@ export function CapsuleSuccess({
             </motion.div>
           ) : null}
 
-          {/* Phase 14.5 · share moment · single quiet CTA */}
-          <motion.div variants={contextualReveal} className="pt-2">
+          {/* P0.9 Memory Graph + Phase 14.5 share · ambos quiet CTAs
+              side-by-side. "Recordar" es la acción de identidad personal ·
+              "Compartir" es la acción social. Stack en mobile, fila en
+              desktop. */}
+          <motion.div
+            variants={contextualReveal}
+            className="flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row"
+          >
+            <RememberPill entry={memoryEntry} />
             <ShareMoment title={capsule.title} />
           </motion.div>
 
@@ -212,7 +242,7 @@ export function CapsuleSuccess({
                     onNext();
                   }}
                 >
-                  Otra cápsula
+                  Otra memoria
                 </RecoveryPill>
               ) : null}
             </motion.div>

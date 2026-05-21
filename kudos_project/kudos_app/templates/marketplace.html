@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Mercado descentralizado – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🛍️</div>
+        <div>
+            <h1>Mercado descentralizado</h1>
+            <p class="muted">Cápsulas multidimensionales y operaciones del ecosistema.</p>
+        </div>
+    </header>
+    
+<a href="{% url 'create_operation' %}" class="btn btn-gold">+ Publicar operación</a>
+<div class="cards-grid">
+    {% for op in operations %}
+    <article class="capsule-card">
+        <span class="capsule-mode">{{ op.get_operation_type_display }}</span>
+        <h3>{{ op.title }}</h3>
+        <p class="muted">{{ op.user.alias }} · {{ op.city|default:'global' }}</p>
+        <p>{{ op.description|truncatechars:120 }}</p>
+        <div class="capsule-meta"><span class="price">💰 {{ op.price }} K</span></div>
+    </article>
+    {% empty %}
+    <p class="muted">El mercado está libre. ¡Publica la primera operación!</p>
+    {% endfor %}
+</div>
+
+</div>
+{% endblock %}

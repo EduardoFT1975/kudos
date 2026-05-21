@@ -1,0 +1,149 @@
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Infraestructura - Kudos</title>
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+    <script src="{% static 'js/leaflet-src.js' %}"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        #infrastructure-map { height: 400px; margin: 20px 0; border: 2px solid #ccc; }
+        .infrastructure-container { max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        .section { margin: 20px 0; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 10px 0; border-bottom: 1px solid #ddd; }
+        form { margin: 10px 0; }
+        input, select, textarea { padding: 8px; margin: 5px 0; width: 100%; }
+        button { padding: 8px 16px; background-color: #FFD700; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #FFC107; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .progress { display: flex; justify-content: space-around; margin: 20px 0; }
+        .progress-box { background-color: #f9f9f9; padding: 15px; border-radius: 5px; text-align: center; }
+        .infrastructure-simulation { margin: 20px 0; border: 1px solid #ddd; padding: 10px; }
+        .stats { display: flex; justify-content: space-around; margin: 20px 0; }
+        .stat-box { background-color: #f9f9f9; padding: 15px; border-radius: 5px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>Infraestructura - Kudos</h1>
+
+    <div class="infrastructure-container">
+        <!-- Estadísticas de Infraestructura -->
+        <div class="section stats">
+            <div class="stat-box">
+                <h3>Almacenamiento IPFS (MB)</h3>
+                <p>{{ infrastructure_stats.ipfs_storage_used }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Transacciones Solana</h3>
+                <p>{{ infrastructure_stats.solana_transactions }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Uso WebGPU (%)</h3>
+                <p>{{ infrastructure_stats.webgpu_usage }}</p>
+            </div>
+        </div>
+
+        <!-- Progreso del Usuario -->
+        <div class="section progress">
+            <div class="progress-box">
+                <h3>Cápsulas Completadas</h3>
+                <p>{{ completed_infrastructure_capsules }}</p>
+            </div>
+            <div class="progress-box">
+                <h3>Insignias</h3>
+                <p>{{ badges.count }}</p>
+            </div>
+        </div>
+
+        <!-- Insignias -->
+        <div class="section">
+            <h2>Tus Insignias de Infraestructura</h2>
+            {% if badges %}
+                <ul>
+                    {% for badge in badges %}
+                        <li>{{ badge.name }}: {{ badge.description }} ({{ badge.timestamp|date:"Y-m-d" }})</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No tienes insignias de infraestructura aún. ¡Contribuye a la tecnología!</p>
+            {% endif %}
+        </div>
+
+        <!-- Simulación de Infraestructura -->
+        <div class="section infrastructure-simulation">
+            <h2>Simulación de Infraestructura en AR/VR</h2>
+            {{ infrastructure_scene|safe }}
+        </div>
+
+        <!-- Cápsulas de Infraestructura -->
+        <div class="section">
+            <h2>Cápsulas de Infraestructura</h2>
+            <div id="infrastructure-map"></div>
+            {% if infrastructure_capsules %}
+                <ul>
+                    {% for capsule in infrastructure_capsules %}
+                        <li>
+                            {{ capsule.contenido }} (Méritos: {{ capsule.parameters.merits }})
+                            <a href="{% url 'ar_view' capsule.uid %}">Ver en AR</a> |
+                            <a href="{% url 'vr_view' capsule.uid %}">Ver en VR</a>
+                            <form method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="contribute_capsule">
+                                <input type="hidden" name="capsule_uid" value="{{ capsule.uid }}">
+                                <button type="submit">Contribuir</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay cápsulas de infraestructura disponibles.</p>
+            {% endif %}
+        </div>
+
+        <!-- Simular Transacción -->
+        <div class="section">
+            <h2>Simular Transacción en Solana</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="simulate_transaction">
+                <label for="amount">Monto (KMT):</label>
+                <input type="number" id="amount" name="amount" min="0" max="100" step="0.01" required>
+                <button type="submit">Simular</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar mapa con Leaflet
+        var map = L.map('infrastructure-map').setView([0, 0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            minZoom: 0,
+            maxZoom: 20
+        }).addTo(map);
+
+        var capsuleLayer = L.geoJSON({{ map_data|safe }}, {
+            style: function(feature) {
+                return { color: "#FFD700", weight: 2 };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `<b>${feature.properties.description}</b><br>
+                    Modo: ${feature.properties.mode}<br>
+                    Temas: ${feature.properties.themes.join(', ')}`
+                );
+            }
+        }).addTo(map);
+
+        if (capsuleLayer.getBounds().isValid()) {
+            map.fitBounds(capsuleLayer.getBounds());
+        }
+    </script>
+</body>
+</html>
+```

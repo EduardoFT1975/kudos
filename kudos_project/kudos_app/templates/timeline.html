@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}🕰️ Línea temporal – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🕰️</div>
+        <div>
+            <h1>🕰️ Línea temporal</h1>
+            <p class="muted">Cápsulas ordenadas por fecha.</p>
+        </div>
+    </header>
+    
+<div class="timeline">
+{% for c in capsules %}
+<div class="timeline-item">
+<div class="timeline-date">{{ c.fecha|date:"d M Y" }}</div>
+<div class="timeline-content">
+<a href="{% url 'capsule_detail' c.uid %}"><strong>{{ c.display_title }}</strong></a>
+<small>{{ c.usuario.alias }}</small>
+</div>
+</div>
+{% empty %}<p class="muted">Línea temporal vacía.</p>{% endfor %}
+</div>
+
+</div>
+{% endblock %}

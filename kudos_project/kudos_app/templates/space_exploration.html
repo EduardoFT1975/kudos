@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}🚀 Exploración espacial – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🚀</div>
+        <div>
+            <h1>🚀 Exploración espacial</h1>
+            <p class="muted">Cápsulas relacionadas con el cosmos.</p>
+        </div>
+    </header>
+    
+<p class="muted">Crea cápsulas con ubicaciones cósmicas y compártelas con la humanidad.</p>
+<a href="{% url 'create_capsule' %}" class="btn btn-gold">+ Cápsula cósmica</a>
+
+</div>
+{% endblock %}

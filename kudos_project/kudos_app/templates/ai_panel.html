@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+{% load feature_tags %}
+{% block title %}Mind · Pregunta al lugar — Kudos{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ============================================================
+ * AXÓN D12 · KUDOS MIND LITE
+ * "El lugar respondiendo", no un chatbot. UI minimal: 3 chips
+ * grandes + respuesta evocadora. Preserva paleta KUDOS.
+ * ============================================================ */
+.mind-lite-shell {
+    max-width: 760px;
+    margin: 32px auto;
+    padding: 0 18px;
+    color: #e2e8f0;
+}
+.mind-lite-eyebrow {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: rgba(124, 58, 237, 0.18);
+    border: 1px solid rgba(167, 139, 250, 0.35);
+    color: #c4b5fd;
+    font-size: .78rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+.mind-lite-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+    line-height: 1.1;
+    margin: 14px 0 6px;
+    color: #fff;
+    text-shadow: 0 0 18px rgba(167, 139, 250, .35);
+}
+.mind-lite-subtitle {
+    color: #94a3b8;
+    font-size: 1.02rem;
+    margin-bottom: 28px;
+    max-width: 580px;
+}
+.mind-lite-context-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 6px 0 0;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(0, 240, 255, 0.10);
+    border: 1px solid rgba(0, 240, 255, 0.28);
+    color: #93e3f0;
+    font-size: .82rem;
+}
+.mind-lite-prompts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin: 24px 0;
+}
+.mind-lite-prompt {
+    background: rgba(8, 12, 32, 0.66);
+    border: 1px solid rgba(167, 139, 250, 0.28);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 18px 18px 16px;
+    text-align: left;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1.02rem;
+    line-height: 1.35;
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.mind-lite-prompt:hover, .mind-lite-prompt:focus-visible {
+    transform: translateY(-2px);
+    border-color: rgba(167, 139, 250, .65);
+    box-shadow: 0 8px 32px rgba(124, 58, 237, .28);
+    outline: none;
+}
+.mind-lite-prompt[aria-pressed="true"] {
+    border-color: #d4af37;
+    box-shadow: 0 0 24px rgba(212, 175, 55, .35);
+    background: rgba(212, 175, 55, 0.08);
+}
+.mind-lite-prompt .emoji { display: block; font-size: 1.6rem; margin-bottom: 6px; }
+.mind-lite-prompt .label { font-weight: 600; }
+.mind-lite-prompt .hint  { display: block; margin-top: 4px; color: #94a3b8; font-size: .82rem; font-weight: 400; }
+.mind-lite-response {
+    min-height: 96px;
+    margin-top: 18px;
+    padding: 22px 24px;
+    background: rgba(8, 12, 32, 0.78);
+    border: 1px solid rgba(0, 240, 255, 0.22);
+    border-left: 3px solid #a78bfa;
+    border-radius: 14px;
+    backdrop-filter: blur(12px);
+    color: #f1f5f9;
+    line-height: 1.6;
+    font-size: 1.05rem;
+    box-shadow: 0 0 36px rgba(124, 58, 237, .15);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .35s ease, transform .35s ease;
+}
+.mind-lite-response.visible { opacity: 1; transform: none; }
+.mind-lite-response.skeleton {
+    color: transparent;
+    background:
+      linear-gradient(90deg, rgba(167,139,250,.08), rgba(167,139,250,.18), rgba(167,139,250,.08))
+      rgba(8, 12, 32, 0.78);
+    background-size: 200% 100%;
+    animation: mind-shimmer 1.6s infinite linear;
+}
+@keyframes mind-shimmer { from { background-position: 0% 0; } to { background-position: -200% 0; } }
+.mind-lite-related { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.mind-lite-related a {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 10px; border-radius: 999px;
+    background: rgba(0, 240, 255, 0.10);
+    border: 1px solid rgba(0, 240, 255, 0.32);
+    color: #00f0ff; text-decoration: none; font-size: .88rem;
+}
+.mind-lite-related a:hover { background: rgba(0, 240, 255, 0.18); }
+.mind-lite-footer { margin-top: 28px; color: #64748b; font-size: .85rem; }
+.mind-lite-footer a { color: #a78bfa; text-decoration: none; }
+.mind-full-divider {
+    margin: 60px 0 12px;
+    border-top: 1px dashed rgba(167, 139, 250, .25);
+    padding-top: 18px;
+    color: #94a3b8; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="mind-lite-shell">
+    <span class="mind-lite-eyebrow">🧠 KUDOS MIND · Lite</span>
+    <h1 class="mind-lite-title">Pregunta al lugar.</h1>
+    <p class="mind-lite-subtitle">
+        Aquí no hablas con una IA. Habla el sitio.
+        Tres preguntas, tres ventanas a lo que sucedió bajo tus pies.
+    </p>
+
+    <div class="mind-lite-context"
+         data-capsule="{{ lite_capsule.uid|default:'' }}"
+         data-lat="{{ lite_lat|default:'' }}"
+         data-lon="{{ lite_lon|default:'' }}"
+         data-year="{{ lite_year|default:'' }}">
+        {% if lite_capsule %}<span class="mind-lite-context-chip">📍 {{ lite_capsule.display_title }}</span>{% endif %}
+        {% if lite_lat and lite_lon %}<span class="mind-lite-context-chip">🧭 {{ lite_lat }}, {{ lite_lon }}</span>{% endif %}
+        {% if lite_year %}<span class="mind-lite-context-chip">📅 {{ lite_year }}</span>{% endif %}
+    </div>
+
+    <div class="mind-lite-prompts" id="mind-prompts">
+        <button class="mind-lite-prompt" data-mode="what" type="button">
+            <span class="emoji">🏛</span>
+            <span class="label">¿Qué ocurrió aquí?</span>
+            <span class="hint">La voz del lugar en primera persona.</span>
+        </button>
+        <button class="mind-lite-prompt" data-mode="summary" type="button">
+            <span class="emoji">⏱</span>
+            <span class="label">Resúmelo en 30 segundos</span>
+            <span class="hint">Lo esencial, sin tecnicismos.</span>
+        </button>
+        <button class="mind-lite-prompt" data-mode="near" type="button">
+            <span class="emoji">🌐</span>
+            <span class="label">¿Qué debería descubrir cerca?</span>
+            <span class="hint">Tres hebras del mismo tejido.</span>
+        </button>
+    </div>
+
+    <div id="mind-response" class="mind-lite-response" aria-live="polite">
+        Toca una pregunta. El lugar responderá.
+    </div>
+
+    <p class="mind-lite-footer">
+        Llegas desde <a href="{% url 'map' %}">el mapa</a> o desde una
+        <a href="{% url 'capsule_list' %}">cápsula</a>. Mind no recuerda
+        conversaciones: cada pregunta es un destello.
+    </p>
+</section>
+
+{% if is_founder %}{% if_feature "mind_full" %}
+<section class="mind-lite-shell">
+    <div class="mind-full-divider">⚙ Operación interna · panel del fundador</div>
+
+    <h2 class="section-title">Agentes</h2>
+    <form method="post" class="inline-form">{% csrf_token %}
+        <input type="hidden" name="action" value="cycle">
+        <button class="btn btn-gold">▶ Ejecutar ciclo completo ahora</button>
+    </form>
+
+    <div class="agents-grid">
+        {% for a in agents %}
+        <article class="agent-card">
+            <h3>{{ a.name }}</h3>
+            <p class="muted">{{ a.description }}</p>
+            <p><small>Éxito: {{ a.success_rate }}% · Última ejecución: {{ a.last_run|date:"d M H:i" }}</small></p>
+            <form method="post" class="inline-form">{% csrf_token %}
+                <input type="hidden" name="action" value="agent">
+                <input type="hidden" name="agent_code" value="{{ a.code }}">
+                <button class="btn btn-ghost">Lanzar ahora</button>
+            </form>
+        </article>
+        {% endfor %}
+    </div>
+
+    <h2 class="section-title" style="margin-top:32px;">🧭 Directivas</h2>
+    <form method="post" class="card directive-form">{% csrf_token %}
+        <input type="hidden" name="action" value="directive">
+        <input type="text" name="title" placeholder="Título corto (ej: importar más arte)" required>
+        <textarea name="instruction" placeholder="Instrucción detallada para el agente..." required></textarea>
+        <button class="btn btn-gold">Añadir directiva</button>
+    </form>
+
+    {% for d in directives %}
+    <div class="directive-item">
+        <strong>{{ d.title }}</strong><br>
+        <small class="muted">{{ d.instruction }}</small>
+        <form method="post" action="{% url 'ai_directive_toggle' d.id %}" class="inline-form">{% csrf_token %}
+            <button class="btn btn-ghost btn-sm">Pausar / activar</button>
+        </form>
+    </div>
+    {% endfor %}
+
+    <h2 class="section-title" style="margin-top:32px;">💡 Insights recientes</h2>
+    {% for i in insights %}
+    <div class="insight-item">
+        <h3>{{ i.title }}</h3>
+        <p>{{ i.body|linebreaksbr }}</p>
+        <form method="post" action="{% url 'ai_insight_accept' i.id %}" class="inline-form">{% csrf_token %}
+            <button class="btn btn-gold btn-sm">✓ Aceptar y ejecutar</button>
+        </form>
+        <form method="post" action="{% url 'ai_insight_archive' i.id %}" class="inline-form">{% csrf_token %}
+            <button class="btn btn-ghost btn-sm">Archivar</button>
+        </form>
+    </div>
+    {% endfor %}
+
+    <h2 class="section-title" style="margin-top:32px;">📜 Caja negra</h2>
+    <table class="data-table">
+        <thead><tr><th>Cuándo</th><th>Agente</th><th>Acción</th><th>Nivel</th><th>Resumen</th></tr></thead>
+        <tbody>
+        {% for a in actions %}
+            <tr class="lvl-{{ a.level }}">
+                <td><small>{{ a.timestamp|date:"d M H:i:s" }}</small></td>
+                <td>{% if a.agent %}{{ a.agent.icon }} {{ a.agent.name }}{% else %}—{% endif %}</td>
+                <td>{{ a.action }}</td>
+                <td>{{ a.get_level_display }}</td>
+                <td><small>{{ a.summary }}</small></td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="5" class="muted">Aún no hay acciones registradas.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endif_feature %}{% endif %}
+
+<script>
+(function () {
+    'use strict';
+    const ctxEl = document.querySelector('.mind-lite-context');
+    const promptsRoot = document.getElementById('mind-prompts');
+    const responseEl = document.getElementById('mind-response');
+    if (!ctxEl || !promptsRoot || !responseEl) return;
+
+    const csrf = (document.querySelector('[name=csrfmiddlewaretoken]') || {}).value
+              || (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
+
+    function ctx() {
+        return {
+            capsule: ctxEl.dataset.capsule || '',
+            lat:     ctxEl.dataset.lat || '',
+            lon:     ctxEl.dataset.lon || '',
+            year:    ctxEl.dataset.year || '',
+        };
+    }
+
+    function showSkeleton() {
+        responseEl.textContent = '';
+        responseEl.classList.add('skeleton', 'visible');
+    }
+    function showReply(text, related) {
+        responseEl.classList.remove('skeleton');
+        const safe = (s) => String(s||'').replace(/[&<>"\']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+        let html = '<p>' + safe(text).replace(/\n/g, '<br>') + '</p>';
+        if (Array.isArray(related) && related.length) {
+            html += '<div class="mind-lite-related">';
+            related.forEach(r => {
+                const y = (r.year != null) ? ' · ' + safe(r.year) : '';
+                html += '<a href="/capsules/' + safe(r.uid) + '/">📍 ' + safe(r.titulo) + y + '</a>';
+            });
+            html += '</div>';
+        }
+        responseEl.innerHTML = html;
+        void responseEl.offsetWidth;
+        responseEl.classList.add('visible');
+    }
+    function showError() {
+        responseEl.classList.remove('skeleton');
+        responseEl.innerHTML = '<p style="color:#94a3b8;">El lugar no respondió esta vez. Inténtalo de nuevo en un momento.</p>';
+    }
+
+    async function ask(mode, btn) {
+        promptsRoot.querySelectorAll('.mind-lite-prompt').forEach(b => b.setAttribute('aria-pressed','false'));
+        btn.setAttribute('aria-pressed','true');
+        showSkeleton();
+        const fd = new FormData();
+        fd.append('mode', mode);
+        const c = ctx();
+        if (c.capsule) fd.append('capsule', c.capsule);
+        if (c.lat)     fd.append('lat', c.lat);
+        if (c.lon)     fd.append('lon', c.lon);
+        if (c.year)    fd.append('year', c.year);
+        try {
+            const r = await fetch('{% url "ai_lite_ask" %}', {
+                method: 'POST', body: fd,
+                headers: csrf ? { 'X-CSRFToken': csrf } : {},
+                credentials: 'same-origin',
+            });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const data = await r.json();
+            showReply(data.reply || 'El lugar guarda silencio.', data.related || []);
+        } catch (e) {
+            console.error('[Mind Lite] error:', e);
+            showError();
+        }
+    }
+
+    promptsRoot.querySelectorAll('.mind-lite-prompt').forEach(btn => {
+        btn.addEventListener('click', () => ask(btn.dataset.mode, btn));
+    });
+
+    if (ctx().capsule) {
+        const first = promptsRoot.querySelector('.mind-lite-prompt[data-mode="what"]');
+        if (first) setTimeout(() => ask('what', first), 200);
+    }
+})();
+</script>
+<form style="display:none;">{% csrf_token %}</form>
+{% endblock %}

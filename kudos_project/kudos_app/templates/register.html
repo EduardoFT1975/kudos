@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear cuenta – Kudos{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <h1>Crear cuenta</h1>
+    <p class="muted">Únete al ecosistema multidimensional de Kudos.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <label>UID único <small>(p.ej. tu_apodo123)</small>
+            <input type="text" name="uid" required maxlength="50" autocomplete="username">
+        </label>
+        <label>Alias visible
+            <input type="text" name="alias" required maxlength="50">
+        </label>
+        <label>Email <small>(opcional)</small>
+            <input type="email" name="email" autocomplete="email">
+        </label>
+        <label>Contraseña <small>(mín. 6 caracteres)</small>
+            <input type="password" name="password" required minlength="6" autocomplete="new-password">
+        </label>
+        <button type="submit" class="btn btn-gold">Crear cuenta</button>
+    </form>
+    <p class="muted center">¿Ya tienes cuenta? <a href="{% url 'login' %}">Entra</a>.</p>
+</div>
+{% endblock %}

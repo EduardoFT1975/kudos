@@ -1,0 +1,110 @@
+<!-- kudos_app/templates/education_recommender.html -->
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recomendador de Cápsulas Educativas</title>
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+    <script src="{% static 'js/leaflet-src.js' %}"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        #recommendation-map { height: 400px; margin: 20px 0; border: 2px solid #ccc; }
+        .recommender-container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        .capsule-list { margin: 20px 0; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 5px 0; }
+        select, input { padding: 8px; margin: 5px 0; }
+        button { padding: 10px 20px; background-color: #FFD700; border: none; cursor: pointer; }
+        button:hover { background-color: #FFC107; }
+        .filter-form { text-align: center; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Recomendador de Cápsulas Educativas</h1>
+
+    <div class="recommender-container">
+        <!-- Formulario de Filtros -->
+        <div class="filter-form">
+            <form method="GET">
+                <label for="themes">Temas:</label>
+                <select id="themes" name="themes" multiple>
+                    {% for theme in themes %}
+                        <option value="{{ theme }}" {% if theme in selected_themes %}selected{% endif %}>
+                            {{ theme }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <label for="educational_level">Nivel Educativo:</label>
+                <select id="educational_level" name="educational_level">
+                    {% for level in educational_levels %}
+                        <option value="{{ level }}" {% if level == selected_level %}selected{% endif %}>
+                            {{ level }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <label for="radius">Radio (km):</label>
+                <input type="number" id="radius" name="radius" value="{{ radius }}" min="1" max="1000">
+
+                <button type="submit">Filtrar</button>
+            </form>
+        </div>
+
+        <!-- Lista de Cápsulas Recomendadas -->
+        <div class="capsule-list">
+            <h2>Cápsulas Recomendadas</h2>
+            {% if capsules %}
+                <ul>
+                    {% for capsule in capsules %}
+                        <li>
+                            {{ capsule.contenido }} (Modo: {{ capsule.modo }}, Año: {{ capsule.fecha.year }})
+                            <a href="{% url 'ar_view' capsule.uid %}">Ver en AR</a> |
+                            <a href="{% url 'vr_view' capsule.uid %}">Ver en VR</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No se encontraron cápsulas para los filtros seleccionados.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Mapa Interactivo -->
+    <div id="recommendation-map"></div>
+
+    <script>
+        // Inicializar mapa con Leaflet
+        var map = L.map('recommendation-map').setView([41.8902, 12.4924], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            minZoom: 0,
+            maxZoom: 20
+        }).addTo(map);
+
+        var capsuleLayer = L.geoJSON({{ map_data|safe }}, {
+            style: function(feature) {
+                return { color: "#FFD700", weight: 2 };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `<b>${feature.properties.description}</b><br>
+                    Modo: ${feature.properties.mode}<br>
+                    Temas: ${feature.properties.themes.join(', ')}<br>
+                    Clima: ${feature.properties.weather}<br>
+                    Año: ${feature.properties.year}`
+                );
+            }
+        }).addTo(map);
+
+        if (capsuleLayer.getBounds().isValid()) {
+            map.fitBounds(capsuleLayer.getBounds());
+        }
+    </script>
+</body>
+</html>
+```

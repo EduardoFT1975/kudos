@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Publicar operación – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🛍️</div>
+        <div>
+            <h1>Publicar operación</h1>
+            <p class="muted">Crea una nueva oferta en el mercado descentralizado de Kudos.</p>
+        </div>
+    </header>
+    
+<form method="post" class="form-stacked">
+    {% csrf_token %}
+    <label>Tipo<select name="operation_type">
+        {% for code, label in op_types %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
+    </select></label>
+    <label>Título *<input type="text" name="title" required maxlength="150"></label>
+    <label>Descripción *<textarea name="description" rows="4" required></textarea></label>
+    <label>Precio (K)<input type="number" name="price" step="0.01" value="0"></label>
+    <label>Ciudad<input type="text" name="city" maxlength="100"></label>
+    <button class="btn btn-gold">Publicar</button>
+</form>
+
+</div>
+{% endblock %}

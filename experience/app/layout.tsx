@@ -7,6 +7,8 @@
  */
 import type { Metadata, Viewport } from "next";
 import { PlausibleProvider } from "@/components/analytics/PlausibleProvider";
+import { KudosHeader } from "@/components/shell/KudosHeader";
+import { KudosFooter } from "@/components/shell/KudosFooter";
 import { checkEnv } from "@/lib/env/check";
 import "./globals.css";
 
@@ -50,7 +52,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className="dark" suppressHydrationWarning>
-      <body>{children}</body>
+      <body className="flex min-h-[100dvh] flex-col">
+        <KudosHeader />
+        <div className="flex-1">{children}</div>
+        <KudosFooter />
+      </body>
       <PlausibleProvider />
     </html>
   );

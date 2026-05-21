@@ -1,0 +1,456 @@
+Documentación del Proyecto Kudos
+1. Introducción
+Kudos es una plataforma descentralizada diseñada para fomentar la colaboración, el aprendizaje, la innovación, y el impacto social a través de cápsulas digitales (unidades de contenido multimedia). El proyecto sigue el "Plan Maestro 🌟", que consta de 15 módulos integrados para cubrir archivo, educación, comercio, interacciones sociales, gobernanza, infraestructura, investigación, impacto social, salud mental, turismo sostenible, exploración espacial, innovación tecnológica, arte/cultura, y gestión centralizada. Desarrollado con un presupuesto de 1,000€, Kudos está optimizado para escalar a 60M de usuarios en 4 años, utilizando tecnologías abiertas y descentralizadas.
+Objetivos
+
+Colaboración Global: Facilitar la creación y compartición de cápsulas en comunidades descentralizadas.
+Educación y Bienestar: Ofrecer aprendizaje personalizado y herramientas de salud mental.
+Sostenibilidad e Innovación: Promover turismo responsable, investigación científica, e innovación tecnológica.
+Gobernanza Descentralizada: Implementar votaciones transparentes mediante blockchain.
+Escalabilidad: Soportar 60M de usuarios con infraestructura eficiente.
+Bajo Costo: Mantenerse dentro de un presupuesto de 1,000€.
+
+2. Arquitectura del Sistema
+Tecnologías Principales
+
+Backend: Django (Python) para la lógica del servidor y gestión de datos.
+Base de Datos: PostgreSQL con soporte GIS (PostGIS) para cápsulas georreferenciadas.
+Automatización: Celery con colas prioritarias para tareas asíncronas, gestionadas por Celery Beat.
+Blockchain: Solana para transacciones y votaciones descentralizadas.
+Almacenamiento: IPFS para almacenamiento distribuido de cápsulas y multimedia.
+Renderizado: WebGPU y A-Frame para simulaciones AR/VR.
+Frontend: HTML, CSS, JavaScript con Leaflet (mapas) y Chart.js (visualizaciones).
+Dependencias: Ver sección 6 del plan de mantenimiento.
+
+Estructura de Archivos
+
+Módulos Principales:
+capsule_museum.py (M1: Archivo Universal)
+education_plan.py, education_recommender.py, education_advanced.py (M2, M7: Educación)
+marketplace.py, market_transactions.py (M3: Mercado Global)
+social.py (M4: Social)
+governance.py (M5: Gobernanza)
+infrastructure.py (M6: Infraestructura)
+research.py (M8: Investigación)
+social_impact.py (M9: Impacto Social)
+mental_health.py (M10: Salud Mental)
+sustainable_tourism.py (M11: Turismo Sostenible)
+space_exploration.py (M12: Exploración Espacial)
+innovation.py (M13: Innovación Tecnológica)
+art_culture.py (M14: Arte y Cultura)
+control_panel.py (M15: Panel de Control)
+
+
+Automatización:
+scheduler.py: Tareas programadas (curación, recomendaciones, monitoreo).
+celery.py: Configuración de colas y horarios.
+
+
+Plantillas:
+education_recommender.html, education_plan.html, education_plan_success.html (M2)
+social.html, governance.html, research.html, social_impact.html, infrastructure.html, control_panel.html (M4-M6, M8-M9, M15)
+
+
+Utilidades:
+ar_vr_utils.py: Funciones para simulaciones AR/VR.
+blockchain_utils.py: Interacciones con Solana.
+
+
+
+3. Módulos y Funcionalidades
+M1: Archivo Universal
+
+Descripción: Gestiona cápsulas digitales (texto, multimedia) con mapas interactivos y vistas AR/VR.
+Funcionalidades:
+Creación, edición, y visualización de cápsulas (capsule_museum.py).
+Mapas Leaflet para georreferenciación (prepare_map_data).
+Simulaciones AR/VR con A-Frame (ar_view.py, vr_view.py).
+
+
+Tareas Automatizadas: process_expired_capsules (oculta cápsulas expiradas).
+
+M2: Educación
+
+Descripción: Ofrece planes de aprendizaje personalizados y certificaciones.
+Funcionalidades:
+Recomendaciones educativas (education_recommender.py).
+Planes de estudio (education_plan.py).
+Certificaciones (education_certification.py).
+
+
+Plantillas: education_recommender.html, education_plan.html, education_plan_success.html.
+Tareas Automatizadas: update_adaptive_recommendations.
+
+M3: Mercado Global
+
+Descripción: Plataforma de comercio para cápsulas con subastas y reputación.
+Funcionalidades:
+Listado y compra de cápsulas (marketplace.py).
+Subastas (market_transactions.py).
+Sistema de reputación (market_reputation.py).
+
+
+Tareas Automatizadas: expire_market_listings, update_seller_reputation, process_expired_auctions.
+
+M4: Social
+
+Descripción: Red social para interacciones, comunidades, y eventos AR/VR.
+Funcionalidades:
+Seguimiento, comentarios, mensajes (social.py).
+Creación de comunidades y eventos virtuales.
+
+
+Plantilla: social.html.
+Tareas Automatizadas: moderate_social_interactions, update_social_recommendations.
+
+M5: Gobernanza
+
+Descripción: Sistema descentralizado para propuestas y votaciones.
+Funcionalidades:
+Creación de propuestas (governance.py).
+Votaciones en Solana (blockchain_utils.py).
+
+
+Plantilla: governance.html.
+Tareas Automatizadas: moderate_governance_proposals, process_governance_votes (cola crítica).
+
+M6: Infraestructura
+
+Descripción: Base tecnológica con IPFS, Solana, y WebGPU.
+Funcionalidades:
+Almacenamiento distribuido (infrastructure.py).
+Transacciones descentralizadas.
+Renderizado AR/VR optimizado.
+Monitoreo de recursos.
+
+
+Plantilla: infrastructure.html.
+Tareas Automatizadas: monitor_infrastructure_resources (cola crítica), optimize_ipfs_storage.
+
+M7: Educación Avanzada
+
+Descripción: Aprendizaje adaptativo con gamificación.
+Funcionalidades:
+Recomendaciones basadas en IA (education_advanced.py).
+Insignias educativas.
+
+
+Tareas Automatizadas: assign_learning_badges.
+
+M8: Investigación
+
+Descripción: Herramientas para colaboración científica.
+Funcionalidades:
+Cápsulas científicas y simulaciones AR/VR (research.py).
+Proyectos colaborativos.
+
+
+Plantilla: research.html.
+Tareas Automatizadas: curate_research_capsules, update_research_recommendations.
+
+M9: Impacto Social
+
+Descripción: Proyectos comunitarios y sostenibles.
+Funcionalidades:
+Cápsulas de impacto y colaboración (social_impact.py).
+Simulaciones AR/VR.
+
+
+Plantilla: social_impact.html.
+Tareas Automatizadas: curate_social_impact_capsules, update_social_impact_recommendations.
+
+M10: Salud Mental
+
+Descripción: Actividades de bienestar con AR/VR.
+Funcionalidades:
+Cápsulas de mindfulness (mental_health.py).
+Recomendaciones personalizadas.
+
+
+Tareas Automatizadas: send_mental_health_reminders, update_mental_health_recommendations.
+
+M11: Turismo Sostenible
+
+Descripción: Rutas responsables con AR/VR.
+Funcionalidades:
+Cápsulas de turismo (sustainable_tourism.py).
+Visualizaciones interactivas.
+
+
+Tareas Automatizadas: curate_tourism_capsules, update_tourism_recommendations.
+
+M12: Exploración Espacial
+
+Descripción: Cápsulas y simulaciones espaciales.
+Funcionalidades:
+Datos espaciales simulados (space_exploration.py).
+Integración con NASA API (simulada).
+
+
+Tareas Automatizadas: update_space_data.
+
+M13: Innovación Tecnológica
+
+Descripción: Plataforma para IA y tecnología.
+Funcionalidades:
+Cápsulas de innovación (innovation.py).
+Recomendaciones tecnológicas.
+
+
+Tareas Automatizadas: curate_innovation_capsules, update_innovation_recommendations.
+
+M14: Arte y Cultura
+
+Descripción: Exposiciones virtuales y colaboración artística.
+Funcionalidades:
+Cápsulas artísticas (art_culture.py).
+Integración con Europeana API (simulada).
+
+
+Tareas Automatizadas: curate_art_capsules, update_art_recommendations.
+
+M15: Panel de Control
+
+Descripción: Gestión centralizada con estadísticas y configuraciones.
+Funcionalidades:
+Monitoreo de módulos (control_panel.py).
+Visualizaciones con Chart.js (control_panel.html).
+
+
+Plantilla: control_panel.html.
+Tareas Automatizadas: update_global_statistics.
+
+4. Instrucciones de Uso
+Requisitos
+
+Servidor: Linux (Ubuntu recomendado) con Python 3.8+.
+Dependencias: Ver requirements.txt en el plan de mantenimiento.
+Configuración:
+Instalar PostgreSQL con PostGIS.
+Configurar Redis para Celery.
+Configurar nodos IPFS y conexión a Solana.
+
+
+
+Instalación
+
+Clonar el repositorio: git clone <repo_url>
+Instalar dependencias: pip install -r requirements.txt
+Configurar variables de entorno en .env:
+DATABASE_URL: Conexión a PostgreSQL.
+REDIS_URL: Conexión a Redis.
+SOLANA_RPC: Endpoint de Solana.
+IPFS_API: Endpoint de IPFS.
+
+
+Aplicar migraciones: python manage.py migrate
+Iniciar Celery: celery -A kudos_project worker --beat --scheduler django
+Iniciar servidor: python manage.py runserver
+
+Uso
+
+Acceso: Iniciar sesión como administrador (is_staff=True, AdminAccess.access_level >= 1).
+Panel de Control: Acceder a /control_panel para gestionar configuraciones, ver estadísticas, y monitorear tareas.
+Módulos: Navegar a rutas específicas (por ejemplo, /social, /infrastructure) para interactuar con cápsulas.
+Automatización: Configurar parámetros en control_panel.html (por ejemplo, ipfs_storage_limit, curation_impact_threshold).
+
+5. Escalabilidad
+
+Base de Datos: Índices en modo, privacy, parameters__merits para consultas rápidas.
+Automatización: Celery con colas prioritarias (critical para process_governance_votes, monitor_infrastructure_resources).
+Infraestructura: IPFS para almacenamiento distribuido, Solana para transacciones escalables, WebGPU para renderizado eficiente.
+Pruebas: Diseñado para 60M de usuarios con consultas limitadas ([:50], [:5]) y tareas asíncronas.
+
+6. Presupuesto
+
+Costo Total: <1,000€.
+Componentes:
+Tecnologías abiertas (Django, Leaflet, Chart.js, A-Frame): 0€.
+Solana: ~0.0001€ por transacción (estimado 500€ para 5M transacciones).
+Servidor: Cloud económico (~300€/año).
+Redis: Gratuito (instancia local).
+IPFS: Nodos gratuitos o ~200€/año para nodos gestionados.
+
+
+
+
+Plan de Mantenimiento para Dependencias
+1. Objetivo
+Mantener las dependencias del proyecto Kudos actualizadas, seguras, y compatibles, asegurando operación continua, escalabilidad, y cumplimiento del presupuesto de 1,000€.
+2. Dependencias Principales
+
+
+
+Dependencia
+Versión
+Propósito
+Fuente
+
+
+
+Django
+4.2
+Framework backend
+PyPI
+
+
+PostgreSQL
+15
+Base de datos
+Oficial
+
+
+PostGIS
+3.4
+Soporte GIS
+Oficial
+
+
+Celery
+5.3
+Tareas asíncronas
+PyPI
+
+
+django-celery-beat
+2.5
+Programación de tareas
+PyPI
+
+
+Redis
+7.0
+Broker para Celery
+Oficial
+
+
+Leaflet
+1.9
+Mapas interactivos
+CDN
+
+
+Chart.js
+4.4.3
+Visualizaciones
+CDN
+
+
+A-Frame
+1.4.0
+Simulaciones AR/VR
+CDN
+
+
+solana-py
+0.30
+Interacciones con Solana
+PyPI
+
+
+python-ipfs-http-client
+0.0.6
+Conexión a IPFS
+PyPI
+
+
+3. Estrategia de Mantenimiento
+Actualizaciones
+
+Frecuencia: Trimestral (febrero, mayo, agosto, noviembre).
+Proceso:
+Verificar nuevas versiones en PyPI, CDN, o sitios oficiales.
+Revisar notas de lanzamiento para cambios disruptivos.
+Probar actualizaciones en un entorno de staging.
+Aplicar actualizaciones en producción: pip install <dependencia>==<versión>.
+
+
+Prioridad:
+Parches de seguridad: Inmediatos.
+Actualizaciones menores: Trimestrales.
+Actualizaciones mayores: Evaluar compatibilidad.
+
+
+
+Monitoreo
+
+Herramientas:
+Dependabot (GitHub) para alertas de vulnerabilidades.
+pip-audit para auditorías de seguridad.
+Monitoreo manual de repositorios oficiales (Django, Celery, Solana).
+
+
+Tareas Automatizadas:
+monitor_infrastructure_resources: Monitorea métricas de IPFS, Solana, WebGPU.
+Notificaciones en control_panel.html para alertas críticas (por ejemplo, almacenamiento IPFS excedido).
+
+
+
+Resolución de Problemas
+
+Vulnerabilidades:
+Aplicar parches inmediatamente.
+Si no hay parche, mitigar con configuraciones (por ejemplo, restricciones de acceso).
+
+
+Incompatibilidades:
+Mantener requirements.txt congelado (pip freeze > requirements.txt).
+Revertir a versiones estables si surgen problemas.
+
+
+Soporte Comunitario:
+Consultar foros (Stack Overflow, GitHub Issues).
+Contribuir parches si es necesario.
+
+
+
+4. Cronograma Anual
+
+
+
+Mes
+Tarea
+Responsable
+
+
+
+Febrero
+Actualización trimestral, auditoría de seguridad
+DevOps
+
+
+Mayo
+Actualización trimestral, pruebas de escalabilidad
+DevOps/Testing
+
+
+Agosto
+Actualización trimestral, revisión de costos
+DevOps/Finanzas
+
+
+Noviembre
+Actualización trimestral, planificación anual
+DevOps
+
+
+Mensual
+Monitoreo de vulnerabilidades, revisión de métricas
+DevOps
+
+
+5. Costos Estimados
+
+Actualizaciones: 0€ (herramientas gratuitas).
+Servidor: ~300€/año (cloud económico).
+Solana: ~200€/año (transacciones para 2M de usuarios).
+IPFS: ~200€/año (nodos gestionados, opcional).
+Total Anual: ~700€, dentro del presupuesto.
+
+6. Recomendaciones
+
+Automatización: Implementar CI/CD con GitHub Actions para pruebas automáticas de actualizaciones.
+Documentación: Mantener un CHANGELOG para registrar cambios en dependencias.
+Capacitación: Formar al equipo en nuevas versiones de Django y Celery.
+Respaldo: Configurar backups automáticos de PostgreSQL.
+

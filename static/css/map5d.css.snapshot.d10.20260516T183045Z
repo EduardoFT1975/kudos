@@ -1,0 +1,399 @@
+/* ============================================================
+ * KUDOS · Mapa 5D · estilos
+ * Extraído de templates/map.html (D7 · 2026-05-16)
+ * REGLA: 0 cambios visuales respecto al inline original.
+ * ============================================================ */
+
+/* ---- bloque CSS extraído de map.html L11-L76 ---- */
+/* AXÓN D4 · cluster icons en clave KUDOS (cyan/neón, sin destruir identidad) */
+.marker-cluster-small      { background-color: rgba(0,240,255,.15); }
+.marker-cluster-small div  { background-color: rgba(0,240,255,.55); color:#0a0f2c; font-weight:700; }
+.marker-cluster-medium     { background-color: rgba(255,174,0,.18); }
+.marker-cluster-medium div { background-color: rgba(255,174,0,.65); color:#0a0f2c; font-weight:700; }
+.marker-cluster-large      { background-color: rgba(255,0,212,.18); }
+.marker-cluster-large div  { background-color: rgba(255,0,212,.65); color:#fff; font-weight:700; }
+.marker-cluster { box-shadow: 0 0 18px rgba(0,240,255,.35); }
+/* AXÓN D6 · Touch ergonomics — preserva identidad, mejora fiabilidad táctil */
+.map5d-side {
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+/* CTAs del popup: mínimo 36 px de altura efectiva (Apple HIG 44 con padding) */
+.leaflet-popup-content .cta-row a {
+    min-height: 36px;
+    padding: 8px 12px !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+/* Botón cerrar del popup: área táctil más generosa */
+.leaflet-popup-close-button {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 22px !important;
+    line-height: 30px !important;
+}
+/* Cluster: hitbox un pelo mayor sin cambiar visual */
+.marker-cluster { cursor: pointer; }
+.marker-cluster div { line-height: 30px; }
+/* Búsqueda dentro del mapa: tap fiable en resultados */
+#search-results li { min-height: 40px; line-height: 1.35; }
+/* Evitar selección de texto accidental al pan/tap en glass UI */
+.map5d-hud, .map5d-side .group-title, .map5d-side .side-h2 {
+    -webkit-user-select: none;
+    user-select: none;
+}
+@media (max-width: 1100px) {
+    /* En mobile el sidebar pasa de 320 px a stacked. Limitar altura para no comerse el mapa. */
+    .map5d-side {
+        max-height: 42vh;
+        max-height: 42dvh;
+        overflow-y: auto;
+        border-right: none;
+        border-bottom: 1px solid rgba(0, 240, 255, 0.18);
+    }
+}
+/* AXÓN D5 · chips de metadata lazy (era / IA / calidad / sentimiento) */
+.lazy-meta {
+    margin-top: 6px;
+    min-height: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity .35s ease;
+}
+.lazy-meta.lazy-loaded { opacity: 1; }
+.lazy-meta .chip {
+    font-size: .78em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1.3;
+}
+
+/* ---- bloque CSS extraído de map.html L79-L257 ---- */
+/* ========= MAPA 5D · ESTILO FUTURISTA ========= */
+.map5d-shell {
+    --neon: #00f0ff;
+    --neon-warm: #ffae00;
+    --neon-pink: #ff00d4;
+    --grid: rgba(0, 240, 255, 0.08);
+    position: relative;
+    margin: 0;
+    padding: 0;
+    background:
+      radial-gradient(800px 600px at 20% 0%, rgba(0,240,255,0.10), transparent 60%),
+      radial-gradient(700px 500px at 80% 30%, rgba(255,0,212,0.08), transparent 70%),
+      linear-gradient(180deg, #050a1f 0%, #0a0f2c 60%, #050a1f 100%);
+    color: #e2e8f0;
+    min-height: calc(100vh - 80px);
+    min-height: calc(100dvh - 80px); /* AXÓN D6 · iOS Safari viewport fix */
+    overflow: hidden;
+}
+.map5d-shell::before {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/40px 40px;
+    mask-image: radial-gradient(ellipse at center, #000 35%, transparent 75%);
+    opacity: .6;
+}
+.map5d-grid { display:grid; grid-template-columns: 320px 1fr; gap:0; height:calc(100vh - 80px); height:calc(100dvh - 80px); }
+@media (max-width: 1100px) { .map5d-grid { grid-template-columns: 1fr; } }
+
+.map5d-side {
+    background: rgba(8, 12, 32, 0.66);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    border-right: 1px solid rgba(0,240,255,0.18);
+    padding: 22px 22px 80px;
+    overflow-y: auto;
+    z-index: 5;
+    box-shadow: 4px 0 30px rgba(0,240,255,0.05);
+}
+.map5d-side h1 {
+    font-family:'Cormorant Garamond', Georgia, serif;
+    font-size: 1.6rem; margin: 0 0 4px;
+    background: linear-gradient(90deg, var(--neon), #fff 60%, var(--neon-pink));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: 0 0 30px rgba(0,240,255,.2);
+}
+.map5d-side .eyebrow {
+    font-size:.7rem; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--neon); padding:3px 8px; border:1px solid var(--neon);
+    border-radius:4px; display:inline-block; margin-bottom:6px;
+}
+.map5d-section { margin-top:22px; }
+.map5d-section h3 { font-size:.85rem; letter-spacing:.12em; text-transform:uppercase; color:#94a3b8; margin:0 0 8px; }
+
+.dim-btns { display:grid; grid-template-columns: 1fr 1fr; gap:6px; }
+.dim-btn {
+    padding:9px 8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.03);
+    color:#cbd5e1; border-radius:9px; font-size:.84rem; cursor:pointer;
+    transition: all .25s; text-align:left;
+}
+.dim-btn.active, .dim-btn:hover { border-color:var(--neon); color:#fff; box-shadow:0 0 14px rgba(0,240,255,.25); background:rgba(0,240,255,.08); }
+
+.modo-pills { display:flex; flex-wrap:wrap; gap:6px; }
+.modo-pill {
+    padding:5px 10px; border-radius:14px; font-size:.78rem;
+    background:rgba(255,255,255,0.04); color:#cbd5e1; cursor:pointer;
+    border:1px solid rgba(255,255,255,0.08);
+}
+.modo-pill.active { background:var(--neon); color:#000; font-weight:700; border-color:var(--neon); box-shadow:0 0 14px var(--neon); }
+
+.map5d-counter {
+    margin-top:18px; padding:14px;
+    background: rgba(0,240,255,0.05);
+    border:1px dashed rgba(0,240,255,0.35); border-radius:12px;
+}
+.map5d-counter .num {
+    font-family:'Cormorant Garamond', Georgia, serif;
+    font-size:2rem; color:var(--neon); text-shadow:0 0 14px var(--neon);
+}
+
+.map5d-canvas {
+    position:relative;
+}
+#map {
+    height:100%; width:100%;
+    filter: hue-rotate(190deg) saturate(.8) brightness(.85);
+}
+
+/* HUD superior */
+.hud-top {
+    position:absolute; top:14px; left:14px; right:14px; z-index: 999;
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    padding:10px 14px;
+    background: rgba(8, 12, 32, 0.7);
+    border:1px solid rgba(0,240,255,0.25); border-radius:14px;
+    backdrop-filter: blur(12px); color:#e2e8f0;
+    box-shadow: 0 0 30px rgba(0,240,255,0.10);
+}
+.hud-top .hud-label { font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:#94a3b8; }
+.hud-top .hud-value { font-family:'Cormorant Garamond', Georgia, serif; font-size:1.4rem; color:#fff; text-shadow: 0 0 8px rgba(0,240,255,.6); }
+
+/* Slider temporal */
+.time-slider {
+    position:absolute; bottom:18px; left:18px; right:18px; z-index: 999;
+    padding:18px 18px 14px;
+    background: rgba(8, 12, 32, 0.78);
+    border:1px solid rgba(0,240,255,0.25); border-radius:18px;
+    backdrop-filter: blur(14px); color:#e2e8f0;
+    box-shadow: 0 0 40px rgba(0,240,255,0.10);
+}
+.time-slider .ts-row { display:flex; align-items:center; gap:14px; }
+.time-slider .ts-label { font-family:'Cormorant Garamond', Georgia, serif; font-size:1.6rem; color:#fff; min-width:140px; text-align:center; text-shadow: 0 0 12px rgba(0,240,255,.6); }
+.time-slider input[type=range] {
+    flex:1; -webkit-appearance:none; appearance:none; height:6px;
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon), var(--neon-warm));
+    border-radius: 6px; outline:none;
+}
+.time-slider input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance:none; appearance:none;
+    width:22px; height:22px; border-radius:50%;
+    background:#fff; box-shadow:0 0 16px var(--neon); cursor:pointer;
+    border:2px solid var(--neon);
+}
+.time-slider input[type=range]::-moz-range-thumb {
+    width:22px; height:22px; border-radius:50%;
+    background:#fff; box-shadow:0 0 16px var(--neon); cursor:pointer;
+    border:2px solid var(--neon);
+}
+.time-slider .ts-controls { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; align-items:center; }
+.ts-btn {
+    padding:7px 14px; border-radius:18px; border:1px solid rgba(0,240,255,.5);
+    background: rgba(0,240,255,0.08); color:#fff; cursor:pointer; font-size:.85rem;
+    transition: all .25s;
+}
+.ts-btn:hover { background: rgba(0,240,255,.2); box-shadow:0 0 12px rgba(0,240,255,.4); }
+.ts-btn.playing { background: var(--neon-warm); color:#000; border-color: var(--neon-warm); }
+
+/* Marker custom */
+.kudos-marker {
+    cursor: pointer;
+    transition: transform .2s;
+}
+.kudos-marker:hover { transform: scale(1.6); z-index: 9999 !important; }
+
+/* Tamaño y aspecto del marcador */
+.kudos-marker-default {
+    width:14px; height:14px; border-radius:50%;
+    background: radial-gradient(circle at 30% 30%, #fff, var(--neon) 50%, transparent);
+    box-shadow:0 0 12px var(--neon);
+    cursor:pointer;
+    animation: pulse 2.5s ease-in-out infinite;
+}
+.kudos-marker.dim-emocional { background: radial-gradient(circle at 30% 30%, #fff, #ff00d4 50%, transparent); box-shadow:0 0 12px #ff00d4; }
+.kudos-marker.dim-cognitiva { background: radial-gradient(circle at 30% 30%, #fff, #ffae00 50%, transparent); box-shadow:0 0 12px #ffae00; }
+.kudos-marker.dim-social    { background: radial-gradient(circle at 30% 30%, #fff, #10b981 50%, transparent); box-shadow:0 0 12px #10b981; }
+.kudos-marker.dim-espiritual{ background: radial-gradient(circle at 30% 30%, #fff, #d4af37 50%, transparent); box-shadow:0 0 12px #d4af37; }
+@keyframes pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.35); } }
+
+/* Popup */
+.leaflet-popup-content-wrapper {
+    background: rgba(8, 12, 32, 0.92);
+    color:#fff;
+    border:1px solid rgba(0,240,255,.4);
+    border-radius:14px;
+    backdrop-filter: blur(8px);
+}
+.leaflet-popup-tip { background: rgba(8, 12, 32, 0.92); }
+.leaflet-popup-content { font-family: 'Inter', sans-serif; line-height:1.5; }
+.leaflet-popup-content a { color: var(--neon); }
+.leaflet-popup-content img { border-radius:8px; max-height:120px; object-fit:cover; }
+
+/* Toggle vista */
+.view-toggle { position:absolute; top:14px; right:14px; z-index:999; display:flex; gap:6px; }
+.view-toggle button {
+    padding:8px 12px; border-radius:10px;
+    background:rgba(8,12,32,.7); border:1px solid rgba(0,240,255,.3);
+    color:#cbd5e1; cursor:pointer;
+}
+.view-toggle button.active { background:var(--neon); color:#000; border-color:var(--neon); }
+
+
+/* ============================================================
+ * AXÓN D10 · POPUP COMO PORTAL CONTEXTUAL
+ * Reglas: identidad cyan/ámbar/magenta preservada · sin saturación.
+ * ============================================================ */
+.kudos-popup {
+    font-family: 'Inter', sans-serif;
+    color: #e2e8f0;
+    line-height: 1.45;
+    min-width: 240px;
+}
+.kudos-popup-title {
+    display: block;
+    font-size: 1.05em;
+    line-height: 1.25;
+    color: #ffffff;
+    margin-bottom: 4px;
+    letter-spacing: .2px;
+}
+.kudos-popup-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .82em;
+    color: #94a3b8;
+    margin-bottom: 6px;
+}
+.kudos-popup-meta .sep { opacity: .45; }
+.kudos-popup-meta .dim-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.kudos-popup-thumb {
+    display: block;
+    width: 100%;
+    max-height: 130px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin: 4px 0 6px;
+    box-shadow: 0 0 18px rgba(0,240,255,.15);
+}
+.kudos-popup-byline {
+    font-size: .78em;
+    color: #94a3b8;
+    margin-bottom: 4px;
+    font-style: italic;
+    letter-spacing: .15px;
+}
+
+/* ── CTA hierarchy ──────────────────────────────────────────
+ * 1. Explorar (primary, ámbar dorado): destino narrativo.
+ * 2. Compartir (cyan): viralidad / "mira esto".
+ * 3. Timeline (neutro grafito): contextualizar en el tiempo.
+ * 4. ◯ Mind queda en nav principal (no se duplica aquí).
+ * ─────────────────────────────────────────────────────────── */
+.leaflet-popup-content .cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+.leaflet-popup-content .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 36px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: .82em;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    background: transparent;
+    transition: transform .12s ease, box-shadow .18s ease, background .18s ease;
+}
+.leaflet-popup-content .cta:active { transform: translateY(1px); }
+.leaflet-popup-content .cta-primary {
+    background: linear-gradient(135deg, #d4af37 0%, #c19a2f 100%);
+    color: #0a0f2c;
+    box-shadow: 0 0 18px rgba(212, 175, 55, .35);
+    border-color: rgba(212, 175, 55, .55);
+}
+.leaflet-popup-content .cta-primary:hover {
+    box-shadow: 0 0 26px rgba(212, 175, 55, .55);
+}
+.leaflet-popup-content .cta-share {
+    background: rgba(0, 240, 255, .12);
+    color: #00f0ff;
+    border-color: rgba(0, 240, 255, .35);
+}
+.leaflet-popup-content .cta-share:hover {
+    background: rgba(0, 240, 255, .2);
+    box-shadow: 0 0 16px rgba(0, 240, 255, .35);
+}
+.leaflet-popup-content .cta-timeline {
+    background: rgba(255, 255, 255, .04);
+    color: #cbd5e1;
+    border-color: rgba(255, 255, 255, .12);
+}
+.leaflet-popup-content .cta-timeline:hover {
+    background: rgba(255, 255, 255, .08);
+    color: #ffffff;
+}
+
+/* ── Toast suave (share feedback) ───────────────────────────
+ * Sin spinner, sin alert. Aparece desde abajo con fade neón.
+ * ─────────────────────────────────────────────────────────── */
+.kudos-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translate(-50%, 30px);
+    z-index: 99999;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: rgba(8, 12, 32, .92);
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+    font-size: .9em;
+    font-weight: 500;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, .5), 0 0 24px rgba(0, 240, 255, .25);
+    border: 1px solid rgba(0, 240, 255, .35);
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+}
+.kudos-toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+.kudos-toast[data-kind="success"] {
+    border-color: rgba(16, 185, 129, .55);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, .5), 0 0 24px rgba(16, 185, 129, .35);
+}
+.kudos-toast[data-kind="error"] {
+    border-color: rgba(255, 0, 212, .55);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, .5), 0 0 24px rgba(255, 0, 212, .35);
+}

@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asistente Personal - Kudos</title>
+</head>
+<body>
+    <h1>Asistente Personal de {{ user.alias }}</h1>
+    <p>Tu guía estoica para liderar Kudos y gestionar tu legado.</p>
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+    {% if user.role != 'founder' %}
+        <div>
+            <p>Acceso denegado. Este asistente es exclusivo para el fundador.</p>
+        </div>
+    {% else %}
+        <p>Este asistente requiere Streamlit para funcionar correctamente. Por favor, ejecuta el asistente con Streamlit para interactuar con él.</p>
+    {% endif %}
+    <p><a href="{% url 'control_panel' %}">Volver al Panel</a></p>
+</body>
+</html>

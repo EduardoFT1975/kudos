@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}⚙ Motor de simulación masiva – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">⚙</div>
+        <div>
+            <h1>⚙ Motor de simulación masiva</h1>
+            <p class="muted">Configura y lanza simulaciones multidimensionales.</p>
+        </div>
+    </header>
+    
+<p>Estado actual del sistema: {{ stats.total_capsules }} cápsulas activas.</p>
+<div class="cards-grid">
+<article class="capsule-card"><h3>Simulación demográfica</h3><p>Proyecta el crecimiento de la comunidad Kudos.</p></article>
+<article class="capsule-card"><h3>Simulación cultural</h3><p>Predice qué temas dominarán en el repositorio de sabiduría.</p></article>
+<article class="capsule-card"><h3>Simulación económica</h3><p>Estima el flujo de tokens KMT en el mercado.</p></article>
+</div>
+
+</div>
+{% endblock %}

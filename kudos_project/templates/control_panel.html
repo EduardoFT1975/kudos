@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 30px; }
+        .card { background: white; border-radius: 16px; padding: 28px; margin: 20px 0; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        h1 { color: #1a2530; margin: 0 0 15px 0; font-size: 28px; }
+        .welcome { color: #2c3e50; font-size: 18px; }
+        .status { font-size: 1.25em; margin: 12px 0; font-weight: 600; }
+        .green { color: #27ae60; }
+        .blue { color: #3498db; }
+        a { color: #3498db; text-decoration: none; font-weight: 500; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🎉 Panel de Control de Kudos</h1>
+        <p class="welcome">Bienvenido, <strong>{{ user.username }}</strong></p>
+        <p class="green">{{ message }}</p>
+    </div>
+
+    <div class="card">
+        <h2>📊 Estadísticas rápidas</h2>
+        <p><strong>Cápsulas totales:</strong> <span style="font-size:1.6em; color:#27ae60;">{{ total_capsules }}</span></p>
+    </div>
+
+    <div class="card">
+        <h2>🛠️ Estado de Servicios</h2>
+        <p class="status">Redis: {{ redis_status }}</p>
+        <p class="status">Celery: {{ celery_status }}</p>
+    </div>
+
+    <div class="card">
+        <h2>🔗 Accesos rápidos</h2>
+        <p><a href="/admin/" target="_blank">→ Ir al Admin de Django</a></p>
+        <p><a href="/capsule_museum/" target="_blank">→ Ver Museo de Cápsulas</a></p>
+        <p><a href="/create_capsule/" target="_blank">→ Crear nueva cápsula</a></p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,876 @@
+{% extends 'base.html' %}
+{% load feature_tags %}
+
+{% block title %}{{ capsule.display_title }} – Kudos{% endblock %}
+
+{% block extra_head %}
+<!-- Open Graph para Facebook, LinkedIn, WhatsApp, Telegram, Slack... -->
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ capsule.display_title }} · KUDOS">
+<meta property="og:description" content="{{ capsule.ai_summary|default:capsule.contenido|truncatewords:30|striptags }}">
+<meta property="og:image" content="{{ capsule.image|default:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Earth_Eastern_Hemisphere.jpg/1200px-Earth_Eastern_Hemisphere.jpg' }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:site_name" content="KUDOS · 1D~5D">
+<meta property="og:locale" content="es_ES">
+<!-- Twitter / X Card grande -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ capsule.display_title }}">
+<meta name="twitter:description" content="{{ capsule.ai_summary|default:capsule.contenido|truncatewords:25|striptags }}">
+<meta name="twitter:image" content="{{ capsule.image|default:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Earth_Eastern_Hemisphere.jpg/1200px-Earth_Eastern_Hemisphere.jpg' }}">
+<!-- Schema.org -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"{{ capsule.display_title|escapejs }}","image":["{{ capsule.image|default:'' }}"],"datePublished":"{{ capsule.timestamp|date:'c' }}","author":{"@type":"Organization","name":"KUDOS"},"publisher":{"@type":"Organization","name":"KUDOS"},"description":"{{ capsule.ai_summary|default:capsule.contenido|truncatewords:30|striptags|escapejs }}"}
+</script>
+
+<style>
+/* ============================================================
+   CÁPSULA · COMPOSITOR CINEMATOGRÁFICO
+   Imagen real con Ken Burns + tipografía animada por escenas +
+   partículas + datos 5D superpuestos + música ambient procedural.
+   ============================================================ */
+.cinema-stage {
+    position: relative; margin: 22px 0; border-radius: 22px; overflow: hidden;
+    background: #000;
+    aspect-ratio: 16 / 9;
+    box-shadow: 0 0 50px rgba(0,240,255,.15), inset 0 0 50px rgba(0,0,0,.6);
+    border: 1px solid rgba(212,175,55,.4);
+}
+.cinema-stage > * { position: absolute; inset: 0; }
+.cinema-bg {
+    background-size: cover; background-position: center;
+    transform: scale(1.05);
+    transition: transform 12s linear, filter 1.4s ease;
+    filter: brightness(.92) saturate(1.05);
+}
+.cinema-stage.playing .cinema-bg { transform: scale(1.18) translate(-2%, -1%); filter: brightness(1) saturate(1.15); }
+.cinema-vignette {
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 0%, transparent 55%, rgba(0,0,0,.55) 100%);
+}
+.cinema-grain {
+    pointer-events: none; opacity: .12; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+.cinema-particles {
+    pointer-events: none;
+}
+.cinema-particles span {
+    position: absolute; width: 2px; height: 2px; border-radius: 50%;
+    background: #fff; opacity: 0; animation: particleFloat var(--dur, 14s) linear infinite;
+    box-shadow: 0 0 6px #00f0ff;
+}
+@keyframes particleFloat {
+    0%   { opacity: 0; transform: translateY(0) translateX(0); }
+    8%   { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-110vh) translateX(40px); }
+}
+.cinema-overlay {
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 22px 32px; color: #fff; pointer-events: none;
+    background: linear-gradient(180deg, rgba(0,0,0,.55) 0%, transparent 25%, transparent 65%, rgba(0,0,0,.7) 100%);
+}
+.cinema-top {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+}
+.cinema-eyebrow {
+    font-size: .68rem; letter-spacing: .25em; text-transform: uppercase;
+    padding: 4px 10px; border: 1px solid rgba(212,175,55,.7); border-radius: 20px;
+    background: rgba(0,0,0,.35); backdrop-filter: blur(6px); color: #d4af37;
+}
+.cinema-meta-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.cinema-meta-pills span {
+    font-size: .7rem; padding: 3px 9px; border-radius: 12px;
+    background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.18);
+    backdrop-filter: blur(8px);
+}
+.cinema-meta-pills strong { color: #00f0ff; margin-right: 4px; }
+
+.cinema-center {
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    text-align: center; padding: 0 6%;
+}
+.cinema-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(1.4rem, 3.2vw, 2.4rem);
+    line-height: 1.1; margin: 0 0 10px;
+    text-shadow: 0 2px 18px rgba(0,0,0,.75);
+    opacity: 0.85; transform: translateY(0); transition: opacity 1s, transform 1s;
+    /* Solo se intensifica cuando se reproduce el clip */
+}
+.cinema-stage.playing .cinema-title { opacity: 1; transform: translateY(0); text-shadow: 0 4px 24px rgba(0,0,0,.85), 0 0 30px rgba(0,240,255,.2); }
+
+.cinema-quote {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic; font-size: clamp(.9rem, 1.3vw, 1.1rem);
+    color: #fde68a; max-width: 720px; margin: 0 auto;
+    text-shadow: 0 2px 10px rgba(0,0,0,.8);
+    opacity: 0.6; transition: opacity 1.2s 0.6s;
+}
+.cinema-stage.playing .cinema-quote { opacity: 1; }
+.cinema-center { padding: 0 6%; max-height: 35%; overflow: hidden; }
+
+.cinema-bottom {
+    display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap;
+}
+.cinema-lower-third {
+    background: linear-gradient(90deg, rgba(212,175,55,.95), rgba(212,175,55,0));
+    padding: 8px 16px 8px 12px;
+    border-left: 4px solid #fff;
+    color: #1a1f36; font-weight: 700;
+    transform: translateX(-110%); transition: transform .9s cubic-bezier(.2,.8,.2,1);
+    max-width: 60%;
+}
+.cinema-stage.playing .cinema-lower-third { transform: translateX(0); }
+.cinema-lower-third small { display:block; color: #1e3a8a; font-weight: 500; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; }
+
+.cinema-merit {
+    text-align: right; backdrop-filter: blur(8px); padding: 8px 12px; border-radius: 10px;
+    background: rgba(0,0,0,.4); border: 1px solid rgba(212,175,55,.4);
+    font-size: .85rem;
+}
+.cinema-merit .stars { color: #ffae00; letter-spacing: 2px; }
+.cinema-merit small { display:block; color: #94a3b8; font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; }
+
+/* Subtítulo (caption) sincronizado con la voz */
+.cinema-caption {
+    position: absolute; left: 8%; right: 8%; bottom: 76px;
+    text-align: center; pointer-events: none;
+    font-size: clamp(.95rem, 1.4vw, 1.2rem); font-weight: 500;
+    color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,.85);
+    background: rgba(0,0,0,.35); padding: 8px 16px; border-radius: 10px;
+    backdrop-filter: blur(4px); max-width: 84%; margin: 0 auto;
+    opacity: 0; transition: opacity .25s;
+}
+.cinema-caption.show { opacity: 1; }
+
+/* Mini-mapa 5D · esquina inferior izquierda */
+.cinema-minimap {
+    position: absolute; bottom: 22px; right: 22px;
+    width: 110px; height: 110px; border-radius: 50%;
+    background: radial-gradient(circle, #1e3a8a 0%, #04081a 80%);
+    border: 1px solid rgba(0,240,255,.5); box-shadow: 0 0 14px rgba(0,240,255,.4);
+    display: grid; place-items: center;
+}
+.cinema-minimap .pin {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff, #d4af37 50%, transparent);
+    box-shadow: 0 0 12px #d4af37;
+    animation: minimapPulse 2s ease-in-out infinite;
+}
+@keyframes minimapPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.4); } }
+.cinema-minimap small { position: absolute; bottom: -20px; left: 0; right: 0; text-align: center; font-size: .7rem; color: #94a3b8; }
+
+/* Barra de progreso debajo */
+.cinema-controls {
+    margin-top: 14px;
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+    padding: 14px 16px; background: rgba(8,12,32,.6); border-radius: 14px;
+    border: 1px solid rgba(0,240,255,.2); backdrop-filter: blur(10px);
+}
+.cinema-progress {
+    flex: 1; min-width: 200px; height: 6px; border-radius: 3px;
+    background: rgba(255,255,255,.08); overflow: hidden;
+}
+.cinema-progress > span {
+    display: block; height: 100%; width: 0;
+    background: linear-gradient(90deg, #ff00d4, #00f0ff, #ffae00);
+    transition: width .15s linear;
+    box-shadow: 0 0 12px rgba(0,240,255,.6);
+}
+.cinema-mode-tag {
+    color: #00f0ff; font-size: .85rem; font-weight: 600; min-width: 130px; text-align: right;
+}
+
+/* Datos 5D barra */
+.capsule-5d-bar {
+    margin: 18px 0;
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(0,240,255,.08), rgba(124,58,237,.08));
+    border: 1px solid rgba(0,240,255,.25);
+    display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+}
+.capsule-5d-bar .pill {
+    padding: 4px 10px; border-radius: 12px;
+    background: rgba(255,255,255,.05); font-size: .85rem;
+    border: 1px solid rgba(0,240,255,.2);
+}
+.capsule-5d-bar .pill strong { color: #00f0ff; }
+.capsule-actions-pro { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+
+.btn-neon {
+    padding: 9px 16px; border-radius: 10px;
+    background: linear-gradient(135deg, #00f0ff, #1e3a8a);
+    color: #fff; border: none; cursor: pointer;
+    box-shadow: 0 0 18px rgba(0,240,255,.4);
+    transition: all .25s; font-weight: 600;
+    text-decoration: none; display: inline-block;
+}
+.btn-neon:hover { transform: translateY(-2px); box-shadow: 0 0 28px rgba(0,240,255,.7); color: #fff; }
+.btn-neon.violet { background: linear-gradient(135deg, #a78bfa, #1e3a8a); }
+.btn-neon.amber { background: linear-gradient(135deg, #ffae00, #ff00d4); }
+.btn-neon.emerald { background: linear-gradient(135deg, #10b981, #1e3a8a); }
+.btn-neon.ghost { background: rgba(255,255,255,.08); box-shadow: none; }
+
+.ai-card {
+    margin: 16px 0; padding: 16px 18px; border-radius: 14px;
+    background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(0,240,255,.05));
+    border: 1px solid rgba(124,58,237,.3);
+}
+.ai-card h3 { margin: 0 0 8px; color: #a78bfa; }
+.quality-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; margin-top: 6px; }
+.quality-bar > span { display: block; height: 100%; background: linear-gradient(90deg, #ff00d4, #00f0ff, #10b981); }
+
+/* Pie de atribución legal · pequeño, en esquina */
+.cinema-sources-footer {
+    position: absolute; left: 16px; bottom: 12px;
+    pointer-events: auto; max-width: 60%;
+    font-size: .65rem; color: rgba(255,255,255,.7);
+    background: rgba(0,0,0,.5); backdrop-filter: blur(6px);
+    padding: 4px 9px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.15);
+    line-height: 1.35;
+}
+.cinema-sources-footer a { color: #00f0ff; text-decoration: none; }
+.cinema-sources-footer a:hover { text-decoration: underline; }
+.sources-card {
+    margin: 16px 0; padding: 14px 18px; border-radius: 12px;
+    background: rgba(8,12,32,.4); border: 1px solid rgba(0,240,255,.18);
+    font-size: .85rem;
+}
+.sources-card h4 { margin: 0 0 8px; color: #00f0ff; font-size: .9rem; letter-spacing: .08em; text-transform: uppercase; }
+.sources-card ul { padding-left: 18px; margin: 6px 0; }
+.sources-card li { margin: 2px 0; color: var(--text-muted); }
+.sources-card .lic { color: #d4af37; font-weight: 600; font-size: .78rem; padding: 1px 7px; border-radius: 8px; background: rgba(212,175,55,.12); border: 1px solid rgba(212,175,55,.4); margin-left: 6px; }
+
+/* ===== SOCIAL SHARE WIDGET (Caballo de Troya) ===== */
+.share-bar {
+    margin: 18px 0; padding: 14px 18px; border-radius: 14px;
+    background: linear-gradient(135deg, rgba(0,240,255,.06), rgba(212,175,55,.06));
+    border: 1px solid rgba(0,240,255,.2);
+}
+.share-bar h4 { margin: 0 0 8px; color: #d4af37; font-size: .9rem; letter-spacing: .08em; text-transform: uppercase; }
+.share-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.share-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 24px;
+    background: rgba(8,12,32,.5); color: #fff !important;
+    border: 1px solid rgba(255,255,255,.15); text-decoration: none;
+    font-size: .85rem; font-weight: 600; transition: all .25s;
+    cursor: pointer;
+}
+.share-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,240,255,.3); border-color: #00f0ff; color: #fff !important; }
+.share-btn.x { background: #000; }
+.share-btn.fb { background: #1877f2; border-color: #1877f2; }
+.share-btn.wa { background: #25d366; border-color: #25d366; }
+.share-btn.tg { background: #229ED9; border-color: #229ED9; }
+.share-btn.li { background: #0a66c2; border-color: #0a66c2; }
+.share-btn.rd { background: #ff4500; border-color: #ff4500; }
+.share-btn.pi { background: #e60023; border-color: #e60023; }
+.share-btn.poster { background: linear-gradient(135deg, #d4af37, #ff00d4); border-color: #d4af37; }
+.share-btn .ico { width: 18px; height: 18px; }
+.share-toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: rgba(8,12,32,.95); color: #00f0ff;
+    padding: 10px 20px; border-radius: 8px; border: 1px solid #00f0ff;
+    z-index: 9999; font-weight: 600;
+    opacity: 0; transition: opacity .3s, transform .3s;
+}
+.share-toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+
+/* Modal poster */
+.poster-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,.92);
+    display: none; align-items: center; justify-content: center;
+    z-index: 9998; padding: 20px;
+}
+.poster-modal.open { display: flex; }
+.poster-modal-content {
+    background: #04081a; border-radius: 16px; padding: 22px;
+    max-width: 720px; width: 100%; text-align: center;
+    border: 1px solid rgba(212,175,55,.4);
+    box-shadow: 0 0 60px rgba(212,175,55,.3);
+}
+.poster-modal canvas { max-width: 100%; max-height: 70vh; border-radius: 8px; }
+.poster-modal .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.poster-modal .close { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 30px; cursor: pointer; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ============================================================
+// CINEMA · Compositor cinematográfico cliente
+// Combina: imagen real, Ken Burns, escenas, partículas, voz, música ambient
+// ============================================================
+(function(){
+    const stage = document.getElementById('cinema-stage');
+    if (!stage) return;
+    const bg = stage.querySelector('.cinema-bg');
+    const titleEl = stage.querySelector('.cinema-title');
+    const quoteEl = stage.querySelector('.cinema-quote');
+    const captionEl = stage.querySelector('.cinema-caption');
+    const lowerThird = stage.querySelector('.cinema-lower-third');
+    const progressBar = document.getElementById('cinema-bar');
+    const modeTag = document.getElementById('cinema-mode-tag');
+    const stopBtn = document.getElementById('cinema-stop');
+    const voicePicker = document.getElementById('voice-picker');
+    const muteToggle = document.getElementById('cinema-mute');
+
+    // Limpia el texto para que la voz no pronuncie símbolos decorativos
+    function cleanForVoice(s) {
+        if (!s) return '';
+        return s
+            .split(/━{3,}|═{3,}/)[0]
+            .replace(/https?:\/\/\S+/g, '')
+            .replace(/[#—•\*_\[\]\|]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+    const TITLE   = cleanForVoice(`{{ capsule.display_title|escapejs }}`);
+    const TEXT    = cleanForVoice(`{{ capsule.contenido|escapejs }}`);
+    const SUMMARY = cleanForVoice(`{{ capsule.ai_summary|escapejs }}`) || TEXT.slice(0, 280);
+    const LUGAR   = `{{ capsule.lugar|default:""|escapejs }}`;
+    const FECHA   = `{{ capsule.fecha|date:"Y" }}`;
+    const ERA     = `{{ capsule.get_era_display|escapejs }}`;
+    const DIM     = `{{ capsule.get_dimension_layer_display|escapejs }}`;
+    const MODO    = `{{ capsule.get_modo_display|escapejs }}`;
+    const VOICE_NAME = `{{ voice_name|escapejs }}`;
+    const VOICE_CODE = `{{ voice_code|escapejs }}`;
+    const QUALITY = parseFloat('{{ capsule.ai_quality_score|default:0 }}') || 0;
+    const TEMAS = `{{ capsule.ai_themes|join:", "|escapejs }}` || `{{ capsule.modo|escapejs }}`;
+    const IMG_URL = `{{ capsule.image|escapejs }}`;
+
+    // -----------------------------------------------------------
+    // Generar partículas
+    // -----------------------------------------------------------
+    const particles = stage.querySelector('.cinema-particles');
+    if (particles && !particles.children.length) {
+        for (let i = 0; i < 35; i++) {
+            const p = document.createElement('span');
+            p.style.left = Math.random() * 100 + '%';
+            p.style.bottom = '-10px';
+            p.style.setProperty('--dur', (10 + Math.random() * 14) + 's');
+            p.style.animationDelay = (Math.random() * 14) + 's';
+            particles.appendChild(p);
+        }
+    }
+
+    // -----------------------------------------------------------
+    // Voces
+    // -----------------------------------------------------------
+    const CHAR_TUNING = {
+        seneca:      { rate: 0.85, pitch: 0.85, gender: 'male'   },
+        confucio:    { rate: 0.78, pitch: 0.80, gender: 'male'   },
+        aristoteles: { rate: 0.85, pitch: 0.82, gender: 'male'   },
+        newton:      { rate: 0.92, pitch: 0.92, gender: 'male'   },
+        tesla:       { rate: 1.00, pitch: 1.05, gender: 'male'   },
+        cleopatra:   { rate: 0.92, pitch: 1.20, gender: 'female' },
+        nightingale: { rate: 0.90, pitch: 1.15, gender: 'female' },
+    };
+    function pickVoice() {
+        const voices = speechSynthesis.getVoices();
+        const tuning = CHAR_TUNING[VOICE_CODE] || { gender: 'female' };
+        const isSpanish = v => v.lang && v.lang.toLowerCase().startsWith('es');
+        const ranked = voices.slice().sort((a,b) => {
+            let sa=0, sb=0;
+            if (isSpanish(a)) sa+=100; if (isSpanish(b)) sb+=100;
+            if (a.lang === 'es-ES') sa+=30; if (b.lang === 'es-ES') sb+=30;
+            if (/neural|premium|natural|enhanced|wavenet/i.test(a.name)) sa+=30;
+            if (/neural|premium|natural|enhanced|wavenet/i.test(b.name)) sb+=30;
+            const fNames = /(elvira|laura|lucia|pilar|monica|paloma|sabina|isabella|esperanza)/i;
+            const mNames = /(diego|jorge|pablo|carlos|alvaro|enrique|miguel|juan|raul)/i;
+            if (tuning.gender === 'female' && fNames.test(a.name)) sa+=15;
+            if (tuning.gender === 'female' && fNames.test(b.name)) sb+=15;
+            if (tuning.gender === 'male'   && mNames.test(a.name)) sa+=15;
+            if (tuning.gender === 'male'   && mNames.test(b.name)) sb+=15;
+            return sb - sa;
+        });
+        return ranked[0];
+    }
+    function fillVoices() {
+        if (!voicePicker) return;
+        const voices = speechSynthesis.getVoices().filter(v => v.lang && v.lang.toLowerCase().startsWith('es'));
+        voicePicker.innerHTML = '<option value="">Voz automática (mejor disponible)</option>' +
+            voices.map(v => `<option value="${v.name}">${v.name} · ${v.lang}</option>`).join('');
+    }
+    if ('speechSynthesis' in window) {
+        speechSynthesis.onvoiceschanged = fillVoices;
+        fillVoices();
+    }
+
+    // -----------------------------------------------------------
+    // Música ambient procedural · Web Audio API
+    // -----------------------------------------------------------
+    let audioCtx = null;
+    let ambientNodes = [];
+    let muted = false;
+    function startAmbient(durationSec) {
+        if (muted) return;
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const master = audioCtx.createGain();
+        master.gain.setValueAtTime(0, now);
+        master.gain.linearRampToValueAtTime(0.07, now + 1.5);
+        master.gain.linearRampToValueAtTime(0.07, now + durationSec - 2);
+        master.gain.linearRampToValueAtTime(0, now + durationSec);
+        master.connect(audioCtx.destination);
+        // Drone armónico (3 notas en cuarta justa, evocador)
+        const freqs = [110, 165, 220];
+        freqs.forEach((f, i) => {
+            const o = audioCtx.createOscillator();
+            o.type = i === 0 ? 'sine' : (i === 1 ? 'triangle' : 'sine');
+            o.frequency.setValueAtTime(f, now);
+            // Detune lento para riqueza
+            o.detune.setValueAtTime(0, now);
+            o.detune.linearRampToValueAtTime(8, now + durationSec / 2);
+            o.detune.linearRampToValueAtTime(-8, now + durationSec);
+            const g = audioCtx.createGain();
+            g.gain.setValueAtTime(0.0, now);
+            g.gain.linearRampToValueAtTime(0.4, now + 2);
+            g.gain.linearRampToValueAtTime(0.0, now + durationSec - 1);
+            o.connect(g); g.connect(master);
+            o.start(now); o.stop(now + durationSec + 0.1);
+            ambientNodes.push(o, g);
+        });
+        // Campanilla cada 12s para puntuación cinemática
+        for (let t = 4; t < durationSec - 2; t += 12) {
+            const bell = audioCtx.createOscillator();
+            const bg = audioCtx.createGain();
+            bell.type = 'sine'; bell.frequency.value = 880 + Math.random()*440;
+            bg.gain.setValueAtTime(0.0, now + t);
+            bg.gain.linearRampToValueAtTime(0.06, now + t + 0.05);
+            bg.gain.exponentialRampToValueAtTime(0.0001, now + t + 1.2);
+            bell.connect(bg); bg.connect(master);
+            bell.start(now + t); bell.stop(now + t + 1.4);
+            ambientNodes.push(bell, bg);
+        }
+    }
+    function stopAmbient() {
+        ambientNodes.forEach(n => { try { n.stop && n.stop(); n.disconnect && n.disconnect(); } catch(e){} });
+        ambientNodes = [];
+    }
+    if (muteToggle) muteToggle.addEventListener('click', () => {
+        muted = !muted;
+        muteToggle.textContent = muted ? '🔇' : '🔊';
+        if (muted) stopAmbient();
+    });
+
+    // -----------------------------------------------------------
+    // Subtítulos sincronizados con la voz
+    // -----------------------------------------------------------
+    function showCaption(text) {
+        if (!captionEl) return;
+        captionEl.textContent = text;
+        captionEl.classList.add('show');
+    }
+    function hideCaption() { if (captionEl) captionEl.classList.remove('show'); }
+
+    // -----------------------------------------------------------
+    // Construcción del guión narrativo
+    // -----------------------------------------------------------
+    function escenasViral() {
+        // 4 escenas · 15s totales
+        return [
+            { t: 0,   text: TITLE.toUpperCase() },
+            { t: 4,   text: SUMMARY.split('.').slice(0, 1).join('.') + '.' },
+            { t: 9,   text: (LUGAR ? LUGAR + ' · ' : '') + (FECHA ? FECHA : '') + ' · ' + DIM },
+            { t: 12,  text: 'Descúbrelo en KUDOS.' },
+        ];
+    }
+    function escenasDocumental() {
+        // 6-7 escenas · ~90s totales
+        const intro = `Hoy viajamos hasta ${LUGAR || 'un lugar de la humanidad'}${FECHA ? ', en el año ' + FECHA : ''}.`;
+        const body  = TEXT.length > 600 ? TEXT.slice(0, 1100) : TEXT;
+        const partes = body.split(/\.\s+/).filter(p => p.length > 30);
+        return [
+            { t: 0,   text: TITLE },
+            { t: 6,   text: intro },
+            { t: 18,  text: partes[0] ? partes[0] + '.' : '' },
+            { t: 36,  text: partes[1] ? partes[1] + '.' : (partes[0] || '') },
+            { t: 54,  text: `Lo que escuchas no es solo información. Es legado.` },
+            { t: 68,  text: `${VOICE_NAME} lo cuenta. La humanidad lo recuerda.` },
+            { t: 82,  text: `${TEMAS ? '#' + TEMAS.split(',')[0].trim() + ' · ' : ''}KUDOS · 1D~5D` },
+        ];
+    }
+
+    // -----------------------------------------------------------
+    // Reproducción
+    // -----------------------------------------------------------
+    let utterance = null;
+    let timers = [];
+    let progressTicker = null;
+    function clearTimers() {
+        timers.forEach(t => clearTimeout(t)); timers = [];
+        cancelAnimationFrame(progressTicker);
+    }
+    function stopAll() {
+        speechSynthesis.cancel();
+        clearTimers();
+        stopAmbient();
+        stage.classList.remove('playing');
+        hideCaption();
+        if (progressBar) progressBar.style.width = '0%';
+        if (modeTag) modeTag.textContent = 'listo';
+    }
+
+    function playFilm(escenas, duracion, modeName) {
+        stopAll();
+        stage.classList.add('playing');
+        if (modeTag) modeTag.textContent = modeName;
+        startAmbient(duracion);
+
+        // Ken Burns: el background hace zoom + pan suave durante todo el clip
+        // (controlado por la clase .playing en el CSS)
+
+        // Escenas: cada una muestra subtítulo
+        escenas.forEach(esc => {
+            timers.push(setTimeout(() => showCaption(esc.text), esc.t * 1000));
+        });
+        // Cierre de subtítulo
+        timers.push(setTimeout(hideCaption, duracion * 1000 - 400));
+
+        // Progreso
+        const t0 = performance.now();
+        function tick() {
+            const elapsed = (performance.now() - t0) / 1000;
+            const pct = Math.min(100, elapsed / duracion * 100);
+            if (progressBar) progressBar.style.width = pct + '%';
+            if (pct < 100) progressTicker = requestAnimationFrame(tick);
+            else stopAll();
+        }
+        progressTicker = requestAnimationFrame(tick);
+
+        // Voz: armar texto a partir de las escenas (sin TÍTULO repetido)
+        const fullText = escenas.map(e => e.text).join(' ');
+        if ('speechSynthesis' in window) {
+            utterance = new SpeechSynthesisUtterance(fullText);
+            utterance.lang = 'es-ES';
+            const tuning = CHAR_TUNING[VOICE_CODE] || { rate: 0.92, pitch: 1.0 };
+            utterance.rate = duracion < 30 ? Math.min(1.1, tuning.rate + 0.1) : tuning.rate;
+            utterance.pitch = tuning.pitch;
+            const customVoice = voicePicker ? voicePicker.value : '';
+            const v = customVoice ? speechSynthesis.getVoices().find(x => x.name === customVoice) : pickVoice();
+            if (v) utterance.voice = v;
+            // Volumen un poco bajo para que la música quede de fondo
+            utterance.volume = muted ? 0 : 0.95;
+            speechSynthesis.speak(utterance);
+        }
+    }
+
+    // -----------------------------------------------------------
+    // Conexión de botones
+    // -----------------------------------------------------------
+    const btnViral = document.getElementById('cinema-viral');
+    const btnDoc   = document.getElementById('cinema-doc');
+    if (btnViral) btnViral.addEventListener('click', () => playFilm(escenasViral(), 15, '⚡ Clip viral 15s'));
+    if (btnDoc)   btnDoc.addEventListener('click',   () => playFilm(escenasDocumental(), 90, '🎬 Documental 90s'));
+    if (stopBtn)  stopBtn.addEventListener('click',  stopAll);
+
+    // ===== Compartir social (Caballo de Troya) =====
+    const grid = document.getElementById('share-grid');
+    if (grid) {
+        const url = window.location.href;
+        const text = `${TITLE} · ${LUGAR ? LUGAR + ' · ' : ''}${FECHA ? FECHA + ' · ' : ''}una cápsula de Kudos · #Kudos #Memento`;
+        const eu = encodeURIComponent(url), et = encodeURIComponent(text);
+        const buttons = [
+            { cls: 'x',  label: '𝕏',  href: `https://twitter.com/intent/tweet?url=${eu}&text=${et}` },
+            { cls: 'fb', label: 'Facebook', href: `https://www.facebook.com/sharer/sharer.php?u=${eu}&quote=${et}` },
+            { cls: 'wa', label: 'WhatsApp', href: `https://wa.me/?text=${et}%20${eu}` },
+            { cls: 'tg', label: 'Telegram', href: `https://t.me/share/url?url=${eu}&text=${et}` },
+            { cls: 'li', label: 'LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${eu}` },
+            { cls: 'rd', label: 'Reddit',   href: `https://www.reddit.com/submit?url=${eu}&title=${encodeURIComponent(TITLE)}` },
+            { cls: 'pi', label: 'Pinterest', href: `https://pinterest.com/pin/create/button/?url=${eu}&description=${et}` },
+            { cls: '',  label: '✉ Email', href: `mailto:?subject=${encodeURIComponent(TITLE)}&body=${et}%0A%0A${eu}` },
+        ];
+        buttons.forEach(b => {
+            const a = document.createElement('a');
+            a.className = 'share-btn ' + b.cls;
+            a.href = b.href; a.target = '_blank'; a.rel = 'noopener';
+            a.textContent = b.label;
+            grid.appendChild(a);
+        });
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'share-btn'; copyBtn.type = 'button';
+        copyBtn.textContent = '🔗 Copiar enlace';
+        copyBtn.addEventListener('click', () => {
+            if (navigator.share) {
+                navigator.share({ title: TITLE, text: text, url: url }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(url).then(() => {
+                    const t = document.createElement('div');
+                    t.className = 'share-toast show';
+                    t.textContent = '✓ Enlace copiado';
+                    document.body.appendChild(t);
+                    setTimeout(() => t.remove(), 2200);
+                });
+            }
+        });
+        grid.appendChild(copyBtn);
+    }
+})();
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container narrow">
+    <article class="capsule-detail">
+        <span class="capsule-mode">{{ capsule.get_modo_display }}</span>
+        <h1>{{ capsule.display_title }}</h1>
+        <p class="muted">
+            por <a href="{% url 'public_profile' capsule.usuario.alias %}">{{ capsule.usuario.alias|default:'anónimo' }}</a>
+            · {{ capsule.fecha }} · {{ capsule.get_privacy_display }}
+        </p>
+
+        <!-- ╔══════ COMPOSITOR CINEMATOGRÁFICO ══════╗ -->
+        <section class="cinema-stage" id="cinema-stage">
+            <!-- Capa 1: imagen real (Ken Burns) -->
+            <div class="cinema-bg" style="background-image: url('{% if capsule.image %}{{ capsule.image }}{% else %}https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Earth_Eastern_Hemisphere.jpg/1200px-Earth_Eastern_Hemisphere.jpg{% endif %}');"></div>
+            <!-- Capa 2: viñeta -->
+            <div class="cinema-vignette"></div>
+            <!-- Capa 3: grano cinematográfico -->
+            <div class="cinema-grain"></div>
+            <!-- Capa 4: partículas -->
+            <div class="cinema-particles"></div>
+            <!-- Capa 5: overlay con tipografía y datos -->
+            <div class="cinema-overlay">
+                <div class="cinema-top">
+                    <span class="cinema-eyebrow">KUDOS · {{ capsule.get_modo_display }} · 1D~5D</span>
+                    <div class="cinema-meta-pills">
+                        <span><strong>1D</strong> {{ capsule.fecha|date:"Y" }}</span>
+                        {% if capsule.latitud %}<span><strong>2D</strong> {{ capsule.latitud|floatformat:1 }}°, {{ capsule.longitud|floatformat:1 }}°</span>{% endif %}
+                        <span><strong>4D</strong> {{ capsule.get_era_display|default:"actual" }}</span>
+                        <span><strong>5D</strong> {{ capsule.get_dimension_layer_display }}</span>
+                        {% if capsule.altitud %}<span><strong>3D</strong> {{ capsule.altitud }} m</span>{% endif %}
+                    </div>
+                </div>
+
+                <div class="cinema-center">
+                    <h2 class="cinema-title">{{ capsule.display_title }}</h2>
+                    <p class="cinema-quote">{% if capsule.ai_summary %}{{ capsule.ai_summary|truncatewords:25 }}{% else %}{{ capsule.contenido|truncatewords:22 }}{% endif %}</p>
+                </div>
+
+                <div class="cinema-bottom">
+                    <div class="cinema-lower-third">
+                        <small>narra</small>
+                        {{ voice_name }}
+                    </div>
+                    <div class="cinema-merit">
+                        <small>Mérito Kudos</small>
+                        <div class="stars">
+                            {% with q=capsule.ai_quality_score|default:5 %}
+                            {% for i in "1234567890"|make_list %}{% if forloop.counter <= q %}★{% else %}☆{% endif %}{% endfor %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capa 6: subtítulos sincronizados -->
+            <div class="cinema-caption"></div>
+
+            <!-- Pie de atribución legal -->
+            <div class="cinema-sources-footer">
+                Fuentes:
+                {% with srcs=capsule.parameters.sources_v2 %}
+                {% if srcs %}
+                    {% for s in srcs %}{{ s.name }} ({{ s.license }}){% if not forloop.last %} · {% endif %}{% endfor %}
+                {% else %}
+                    Wikipedia (CC BY-SA 4.0) · Catálogo Kudos
+                {% endif %}
+                {% endwith %}
+            </div>
+
+            <!-- Capa 7: mini-mapa 5D -->
+            {% if capsule.latitud %}
+            <div class="cinema-minimap">
+                <div class="pin"></div>
+                <small>{{ capsule.lugar|default:"" }}</small>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Controles externos -->
+        <div class="cinema-controls">
+            <button type="button" class="btn-neon amber" id="cinema-viral">⚡ Clip viral · 15s</button>
+            <button type="button" class="btn-neon violet" id="cinema-doc">🎬 Documental · 90s</button>
+            <button type="button" class="btn-neon ghost" id="cinema-stop">⏹</button>
+            <button type="button" class="btn-neon ghost" id="cinema-mute" title="Silenciar música">🔊</button>
+            <select id="voice-picker" class="btn-neon ghost" style="padding:8px 10px;">
+                <option value="">Voz automática</option>
+            </select>
+            <div class="cinema-progress"><span id="cinema-bar"></span></div>
+            <span class="cinema-mode-tag" id="cinema-mode-tag">listo</span>
+        </div>
+
+        <!-- ============== BARRA 5D ============== -->
+        <div class="capsule-5d-bar">
+            <span class="pill"><strong>1D</strong> {{ capsule.fecha|date:"Y" }}</span>
+            <span class="pill"><strong>2D</strong> {% if capsule.latitud %}{{ capsule.latitud|floatformat:2 }}, {{ capsule.longitud|floatformat:2 }}{% else %}—{% endif %}</span>
+            <span class="pill"><strong>3D</strong> {% if capsule.altitud %}{{ capsule.altitud }} m{% else %}superficie{% endif %}</span>
+            <span class="pill"><strong>4D</strong> {{ capsule.get_era_display|default:"actual" }}</span>
+            <span class="pill"><strong>5D</strong> {{ capsule.get_dimension_layer_display }}</span>
+            <span class="pill"><strong>Mérito</strong> {{ capsule.ai_quality_score|default:0|floatformat:1 }}/10</span>
+        </div>
+
+        <!-- ============== COMPARTIR (CABALLO DE TROYA) ============== -->
+        <div class="share-bar">
+            <h4>📡 Llévalo a tus redes</h4>
+            <div class="share-grid" id="share-grid"></div>
+        </div>
+
+        {# ============== ACCIONES MULTIDIMENSIONALES (AXÓN D10 · gating) ============== #}
+        {# Cada CTA envuelta por feature flag: oculta en MVP, código vivo en DORMANT. #}
+        {% if_feature "capsule_ar_vr" %}
+        <div class="capsule-actions-pro">
+            <a href="{% url 'capsule_audio' capsule.uid %}" class="btn-neon">🔊 Audio del consejero</a>
+            <a href="/capsules/{{ capsule.uid }}/vr/" class="btn-neon emerald">🥽 Modo VR inmersivo</a>
+            <a href="{% url 'ar_view' capsule.uid %}" class="btn-neon emerald">🎭 AR</a>
+        </div>
+        {% endif_feature %}
+        {% if_feature "capsule_memento" %}
+        <div class="capsule-actions-pro">
+            <a href="{% url 'capsule_dialog' capsule.uid %}" class="btn-neon" style="background: linear-gradient(135deg, #d4af37, #ff00d4);">🗣 Diálogo / Hecho</a>
+            <a href="{% url 'capsule_versions' capsule.uid %}" class="btn-neon ghost">📜 Versiones</a>
+            {% if user.is_authenticated %}<a href="{% url 'capsule_aport_create' capsule.uid %}" class="btn-neon">📤 Aportar</a>{% endif %}
+        </div>
+        {% endif_feature %}
+        {% if_feature "capsule_ar_vr" %}
+            {% if user.is_authenticated and user == capsule.usuario or user.is_staff %}
+            <form method="post" action="{% url 'capsule_ai_enrich' capsule.uid %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-neon violet">🤖 Mejorar con IA interna</button>
+            </form>
+            {% endif %}
+        {% endif_feature %}
+
+        {% with srcs=capsule.parameters.sources_v2 %}
+        {% if srcs %}
+        <div class="sources-card">
+            <h4>📚 Fuentes utilizadas en esta cápsula</h4>
+            <ul>
+                {% for s in srcs %}
+                <li>
+                    {% if s.url %}<a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.name }}</a>{% else %}{{ s.name }}{% endif %}
+                    <span class="lic">{{ s.license }}</span>
+                    {% if s.description %} — {{ s.description }}{% endif %}
+                    {% if s.unesco_world_heritage %} · 🏛 Patrimonio Mundial UNESCO{% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            <p class="muted" style="font-size:.78rem; margin-top:8px;">
+                El contenido de esta cápsula se compone a partir de obras abiertas de las fuentes citadas.
+                Se respetan las licencias de cada origen. La narración y el clip son obra de la IA interna de Kudos
+                a partir de esos materiales y se publican bajo CC BY-SA 4.0 con atribución compartida.
+            </p>
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% if capsule.ai_enriched %}
+        <div class="ai-card">
+            <h3>🤖 Enriquecimiento de la IA interna</h3>
+            {% if capsule.ai_summary %}<p><strong>Resumen:</strong> {{ capsule.ai_summary }}</p>{% endif %}
+            {% if capsule.ai_themes %}<p><strong>Temas inferidos:</strong>
+                {% for t in capsule.ai_themes %}<span class="tag">#{{ t }}</span> {% endfor %}
+            </p>{% endif %}
+            <p><strong>Calidad estimada:</strong> {{ capsule.ai_quality_score }}/10</p>
+            <div class="quality-bar"><span style="width: {% widthratio capsule.ai_quality_score 10 100 %}%;"></span></div>
+            <p><small class="muted">Voz asignada: {{ capsule.ai_audio_voice|default:'séneca' }} · Procesado el {{ capsule.ai_enriched_at|date:"d/m/Y H:i" }}</small></p>
+        </div>
+        {% endif %}
+
+        {% if capsule.video %}
+        <div class="capsule-video">
+            {% if 'youtube.com' in capsule.video or 'youtu.be' in capsule.video %}
+                <iframe src="{{ capsule.video|cut:'watch?v='|cut:'youtu.be/'|slice:'-11:'|stringformat:'s' }}" allowfullscreen
+                        title="Vídeo: {{ capsule.display_title }}"></iframe>
+            {% else %}
+                <video src="{{ capsule.video }}" controls preload="metadata"></video>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if capsule.audio %}
+        <div class="capsule-audio">
+            <audio controls preload="metadata" src="{{ capsule.audio }}"></audio>
+        </div>
+        {% endif %}
+
+        <div class="capsule-content">{{ capsule.contenido|linebreaks }}</div>
+
+        {% if capsule.temas %}
+        <div class="capsule-themes">
+            {% for tema in capsule.temas %}<span class="tag">#{{ tema }}</span>{% endfor %}
+        </div>
+        {% endif %}
+        {% if capsule.lugar %}
+        <p class="muted">📍 {{ capsule.lugar }}{% if capsule.latitud %} ({{ capsule.latitud|floatformat:4 }}, {{ capsule.longitud|floatformat:4 }}){% endif %}</p>
+        {% endif %}
+        <div class="capsule-actions">
+            {% if user.is_authenticated %}
+            <a href="{% url 'toggle_like' capsule.uid %}" class="btn btn-ghost">{% if user_liked %}❤ Te gusta{% else %}♡ Me gusta{% endif %} ({{ capsule.likes }})</a>
+            {% endif %}
+            <span class="muted">👁 {{ capsule.views }} vistas</span>
+            {% if user == capsule.usuario or user.is_staff %}
+                <form method="post" action="{% url 'delete_capsule' capsule.uid %}" style="display:inline" onsubmit="return confirm('¿Borrar esta cápsula?')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-ghost danger">🗑 Borrar</button>
+                </form>
+            {% endif %}
+        </div>
+
+        {# AXÓN D10 · Cierre narrativo: jerarquía CTA (Explorar mapa / Timeline / Mind) #}
+        <div class="capsule-cta-row" style="display:flex; gap:10px; flex-wrap:wrap; margin:24px 0 8px;">
+            {% if capsule.latitud and capsule.longitud %}
+            <a href="{% url 'map' %}?lat={{ capsule.latitud }}&lon={{ capsule.longitud }}&year={{ capsule.fecha|date:'Y' }}" class="btn btn-gold">🌍 Ver en mapa 5D</a>
+            {% endif %}
+            <a href="{% url 'timeline' %}?year={{ capsule.fecha|date:'Y' }}" class="btn btn-ghost">📜 Año {{ capsule.fecha|date:'Y' }} en timeline</a>
+            {% if user.is_authenticated %}
+                {% if_feature "mind_lite" %}
+                <a href="{% url 'ai_panel' %}?capsule={{ capsule.uid }}" class="btn btn-ghost">🧠 Preguntar a Mind</a>
+                {% endif_feature %}
+            {% endif %}
+        </div>
+    </article>
+
+    <section class="reviews-section">
+        <h2>Reseñas {% if avg_rating %}<small>({{ avg_rating|floatformat:1 }}★ media)</small>{% endif %}</h2>
+        {% if user.is_authenticated %}
+        <form method="post" class="form-stacked">
+            {% csrf_token %}
+            <label>Tu valoración
+                <select name="rating" required>
+                    <option value="5">5 ★ Excelente</option>
+                    <option value="4">4 ★ Muy buena</option>
+                    <option value="3">3 ★ Buena</option>
+                    <option value="2">2 ★ Regular</option>
+                    <option value="1">1 ★ Floja</option>
+                </select>
+            </label>
+            <label>Comentario
+                <textarea name="comment" rows="3" required></textarea>
+            </label>
+            <button type="submit" class="btn btn-gold">Publicar reseña</button>
+        </form>
+        {% endif %}
+        <div class="reviews-list">
+            {% for r in reviews %}
+            <div class="review-item">
+                <div class="review-header">
+                    <strong>{{ r.user.alias }}</strong>
+                    <span class="rating">{% for i in "12345"|make_list %}{% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+                    <small>{{ r.timestamp|date:"d/m/Y" }}</small>
+                </div>
+                <p>{{ r.comment }}</p>
+            </div>
+            {% empty %}
+            <p class="muted">Sin reseñas todavía.</p>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

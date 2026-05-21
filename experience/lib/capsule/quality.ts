@@ -56,6 +56,23 @@ const _WEAK_TITLE_PATTERNS: RegExp[] = [
   /^(hotel|hostal|pensión|motel) [a-z]{1,3}\b/i, // very short hotel names
   // Numeric/coordinate-style titles (Wikidata fallback bug surfaces)
   /^[\d.,\s°'"-]+$/,
+  // P0.9 WOW pilot · municipal/admin division genéricos (sin nombre propio
+  // fuerte). "Distrito centro", "Pueblo de X", "Municipio de Y", "Partida
+  // rural Z" suelen ser fallbacks Wikidata sin densidad narrativa real.
+  /^(distrito|barrio|pueblo|municipio|comarca|partida)\s+(de\s+|del\s+)?[a-záéíóúñ]+(\s|$)/i,
+  // P0.9 WOW pilot · religiosos genéricos sin nombre propio (las
+  // basílicas/catedrales/santuarios con nombre quedan fuera porque
+  // exigen genitivo de marca clara que estos patrones no atrapan).
+  /^(iglesia parroquial|capilla de|ermita de|santuario de|oratorio de)\b/i,
+  // P0.9 WOW pilot · civicos genéricos (centro de salud, polideportivo,
+  // colegio público, escuela primaria, instituto de educación).
+  /^(centro de salud|centro cultural|centro cívico|polideportivo|pabellón|colegio público|escuela primaria|instituto de educación|biblioteca municipal)\b/i,
+  // P0.9 WOW pilot · disambiguation / placeholder Wikipedia (síntoma de
+  // que el winner no se resolvió a un artículo real).
+  /\((desambiguación|disambiguation)\)\s*$/i,
+  // P0.9 WOW pilot · títulos extremadamente cortos (≤3 chars trim) suelen
+  // ser fallbacks malformados · landmarks reales tienen nombres más largos.
+  /^.{1,3}$/,
 ];
 
 /**

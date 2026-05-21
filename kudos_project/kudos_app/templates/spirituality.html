@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}🕊️ Espiritualidad – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🕊️</div>
+        <div>
+            <h1>🕊️ Espiritualidad</h1>
+            <p class="muted">Reflexiones, introspección, conexión trascendental.</p>
+        </div>
+    </header>
+    
+<a href="{% url 'create_capsule' %}?modo=espiritual" class="btn btn-gold">+ Compartir reflexión</a>
+<div class="cards-grid">
+{% for r in reflections %}
+<article class="capsule-card {% if r.image %}has-image{% endif %}">
+{% if r.image %}<a href="{% url 'capsule_detail' r.uid %}" class="capsule-thumb"><img src="{{ r.image }}" alt="" loading="lazy">{% if r.video %}<span class="play-badge">▶</span>{% endif %}</a>{% endif %}
+<div class="capsule-card-body">
+<h3><a href="{% url 'capsule_detail' r.uid %}">{{ r.display_title }}</a></h3>
+<p class="muted">{{ r.usuario.alias }} · {{ r.fecha }}</p>
+<p>{{ r.contenido|truncatechars:140 }}</p></div>
+</article>
+{% empty %}<p class="muted">Aún no hay reflexiones espirituales.</p>{% endfor %}
+</div>
+
+</div>
+{% endblock %}

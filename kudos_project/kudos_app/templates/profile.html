@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}👤 Mi perfil – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">👤</div>
+        <div>
+            <h1>👤 Mi perfil</h1>
+            <p class="muted"></p>
+        </div>
+    </header>
+    
+<div class="profile-header">
+{% if user_obj.avatar %}<img src="{{ user_obj.avatar }}" class="avatar-img" alt="">{% endif %}
+<div>
+<h2>{{ user_obj.alias }}</h2>
+<p class="muted">UID: {{ user_obj.uid }}{% if user_obj.email %} · {{ user_obj.email }}{% endif %}</p>
+<p>{{ user_obj.bio|default:'Sin biografía aún.' }}</p>
+<p><strong>Nivel {{ user_obj.level }}</strong> · {{ user_obj.experience_points }} XP</p>
+<a href="{% url 'edit_profile' %}" class="btn btn-ghost">Editar perfil</a>
+<a href="{% url 'export_capsules' %}" class="btn btn-ghost">📤 Exportar mis cápsulas (CSV)</a>
+</div>
+</div>
+<h3>Mis cápsulas</h3>
+<div class="cards-grid">
+{% for c in capsules %}<article class="capsule-card"><h3><a href="{% url 'capsule_detail' c.uid %}">{{ c.display_title }}</a></h3><p class="muted">{{ c.fecha }}</p></article>
+{% empty %}<p class="muted">Aún no has creado cápsulas.</p>{% endfor %}
+</div>
+<h3>Mis insignias</h3>
+<div class="badges-grid">
+{% for b in badges %}<div class="badge-item earned"><div class="badge-icon">{{ b.icon }}</div><div class="badge-name">{{ b.name }}</div></div>
+{% empty %}<p class="muted">Sin insignias todavía.</p>{% endfor %}
+</div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}📍 Geolocalización – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">📍</div>
+        <div>
+            <h1>📍 Geolocalización</h1>
+            <p class="muted">Tu ubicación importa: ancla tus cápsulas al territorio.</p>
+        </div>
+    </header>
+    
+<p>Cuando crees una cápsula, añade latitud y longitud. Visita el <a href="{% url 'map' %}">mapa</a> para ver el resultado.</p>
+
+</div>
+{% endblock %}

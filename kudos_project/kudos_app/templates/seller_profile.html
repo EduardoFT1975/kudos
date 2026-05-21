@@ -1,0 +1,122 @@
+<!-- kudos_app/templates/seller_profile.html -->
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Perfil de Vendedor</title>
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+    <script src="{% static 'js/leaflet-src.js' %}"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        #profile-map { height: 300px; margin: 20px 0; border: 2px solid #ccc; }
+        .profile-container { max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        .transaction-list, .review-list { margin: 20px 0; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 10px 0; border-bottom: 1px solid #ddd; }
+        form { margin: 10px 0; }
+        select, textarea, input { padding: 8px; margin: 5px 0; width: 100%; }
+        button { padding: 8px 16px; background-color: #FFD700; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #FFC107; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Perfil de Vendedor</h1>
+
+    <div class="profile-container">
+        <h2>{{ seller.alias }}</h2>
+        <p><strong>Ventas Totales:</strong> {{ profile_data.total_sales }}</p>
+        <p><strong>Méritos Totales:</strong> {{ profile_data.total_merits }}</p>
+        <p><strong>Calificación Promedio:</strong> {{ profile_data.average_rating }}/5</p>
+        <p><strong>Puntuación de Reputación:</strong> {{ profile_data.reputation_score }}</p>
+
+        <!-- Transacciones -->
+        <div class="transaction-list">
+            <h3>Transacciones Completadas</h3>
+            {% if transactions %}
+                <ul>
+                    {% for transaction in transactions %}
+                        <li>
+                            Cápsula: {{ transaction.content_id }} (Monto: {{ transaction.amount }} KMT, Fecha: {{ transaction.timestamp|date:"Y-m-d" }})
+                            {% if transaction.user == request.user and not profile_data.reviews.filter(parameters__transaction_uid=transaction.uid).exists %}
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    <label for="rating_{{ transaction.uid }}">Calificación:</label>
+                                    <select id="rating_{{ transaction.uid }}" name="rating" required>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                    <label for="review_text_{{ transaction.uid }}">Reseña:</label>
+                                    <textarea id="review_text_{{ transaction.uid }}" name="review_text" rows="3" required></textarea>
+                                    <input type="hidden" name="transaction_uid" value="{{ transaction.uid }}">
+                                    <button type="submit">Enviar Reseña</button>
+                                </form>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay transacciones completadas.</p>
+            {% endif %}
+        </div>
+
+        <!-- Reseñas -->
+        <div class="review-list">
+            <h3>Reseñas Recibidas</h3>
+            {% if profile_data.reviews %}
+                <ul>
+                    {% for review in profile_data.reviews %}
+                        <li>
+                            {{ review.parameters.review_text }} (Calificación: {{ review.parameters.rating }}/5, Fecha: {{ review.fecha|date:"Y-m-d" }})
+                            {% if review.parameters.blockchain_tx_hash %}
+                                <a href="https://explorer.solana.com/tx/{{ review.parameters.blockchain_tx_hash }}?cluster=devnet" target="_blank">Ver en Blockchain</a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay reseñas recibidas.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Mapa Interactivo -->
+    <div id="profile-map"></div>
+
+    <script>
+        // Inicializar mapa con Leaflet
+        var map = L.map('profile-map').setView([41.8902, 12.4924], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            minZoom: 0,
+            maxZoom: 20
+        }).addTo(map);
+
+        var capsuleLayer = L.geoJSON({{ map_data|safe }}, {
+            style: function(feature) {
+                return { color: "#FFD700", weight: 2 };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `<b>${feature.properties.description}</b><br>
+                    Modo: ${feature.properties.mode}<br>
+                    Temas: ${feature.properties.themes.join(', ')}`
+                );
+            }
+        }).addTo(map);
+
+        if (capsuleLayer.getBounds().isValid()) {
+            map.fitBounds(capsuleLayer.getBounds());
+        }
+    </script>
+</body>
+</html>
+```

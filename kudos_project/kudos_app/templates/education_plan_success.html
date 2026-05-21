@@ -1,0 +1,81 @@
+<!-- kudos_app/templates/education_plan_success.html -->
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plan de Aprendizaje Creado</title>
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+    <script src="{% static 'js/leaflet-src.js' %}"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        #plan-map { height: 300px; margin: 20px 0; border: 2px solid #ccc; }
+        .success-container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        .capsule-list { margin: 20px 0; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 5px 0; }
+        .aula-virtual { margin: 20px 0; border: 1px solid #ddd; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Plan de Aprendizaje Creado</h1>
+
+    <div class="success-container">
+        <h2>{{ plan_name }}</h2>
+        <p>Tu plan de aprendizaje ha sido creado con éxito.</p>
+
+        <!-- Aula Virtual -->
+        <div class="aula-virtual">
+            <h3>Aula Virtual en 3D</h3>
+            {{ plan_scene|safe }}
+        </div>
+
+        <!-- Cápsulas Incluidas -->
+        <div class="capsule-list">
+            <h3>Cápsulas Incluidas</h3>
+            <ul>
+                {% for capsule in capsules %}
+                    <li>
+                        {{ capsule.contenido }} (Modo: {{ capsule.modo }}, Año: {{ capsule.fecha.year }})
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Mapa Interactivo -->
+    <div id="plan-map"></div>
+
+    <script>
+        // Inicializar mapa con Leaflet
+        var map = L.map('plan-map').setView([41.8902, 12.4924], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            minZoom: 0,
+            maxZoom: 20
+        }).addTo(map);
+
+        var capsuleLayer = L.geoJSON({{ map_data|safe }}, {
+            style: function(feature) {
+                return { color: "#FFD700", weight: 2 };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `<b>${feature.properties.description}</b><br>
+                    Modo: ${feature.properties.mode}<br>
+                    Temas: ${feature.properties.themes.join(', ')}<br>
+                    Clima: ${feature.properties.weather}`
+                );
+            }
+        }).addTo(map);
+
+        if (capsuleLayer.getBounds().isValid()) {
+            map.fitBounds(capsuleLayer.getBounds());
+        }
+    </script>
+</body>
+</html>
+```

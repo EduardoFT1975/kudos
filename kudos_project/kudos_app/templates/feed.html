@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Tu feed personal · Kudos{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <h1>🎯 Tu feed</h1>
+    <p class="muted">Lo que la IA cree que te puede interesar hoy.</p>
+</section>
+
+<section class="cards-grid">
+    {% for it in items %}
+    <article class="capsule-card">
+        <div class="capsule-card-body">
+            <span class="capsule-mode">{{ it.reason }}</span>
+            <h3>
+                {% if it.capsule %}
+                    <a href="{% url 'capsule_detail' it.capsule.uid %}">{{ it.headline }}</a>
+                {% else %}
+                    {{ it.headline }}
+                {% endif %}
+            </h3>
+            <p class="capsule-excerpt">{{ it.body }}</p>
+            <div class="capsule-meta">
+                <span>⭐ score {{ it.score|floatformat:2 }}</span>
+                <small>{{ it.created|date:"d M H:i" }}</small>
+            </div>
+        </div>
+    </article>
+    {% empty %}
+    <p class="muted">Tu feed está vacío. Visita más cápsulas y la IA aprenderá tu gusto.</p>
+    {% endfor %}
+</section>
+{% endblock %}

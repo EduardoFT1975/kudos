@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}💬 Tu feedback – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">💬</div>
+        <div>
+            <h1>💬 Tu feedback</h1>
+            <p class="muted">Ayúdanos a mejorar Kudos.</p>
+        </div>
+    </header>
+    
+<form method="post" class="form-stacked">{% csrf_token %}
+<label>Tu mensaje<textarea name="message" rows="5" required></textarea></label>
+<label>Email (opcional)<input type="email" name="email"></label>
+<button class="btn btn-gold">Enviar</button>
+</form>
+
+</div>
+{% endblock %}

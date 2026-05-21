@@ -1,0 +1,67 @@
+/* ============================================================
+ * KUDOS · Mapa 5D · markers.js
+ * renderMap: itera STATE.capsules y crea markers con icon emoji,
+ * tooltip miniatura y popup con CTAs + chips lazy.
+ * Depende de: core.js (STATE, escapeHtml), clustering.js (markersLayer),
+ * popups.js (hydrateLight).
+ * ============================================================ */
+'use strict';
+
+function renderMap() {
+    document.getElementById('map').style.display = 'block';
+    document.getElementById('alt-view').style.display = 'none';
+    markersLayer.clearLayers();
+    let visible = 0;
+    STATE.capsules.forEach(c => {
+        if (!c.lat || !c.lon) return;
+        // Suavizar la "edad" del año visible: cuanto más lejos del año seleccionado, más translúcido
+        const yearDiff = Math.abs((c.year || STATE.year) - STATE.year);
+        const opacity = Math.max(0.3, 1 - yearDiff / 80);
+
+        // Icono según modo (museo, monumento, paisaje, negocio, etc.)
+        const modeEmoji = {
+            museo: '🏛', monumento: '🗿', paisaje: '🏞', negocio: '🏪',
+            historico: '📜', sabiduria: '🧠', arte: '🎨', espiritual: '✨',
+            ciudadano: '🗳', comercial: '🛍', personal: '🌿', eterno: '♾',
+        }[c.modo] || '📍';
+        const dimColor = {
+            fisica: '#00f0ff', emocional: '#ff00d4', cognitiva: '#ffae00',
+            social: '#10b981', espiritual: '#d4af37',
+        }[c.dimension] || '#00f0ff';
+        const icon = L.divIcon({
+            className: 'kudos-marker dim-' + (c.dimension || 'fisica'),
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+            html: `<div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+                font-size:18px;background:radial-gradient(circle,${dimColor} 0%,rgba(0,0,0,.7) 80%);
+                border:2px solid ${dimColor};border-radius:50%;box-shadow:0 0 10px ${dimColor};">${modeEmoji}</div>`,
+        });
+        const m = L.marker([c.lat, c.lon], { icon, opacity }).addTo(markersLayer);
+        // HOVER · tooltip rápido con miniatura
+        const tooltip = `<div style="text-align:left; max-width:200px;">
+            <strong style="color:#00f0ff;">${escapeHtml(c.titulo)}</strong><br>
+            <small>${escapeHtml(c.modo)} · ${c.year || '—'}</small>
+            ${c.image ? '<img src="'+c.image+'" style="margin-top:4px; width:100%; max-height:80px; object-fit:cover; border-radius:4px;">' : ''}
+        </div>`;
+        m.bindTooltip(tooltip, { direction: 'top', sticky: false, opacity: .95 });
+        // CLICK · popup completo con clip + acciones
+        const html = `
+          <strong>${escapeHtml(c.titulo)}</strong><br>
+          <small>📅 ${c.year || '—'} · ${escapeHtml(c.modo)} · ${escapeHtml(c.dimension)}</small><br>
+          <small>por ${escapeHtml(c.autor)}</small><br>
+          ${c.image ? '<img src="' + c.image + '" style="margin-top:6px; width:100%; max-height:120px; object-fit:cover; border-radius:6px;">' : ''}
+          <div class="lazy-meta" data-uid="${c.uid}"></div>
+          <div class="cta-row" style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+            <a href="/capsules/${c.uid}/" style="background:#d4af37;color:#000;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700;">Ver cápsula →</a>
+            <a href="/capsules/${c.uid}/clip/" style="background:rgba(0,240,255,.2);color:#00f0ff;padding:4px 10px;border-radius:6px;text-decoration:none;">▶ Clip 15s</a>
+            <a href="/capsules/${c.uid}/audio/" style="background:rgba(255,0,212,.2);color:#ff00d4;padding:4px 10px;border-radius:6px;text-decoration:none;">🔊 Audio</a>
+            <a href="/capsules/${c.uid}/dialog/" style="background:rgba(212,175,55,.2);color:#d4af37;padding:4px 10px;border-radius:6px;text-decoration:none;">💬 Diálogo</a>
+          </div>`;
+        m.bindPopup(html);
+        // AXÓN D5 · hidratar chips de metadata al abrir el popup (lazy, cacheable).
+        m.on('popupopen', (ev) => hydrateLight(ev.popup, c.uid));
+        visible++;
+    });
+    document.getElementById('hud-count').textContent = visible;
+    document.getElementById('visible-count').textContent = visible;
+}

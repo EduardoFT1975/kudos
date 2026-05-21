@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Cripto – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+<header class="personal-header">
+    <h1>🪙 Cripto · Tracker informativo</h1>
+    <p class="muted">⚠ Solo lectura y log manual. Kudos NUNCA ejecuta operaciones.</p>
+</header>
+
+<nav class="personal-tabs">
+    <a href="{% url 'personal_dashboard' %}">📊 Resumen</a>
+    <a href="{% url 'personal_journal' %}">📔 Diario</a>
+    <a href="{% url 'personal_learning' %}">📚 Aprendizaje</a>
+    <a href="{% url 'personal_health' %}">💪 Salud</a>
+    <a href="{% url 'personal_crypto' %}" class="active">🪙 Cripto</a>
+    <a href="{% url 'assistant_characters' %}">🎭 Consejero</a>
+</nav>
+
+<div class="warning-box">
+    <strong>⚠ Aviso del fundador:</strong> esto es un tracker, no un bot de trading. Las decisiones de compra/venta las tomas tú, fuera de Kudos, en tu exchange. Aquí sólo registras y reflexionas. Esta separación es deliberada.
+</div>
+
+<div class="grid-2">
+<details class="card">
+    <summary class="btn btn-gold">+ Vigilar nueva moneda</summary>
+    <form method="post" class="form-stacked">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_watch">
+        <label>Símbolo<input type="text" name="symbol" maxlength="20" required></label>
+        <label>Nombre<input type="text" name="name" required></label>
+        <label>Tu tesis<textarea name="notes" rows="2"></textarea></label>
+        <div class="form-row">
+            <label>Compra €<input type="number" name="target_buy" step="0.01"></label>
+            <label>Venta €<input type="number" name="target_sell" step="0.01"></label>
+        </div>
+        <button class="btn btn-gold">Vigilar</button>
+    </form>
+</details>
+
+<details class="card">
+    <summary class="btn btn-ghost">📝 Loggear operación manual</summary>
+    <form method="post" class="form-stacked">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="log_op">
+        <div class="form-row">
+            <label>Tipo<select name="op_type">{% for c, l in op_types %}<option value="{{ c }}">{{ l }}</option>{% endfor %}</select></label>
+            <label>Símbolo<input type="text" name="symbol" required></label>
+        </div>
+        <div class="form-row">
+            <label>Cantidad<input type="number" name="amount" step="0.000001"></label>
+            <label>Precio €<input type="number" name="price" step="0.01"></label>
+            <label>Total €<input type="number" name="total" step="0.01"></label>
+        </div>
+        <label>¿Qué regla seguiste?<input type="text" name="rule" placeholder="DCA mensual / Stop-loss 10% / etc."></label>
+        <label>Notas<textarea name="notes" rows="2"></textarea></label>
+        <button class="btn btn-gold">Registrar</button>
+    </form>
+</details>
+</div>
+
+<h2>Vigilando</h2>
+<div class="cards-grid">
+{% for w in watches %}
+<article class="card">
+    <h3>{{ w.symbol }} <small class="muted">{{ w.name }}</small></h3>
+    {% if w.notes %}<p>{{ w.notes }}</p>{% endif %}
+    <p>
+    {% if w.target_buy_eur %}<span class="tag green">Compra <{{ w.target_buy_eur }}€</span> {% endif %}
+    {% if w.target_sell_eur %}<span class="tag red">Venta >{{ w.target_sell_eur }}€</span>{% endif %}
+    </p>
+</article>
+{% empty %}<p class="muted">No vigilas ninguna moneda.</p>{% endfor %}
+</div>
+
+<h2>Log de operaciones</h2>
+<table class="op-table">
+<tr><th>Fecha</th><th>Tipo</th><th>Símbolo</th><th>Cantidad</th><th>Precio</th><th>Total</th><th>Regla</th></tr>
+{% for op in operations %}
+<tr>
+    <td>{{ op.date|date:"d/m/Y" }}</td>
+    <td>{{ op.get_type_display }}</td>
+    <td>{{ op.symbol }}</td>
+    <td>{{ op.amount }}</td>
+    <td>{{ op.price_eur }}€</td>
+    <td>{{ op.total_eur }}€</td>
+    <td>{{ op.rule_followed|truncatechars:40 }}</td>
+</tr>
+{% empty %}<tr><td colspan="7" class="muted">Sin operaciones registradas.</td></tr>{% endfor %}
+</table>
+</div>
+
+<style>
+.personal-header { background: linear-gradient(135deg, #B45309, #1E3A8A); color: white; padding: 28px; border-radius: var(--radius); margin-bottom: 20px; }
+.personal-header h1 { color: white; }
+.personal-header .muted { color: rgba(255,255,255,0.85); }
+.personal-tabs { display: flex; gap: 4px; flex-wrap: wrap; padding: 4px; background: var(--surface-2); border-radius: var(--radius); margin-bottom: 20px; }
+.personal-tabs a { padding: 10px 16px; border-radius: var(--radius-sm); color: var(--text); font-weight: 600; }
+.personal-tabs a.active { background: var(--primary); color: white; }
+.warning-box { background: #FEF3C7; color: #78350F; padding: 16px; border-radius: var(--radius); margin-bottom: 20px; border-left: 4px solid #F59E0B; }
+.card { background: var(--surface); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 12px; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.tag { padding: 3px 10px; border-radius: 999px; font-size: 0.85rem; }
+.tag.green { background: #DCFCE7; color: #14532D; }
+.tag.red { background: #FEE2E2; color: #7F1D1D; }
+.op-table { width: 100%; border-collapse: collapse; }
+.op-table th, .op-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+.op-table th { background: var(--surface-2); }
+</style>
+{% endblock %}

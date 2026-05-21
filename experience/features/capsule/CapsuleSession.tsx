@@ -395,6 +395,8 @@ export function CapsuleSession({
         onExpand={expandAvailable ? handleExpand : undefined}
         onManual={onManualCoordsPicked ? handleManual : undefined}
         onNext={nextAvailable ? handleNext : undefined}
+        lat={lat}
+        lng={lng}
       />
       <ManualLocationPicker
         open={pickerOpen}

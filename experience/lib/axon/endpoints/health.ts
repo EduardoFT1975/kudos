@@ -22,8 +22,9 @@
  */
 import { requireAxonBaseUrl } from "../config";
 
-/** Path canonical contra el que probamos. Expuesto para UI debug. */
-export const HEALTH_PATH = "/api/place-capsule";
+/** Path canonical contra el que probamos · trailing slash (Django
+ *  convention). Backend acepta también la variante sin slash via alias. */
+export const HEALTH_PATH = "/api/place-capsule/";
 
 export interface HealthProbeResult {
   /** true si el backend respondió (cualquier 2xx o 4xx). */

@@ -1,0 +1,84 @@
+# render.yaml – Blueprint Render KUDOS / AXÓN
+#
+# Dos servicios web + una base de datos:
+#   1. kudos-backend  · Django + content_engine API (Python)
+#   2. kudos-frontend · Next.js 15 cinematic frontend (Node)
+#   3. kudos-db       · PostgreSQL compartida (solo backend la usa)
+#
+# Frontend habla con backend vía NEXT_PUBLIC_API_BASE_URL (URL pública
+# del backend). CORS_ALLOWED_ORIGINS del backend acepta explícitamente
+# el origen del frontend.
+
+services:
+  # ─── BACKEND · Django + content_engine API ────────────────────────────
+  # Nombre `kudos` preservado del blueprint original para mantener la URL
+  # pública existente (kudos-40cq.onrender.com). Renombrarlo causaría que
+  # Render cree un servicio nuevo con URL distinta y proponga borrar el viejo.
+  - type: web
+    name: kudos
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn kudos_project.wsgi:application"
+    envVars:
+      - key: DJANGO_ENV
+        value: production
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kudos-db
+          property: connectionString
+      # CORS · pre-popular con el origen esperado del servicio frontend
+      # de este mismo blueprint. Render asigna URLs predecibles del tipo
+      # https://<name>.onrender.com cuando el nombre está libre · si el
+      # nombre ya estaba ocupado por otro user/team, Render añade hash y
+      # el founder debe ajustar este valor en el dashboard tras el primer
+      # deploy del frontend. Para múltiples orígenes (staging + prod), usar
+      # coma: "https://a.onrender.com,https://b.onrender.com".
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://kudos-frontend.onrender.com"
+
+  # ─── FRONTEND · Next.js 15 (experience/) ──────────────────────────────
+  # rootDir mueve el cwd a experience/ para todos los comandos. Beneficios:
+  #   · comandos limpios sin `cd experience &&`
+  #   · Render solo redeploya cuando cambia algo dentro de experience/
+  #     (auto-detect de path-based change · evita rebuilds inútiles
+  #     cuando solo cambia código Django)
+  - type: web
+    name: kudos-frontend
+    runtime: node
+    plan: free
+    rootDir: experience
+    # `npm install` (no `npm ci`) porque el repo aún no tiene
+    # package-lock.json. Tras el primer build local, founder commitea el
+    # lockfile generado y SE PUEDE cambiar este comando a `npm ci` para
+    # builds reproducibles. Mientras tanto `npm install` resuelve deps
+    # frescas en cada build (lento pero funcional).
+    buildCommand: "npm install && npm run build"
+    # Start: Next.js lee $PORT de Render automáticamente cuando se usa
+    # `next start -p $PORT`. `npm start -- -p $PORT` pasa el flag al
+    # script `start` definido en experience/package.json.
+    startCommand: "npm start -- -p $PORT"
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      # URL pública del backend Django (este mismo blueprint, servicio "kudos").
+      # Origen actual confirmado: kudos-40cq.onrender.com.
+      - key: NEXT_PUBLIC_API_BASE_URL
+        value: "https://kudos-40cq.onrender.com"
+      # Opcional · si el founder activa Plausible en el dominio del frontend.
+      - key: NEXT_PUBLIC_PLAUSIBLE_DOMAIN
+        sync: false                     # set manually if/when used
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false                     # set to canonical frontend URL
+
+databases:
+  - name: kudos-db
+    plan: free

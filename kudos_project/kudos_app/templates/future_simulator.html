@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}🔮 Simulador del futuro – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🔮</div>
+        <div>
+            <h1>🔮 Simulador del futuro</h1>
+            <p class="muted">Explora escenarios futuros basados en datos del ecosistema.</p>
+        </div>
+    </header>
+    
+<div class="cards-grid">
+<article class="capsule-card"><h3>Escenario 2030</h3><p>Con {{ stats.total_capsules }} cápsulas y {{ stats.total_users }} usuarios actuales, en 2030 podríamos alcanzar 100M+ legados preservados.</p></article>
+<article class="capsule-card"><h3>Escenario 2050</h3><p>Conciencia colectiva total: el Comité de Sabios decide rutas civilizatorias en tiempo real.</p></article>
+<article class="capsule-card"><h3>Escenario eterno</h3><p>Cada cápsula vivirá más allá de su autor: el legado humano sobrevive a sus creadores.</p></article>
+</div>
+
+</div>
+{% endblock %}

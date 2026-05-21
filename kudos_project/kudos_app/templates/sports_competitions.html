@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}🏆 Competiciones deportivas – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🏆</div>
+        <div>
+            <h1>🏆 Competiciones deportivas</h1>
+            <p class="muted">Crea o participa en competiciones virtuales y físicas.</p>
+        </div>
+    </header>
+    
+{% if user.is_authenticated %}
+<details class="form-collapsible"><summary class="btn btn-gold">+ Crear competición</summary>
+<form method="post" class="form-stacked">
+    {% csrf_token %}
+    <label>Nombre *<input type="text" name="name" required></label>
+    <label>Deporte<input type="text" name="sport" value="general"></label>
+    <label>Descripción *<textarea name="description" rows="3" required></textarea></label>
+    <label>Coste de entrada (K)<input type="number" name="entry_price" value="0" step="0.01"></label>
+    <button class="btn btn-gold">Crear</button>
+</form>
+</details>
+{% endif %}
+<div class="cards-grid">
+{% for c in competitions %}
+<article class="capsule-card">
+    <span class="capsule-mode">{{ c.sport }}</span>
+    <h3><a href="{% url 'competition_detail' c.id %}">{{ c.name }}</a></h3>
+    <p class="muted">{{ c.participant_count }} participantes · {{ c.start_date|date:"d/m/Y" }}</p>
+    <p>{{ c.description|truncatechars:120 }}</p>
+    <div class="capsule-meta"><span>💰 {{ c.entry_price }} K</span>{% if c.is_virtual %}<span>🎮 Virtual</span>{% endif %}</div>
+</article>
+{% empty %}
+<p class="muted">Sin competiciones todavía.</p>
+{% endfor %}
+</div>
+
+</div>
+{% endblock %}

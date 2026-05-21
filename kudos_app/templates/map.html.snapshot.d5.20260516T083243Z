@@ -1,0 +1,928 @@
+{% extends 'base.html' %}
+{% block title %}Mapa 5D · Kudos{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- AXÓN D4 · Leaflet.markercluster (clustering + viewport perf) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<style>
+/* AXÓN D4 · cluster icons en clave KUDOS (cyan/neón, sin destruir identidad) */
+.marker-cluster-small      { background-color: rgba(0,240,255,.15); }
+.marker-cluster-small div  { background-color: rgba(0,240,255,.55); color:#0a0f2c; font-weight:700; }
+.marker-cluster-medium     { background-color: rgba(255,174,0,.18); }
+.marker-cluster-medium div { background-color: rgba(255,174,0,.65); color:#0a0f2c; font-weight:700; }
+.marker-cluster-large      { background-color: rgba(255,0,212,.18); }
+.marker-cluster-large div  { background-color: rgba(255,0,212,.65); color:#fff; font-weight:700; }
+.marker-cluster { box-shadow: 0 0 18px rgba(0,240,255,.35); }
+</style>
+<style>
+/* ========= MAPA 5D · ESTILO FUTURISTA ========= */
+.map5d-shell {
+    --neon: #00f0ff;
+    --neon-warm: #ffae00;
+    --neon-pink: #ff00d4;
+    --grid: rgba(0, 240, 255, 0.08);
+    position: relative;
+    margin: 0;
+    padding: 0;
+    background:
+      radial-gradient(800px 600px at 20% 0%, rgba(0,240,255,0.10), transparent 60%),
+      radial-gradient(700px 500px at 80% 30%, rgba(255,0,212,0.08), transparent 70%),
+      linear-gradient(180deg, #050a1f 0%, #0a0f2c 60%, #050a1f 100%);
+    color: #e2e8f0;
+    min-height: calc(100vh - 80px);
+    overflow: hidden;
+}
+.map5d-shell::before {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/40px 40px;
+    mask-image: radial-gradient(ellipse at center, #000 35%, transparent 75%);
+    opacity: .6;
+}
+.map5d-grid { display:grid; grid-template-columns: 320px 1fr; gap:0; height:calc(100vh - 80px); }
+@media (max-width: 1100px) { .map5d-grid { grid-template-columns: 1fr; } }
+
+.map5d-side {
+    background: rgba(8, 12, 32, 0.66);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    border-right: 1px solid rgba(0,240,255,0.18);
+    padding: 22px 22px 80px;
+    overflow-y: auto;
+    z-index: 5;
+    box-shadow: 4px 0 30px rgba(0,240,255,0.05);
+}
+.map5d-side h1 {
+    font-family:'Cormorant Garamond', Georgia, serif;
+    font-size: 1.6rem; margin: 0 0 4px;
+    background: linear-gradient(90deg, var(--neon), #fff 60%, var(--neon-pink));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: 0 0 30px rgba(0,240,255,.2);
+}
+.map5d-side .eyebrow {
+    font-size:.7rem; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--neon); padding:3px 8px; border:1px solid var(--neon);
+    border-radius:4px; display:inline-block; margin-bottom:6px;
+}
+.map5d-section { margin-top:22px; }
+.map5d-section h3 { font-size:.85rem; letter-spacing:.12em; text-transform:uppercase; color:#94a3b8; margin:0 0 8px; }
+
+.dim-btns { display:grid; grid-template-columns: 1fr 1fr; gap:6px; }
+.dim-btn {
+    padding:9px 8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.03);
+    color:#cbd5e1; border-radius:9px; font-size:.84rem; cursor:pointer;
+    transition: all .25s; text-align:left;
+}
+.dim-btn.active, .dim-btn:hover { border-color:var(--neon); color:#fff; box-shadow:0 0 14px rgba(0,240,255,.25); background:rgba(0,240,255,.08); }
+
+.modo-pills { display:flex; flex-wrap:wrap; gap:6px; }
+.modo-pill {
+    padding:5px 10px; border-radius:14px; font-size:.78rem;
+    background:rgba(255,255,255,0.04); color:#cbd5e1; cursor:pointer;
+    border:1px solid rgba(255,255,255,0.08);
+}
+.modo-pill.active { background:var(--neon); color:#000; font-weight:700; border-color:var(--neon); box-shadow:0 0 14px var(--neon); }
+
+.map5d-counter {
+    margin-top:18px; padding:14px;
+    background: rgba(0,240,255,0.05);
+    border:1px dashed rgba(0,240,255,0.35); border-radius:12px;
+}
+.map5d-counter .num {
+    font-family:'Cormorant Garamond', Georgia, serif;
+    font-size:2rem; color:var(--neon); text-shadow:0 0 14px var(--neon);
+}
+
+.map5d-canvas {
+    position:relative;
+}
+#map {
+    height:100%; width:100%;
+    filter: hue-rotate(190deg) saturate(.8) brightness(.85);
+}
+
+/* HUD superior */
+.hud-top {
+    position:absolute; top:14px; left:14px; right:14px; z-index: 999;
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    padding:10px 14px;
+    background: rgba(8, 12, 32, 0.7);
+    border:1px solid rgba(0,240,255,0.25); border-radius:14px;
+    backdrop-filter: blur(12px); color:#e2e8f0;
+    box-shadow: 0 0 30px rgba(0,240,255,0.10);
+}
+.hud-top .hud-label { font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:#94a3b8; }
+.hud-top .hud-value { font-family:'Cormorant Garamond', Georgia, serif; font-size:1.4rem; color:#fff; text-shadow: 0 0 8px rgba(0,240,255,.6); }
+
+/* Slider temporal */
+.time-slider {
+    position:absolute; bottom:18px; left:18px; right:18px; z-index: 999;
+    padding:18px 18px 14px;
+    background: rgba(8, 12, 32, 0.78);
+    border:1px solid rgba(0,240,255,0.25); border-radius:18px;
+    backdrop-filter: blur(14px); color:#e2e8f0;
+    box-shadow: 0 0 40px rgba(0,240,255,0.10);
+}
+.time-slider .ts-row { display:flex; align-items:center; gap:14px; }
+.time-slider .ts-label { font-family:'Cormorant Garamond', Georgia, serif; font-size:1.6rem; color:#fff; min-width:140px; text-align:center; text-shadow: 0 0 12px rgba(0,240,255,.6); }
+.time-slider input[type=range] {
+    flex:1; -webkit-appearance:none; appearance:none; height:6px;
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon), var(--neon-warm));
+    border-radius: 6px; outline:none;
+}
+.time-slider input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance:none; appearance:none;
+    width:22px; height:22px; border-radius:50%;
+    background:#fff; box-shadow:0 0 16px var(--neon); cursor:pointer;
+    border:2px solid var(--neon);
+}
+.time-slider input[type=range]::-moz-range-thumb {
+    width:22px; height:22px; border-radius:50%;
+    background:#fff; box-shadow:0 0 16px var(--neon); cursor:pointer;
+    border:2px solid var(--neon);
+}
+.time-slider .ts-controls { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; align-items:center; }
+.ts-btn {
+    padding:7px 14px; border-radius:18px; border:1px solid rgba(0,240,255,.5);
+    background: rgba(0,240,255,0.08); color:#fff; cursor:pointer; font-size:.85rem;
+    transition: all .25s;
+}
+.ts-btn:hover { background: rgba(0,240,255,.2); box-shadow:0 0 12px rgba(0,240,255,.4); }
+.ts-btn.playing { background: var(--neon-warm); color:#000; border-color: var(--neon-warm); }
+
+/* Marker custom */
+.kudos-marker {
+    cursor: pointer;
+    transition: transform .2s;
+}
+.kudos-marker:hover { transform: scale(1.6); z-index: 9999 !important; }
+
+/* Tamaño y aspecto del marcador */
+.kudos-marker-default {
+    width:14px; height:14px; border-radius:50%;
+    background: radial-gradient(circle at 30% 30%, #fff, var(--neon) 50%, transparent);
+    box-shadow:0 0 12px var(--neon);
+    cursor:pointer;
+    animation: pulse 2.5s ease-in-out infinite;
+}
+.kudos-marker.dim-emocional { background: radial-gradient(circle at 30% 30%, #fff, #ff00d4 50%, transparent); box-shadow:0 0 12px #ff00d4; }
+.kudos-marker.dim-cognitiva { background: radial-gradient(circle at 30% 30%, #fff, #ffae00 50%, transparent); box-shadow:0 0 12px #ffae00; }
+.kudos-marker.dim-social    { background: radial-gradient(circle at 30% 30%, #fff, #10b981 50%, transparent); box-shadow:0 0 12px #10b981; }
+.kudos-marker.dim-espiritual{ background: radial-gradient(circle at 30% 30%, #fff, #d4af37 50%, transparent); box-shadow:0 0 12px #d4af37; }
+@keyframes pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.35); } }
+
+/* Popup */
+.leaflet-popup-content-wrapper {
+    background: rgba(8, 12, 32, 0.92);
+    color:#fff;
+    border:1px solid rgba(0,240,255,.4);
+    border-radius:14px;
+    backdrop-filter: blur(8px);
+}
+.leaflet-popup-tip { background: rgba(8, 12, 32, 0.92); }
+.leaflet-popup-content { font-family: 'Inter', sans-serif; line-height:1.5; }
+.leaflet-popup-content a { color: var(--neon); }
+.leaflet-popup-content img { border-radius:8px; max-height:120px; object-fit:cover; }
+
+/* Toggle vista */
+.view-toggle { position:absolute; top:14px; right:14px; z-index:999; display:flex; gap:6px; }
+.view-toggle button {
+    padding:8px 12px; border-radius:10px;
+    background:rgba(8,12,32,.7); border:1px solid rgba(0,240,255,.3);
+    color:#cbd5e1; cursor:pointer;
+}
+.view-toggle button.active { background:var(--neon); color:#000; border-color:var(--neon); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="map5d-shell">
+<div class="map5d-grid">
+
+<!-- ╔═════════════ PANEL LATERAL ═════════════╗ -->
+<aside class="map5d-side">
+    <span class="eyebrow">Mapa 5D · Vault</span>
+    <h1>Atlas multidimensional</h1>
+    <p class="muted" style="color:#94a3b8;">5 dimensiones · 1D&nbsp;tiempo&nbsp;· 2D&nbsp;mapa · 3D&nbsp;altitud · 4D&nbsp;era · 5D&nbsp;capa</p>
+
+    <div class="map5d-counter">
+        <div class="num" id="visible-count">{{ total_capsules }}</div>
+        <small>cápsulas visibles</small>
+    </div>
+
+    <div class="map5d-section">
+        <h3>5D · Capa de realidad</h3>
+        <div class="dim-btns">
+            <button class="dim-btn active" data-dim="">🌐 Todas</button>
+            <button class="dim-btn" data-dim="fisica">🌍 Física</button>
+            <button class="dim-btn" data-dim="emocional">💗 Emocional</button>
+            <button class="dim-btn" data-dim="cognitiva">🧠 Cognitiva</button>
+            <button class="dim-btn" data-dim="social">👥 Social</button>
+            <button class="dim-btn" data-dim="espiritual">✨ Espiritual</button>
+        </div>
+    </div>
+
+    <div class="map5d-section">
+        <h3>Tipo de cápsula</h3>
+        <div class="modo-pills" id="modo-pills">
+            <span class="modo-pill active" data-modo="">Todas</span>
+            <span class="modo-pill" data-modo="historico">📜 Histórico</span>
+            <span class="modo-pill" data-modo="museo">🏛 Museo</span>
+            <span class="modo-pill" data-modo="monumento">🗿 Monumento</span>
+            <span class="modo-pill" data-modo="paisaje">🏞 Paisaje</span>
+            <span class="modo-pill" data-modo="negocio">🏪 Negocio</span>
+            <span class="modo-pill" data-modo="sabiduria">🧠 Sabiduría</span>
+            <span class="modo-pill" data-modo="arte">🎨 Arte</span>
+            <span class="modo-pill" data-modo="espiritual">✨ Espiritual</span>
+            <span class="modo-pill" data-modo="ciudadano">🗳 Ciudadano</span>
+            <span class="modo-pill" data-modo="comercial">🛍 Comercial</span>
+            <span class="modo-pill" data-modo="personal">🌿 Personal</span>
+            <span class="modo-pill" data-modo="eterno">♾ Eterno</span>
+        </div>
+    </div>
+
+    <div class="map5d-section">
+        <h3>Vista del planeta</h3>
+        <div class="dim-btns">
+            <button class="dim-btn active" data-tile="dark">🌑 Oscura</button>
+            <button class="dim-btn" data-tile="osm">🗺 Clásica</button>
+            <button class="dim-btn" data-tile="satellite">🛰 Satélite</button>
+            <button class="dim-btn" data-tile="terrain">⛰ Terreno</button>
+        </div>
+    </div>
+
+    <div class="map5d-section">
+        <h3>Atajos</h3>
+        <button class="dim-btn" onclick="goTo(0,0,2)">🌐 Mundo</button>
+        <button class="dim-btn" onclick="goTo(50,10,4)">🇪🇺 Europa</button>
+        <button class="dim-btn" onclick="goTo(0,20,3)">🌍 África</button>
+        <button class="dim-btn" onclick="goTo(35,105,3)">🌏 Asia</button>
+        <button class="dim-btn" onclick="goTo(40,-100,3)">🌎 N. América</button>
+        <button class="dim-btn" onclick="goTo(-15,-60,3)">🌎 S. América</button>
+        <button class="dim-btn" onclick="goTo(-25,135,3)">🌏 Oceanía</button>
+        <button class="dim-btn" onclick="goTo(0,0,1)">🛰 Vista satélite total</button>
+    </div>
+</aside>
+
+<!-- ╔═════════════ CANVAS DEL MAPA ═════════════╗ -->
+<section class="map5d-canvas">
+    <div class="hud-top">
+        <div>
+            <div class="hud-label">Año mostrado</div>
+            <div class="hud-value" id="hud-year">{{ now_year|default:"2026" }}</div>
+        </div>
+        <div>
+            <div class="hud-label">Capa</div>
+            <div class="hud-value" id="hud-dim">Todas</div>
+        </div>
+        <div>
+            <div class="hud-label">Visibles</div>
+            <div class="hud-value" id="hud-count">0</div>
+        </div>
+        <div>
+            <div class="hud-label">Era</div>
+            <div class="hud-value" id="era-label" style="font-size:1rem;">—</div>
+        </div>
+        <div style="margin-left:auto;">
+            <div class="hud-label">Vista</div>
+            <div class="hud-value" id="hud-view">2D</div>
+        </div>
+    </div>
+
+    <div class="view-toggle">
+        <button class="active" data-view="map">🗺 Mapa</button>
+        <button data-view="galaxy">🌌 Galaxia</button>
+        <button data-view="timeline">📜 Timeline</button>
+    </div>
+
+    <!-- Buscador estilo Google Maps -->
+    <div style="position:absolute; top:14px; left:50%; transform:translateX(-50%); z-index:999; width: 360px; max-width: 90vw;">
+        <div style="background: rgba(8,12,32,.85); border: 1px solid rgba(0,240,255,.3); border-radius: 14px; backdrop-filter: blur(12px); display:flex; align-items:center; padding: 6px 8px; box-shadow: 0 0 24px rgba(0,240,255,.2);">
+            <span style="font-size: 1.2rem; padding: 0 8px;">🔎</span>
+            <input id="search-input" type="text" placeholder="Buscar ciudad, monumento, museo..."
+                   style="flex:1; background:transparent; border:none; color:#fff; outline:none; padding: 8px; font-size:.95rem;">
+            <button id="locate-btn" title="Mi ubicación"
+                    style="background: rgba(0,240,255,.15); color: #00f0ff; border: 1px solid rgba(0,240,255,.4); border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 1rem;">📍</button>
+        </div>
+        <ul id="search-results" style="margin: 4px 0 0; padding: 0; list-style: none; background: rgba(8,12,32,.92); border: 1px solid rgba(0,240,255,.3); border-radius: 10px; max-height: 280px; overflow-y: auto; color: #cbd5e1; font-size: .85rem;"></ul>
+    </div>
+
+    <div id="map" style="height:100%;"></div>
+    <div id="alt-view" style="display:none; height:100%; padding:60px 40px 100px; overflow:auto; color:#e2e8f0; position:absolute; inset:0; background:#050a1f;"></div>
+
+    <div class="time-slider">
+        <div class="ts-row">
+            <div class="ts-label" id="ts-label">2026</div>
+            <input type="range" id="ts-range" min="-3000" max="2050" value="2026" step="1">
+        </div>
+        <div class="ts-controls">
+            <button class="ts-btn" onclick="setYear(-1000)">−1000 a.C.</button>
+            <button class="ts-btn" onclick="setYear(0)">Año 0</button>
+            <button class="ts-btn" onclick="setYear(500)">500</button>
+            <button class="ts-btn" onclick="setYear(1000)">Edad Media</button>
+            <button class="ts-btn" onclick="setYear(1500)">Renacimiento</button>
+            <button class="ts-btn" onclick="setYear(1800)">Industrial</button>
+            <button class="ts-btn" onclick="setYear(1900)">Siglo XX</button>
+            <button class="ts-btn" onclick="setYear(2000)">2000</button>
+            <button class="ts-btn" onclick="setYear(2026)">HOY</button>
+            <button class="ts-btn" onclick="setYear(2050)">Futuro</button>
+            <button class="ts-btn" id="play-btn" onclick="togglePlay()">▶ Reproducir</button>
+        </div>
+    </div>
+</section>
+
+</div>
+</div>
+
+<script>
+// ============================================================
+// MAPA 5D · KUDOS · estado y control
+// ============================================================
+const STATE = {
+    year: 2026,
+    dimension: '',
+    modo: '',
+    tile: 'dark',
+    view: 'map',
+    capsules: [],
+};
+
+const TILE_LAYERS = {
+    dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© CARTO © OpenStreetMap', maxZoom: 19, subdomains: 'abcd'
+    }),
+    osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap', maxZoom: 19
+    }),
+    satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '© Esri', maxZoom: 19
+    }),
+    terrain: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenTopoMap', maxZoom: 17
+    }),
+};
+
+const map = L.map('map', {
+    zoomControl: true,
+    zoomControlOptions: { position: 'topright' },
+    attributionControl: false,
+    minZoom: 2,
+}).setView([30, 0], 3);  // Vista mundial al cargar — luego se centra en el usuario si concede geo
+let activeTile = TILE_LAYERS.dark.addTo(map);
+// AXÓN D4 · markerClusterGroup en lugar de layerGroup plano.
+// maxClusterRadius bajo (45) → clusters suaves, no agresivos.
+// disableClusteringAtZoom 14 → a partir de zoom 14 se ven todos los markers individuales.
+// spiderfyOnMaxZoom + showCoverageOnHover preservan el descubrimiento.
+let markersLayer = L.markerClusterGroup({
+    maxClusterRadius: 45,
+    disableClusteringAtZoom: 14,
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    chunkedLoading: true,
+    chunkInterval: 80,
+    chunkDelay: 16,
+    animate: true,
+    animateAddingMarkers: false,
+    removeOutsideVisibleBounds: true,
+}).addTo(map);
+let userMarker = null;
+let userCircle = null;
+
+// ============================================================
+// Geolocalización del usuario
+// ============================================================
+function locateUser() {
+    if (!navigator.geolocation) return;
+    map.locate({ setView: true, maxZoom: 15, enableHighAccuracy: true, timeout: 10000 });
+}
+map.on('locationfound', (e) => {
+    if (userMarker) map.removeLayer(userMarker);
+    if (userCircle) map.removeLayer(userCircle);
+    const dot = L.divIcon({
+        className: 'user-dot',
+        iconSize: [22, 22], iconAnchor: [11, 11],
+        html: '<div style="width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,#00f0ff,#1e3a8a);box-shadow:0 0 16px #00f0ff;border:2px solid #fff;"></div>',
+    });
+    userMarker = L.marker(e.latlng, { icon: dot, zIndexOffset: 1000 }).addTo(map);
+    userMarker.bindTooltip('📍 Tú estás aquí', { direction: 'top' });
+    userCircle = L.circle(e.latlng, { radius: e.accuracy, color: '#00f0ff', weight: 1, fillOpacity: 0.05 }).addTo(map);
+});
+map.on('locationerror', () => {
+    console.warn('[KUDOS Atlas] Geolocalización rechazada o no disponible.');
+});
+
+// AXÓN D4 · Refetch en pan/zoom (usa el debounce existente de refresh()).
+// Esto activa el viewport querying: solo se piden las cápsulas del bbox visible.
+map.on('moveend zoomend', () => {
+    if (STATE.view === 'map') refresh();
+});
+
+// ============================================================
+// Buscador estilo Google Maps (Nominatim, gratis sin clave)
+// ============================================================
+async function searchPlace(query) {
+    if (!query || query.length < 2) return;
+    try {
+        const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&q=' + encodeURIComponent(query),
+            { headers: { 'Accept-Language': 'es' } });
+        const data = await r.json();
+        const list = document.getElementById('search-results');
+        list.innerHTML = '';
+        data.forEach(d => {
+            const li = document.createElement('li');
+            li.textContent = d.display_name;
+            li.style.cssText = 'padding:6px 10px; cursor:pointer; border-bottom:1px solid rgba(0,240,255,.15);';
+            li.addEventListener('click', () => {
+                map.setView([d.lat, d.lon], 13);
+                list.innerHTML = '';
+                document.getElementById('search-input').value = d.display_name.split(',')[0];
+            });
+            list.appendChild(li);
+        });
+    } catch (e) { console.error(e); }
+}
+
+function setTile(name) {
+    map.removeLayer(activeTile);
+    activeTile = TILE_LAYERS[name].addTo(map);
+    STATE.tile = name;
+    // Quitar el filtro hue-rotate cuando es satelite
+    document.getElementById('map').style.filter =
+      (name === 'satellite' || name === 'terrain') ? 'none' : 'hue-rotate(190deg) saturate(.8) brightness(.85)';
+}
+
+function goTo(lat, lon, zoom) { map.setView([lat, lon], zoom || 4); }
+
+// ============================================================
+// API · obtener cápsulas filtradas
+// ============================================================
+let fetchTimeout = null;
+function refresh() {
+    clearTimeout(fetchTimeout);
+    fetchTimeout = setTimeout(_doRefresh, 250);
+}
+
+function _doRefresh() {
+    const params = new URLSearchParams();
+    const NOW = new Date().getFullYear();
+    // Si el usuario NO ha movido el slider a una época histórica, no enviamos
+    // filtro temporal: muestra TODAS las cápsulas con coordenadas.
+    if (STATE.year < NOW - 5) {
+        params.set('year_from', STATE.year - 50);
+        params.set('year_to', STATE.year + 5);
+    }
+    if (STATE.dimension) params.set('dimension', STATE.dimension);
+    if (STATE.modo) params.set('modo', STATE.modo);
+    // AXÓN D4 · bbox viewport querying — solo cápsulas del viewport actual.
+    try {
+        const b = map.getBounds();
+        params.set('north', b.getNorth().toFixed(4));
+        params.set('south', b.getSouth().toFixed(4));
+        params.set('east',  b.getEast().toFixed(4));
+        params.set('west',  b.getWest().toFixed(4));
+        params.set('zoom',  String(map.getZoom()));
+    } catch (e) { /* el mapa puede no estar inicializado en primera carga */ }
+    // Limit dinámico según zoom: a mayor zoom, más densidad local permitida.
+    const _z = (map && map.getZoom) ? map.getZoom() : 3;
+    const _limit = _z < 4 ? 250 : (_z < 7 ? 500 : (_z < 11 ? 800 : 1200));
+    params.set('limit', String(_limit));
+
+    const status = document.getElementById('hud-count');
+    if (status) status.textContent = '...';
+
+    fetch('/api/capsules/5d/?' + params.toString())
+        .then(r => r.json())
+        .then(data => {
+            STATE.capsules = data.capsules || [];
+            console.log('[KUDOS Map] cápsulas recibidas:', STATE.capsules.length);
+            if (!STATE.capsules.length) {
+                console.warn('[KUDOS Map] respuesta vacía. Ejecuta: python manage.py import_world --enrich');
+            }
+            render();
+        })
+        .catch(err => {
+            console.error('[KUDOS Map] error fetch:', err);
+            if (status) status.textContent = 'ERROR';
+        });
+}
+
+function render() {
+    document.getElementById('hud-year').textContent =
+        STATE.year < 0 ? Math.abs(STATE.year) + ' a.C.' : STATE.year;
+    document.getElementById('hud-dim').textContent =
+        STATE.dimension ? STATE.dimension.charAt(0).toUpperCase() + STATE.dimension.slice(1) : 'Todas';
+    document.getElementById('hud-view').textContent = STATE.view === 'map' ? '2D · 5D' : (STATE.view === 'galaxy' ? '🌌 Galaxia' : '📜 Timeline');
+
+    if (STATE.view === 'map') renderMap();
+    else if (STATE.view === 'galaxy') renderGalaxy();
+    else renderTimeline();
+}
+
+function renderMap() {
+    document.getElementById('map').style.display = 'block';
+    document.getElementById('alt-view').style.display = 'none';
+    markersLayer.clearLayers();
+    let visible = 0;
+    STATE.capsules.forEach(c => {
+        if (!c.lat || !c.lon) return;
+        // Suavizar la "edad" del año visible: cuanto más lejos del año seleccionado, más translúcido
+        const yearDiff = Math.abs((c.year || STATE.year) - STATE.year);
+        const opacity = Math.max(0.3, 1 - yearDiff / 80);
+
+        // Icono según modo (museo, monumento, paisaje, negocio, etc.)
+        const modeEmoji = {
+            museo: '🏛', monumento: '🗿', paisaje: '🏞', negocio: '🏪',
+            historico: '📜', sabiduria: '🧠', arte: '🎨', espiritual: '✨',
+            ciudadano: '🗳', comercial: '🛍', personal: '🌿', eterno: '♾',
+        }[c.modo] || '📍';
+        const dimColor = {
+            fisica: '#00f0ff', emocional: '#ff00d4', cognitiva: '#ffae00',
+            social: '#10b981', espiritual: '#d4af37',
+        }[c.dimension] || '#00f0ff';
+        const icon = L.divIcon({
+            className: 'kudos-marker dim-' + (c.dimension || 'fisica'),
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+            html: `<div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+                font-size:18px;background:radial-gradient(circle,${dimColor} 0%,rgba(0,0,0,.7) 80%);
+                border:2px solid ${dimColor};border-radius:50%;box-shadow:0 0 10px ${dimColor};">${modeEmoji}</div>`,
+        });
+        const m = L.marker([c.lat, c.lon], { icon, opacity }).addTo(markersLayer);
+        // HOVER · tooltip rápido con miniatura
+        const tooltip = `<div style="text-align:left; max-width:200px;">
+            <strong style="color:#00f0ff;">${escapeHtml(c.titulo)}</strong><br>
+            <small>${escapeHtml(c.modo)} · ${c.year || '—'}</small>
+            ${c.image ? '<img src="'+c.image+'" style="margin-top:4px; width:100%; max-height:80px; object-fit:cover; border-radius:4px;">' : ''}
+        </div>`;
+        m.bindTooltip(tooltip, { direction: 'top', sticky: false, opacity: .95 });
+        // CLICK · popup completo con clip + acciones
+        const html = `
+          <strong>${escapeHtml(c.titulo)}</strong><br>
+          <small>📅 ${c.year || '—'} · ${escapeHtml(c.modo)} · ${escapeHtml(c.dimension)}</small><br>
+          <small>por ${escapeHtml(c.autor)}</small><br>
+          ${c.image ? '<img src="' + c.image + '" style="margin-top:6px; width:100%; max-height:120px; object-fit:cover; border-radius:6px;">' : ''}
+          <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+            <a href="/capsules/${c.uid}/" style="background:#d4af37;color:#000;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700;">Ver cápsula →</a>
+            <a href="/capsules/${c.uid}/clip/" style="background:rgba(0,240,255,.2);color:#00f0ff;padding:4px 10px;border-radius:6px;text-decoration:none;">▶ Clip 15s</a>
+            <a href="/capsules/${c.uid}/audio/" style="background:rgba(255,0,212,.2);color:#ff00d4;padding:4px 10px;border-radius:6px;text-decoration:none;">🔊 Audio</a>
+            <a href="/capsules/${c.uid}/dialog/" style="background:rgba(212,175,55,.2);color:#d4af37;padding:4px 10px;border-radius:6px;text-decoration:none;">💬 Diálogo</a>
+          </div>`;
+        m.bindPopup(html);
+        visible++;
+    });
+    document.getElementById('hud-count').textContent = visible;
+    document.getElementById('visible-count').textContent = visible;
+}
+
+function renderGalaxy() {
+    document.getElementById('map').style.display = 'none';
+    const el = document.getElementById('alt-view');
+    el.style.display = 'block';
+    el.innerHTML = '<h2 style="font-family:Cormorant Garamond,serif; font-size:2rem; color:#00f0ff; text-shadow:0 0 12px #00f0ff;">🌌 Galaxia de cápsulas</h2><p style="color:#94a3b8;">Cada cápsula es una estrella en órbita. Filtros activos aplicados.</p><div id="galaxy-canvas" style="position:relative; height:70vh; border-radius:18px; overflow:hidden; background:radial-gradient(ellipse at center, #0a0f2c 0%, #050a1f 70%); box-shadow:inset 0 0 80px rgba(0,240,255,0.2);"></div>';
+    const canvas = el.querySelector('#galaxy-canvas');
+    const cx = canvas.offsetWidth / 2, cy = canvas.offsetHeight / 2;
+    STATE.capsules.slice(0, 200).forEach((c, i) => {
+        const angle = (i / Math.max(STATE.capsules.length, 1)) * Math.PI * 2;
+        const radius = 80 + (i % 6) * 50;
+        const x = cx + Math.cos(angle) * radius;
+        const y = cy + Math.sin(angle) * radius;
+        const star = document.createElement('a');
+        star.href = '/capsules/' + c.uid + '/';
+        star.title = c.titulo + ' · ' + (c.year || '');
+        star.style.cssText = `position:absolute; left:${x-6}px; top:${y-6}px; width:12px; height:12px; border-radius:50%;
+          background:radial-gradient(circle at 30% 30%, #fff, #00f0ff 60%, transparent);
+          box-shadow:0 0 14px #00f0ff; animation: pulse ${2 + Math.random()*3}s infinite;`;
+        canvas.appendChild(star);
+    });
+    document.getElementById('hud-count').textContent = STATE.capsules.length;
+}
+
+function renderTimeline() {
+    document.getElementById('map').style.display = 'none';
+    const el = document.getElementById('alt-view');
+    el.style.display = 'block';
+    let html = '<h2 style="font-family:Cormorant Garamond,serif; font-size:2rem; color:#00f0ff; text-shadow:0 0 12px #00f0ff;">📜 Línea temporal</h2><div style="position:relative; padding-left:24px; border-left:2px solid rgba(0,240,255,.4);">';
+    const sorted = STATE.capsules.slice().sort((a, b) => (a.year || 0) - (b.year || 0));
+    sorted.forEach(c => {
+        html += `<div style="margin:14px 0; padding:12px 16px; background:rgba(8,12,32,.6); border:1px solid rgba(0,240,255,.18); border-radius:12px; backdrop-filter:blur(6px);">
+          <small style="color:#00f0ff;">📅 ${c.year || '—'} · ${escapeHtml(c.dimension)}</small>
+          <h4 style="margin:4px 0; color:#fff;"><a href="/capsules/${c.uid}/" style="color:#fff;">${escapeHtml(c.titulo)}</a></h4>
+          <small style="color:#94a3b8;">por ${escapeHtml(c.autor)} · ${escapeHtml(c.modo)}</small>
+        </div>`;
+    });
+    html += '</div>';
+    el.innerHTML = html;
+    document.getElementById('hud-count').textContent = sorted.length;
+}
+
+function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
+
+// ============================================================
+// EVENTOS · UI
+// ============================================================
+document.querySelectorAll('.dim-btn[data-dim]').forEach(b => {
+    b.addEventListener('click', () => {
+        document.querySelectorAll('.dim-btn[data-dim]').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        STATE.dimension = b.dataset.dim;
+        refresh();
+    });
+});
+document.querySelectorAll('.modo-pill').forEach(p => {
+    p.addEventListener('click', () => {
+        document.querySelectorAll('.modo-pill').forEach(x => x.classList.remove('active'));
+        p.classList.add('active');
+        STATE.modo = p.dataset.modo;
+        refresh();
+    });
+});
+document.querySelectorAll('.dim-btn[data-tile]').forEach(b => {
+    b.addEventListener('click', () => {
+        document.querySelectorAll('.dim-btn[data-tile]').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        setTile(b.dataset.tile);
+    });
+});
+document.querySelectorAll('.view-toggle button').forEach(b => {
+    b.addEventListener('click', () => {
+        document.querySelectorAll('.view-toggle button').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        STATE.view = b.dataset.view;
+        render();
+    });
+});
+
+// Slider temporal
+const tsRange = document.getElementById('ts-range');
+const tsLabel = document.getElementById('ts-label');
+tsRange.addEventListener('input', e => {
+    STATE.year = parseInt(e.target.value, 10);
+    tsLabel.textContent = STATE.year < 0 ? Math.abs(STATE.year)+' a.C.' : STATE.year;
+    applyEraStyle();
+});
+tsRange.addEventListener('change', refresh);
+
+function setYear(y) {
+    STATE.year = y;
+    tsRange.value = y;
+    tsLabel.textContent = y < 0 ? Math.abs(y)+' a.C.' : y;
+    applyEraStyle();
+    refresh();
+}
+
+// El mapa cambia de estilo según la época histórica seleccionada.
+// 2026: asfalto y satélite. 1900: sepia. 1500: pergamino. -1000: parchment antiguo.
+function applyEraStyle() {
+    const y = STATE.year;
+    const mapEl = document.getElementById('map');
+    if (!mapEl) return;
+    let filter, label, autoTile = null;
+    if (y < -500) {
+        filter = 'sepia(.9) hue-rotate(15deg) saturate(1.3) brightness(.85) contrast(1.1)';
+        label = 'Antigüedad (calzadas, puertos romanos)';
+        autoTile = 'terrain';
+    } else if (y < 500) {
+        filter = 'sepia(.7) hue-rotate(0deg) saturate(1.1) brightness(.9)';
+        label = 'Edad Antigua tardía';
+        autoTile = 'terrain';
+    } else if (y < 1500) {
+        filter = 'sepia(.5) saturate(.9) brightness(.92) contrast(1.05)';
+        label = 'Edad Media (pergamino)';
+        autoTile = 'terrain';
+    } else if (y < 1800) {
+        filter = 'sepia(.35) saturate(.95) brightness(.95)';
+        label = 'Renacimiento / Moderno';
+        autoTile = 'osm';
+    } else if (y < 1950) {
+        filter = 'grayscale(.4) sepia(.15) brightness(.95)';
+        label = 'Industrial (mapas en blanco y negro)';
+        autoTile = 'osm';
+    } else if (y < 2010) {
+        filter = 'saturate(.85) brightness(.95)';
+        label = 'Siglo XX';
+        autoTile = 'osm';
+    } else if (y < 2030) {
+        filter = 'hue-rotate(190deg) saturate(.85) brightness(.9)';
+        label = 'Era actual (asfalto)';
+        autoTile = 'dark';
+    } else {
+        filter = 'hue-rotate(280deg) saturate(1.3) brightness(.85) contrast(1.1)';
+        label = 'Futuro proyectado';
+        autoTile = 'dark';
+    }
+    if (mapEl) mapEl.style.filter = filter;
+    const eraEl = document.getElementById('era-label');
+    if (eraEl) eraEl.textContent = label;
+    if (autoTile && autoTile !== STATE.tile) {
+        // Cambiar tile automáticamente sin que el usuario tenga que hacer click
+        setTile(autoTile);
+        document.querySelectorAll('.dim-btn[data-tile]').forEach(b => {
+            b.classList.toggle('active', b.dataset.tile === autoTile);
+        });
+    }
+}
+
+// Reproducir el viaje temporal
+let playInterval = null;
+function togglePlay() {
+    const btn = document.getElementById('play-btn');
+    if (playInterval) {
+        clearInterval(playInterval);
+        playInterval = null;
+        btn.textContent = '▶ Reproducir';
+        btn.classList.remove('playing');
+    } else {
+        btn.textContent = '⏸ Pausar';
+        btn.classList.add('playing');
+        playInterval = setInterval(() => {
+            STATE.year = STATE.year >= 2050 ? -3000 : STATE.year + 25;
+            tsRange.value = STATE.year;
+            tsLabel.textContent = STATE.year < 0 ? Math.abs(STATE.year)+' a.C.' : STATE.year;
+            refresh();
+        }, 800);
+    }
+}
+
+// Buscador
+const searchInput = document.getElementById('search-input');
+const locateBtn = document.getElementById('locate-btn');
+let searchTimer = null;
+if (searchInput) {
+    searchInput.addEventListener('input', e => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => searchPlace(e.target.value.trim()), 350);
+    });
+    searchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); searchPlace(e.target.value.trim()); }
+    });
+}
+if (locateBtn) locateBtn.addEventListener('click', locateUser);
+
+// Pedir geolocalización al cargar (silenciosa, si el usuario rechaza no pasa nada)
+setTimeout(locateUser, 800);
+
+// Carga inicial
+applyEraStyle();
+refresh();
+</script>
+{% endblock %}
+          `<div style="margin:14px 0; padding:12px 16px; background:rgba(8,12,32,.6); border:1px solid rgba(0,240,255,.18); border-radius:12px; backdrop-filter:blur(6px);">
+          <small style="color:#00f0ff;">📅 ${c.year || '—'} · ${escapeHtml(c.dimension)}</small>
+          <h4 style="margin:4px 0; color:#fff;"><a href="/capsules/${c.uid}/" style="color:#fff;">${escapeHtml(c.titulo)}</a></h4>
+          <small style="color:#94a3b8;">por ${escapeHtml(c.autor)} · ${escapeHtml(c.modo)}</small></div>`;
+    });
+    html += '</div>';
+    el.innerHTML = html;
+    document.getElementById('hud-count').textContent = sorted.length;
+}
+
+function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
+
+// ============================================================
+// CONEXIÓN DE BOTONES Y EVENTOS
+// ============================================================
+document.querySelectorAll('.dim-btn[data-dim]').forEach(b => {
+    b.addEventListener('click', () => {
+        document.querySelectorAll('.dim-btn[data-dim]').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        STATE.dimension = b.dataset.dim;
+        refresh();
+    });
+});
+document.querySelectorAll('.modo-pill').forEach(p => {
+    p.addEventListener('click', () => {
+        document.querySelectorAll('.modo-pill').forEach(x => x.classList.remove('active'));
+        p.classList.add('active');
+        STATE.modo = p.dataset.modo;
+        refresh();
+    });
+});
+document.querySelectorAll('.dim-btn[data-tile]').forEach(b => {
+    b.addEventListener('click', () => {
+        document.querySelectorAll('.dim-btn[data-tile]').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        setTile(b.dataset.tile);
+    });
+});
+document.querySelectorAll('.view-toggle button').forEach(b => {
+    b.addEventListener('click', () => {
+        document.querySelectorAll('.view-toggle button').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        STATE.view = b.dataset.view;
+        render();
+    });
+});
+
+// Slider temporal
+const tsRange = document.getElementById('ts-range');
+const tsLabel = document.getElementById('ts-label');
+tsRange.addEventListener('input', e => {
+    STATE.year = parseInt(e.target.value, 10);
+    tsLabel.textContent = STATE.year < 0 ? Math.abs(STATE.year) + ' a.C.' : STATE.year;
+    if (typeof applyEraStyle === 'function') applyEraStyle();
+});
+tsRange.addEventListener('change', refresh);
+
+function setYear(y) {
+    STATE.year = y;
+    tsRange.value = y;
+    tsLabel.textContent = y < 0 ? Math.abs(y) + ' a.C.' : y;
+    if (typeof applyEraStyle === 'function') applyEraStyle();
+    refresh();
+}
+
+// Reproductor temporal
+let playInterval = null;
+function togglePlay() {
+    const btn = document.getElementById('play-btn');
+    if (playInterval) {
+        clearInterval(playInterval); playInterval = null;
+        btn.textContent = '▶ Reproducir'; btn.classList.remove('playing');
+    } else {
+        btn.textContent = '⏸ Pausar'; btn.classList.add('playing');
+        playInterval = setInterval(() => {
+            STATE.year = STATE.year >= 2050 ? -3000 : STATE.year + 25;
+            tsRange.value = STATE.year;
+            tsLabel.textContent = STATE.year < 0 ? Math.abs(STATE.year)+' a.C.' : STATE.year;
+            refresh();
+        }, 800);
+    }
+}
+
+// Estilo del mapa según era (parchment, sepia, satélite...)
+function applyEraStyle() {
+    const y = STATE.year, mapEl = document.getElementById('map');
+    let filter;
+    if (y < -500) filter = 'sepia(.9) hue-rotate(15deg) saturate(1.3) brightness(.85)';
+    else if (y < 500) filter = 'sepia(.7) saturate(1.1) brightness(.9)';
+    else if (y < 1500) filter = 'sepia(.5) saturate(.9) brightness(.92)';
+    else if (y < 1800) filter = 'sepia(.35) saturate(.95) brightness(.95)';
+    else if (y < 1950) filter = 'grayscale(.4) sepia(.15) brightness(.95)';
+    else if (y < 2030) filter = 'hue-rotate(190deg) saturate(.85) brightness(.9)';
+    else filter = 'hue-rotate(280deg) saturate(1.3) brightness(.85)';
+    if (mapEl) mapEl.style.filter = filter;
+    const el = document.getElementById('era-label');
+    if (el) el.textContent = (y < 0 ? Math.abs(y)+' a.C.' : y) + ' · ' + (y < 500 ? 'Antigüedad' : y < 1500 ? 'Edad Media' : y < 1800 ? 'Moderna' : y < 1950 ? 'Industrial' : y < 2030 ? 'Actual' : 'Futura');
+}
+
+// Buscador
+const searchInput = document.getElementById('search-input');
+if (searchInput) {
+    let st = null;
+    searchInput.addEventListener('input', e => {
+        clearTimeout(st);
+        const q = e.target.value;
+        st = setTimeout(() => searchPlace(q), 350);
+    });
+    searchInput.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { document.getElementById('search-results').innerHTML = ''; }
+    });
+}
+const locateBtn = document.getElementById('locate-btn');
+if (locateBtn) locateBtn.addEventListener('click', locateUser);
+
+// Atajos globales para los presets temporales
+window.setYear = setYear;
+window.togglePlay = togglePlay;
+window.goTo = function(lat, lon, zoom) { map.setView([lat, lon], zoom || 4); };
+
+// Carga inicial: pintar todo + intentar geolocalizar de inmediato
+applyEraStyle();
+refresh();
+// Pedir ubicación pasados 800ms para no abrumar al cargar
+setTimeout(() => { try { locateUser(); } catch(e){} }, 800);
+</script>
+{% endblock %}
+
+{% endblock %}
+        }, 800);
+    }
+}
+
+// Atajos globales para los presets temporales
+window.setYear = (y) => { STATE.year = y; tsRange.value = y; tsLabel.textContent = y < 0 ? Math.abs(y)+' a.C.' : y; applyEraStyle(); refresh(); };
+window.togglePlay = togglePlay;
+window.goTo = (lat, lon, zoom) => map.setView([lat, lon], zoom || 4);
+
+// Buscador
+const searchInput = document.getElementById('search-input');
+if (searchInput) {
+    let st = null;
+    searchInput.addEventListener('input', e => {
+        clearTimeout(st);
+        st = setTimeout(() => searchPlace(e.target.value), 350);
+    });
+}
+const locateBtn = document.getElementById('locate-btn');
+if (locateBtn) locateBtn.addEventListener('click', locateUser);
+
+// Carga inicial
+applyEraStyle();
+refresh();
+setTimeout(() => { try { locateUser(); } catch(e){} }, 800);
+</script>
+{% endblock %}

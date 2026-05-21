@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kudos · Una civilización digital al servicio de la humanidad{% endblock %}
+
+{% block content %}
+
+<!-- ╔══════════════════════════════════════════════════════════════════ -->
+<!-- ║ HERO ESTILO META / X / WIKIPEDIA — claim, video orb, CTA          -->
+<!-- ╚══════════════════════════════════════════════════════════════════ -->
+<section class="hero hero-xl">
+    <div class="hero-orbital">
+        <div class="orb-core"></div>
+        <div class="orb-ring r1"></div>
+        <div class="orb-ring r2"></div>
+        <div class="orb-ring r3"></div>
+    </div>
+    <div class="hero-inner">
+        <span class="eyebrow">KUDOS · Memoria multidimensional 1D ~ 5D</span>
+        <h1 class="hero-title">
+            Preserva tu <span class="gold">legado</span>.<br>
+            Conecta con la <span class="gold">humanidad</span>.<br>
+            Vive para <span class="gold">siempre</span>.
+        </h1>
+        <p class="hero-sub">
+            La primera red de conciencia eterna. Cápsulas multidimensionales con lugar, tiempo,
+            clima, sentimiento y mérito · <strong>Kudos Mind</strong> conversa contigo y trabaja
+            24/7 · <strong>Kudos Atlas</strong> es tu Google Maps con máquina del tiempo · ganas
+            <strong>$KDS</strong> por preservar lo mejor de la humanidad.
+        </p>
+        <video autoplay muted loop playsinline class="hero-loop"
+               poster="{% static 'img/brand/memento_hero.png' %}"
+               style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.15; z-index:0; pointer-events:none;">
+            <source src="{% static 'video/memento_teaser.mp4' %}" type="video/mp4">
+        </video>
+        <div class="hero-cta">
+            {% if user.is_authenticated %}
+                <a href="{% url 'create_capsule' %}" class="btn btn-gold btn-lg">✨ Crear cápsula</a>
+                <a href="{% url 'feed' %}" class="btn btn-ghost btn-lg">🎯 Ver mi feed</a>
+                <a href="{% url 'map' %}" class="btn btn-ghost btn-lg">🌍 Mapa global</a>
+            {% else %}
+                <a href="{% url 'register' %}" class="btn btn-gold btn-lg">🚀 Crear mi cuenta</a>
+                <a href="{% url 'about' %}" class="btn btn-ghost btn-lg">ℹ Conocer Kudos</a>
+                <a href="{% url 'manifesto' %}" class="btn btn-ghost btn-lg">📜 Manifiesto</a>
+            {% endif %}
+        </div>
+        <div class="hero-trust">
+            <span>🌍 {{ stats.total_capsules }} cápsulas</span>
+            <span>👥 {{ stats.total_users }} pioneros</span>
+            <span>🗳️ {{ stats.total_proposals }} propuestas</span>
+            <span>🤖 IA interna 24/7</span>
+        </div>
+    </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════ -->
+<!-- ║ MOSAICO DE 3 FASES + ENTRADAS A IA / MAPA / SOCIAL                -->
+<!-- ╚══════════════════════════════════════════════════════════════════ -->
+<section class="phases-section">
+    <h2 class="section-title">Las 3 fases del ecosistema</h2>
+    <div class="phases-grid">
+        {% for phase in PROJECT_PHASES %}
+        <div class="phase-card phase-{{ phase.code }}">
+            <div class="phase-icon">{{ phase.icon }}</div>
+            <h3>{{ phase.name }}</h3>
+            <p class="phase-tag">{{ phase.tagline }}</p>
+            <p>{{ phase.description }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════ -->
+<!-- ║ FRANJA DE PRODUCTOS — 6 megapatas (Chrome / Maps / Wiki style)    -->
+<!-- ╚══════════════════════════════════════════════════════════════════ -->
+<section class="megaproducts">
+    <h2 class="section-title">Productos integrados</h2>
+    <div class="megaproducts-grid">
+        <a href="{% url 'capsule_list' %}" class="megacard mp-vault">
+            <div class="megaicon">🌌</div>
+            <h3>Vault</h3>
+            <p>Cápsulas multidimensionales con texto, imagen, vídeo, audio, lugar y tiempo.</p>
+            <span class="megamore">Crear cápsula →</span>
+        </a>
+        <a href="{% url 'map' %}" class="megacard mp-map">
+            <div class="megaicon">🌍</div>
+            <h3>Mapa global</h3>
+            <p>Visualiza la humanidad sobre un mapa interactivo. Como Google Maps, pero con memoria.</p>
+            <span class="megamore">Explorar →</span>
+        </a>
+        <a href="{% url 'social' %}" class="megacard mp-social">
+            <div class="megaicon">🌐</div>
+            <h3>Espacios sociales</h3>
+            <p>Comunidades temáticas sin algoritmos opacos ni publicidad. Tu red, tus reglas.</p>
+            <span class="megamore">Unirse →</span>
+        </a>
+        <a href="{% url 'wisdom_repository' %}" class="megacard mp-wisdom">
+            <div class="megaicon">🧠</div>
+            <h3>Sabiduría</h3>
+            <p>Repositorio vivo: filósofos clásicos, ciencia, arte, espiritualidad. Una Wikipedia con alma.</p>
+            <span class="megamore">Aprender →</span>
+        </a>
+        <a href="{% url 'global_consciousness' %}" class="megacard mp-congress">
+            <div class="megaicon">🗳️</div>
+            <h3>Comité Global</h3>
+            <p>Propón. Vota. Decide. Una capa de gobernanza colectiva para el ecosistema.</p>
+            <span class="megamore">Participar →</span>
+        </a>
+        <a href="{% if user.is_superuser or user.role == 'founder' %}{% url 'ai_panel' %}{% else %}{% url 'about' %}{% endif %}" class="megacard mp-mind">
+            <div class="megaicon">🤖</div>
+            <h3>KUDOS MIND</h3>
+            <p>Una IA interna multi-agente que importa, modera, analiza y recomienda en bucle 24/7.</p>
+            <span class="megamore">Ver →</span>
+        </a>
+    </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════ -->
+<!-- ║ MÉTRICAS LIVE                                                     -->
+<!-- ╚══════════════════════════════════════════════════════════════════ -->
+<section class="stats-section">
+    <h2 class="section-title">El pulso del ecosistema</h2>
+    <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num">{{ stats.total_capsules }}</div><div class="stat-lbl">Cápsulas</div></div>
+        <div class="stat-card"><div class="stat-num">{{ stats.total_users }}</div><div class="stat-lbl">Pioneros</div></div>
+        <div class="stat-card"><div class="stat-num">{{ stats.total_proposals }}</div><div class="stat-lbl">Propuestas</div></div>
+        <div class="stat-card"><div class="stat-num">{{ stats.total_spaces }}</div><div class="stat-lbl">Espacios</div></div>
+    </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════ -->
+<!-- ║ CÁPSULAS RECIENTES                                                -->
+<!-- ╚══════════════════════════════════════════════════════════════════ -->
+<section class="section-block">
+    <div class="row-between">
+        <h2 class="section-title">Cápsulas recientes</h2>
+        <a href="{% url 'capsule_list' %}" class="btn btn-ghost btn-sm">Ver todas →</a>
+    </div>
+    <div class="cards-grid">
+        {% for capsule in recent_capsules %}
+        <article class="capsule-card {% if capsule.image %}has-image{% endif %}">
+            {% if capsule.image %}
+            <a href="{% url 'capsule_detail' capsule.uid %}" class="capsule-thumb">
+                <img src="{{ capsule.image }}" alt="" loading="lazy">
+                {% if capsule.video %}<span class="play-badge">▶</span>{% endif %}
+            </a>
+            {% endif %}
+            <div class="capsule-card-body">
+                <span class="capsule-mode">{{ capsule.get_modo_display }}</span>
+                <h3><a href="{% url 'capsule_detail' capsule.uid %}">{{ capsule.display_title }}</a></h3>
+                <p class="muted">por {{ capsule.usuario.alias|default:'anónimo' }} · {{ capsule.fecha }}</p>
+                <p class="capsule-excerpt">{{ capsule.contenido|truncatechars:120 }}</p>
+                <div class="capsule-meta">
+                    <span>❤ {{ capsule.likes }}</span>
+                    <span>👁 {{ capsule.views }}</span>
+                    {% if capsule.lugar %}<span>📍 {{ capsule.lugar }}</span>{% endif %}
+                </div>
+            </div>
+        </article>
+        {% empty %}
+        <p class="muted">Aún no hay cápsulas públicas. ¡Sé el primero!</p>
+        {% endfor %}
+    </div>
+</section>
+
+{% if trending_capsules %}
+<!-- ╔══════════════════════════════════════════════════════════════════ -->
+<!-- ║ TENDENCIAS                                                        -->
+<!-- ╚══════════════════════════════════════════════════════════════════ -->
+<section class="section-block">
+    <h2 class="section-title">🔥 Tendencia esta semana</h2>
+    <div class="cards-grid">
+        {% for capsule in trending_capsules %}
+        <article class="capsule-card highlighted {% if capsule.image %}has-image{% endif %}">
+            {% if capsule.image %}
+            <a href="{% url 'capsule_detail' capsule.uid %}" class="capsule-thumb">
+                <img src="{{ capsule.image }}" alt="" loading="lazy">
+            </a>
+            {% endif %}
+            <div class="capsule-card-body">
+                <h3><a href="{% url 'capsule_detail' capsule.uid %}">{{ capsule.display_title }}</a></h3>
+                <p class="muted">{{ capsule.usuario.alias|default:'anónimo' }}</p>
+                <div class="capsule-meta"><span>❤ {{ capsule.likes }}</span><span>👁 {{ capsule.views }}</span></div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- ╔══════════════════════════════════════════════════════════════════ -->
+<!-- ║ MÓDULOS COMPLEMENTARIOS                                           -->
+<!-- ╚══════════════════════════════════════════════════════════════════ -->
+<section class="modules-grid">
+    <h2 class="section-title">Explora todos los módulos</h2>
+    <div class="modules-list">
+        <a href="{% url 'wisdom_repository' %}" class="module-tile">🧠<span>Sabiduría</span></a>
+        <a href="{% url 'marketplace' %}" class="module-tile">🛍️<span>Mercado</span></a>
+        <a href="{% url 'global_consciousness' %}" class="module-tile">🗳️<span>Comité</span></a>
+        <a href="{% url 'space_exploration' %}" class="module-tile">🚀<span>Exploración</span></a>
+        <a href="{% url 'sports_competitions' %}" class="module-tile">🏆<span>Deportes</span></a>
+        <a href="{% url 'mental_health' %}" class="module-tile">💚<span>Salud Mental</span></a>
+        <a href="{% url 'spirituality' %}" class="module-tile">🕊️<span>Espiritualidad</span></a>
+        <a href="{% url 'art_festival' %}" class="module-tile">🎨<span>Arte</span></a>
+        <a href="{% url 'future_simulator' %}" class="module-tile">🔮<span>Simulador</span></a>
+        <a href="{% url 'kudos_legacy' %}" class="module-tile">📜<span>Legado</span></a>
+        <a href="{% url 'social' %}" class="module-tile">🌐<span>Espacios</span></a>
+        <a href="{% url 'assistant_characters' %}" class="module-tile">🎭<span>Consejeros</span></a>
+    </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════ -->
+<!-- ║ MANIFIESTO CTA                                                    -->
+<!-- ╚══════════════════════════════════════════════════════════════════ -->
+<section class="cta-band">
+    <div>
+        <h2>Una civilización digital se construye con personas. Una a una.</h2>
+        <p>Súmate al ecosistema, crea tu primera cápsula y deja huella.</p>
+    </div>
+    <div class="cta-actions">
+        {% if user.is_authenticated %}
+            <a href="{% url 'create_capsule' %}" class="btn btn-gold btn-lg">✨ Crear mi primera cápsula</a>
+        {% else %}
+            <a href="{% url 'register' %}" class="btn btn-gold btn-lg">🚀 Crear mi cuenta</a>
+            <a href="{% url 'manifesto' %}" class="btn btn-ghost btn-lg">📜 Leer manifiesto</a>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}

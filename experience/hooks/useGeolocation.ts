@@ -80,7 +80,16 @@ export function useGeolocation(
 
   const timeoutMs = options.timeoutMs ?? _DEFAULT_TIMEOUT_MS;
   const maxAgeMs = options.maxAgeMs ?? _DEFAULT_MAX_AGE_MS;
-  const enableHighAccuracy = options.enableHighAccuracy ?? false;
+  // P0.9 fix · default a GPS de alta precisión.
+  // Pre-patch: default false → browsers caen a geolocation por IP/WiFi.
+  // En mobile con SIM/VPN/proxy de otra ciudad, IP-geo reporta coords
+  // de la ciudad del datacenter (e.g., usuario en León con SIM que sale
+  // por Córdoba → coords de Córdoba). Síntoma: "Descubrir cerca" devuelve
+  // capsule de una ciudad distinta. Activando high-accuracy, el browser
+  // usa GPS real (más batería, ~3-8s más lento, pero coords correctas
+  // a metros). Imprescindible para "Descubrir cerca" que asume verdad
+  // geográfica.
+  const enableHighAccuracy = options.enableHighAccuracy ?? true;
   const watchdogMs = options.watchdogMs ?? _DEFAULT_WATCHDOG_MS;
   const enabled = options.enabled ?? true;
 
@@ -130,6 +139,18 @@ export function useGeolocation(
         track("geolocation_granted", {
           accuracy_m: Math.round(pos.coords.accuracy ?? 0),
         });
+        // P0.9 · console-visible diagnostic. Founder can verify in
+        // DevTools que las coords son las correctas (vs IP-geo fallback
+        // que devuelve coords de la ciudad del datacenter del ISP).
+        // accuracy_m > 1000m suele indicar fuente IP/WiFi · GPS real
+        // suele dar < 50m al aire libre, < 200m bajo techo.
+        // eslint-disable-next-line no-console
+        console.info(
+          "[KUDOS · geo] coords granted · " +
+            `lat=${pos.coords.latitude.toFixed(5)} ` +
+            `lng=${pos.coords.longitude.toFixed(5)} ` +
+            `accuracy=${Math.round(pos.coords.accuracy ?? 0)}m`,
+        );
       },
       (err) => {
         if (resolved) return;

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}🔥 Tendencias – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🔥</div>
+        <div>
+            <h1>🔥 Tendencias</h1>
+            <p class="muted">Lo más popular ahora mismo.</p>
+        </div>
+    </header>
+    
+<div class="cards-grid">
+{% for c in capsules %}
+<article class="capsule-card highlighted {% if c.image %}has-image{% endif %}">
+{% if c.image %}<a href="{% url 'capsule_detail' c.uid %}" class="capsule-thumb"><img src="{{ c.image }}" alt="" loading="lazy">{% if c.video %}<span class="play-badge">▶</span>{% endif %}</a>{% endif %}
+<div class="capsule-card-body">
+<h3><a href="{% url 'capsule_detail' c.uid %}">{{ c.display_title }}</a></h3>
+<p class="muted">{{ c.usuario.alias }}</p>
+<div class="capsule-meta"><span>❤ {{ c.likes }}</span><span>👁 {{ c.views }}</span></div>
+</div>
+</article>
+{% empty %}<p class="muted">Sin tendencias todavía.</p>{% endfor %}
+</div>
+
+</div>
+{% endblock %}

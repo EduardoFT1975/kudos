@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load kudos_extras %}
+{% block title %}Salud – Kudos{% endblock %}
+{% block content %}
+<div class="container narrow">
+<header class="personal-header">
+    <h1>💪 Salud</h1>
+    <p class="muted">Sueño, ejercicio, peso, ánimo. Lo que se mide se mejora.</p>
+</header>
+
+<nav class="personal-tabs">
+    <a href="{% url 'personal_dashboard' %}">📊 Resumen</a>
+    <a href="{% url 'personal_journal' %}">📔 Diario</a>
+    <a href="{% url 'personal_learning' %}">📚 Aprendizaje</a>
+    <a href="{% url 'personal_health' %}" class="active">💪 Salud</a>
+    <a href="{% url 'personal_crypto' %}">🪙 Cripto</a>
+    <a href="{% url 'assistant_characters' %}">🎭 Consejero</a>
+</nav>
+
+<form method="post" class="card form-stacked">
+    {% csrf_token %}
+    <h2>Registrar métrica de hoy</h2>
+    <label>Métrica<select name="metric">{% for c, l in metric_choices %}<option value="{{ c }}">{{ l }}</option>{% endfor %}</select></label>
+    <label>Valor<input type="number" name="value" step="0.1" required></label>
+    <label>Notas<input type="text" name="notes"></label>
+    <button class="btn btn-gold">Guardar</button>
+</form>
+
+<section class="card">
+<h2>Hoy</h2>
+{% if today_metrics %}
+<table style="width:100%">
+{% for code, label in metric_choices %}
+{% if code in today_metrics %}
+<tr><td>{{ label }}</td><td><strong>{{ today_metrics|get_item:code }}</strong></td></tr>
+{% endif %}
+{% endfor %}
+</table>
+{% else %}<p class="muted">Aún no has registrado nada hoy.</p>{% endif %}
+</section>
+
+<section class="card">
+<h2>Últimos 7 días</h2>
+<table style="width:100%">
+<tr><th>Fecha</th><th>Métrica</th><th>Valor</th></tr>
+{% for m in metrics %}
+<tr><td>{{ m.date|date:"d M" }}</td><td>{{ m.get_metric_display }}</td><td>{{ m.value }}</td></tr>
+{% empty %}<tr><td colspan="3" class="muted">Sin registros.</td></tr>{% endfor %}
+</table>
+</section>
+</div>
+
+<style>
+.personal-header { background: linear-gradient(135deg, #16A34A, #1E3A8A); color: white; padding: 28px; border-radius: var(--radius); margin-bottom: 20px; }
+.personal-header h1 { color: white; }
+.personal-header .muted { color: rgba(255,255,255,0.85); }
+.personal-tabs { display: flex; gap: 4px; flex-wrap: wrap; padding: 4px; background: var(--surface-2); border-radius: var(--radius); margin-bottom: 20px; }
+.personal-tabs a { padding: 10px 16px; border-radius: var(--radius-sm); color: var(--text); font-weight: 600; }
+.personal-tabs a.active { background: var(--primary); color: white; }
+.card { background: var(--surface); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 12px; }
+table th, table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }

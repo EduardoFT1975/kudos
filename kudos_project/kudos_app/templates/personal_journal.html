@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Diario estoico – Kudos{% endblock %}
+{% block content %}
+<div class="container narrow">
+<header class="personal-header">
+    <h1>📔 Diario estoico</h1>
+    <p class="muted">Mañana intención · Noche examen · Reflexión libre.</p>
+</header>
+
+<nav class="personal-tabs">
+    <a href="{% url 'personal_dashboard' %}">📊 Resumen</a>
+    <a href="{% url 'personal_journal' %}" class="active">📔 Diario</a>
+    <a href="{% url 'personal_learning' %}">📚 Aprendizaje</a>
+    <a href="{% url 'personal_health' %}">💪 Salud</a>
+    <a href="{% url 'personal_crypto' %}">🪙 Cripto</a>
+    <a href="{% url 'assistant_characters' %}">🎭 Consejero</a>
+</nav>
+
+<form method="post" class="card form-stacked">
+    {% csrf_token %}
+    <h2>Nueva entrada</h2>
+    <label>Tipo
+        <select name="kind">
+            {% for code, label in kinds %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
+        </select>
+    </label>
+    <label>¿Cómo te sientes? (1-10)
+        <input type="range" name="mood" min="1" max="10" value="7" oninput="this.nextElementSibling.value=this.value">
+        <output>7</output>
+    </label>
+    <label>Contenido
+        <textarea name="content" rows="8" placeholder="Escribe libremente..." required></textarea>
+    </label>
+    <button class="btn btn-gold">Guardar entrada</button>
+</form>
+
+<h2>Tus últimas entradas</h2>
+<div class="entries">
+{% for e in entries %}
+<article class="card entry">
+    <header><span class="entry-kind">{{ e.get_kind_display }}</span><small>{{ e.date|date:"d M Y" }} · ánimo {{ e.mood }}/10</small></header>
+    <pre class="entry-body">{{ e.content }}</pre>
+</article>
+{% empty %}
+<p class="muted">Aún no has escrito. Empieza arriba.</p>
+{% endfor %}
+</div>
+</div>
+
+<style>
+.personal-header { background: linear-gradient(135deg, #1F2937, #1E3A8A); color: white; padding: 28px; border-radius: var(--radius); margin-bottom: 20px; }
+.personal-header h1 { color: white; }
+.personal-header .muted { color: rgba(255,255,255,0.85); }
+.personal-tabs { display: flex; gap: 4px; flex-wrap: wrap; padding: 4px; background: var(--surface-2); border-radius: var(--radius); margin-bottom: 20px; }
+.personal-tabs a { padding: 10px 16px; border-radius: var(--radius-sm); color: var(--text); font-weight: 600; }
+.personal-tabs a.active { background: var(--primary); color: white; }
+.card { background: var(--surface); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 16px; }
+.entry-kind { background: var(--gold); color: var(--primary-dark); padding: 2px 10px; border-radius: 999px; font-weight: 700; font-size: 0.8rem; }
+.entry-body { white-space: pre-wrap; font-family: inherit; background: var(--surface-2); padding: 12px; border-radius: var(--radius-sm); margin: 12px 0 0; }
+</style>
+{% endblock %}

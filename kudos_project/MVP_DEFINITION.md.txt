@@ -1,0 +1,32 @@
+MVP_DEFINITION.md
+Definición del Producto Mínimo Viable (Fase 1)
+Nombre: TimeWisdom (anteriormente Kudos)
+
+INNEGOCIABLES (no se lanza sin estos puntos):
+
+1. Registro de usuarios con login social (Instagram, Facebook, TikTok, X, Google, etc.)
+2. Mapa multidimensional (geográfico + temporal con máquina del tiempo / slider de épocas)
+3. Geolocalización del usuario (activada por él) + marcador en mapa + notificaciones de cápsulas cercanas
+4. Acceso desde mapa a Repositorio de Sabiduría temático (Arte, Historia, Filosofía, etc.) organizado por temas y subtemas
+5. Importación masiva y continua de:
+   - Puntos de interés de Google Maps / alternativas
+   - Wikipedia, UNESCO, museos y fuentes similares
+   - Base amplia de imágenes
+6. Generación automática de clips de vídeo virales (15-60s) con IA generativa (propia o local primero). Los clips deben poder actualizarse.
+7. Sistema de preferencias del usuario para personalizar recomendaciones y feed.
+
+FUNCIONALIDADES CORE DEL MVP
+- Mapa interactivo (Leaflet + OpenStreetMap) con slider temporal
+- Hover en cápsula → info básica
+- Click en cápsula → clip de vídeo/audio generado + información ampliada + fuentes + botón compartir
+- Repositorio temático de sabiduría
+- Perfil + preferencias del usuario
+- Dashboard personal (legado)
+- Notificaciones web push
+
+FUERA DEL MVP (Fase 2+)
+- Blockchain, IPFS, token $TIME
+- AR/VR completo, Hogares 5D
+- DAO, gobernanza, marketplace, salud predictiva, etc.
+
+Criterio de lanzamiento: Tener base de datos amplia de POI + Wikipedia + clips virales funcionales + social login + geolocalización.

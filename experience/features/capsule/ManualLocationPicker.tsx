@@ -31,6 +31,12 @@ export interface ManualCityPreset {
   lat: number;
   lng: number;
   hint: string;
+  /** P0.9 WOW pilot · marcas las ciudades en las que el pipeline tiene
+   *  densidad probada y emite WOW garantizado. El picker las renderiza
+   *  primero, con badge "Pilot · datos densos" para guiar al usuario
+   *  hacia la mejor primera impresión posible. Roma + Salamanca son las
+   *  pilot cities oficiales del MVP. */
+  pilot?: boolean;
 }
 
 /**
@@ -38,9 +44,23 @@ export interface ManualCityPreset {
  * Coordinates are city-center / canonical-landmark, not coordinates
  * of a specific monument · the pipeline expands the radius.
  *
- * Salamanca is intentional · Model B benchmark city for the Q3 plan.
+ * P0.9 WOW pilot · Roma + Salamanca son las pilot cities. Roma porque
+ * el Time Machine (/time/rome) ya tiene 5 eras × 5 hotspots curados +
+ * densidad histórica máxima en el pipeline. Salamanca porque fue la
+ * ciudad benchmark del Model B en Q3 · WOW garantizado. Las otras 4 son
+ * fallbacks: funcionan, pero pueden tener cápsulas más sparse según
+ * coordenadas exactas.
  */
 export const CITY_PRESETS: ManualCityPreset[] = [
+  {
+    id: "roma",
+    city: "Roma",
+    country: "Italia",
+    lat: 41.8902,
+    lng: 12.4922,
+    hint: "Foro · Coliseo · 3000 años",
+    pilot: true,
+  },
   {
     id: "salamanca",
     city: "Salamanca",
@@ -48,6 +68,7 @@ export const CITY_PRESETS: ManualCityPreset[] = [
     lat: 40.9651,
     lng: -5.6640,
     hint: "Plaza Mayor · Universidad",
+    pilot: true,
   },
   {
     id: "madrid",
@@ -64,14 +85,6 @@ export const CITY_PRESETS: ManualCityPreset[] = [
     lat: 41.3851,
     lng: 2.1734,
     hint: "Gòtic · Eixample",
-  },
-  {
-    id: "roma",
-    city: "Roma",
-    country: "Italia",
-    lat: 41.8902,
-    lng: 12.4922,
-    hint: "Foro · Coliseo",
   },
   {
     id: "paris",
@@ -207,19 +220,35 @@ export function ManualLocationPicker({
               </p>
             </div>
 
-            {/* City grid */}
+            {/* City grid · P0.9 WOW pilot · las pilot cities (Roma,
+                Salamanca) van primero y llevan un eyebrow accent que
+                señala al usuario dónde está la densidad real. Resto sigue
+                como fallback funcional, sin badge. */}
             <ul className="grid gap-2 sm:grid-cols-2">
               {CITY_PRESETS.map((c) => (
                 <li key={c.id}>
                   <button
                     type="button"
                     onClick={() => {
-                      track("manual_location_picked", { city: c.id });
+                      track("manual_location_picked", {
+                        city: c.id,
+                        pilot: c.pilot ? "yes" : "no",
+                      });
                       onPick({ lat: c.lat, lng: c.lng });
                     }}
-                    className="group flex w-full items-baseline justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3 text-left transition hover:border-[var(--kudos-accent)]/55 hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--kudos-accent)]"
+                    className={
+                      "group flex w-full items-baseline justify-between gap-3 rounded-xl border px-4 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--kudos-accent)] " +
+                      (c.pilot
+                        ? "border-[var(--kudos-accent)]/40 bg-[var(--kudos-accent)]/[0.06] hover:border-[var(--kudos-accent)]/70 hover:bg-[var(--kudos-accent)]/[0.1]"
+                        : "border-white/10 bg-white/[0.025] hover:border-[var(--kudos-accent)]/55 hover:bg-white/[0.06]")
+                    }
                   >
                     <span className="grid">
+                      {c.pilot ? (
+                        <span className="mb-0.5 font-mono text-[9px] uppercase tracking-[0.32em] text-[var(--kudos-accent-bright)]/85">
+                          Pilot · datos densos
+                        </span>
+                      ) : null}
                       <span className="text-[14px] font-medium text-white/90 group-hover:text-white">
                         {c.city}
                       </span>
@@ -229,7 +258,12 @@ export function ManualLocationPicker({
                     </span>
                     <span
                       aria-hidden
-                      className="text-[12px] text-white/30 transition group-hover:translate-x-0.5 group-hover:text-[var(--kudos-accent-bright)]"
+                      className={
+                        "text-[12px] transition group-hover:translate-x-0.5 " +
+                        (c.pilot
+                          ? "text-[var(--kudos-accent-bright)]/70 group-hover:text-[var(--kudos-accent-bright)]"
+                          : "text-white/30 group-hover:text-[var(--kudos-accent-bright)]")
+                      }
                     >
                       →
                     </span>

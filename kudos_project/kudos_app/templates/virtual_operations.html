@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}💼 Operaciones virtuales – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">💼</div>
+        <div>
+            <h1>💼 Operaciones virtuales</h1>
+            <p class="muted">Marketplace de operaciones del ecosistema.</p>
+        </div>
+    </header>
+    
+<div class="cards-grid">
+{% for op in operations %}
+<article class="capsule-card">
+<span class="capsule-mode">{{ op.get_operation_type_display }}</span>
+<h3>{{ op.title }}</h3><p>{{ op.description|truncatechars:140 }}</p>
+<div class="capsule-meta"><span>💰 {{ op.price }} K</span></div>
+</article>
+{% empty %}<p class="muted">Sin operaciones activas.</p>{% endfor %}
+</div>
+
+</div>
+{% endblock %}

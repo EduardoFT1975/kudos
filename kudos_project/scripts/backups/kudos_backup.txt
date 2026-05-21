@@ -1,0 +1,7 @@
+```
+# /etc/cron.d/kudos_backup
+# Backup diario de la base de datos a las 2 AM
+0 2 * * * root /path/to/backup_script.sh >> /var/log/kudos_backup.log 2>&1
+# Backup semanal de IPFS los domingos a las 3 AM
+0 3 * * 0 root /path/to/backup_script.sh >> /var/log/kudos_backup.log 2>&1
+```

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}🔗 Kudos Connect – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🔗</div>
+        <div>
+            <h1>🔗 Kudos Connect</h1>
+            <p class="muted">Fase 2 del ecosistema: red social inmersiva.</p>
+        </div>
+    </header>
+    
+<p>Connect te permite compartir multiformato (texto, audio, vídeo) y transitar mundos virtuales construidos por la comunidad.</p>
+<div class="cards-grid">
+<article class="capsule-card"><h3>📡 Importa tus redes</h3><p>Trae tus contactos y contenidos desde otras plataformas.</p></article>
+<article class="capsule-card"><h3>🌍 Mundo virtual</h3><p>Explora un mapa social transitable en VR/AR.</p></article>
+<article class="capsule-card"><h3>💬 Charlas multiformato</h3><p>Conversaciones que combinan texto, voz y vídeo en hilos enriquecidos.</p></article>
+</div>
+<a href="{% url 'social' %}" class="btn btn-gold">Empieza por los Espacios sociales →</a>
+
+</div>
+{% endblock %}

@@ -65,6 +65,12 @@ interface CapsuleStateRouterProps {
   onExpand?: () => void;
   onManual?: () => void;
   onNext?: () => void;
+  /** P0.9 Memory Graph · coords activas de la sesión. Solo se propagan
+   *  a CapsuleSuccess para que el RememberPill las persista junto a la
+   *  cápsula en localStorage. Sparse/empty states no las necesitan
+   *  (no hay nada que recordar). */
+  lat?: number | null;
+  lng?: number | null;
 }
 
 export function CapsuleStateRouter({
@@ -73,6 +79,8 @@ export function CapsuleStateRouter({
   onExpand,
   onManual,
   onNext,
+  lat = null,
+  lng = null,
 }: CapsuleStateRouterProps) {
   const emptyZone = (
     <CapsuleEmptyZone
@@ -129,6 +137,8 @@ export function CapsuleStateRouter({
           capsule={response.capsule}
           onExploreNearby={onExpand}
           onNext={onNext ?? onManual}
+          lat={lat}
+          lng={lng}
         />
       );
     }

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}📊 Análisis de datos – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">📊</div>
+        <div>
+            <h1>📊 Análisis de datos</h1>
+            <p class="muted">El ecosistema en cifras.</p>
+        </div>
+    </header>
+    
+<div class="stats-grid">
+<div class="stat-card"><div class="stat-num">{{ stats.total_capsules }}</div><div class="stat-lbl">Cápsulas</div></div>
+<div class="stat-card"><div class="stat-num">{{ stats.total_users }}</div><div class="stat-lbl">Usuarios</div></div>
+<div class="stat-card"><div class="stat-num">{{ stats.total_proposals }}</div><div class="stat-lbl">Propuestas</div></div>
+<div class="stat-card"><div class="stat-num">{{ stats.total_spaces }}</div><div class="stat-lbl">Espacios</div></div>
+</div>
+
+</div>
+{% endblock %}

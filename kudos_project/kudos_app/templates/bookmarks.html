@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Mis marcadores · Kudos{% endblock %}
+
+{% block content %}
+<section class="page-head">
+    <h1>🔖 Marcadores</h1>
+    <p class="muted">Cápsulas que has guardado para volver a ellas.</p>
+</section>
+
+<section class="cards-grid">
+    {% for b in bookmarks %}
+    <article class="capsule-card">
+        <div class="capsule-card-body">
+            <h3><a href="{% url 'capsule_detail' b.capsule.uid %}">{{ b.capsule.display_title }}</a></h3>
+            <p class="muted">guardado el {{ b.created|date:"d M Y" }}</p>
+            <p class="capsule-excerpt">{{ b.capsule.contenido|truncatechars:140 }}</p>
+        </div>
+    </article>
+    {% empty %}
+    <p class="muted">Aún no tienes ningún marcador.</p>
+    {% endfor %}
+</section>
+{% endblock %}

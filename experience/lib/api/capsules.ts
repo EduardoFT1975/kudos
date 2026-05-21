@@ -22,10 +22,11 @@
 import type { CapsuleResponse, CapsuleUXState } from "@/types/capsule-state";
 import { track } from "@/lib/analytics/plausible";
 
-// Phase 13 canonical endpoint (`/api/capsule/nearby` is preserved
-// server-side as a back-compat alias but new code should target
-// `/api/place-capsule`).
-const ENDPOINT: string = "/api/place-capsule";
+// Phase 13 canonical endpoint con trailing slash (Django convention).
+// P0.8 · backend registra AMBAS variantes (con y sin slash) por
+// back-compat, pero el frontend canonical usa la versión con slash para
+// evitar redirects de proxy en producción Render.
+const ENDPOINT: string = "/api/place-capsule/";
 
 // Phase 14 telemetry · server emits this header on every response.
 // Values: ok | empty | sparse | degraded | throttled | bad_request.
@@ -129,6 +130,17 @@ export async function fetchCapsuleResponse(
 
   const _t0: number = _now();
   let _health: string = "unknown";
+
+  // P0.9 · console-visible payload diagnostic (silent probes excluded).
+  // Founder verifica en DevTools que las coords enviadas son las correctas.
+  if (!silent && typeof console !== "undefined") {
+    // eslint-disable-next-line no-console
+    console.info(
+      "[KUDOS · capsules] POST " +
+        `${API_BASE}${ENDPOINT} · lat=${lat.toFixed(5)} ` +
+        `lng=${lng.toFixed(5)} radius_m=${radiusM}`,
+    );
+  }
 
   try {
     const res = await fetch(`${API_BASE}${ENDPOINT}`, {

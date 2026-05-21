@@ -1,0 +1,12 @@
+{
+  "name": "kudos-ar-vr",
+  "version": "1.0.0",
+  "description": "AR/VR server for Kudos project",
+  "main": "server.js",
+  "dependencies": {
+    "aframe": "^1.7.1",
+    "express": "^4.21.2",
+    "ipfs-http-client": "^60.0.1",
+    "node-fetch": "^2.7.0"
+  }
+}

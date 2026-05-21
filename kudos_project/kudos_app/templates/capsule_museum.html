@@ -1,0 +1,74 @@
+<!-- kudos_app/templates/capsule_museum.html -->
+
+{% load static %}
+```html
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Museo Universal de Cápsulas</title>
+    <link rel="stylesheet" href="/static/css/leaflet.css" />
+    <script src="/static/js/leaflet-src.js"></script>
+    <style>
+        #museum-map { height: 400px; margin: 20px 0; }
+        .capsule-list { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>Museo Universal de Cápsulas</h1>
+
+    <!-- Escena AR/VR -->
+    <div id="museum-scene">
+        {{ museum_scene|safe }}
+    </div>
+
+    <!-- Mapa Interactivo -->
+    <div id="museum-map"></div>
+
+    <!-- Lista de Cápsulas -->
+    <div class="capsule-list">
+        <h2>Cápsulas Exhibidas</h2>
+        <ul>
+            {% for capsule in capsules %}
+                <li>
+                    {{ capsule.contenido }} (Modo: {{ capsule.modo }}) 
+                    {% if capsule.parameters.clip_url %}
+                        <a href="{{ capsule.parameters.clip_url }}">Ver Clip</a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        // Inicializar mapa con Leaflet
+        var map = L.map('museum-map').setView([40.4168, -3.7038], 2);
+
+        // Añadir capa base (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // Añadir capa personalizada 'Custom Kudos Layer'
+        var kudosLayer = L.geoJSON({{ map_data|safe }}, {
+            style: function(feature) {
+                return { color: "#FFD700", weight: 2 };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `<b>${feature.properties.description}</b><br>
+                    Modo: ${feature.properties.mode}<br>
+                    Temas: ${feature.properties.themes.join(', ')}<br>
+                    Clima: ${feature.properties.weather}`
+                );
+            }
+        }).addTo(map);
+
+        // Ajustar vista para mostrar todas las cápsulas
+        if (kudosLayer.getBounds().isValid()) {
+            map.fitBounds(kudosLayer.getBounds());
+        }
+    </script>
+</body>
+</html>
+```

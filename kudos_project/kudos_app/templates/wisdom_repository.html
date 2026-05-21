@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}🧠 Repositorio de Sabiduría – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🧠</div>
+        <div>
+            <h1>🧠 Repositorio de Sabiduría</h1>
+            <p class="muted">Conocimiento eterno preservado para el futuro.</p>
+        </div>
+    </header>
+    
+<a href="{% url 'create_capsule' %}?modo=sabiduria" class="btn btn-gold">+ Aportar sabiduría</a>
+<div class="cards-grid">
+{% for c in capsules %}
+<article class="capsule-card {% if c.image %}has-image{% endif %}">
+{% if c.image %}<a href="{% url 'capsule_detail' c.uid %}" class="capsule-thumb"><img src="{{ c.image }}" alt="" loading="lazy">{% if c.video %}<span class="play-badge">▶</span>{% endif %}</a>{% endif %}
+<div class="capsule-card-body">
+<h3><a href="{% url 'capsule_detail' c.uid %}">{{ c.display_title }}</a></h3>
+<p class="muted">{{ c.usuario.alias }} · {{ c.fecha }}</p>
+<p>{{ c.contenido|truncatechars:140 }}</p>
+{% if c.temas %}<div class="capsule-themes">{% for t in c.temas %}<span class="tag">#{{ t }}</span>{% endfor %}</div>{% endif %}</div>
+</article>
+{% empty %}<p class="muted">Sé el primero en compartir sabiduría.</p>{% endfor %}
+</div>
+
+</div>
+{% endblock %}

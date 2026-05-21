@@ -1,0 +1,38 @@
+<!-- kudos_app/templates/review_confirmation.html -->
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reseña Enviada</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        .confirmation-container { max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; border: 2px solid #FFD700; }
+        p { margin: 10px 0; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Reseña Enviada</h1>
+
+    <div class="confirmation-container">
+        <h2>Reseña para {{ seller.alias }}</h2>
+        <p><strong>Calificación:</strong> {{ review.parameters.rating }}/5</p>
+        <p><strong>Reseña:</strong> {{ review.parameters.review_text }}</p>
+        {% if review.parameters.blockchain_tx_hash %}
+            <p><strong>Blockchain:</strong> 
+                <a href="https://explorer.solana.com/tx/{{ review.parameters.blockchain_tx_hash }}?cluster=devnet" target="_blank">
+                    Ver en Solana
+                </a>
+            </p>
+        {% else %}
+            <p><strong>Blockchain:</strong> No registrado en blockchain.</p>
+        {% endif %}
+        <p><a href="{% url 'market_reputation' seller.id %}">Volver al Perfil</a></p>
+    </div>
+</body>
+</html>
+```

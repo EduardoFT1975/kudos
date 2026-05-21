@@ -1,0 +1,161 @@
+# kudos_app/views/market_transactions.py
+
+```html
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transacciones del Mercado</title>
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" />
+    <script src="{% static 'js/leaflet-src.js' %}"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        h1, h2 { text-align: center; color: #333; }
+        #market-map { height: 400px; margin: 20px 0; border: 2px solid #ccc; }
+        .transactions-container { max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 5px; }
+        .auction-list, .offer-list { margin: 20px 0; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 10px 0; border-bottom: 1px solid #ddd; }
+        form { display: inline; margin-left: 10px; }
+        input[type="number"] { width: 100px; padding: 5px; }
+        button { padding: 8px 16px; background-color: #FFD700; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #FFC107; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Transacciones del Mercado</h1>
+
+    <div class="transactions-container">
+        <!-- Subastas Activas -->
+        <div class="auction-list">
+            <h2>Subastas Activas</h2>
+            {% if auctions %}
+                <ul>
+                    {% for auction in auctions %}
+                        <li>
+                            {{ auction.contenido }} (Puja Actual: {{ auction.parameters.current_bid }} KMT, Finaliza: {{ auction.parameters.auction_end }})
+                            <a href="{% url 'ar_view' auction.uid %}">Ver en AR</a> |
+                            <a href="{% url 'vr_view' auction.uid %}">Ver en VR</a>
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="place_bid">
+                                <input type="hidden" name="capsule_uid" value="{{ auction.uid }}">
+                                <label for="bid_amount_{{ auction.uid }}">Puja (KMT):</label>
+                                <input type="number" id="bid_amount_{{ auction.uid }}" name="bid_amount" min="{{ auction.parameters.current_bid|add:0.01 }}" step="0.01" required>
+                                <button type="submit">Pujar</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay subastas activas en este momento.</p>
+            {% endif %}
+        </div>
+
+        <!-- Iniciar una Subasta -->
+        <div class="auction-form">
+            <h2>Iniciar una Subasta</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <label for="capsule_uid">Seleccionar Cápsula:</label>
+                <select id="capsule_uid" name="capsule_uid" required>
+                    {% for capsule in user.capsule_set.all %}
+                        {% if not capsule.parameters.market_entry %}
+                            <option value="{{ capsule.uid }}">{{ capsule.contenido|truncatechars:50 }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+
+                <label for="starting_bid">Puja Inicial (KMT):</label>
+                <input type="number" id="starting_bid" name="starting_bid" min="0" step="0.01" required>
+
+                <label for="duration_hours">Duración (horas):</label>
+                <input type="number" id="duration_hours" name="duration_hours" min="1" max="168" value="24" required>
+
+                <input type="hidden" name="action" value="start_auction">
+                <button type="submit">Iniciar Subasta</button>
+            </form>
+        </div>
+
+        <!-- Ofertas Recibidas -->
+        <div class="offer-list">
+            <h2>Ofertas Recibidas</h2>
+            {% if offers %}
+                <ul>
+                    {% for capsule in offers %}
+                        {% for offer in capsule.parameters.offers %}
+                            <li>
+                                Oferta de {{ offer.amount }} KMT por '{{ capsule.contenido|truncatechars:50 }}' (Fecha: {{ offer.timestamp }})
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="accept_offer">
+                                    <input type="hidden" name="capsule_uid" value="{{ capsule.uid }}">
+                                    <input type="hidden" name="offer_index" value="{{ forloop.counter0 }}">
+                                    <button type="submit">Aceptar Oferta</button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No tienes ofertas recibidas.</p>
+            {% endif %}
+        </div>
+
+        <!-- Hacer una Oferta -->
+        <div class="offer-form">
+            <h2>Hacer una Oferta</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <label for="capsule_uid">Seleccionar Cápsula:</label>
+                <select id="capsule_uid" name="capsule_uid" required>
+                    {% for capsule in capsules_for_sale %}
+                        <option value="{{ capsule.uid }}">{{ capsule.contenido|truncatechars:50 }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="offer_amount">Oferta (KMT):</label>
+                <input type="number" id="offer_amount" name="offer_amount" min="0" step="0.01" required>
+
+                <input type="hidden" name="action" value="make_offer">
+                <button type="submit">Hacer Oferta</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mapa Interactivo -->
+    <div id="market-map"></div>
+
+    <script>
+        // Inicializar mapa con Leaflet
+        var map = L.map('market-map').setView([41.8902, 12.4924], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            minZoom: 0,
+            maxZoom: 20
+        }).addTo(map);
+
+        var capsuleLayer = L.geoJSON({{ map_data|safe }}, {
+            style: function(feature) {
+                return { color: "#FFD700", weight: 2 };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    `<b>${feature.properties.description}</b><br>
+                    Modo: ${feature.properties.mode}<br>
+                    Temas: ${feature.properties.themes.join(', ')}<br>
+                    Puja Actual: ${feature.properties.current_bid || 'N/A'} KMT`
+                );
+            }
+        }).addTo(map);
+
+        if (capsuleLayer.getBounds().isValid()) {
+            map.fitBounds(capsuleLayer.getBounds());
+        }
+    </script>
+</body>
+</html>
+```

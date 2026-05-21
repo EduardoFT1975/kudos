@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}🤖 Asistente Personal – Kudos{% endblock %}
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <div class="page-icon">🤖</div>
+        <div>
+            <h1>🤖 Asistente Personal</h1>
+            <p class="muted">Tu compañero de IA para Vida, Sabiduría y Acción.</p>
+        </div>
+    </header>
+    
+<div id="chat-container" class="chat-box">
+    <div id="chat-messages">
+        <div class="chat-msg bot">¡Hola! Soy tu asistente. Pregúntame sobre cápsulas, mapas, propuestas, ánimo o el ecosistema (Vault, Connect, Mind).</div>
+    </div>
+    <form id="chat-form" class="chat-form">
+        {% csrf_token %}
+        <input type="text" id="chat-input" placeholder="Escribe tu consulta..." autocomplete="off">
+        <button class="btn btn-gold" type="submit">Enviar</button>
+    </form>
+</div>
+<script>
+document.getElementById('chat-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var input = document.getElementById('chat-input');
+    var msg = input.value.trim();
+    if(!msg) return;
+    var msgs = document.getElementById('chat-messages');
+    msgs.innerHTML += '<div class="chat-msg user">'+msg+'</div>';
+    input.value = '';
+    var fd = new FormData();
+    fd.append('message', msg);
+    fd.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    var resp = await fetch('{% url "assistant_chat" %}', {method:'POST', body:fd});
+    var data = await resp.json();
+    msgs.innerHTML += '<div class="chat-msg bot">'+data.reply+'</div>';
+    msgs.scrollTop = msgs.scrollHeight;
+});
+</script>
+
+</div>
+{% endblock %}
