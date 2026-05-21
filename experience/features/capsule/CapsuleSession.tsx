@@ -173,7 +173,10 @@ export function CapsuleSession({
 
     const buildPayload = () => ({
       depth: sessionDepthRef.current,
-      last_capsule_id: lastShownIdRef.current,
+      // Plausible EventProps disallow null/undefined · coerce "no capsule
+      // shown this session" → empty string. Dashboard can filter on
+      // last_capsule_id != "" to count sessions that rendered something.
+      last_capsule_id: lastShownIdRef.current ?? "",
       loop_used: sessionDepthRef.current > 1,
     });
 
