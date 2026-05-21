@@ -194,6 +194,50 @@ class Capsule(models.Model):
                                          help_text='0–10 calidad estimada')
     ai_enriched_at = models.DateTimeField(null=True, blank=True)
 
+    # ========== AXÓN · Phase 0 · FOUNDATION CONTEXTUAL ==========
+    # Lugar canónico (FK al nuevo modelo Place). El campo legacy `lugar`
+    # (CharField string) se mantiene para compat; un management command
+    # (`seed_rome`) hace el linkage progresivo.
+    place = models.ForeignKey(
+        'Place', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='capsules',
+        help_text='Lugar canónico (Phase 0). `lugar` legacy se mantiene.',
+    )
+    # Jerarquía contextual: árbol de cápsulas (Coliseo → Viaje 2026 → Cena …).
+    parent_capsule = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='children',
+        help_text='Cápsula padre directa (jerarquía contextual).',
+    )
+    root_capsule = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='descendants',
+        help_text='Raíz del árbol (denormalizado para queries O(1)).',
+    )
+    # Capa de contexto (ortogonal a dimension_layer y modo).
+    CONTEXT_LAYER_CHOICES = [
+        ('OFFICIAL',  'Oficial'),
+        ('COMMUNITY', 'Comunidad'),
+        ('PERSONAL',  'Personal'),
+        ('TEMPORAL',  'Temporal'),
+        ('EMOTIONAL', 'Emocional'),
+    ]
+    context_layer = models.CharField(
+        max_length=20, choices=CONTEXT_LAYER_CHOICES, default='COMMUNITY',
+        db_index=True,
+        help_text='Capa de contexto (ortogonal a dimension_layer).',
+    )
+    # Semilla del CIE. En Phase 0 se backfilea desde ai_quality_score/10.
+    importance_score = models.FloatField(
+        default=0.0, db_index=True,
+        help_text='0..1 · semilla del Capsule Intelligence Engine.',
+    )
+    # Verificación binaria mínima. Phase 2 → verification_state granular.
+    verified = models.BooleanField(
+        default=False, db_index=True,
+        help_text='Phase 0 · binario. Phase 2 lo reemplaza por estado granular.',
+    )
+
     class Meta:
         ordering = ['-timestamp']
         verbose_name = 'Cápsula'
@@ -205,6 +249,58 @@ class Capsule(models.Model):
     @property
     def display_title(self):
         return self.titulo or (self.contenido[:60] + '...' if len(self.contenido) > 60 else self.contenido)
+
+
+# ===================== LUGARES (AXÓN · Phase 0) =====================
+class Place(models.Model):
+    """Lugar canónico que agrupa cápsulas por contexto geográfico.
+
+    Phase 0 mínimo: slug · name · país · lat/lon · summary · rango temporal +
+    `capsule_count` denormalizado. El campo legacy `Capsule.lugar` (string)
+    convive; el linkage se hace progresivamente vía management command.
+    """
+    slug = models.SlugField(
+        max_length=120, unique=True,
+        help_text='Identificador URL-safe (p.ej. "rome", "kyoto", "lima").',
+    )
+    name = models.CharField(max_length=200)
+    country = models.CharField(max_length=80, blank=True, default='')
+    latitud = models.FloatField(null=True, blank=True)
+    longitud = models.FloatField(null=True, blank=True)
+    summary = models.TextField(blank=True, default='')
+    description = models.TextField(blank=True, default='')
+    image = models.CharField(max_length=500, blank=True, default='')
+    era_range_from = models.IntegerField(
+        null=True, blank=True,
+        help_text='Año mínimo cubierto (negativo = a.C.).',
+    )
+    era_range_to = models.IntegerField(
+        null=True, blank=True,
+        help_text='Año máximo cubierto.',
+    )
+    capsule_count = models.IntegerField(
+        default=0,
+        help_text='Denormalizado · actualizado por command/signal.',
+    )
+    created = models.DateTimeField(default=timezone.now, db_index=True)
+    updated = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        verbose_name = 'Lugar'
+        verbose_name_plural = 'Lugares'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name or self.slug
+
+    def recount_capsules(self, save=True):
+        """Recalcula `capsule_count` desde BD. Idempotente."""
+        n = self.capsules.count()
+        self.capsule_count = n
+        if save:
+            self.updated = timezone.now()
+            self.save(update_fields=['capsule_count', 'updated'])
+        return n
 
 
 # ===================== INTERACCIONES =====================

@@ -64,10 +64,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'kudos_app.apps.KudosAppConfig',
+    'content_engine',
+    'corsheaders',  # Phase 13 hardening · CORS for SPA cross-origin
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Phase 13 hardening · CorsMiddleware MUST sit before CommonMiddleware
+    # so preflight OPTIONS responses include the right headers.
+    'corsheaders.middleware.CorsMiddleware',
     # WhiteNoise sirve archivos estáticos en producción (justo después de Security)
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -179,6 +184,104 @@ if IS_PRODUCTION:
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
 GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY', '')
 
+# ====================== CONTENT ENGINE ======================
+# Master switch for the WikidataGeoCache layer. Default ON.
+# Flip to "0" to revert pipeline Stage 2 to live-only SPARQL behavior
+# (no cache reads, no cache writes). Table stays · safe rollback.
+CONTENT_ENGINE_GEOCACHE_ENABLED = os.getenv(
+    'CONTENT_ENGINE_GEOCACHE_ENABLED', '1'
+).lower() in ('1', 'true', 'yes')
+
+# ====================== CORS (Phase 13 hardening) ======================
+# Production: set CORS_ALLOWED_ORIGINS env var with comma-separated origins.
+# Dev: defaults to localhost:3000 + 127.0.0.1:3000 (Next.js standard ports).
+# NEVER use CORS_ALLOW_ALL_ORIGINS=True in production.
+#
+# Sprint 3 · M2 safe guard:
+# If operator misconfigures with CORS_ALLOWED_ORIGINS="*" thinking it
+# means wildcard, django-cors-headers does NOT interpret "*" specially
+# in this list · result is silent breakage of all cross-origin requests.
+# Warn loudly at startup so the misconfig is caught immediately.
+_raw_cors_origins = os.getenv('CORS_ALLOWED_ORIGINS', '')
+if _raw_cors_origins.strip() == '*':
+    import sys as _sys
+    print(
+        "⚠ CORS WARNING: CORS_ALLOWED_ORIGINS='*' detected. "
+        "django-cors-headers treats this as a literal origin, NOT a "
+        "wildcard · all cross-origin requests will be blocked. "
+        "For true wildcard set CORS_ALLOW_ALL_ORIGINS=True (insecure for "
+        "credentialed APIs); for production list explicit origins.",
+        file=_sys.stderr,
+    )
+CORS_ALLOWED_ORIGINS = [
+    o.strip() for o in _raw_cors_origins.split(',')
+    if o.strip()
+]
+if not IS_PRODUCTION and not CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS = [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+    ]
+
+# Restrict CORS to specific endpoints (defense in depth: even if
+# misconfigured, only the API surface is exposed cross-origin, not
+# admin / accounts / kudos_app routes).
+CORS_URLS_REGEX = r'^/api/.*$'
+
+# Do not expose cookies via CORS by default. If session-auth ever
+# becomes needed cross-origin, flip explicitly and tighten origins.
+CORS_ALLOW_CREDENTIALS = False
+
+# Phase 13 hardening · C2: expose custom health header to cross-origin
+# JS. Without this entry, `response.headers.get("X-Kudos-Pipeline-Health")`
+# returns null in browsers when frontend lives at a different origin
+# than Django. Server-side monitoring (nginx logs, Datadog) is unaffected
+# either way · this only matters for client-side header introspection.
+CORS_EXPOSE_HEADERS = [
+    "X-Kudos-Pipeline-Health",
+]
+
+# Sprint 3 · M3: cache preflight OPTIONS responses for 24h.
+# Without this, browsers re-send OPTIONS preflight every ~5s (browser
+# default) before each cross-origin POST. With 24h cache, preflight
+# happens once per day per origin · saves a network round-trip on
+# every subsequent API call. Safe optimization · no security impact.
+CORS_PREFLIGHT_MAX_AGE = 86400  # 24 hours in seconds
+
+# ====================== RATE LIMIT CACHE BACKEND NOTE (Sprint 2 · H4) ===
+# django-ratelimit stores counters in Django's default cache backend.
+# Without an explicit CACHES setting, Django falls back to LocMemCache
+# which is PER-PROCESS · each gunicorn worker has its own counter.
+#
+# Effective production limit = declared_rate × number_of_workers.
+# Example: 10/m declared × 4 workers = 40/m per identity in reality.
+#
+# For accurate cluster-wide rate limiting, configure a shared cache
+# backend (Redis / Memcached) and add to settings:
+#
+#   CACHES = {
+#       'default': {
+#           'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+#           'LOCATION': os.getenv('REDIS_URL'),
+#       }
+#   }
+#
+# Phase 13 leaves this as a deployment-time decision · not added to
+# code to avoid mandating Redis dependency for dev/small deployments.
+
+# ====================== REQUEST BODY SIZE (Phase 13 hardening · C1) =====
+# Tighten Django default (2.5MB) to a conservative 1MB ceiling. Wider
+# than `/api/place-capsule` needs (<1KB) but safe for other kudos_app
+# views that may legitimately POST forms / images. Reverted from the
+# initial 64KB which risked breaking unrelated routes (admin form
+# submits, capsule editing flows, etc.).
+# Per-endpoint tighter limits should be applied at the view layer if
+# truly needed (django-defender / custom middleware).
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1 * 1024 * 1024  # 1MB
+# FILE_UPLOAD_MAX_MEMORY_SIZE removed · it only controls the in-memory
+# buffer before overflow-to-tempfile, not request body size. Was added
+# in error during Phase 13 · not a body-size defense.
+
 # ====================== LOGGING ======================
 LOG_DIR = os.path.join(BASE_DIR, 'logs')
 os.makedirs(LOG_DIR, exist_ok=True)
@@ -204,6 +307,15 @@ LOGGING = {
     },
     'loggers': {
         'kudos_app': {
+            'handlers': ['console'] if IS_PRODUCTION else ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        # Phase 13 hardening · content_engine.* loggers must reach
+        # configured handlers. Without this entry, log.info / log.error
+        # calls from content_engine.api / .pipeline / .clients silently
+        # fall to root logger which may have no file handler.
+        'content_engine': {
             'handlers': ['console'] if IS_PRODUCTION else ['file', 'console'],
             'level': 'INFO',
             'propagate': True,

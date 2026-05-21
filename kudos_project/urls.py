@@ -32,6 +32,10 @@ urlpatterns = [
         name='password_change_done',
     ),
 
+    # Content Engine · Phase 11 API bridge
+    # Mounted before kudos_app catch-all so the API path wins routing.
+    path('', include('content_engine.urls')),
+
     # Todas las rutas de la app
     path('', include('kudos_app.urls')),
 ]

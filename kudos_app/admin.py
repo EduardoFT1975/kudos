@@ -11,6 +11,7 @@ from kudos_app.models import (
     CryptoWatch, CryptoOperation,
     AIAgent, AIAction, AIInsight, AIDirective,
     Follow, DirectMessage, Bookmark, FeedItem,
+    Place,
 )
 
 
@@ -43,6 +44,16 @@ admin.site.register(Follow)
 admin.site.register(DirectMessage)
 admin.site.register(Bookmark)
 admin.site.register(FeedItem)
+
+
+@admin.register(Place)
+class PlaceAdmin(admin.ModelAdmin):
+    """AXÓN · Phase 0 · lugares canónicos."""
+    list_display = ('slug', 'name', 'country', 'capsule_count', 'updated')
+    search_fields = ('slug', 'name', 'country')
+    list_filter = ('country',)
+    prepopulated_fields = {'slug': ('name',)}
+    readonly_fields = ('capsule_count', 'created', 'updated')
 
 
 @admin.register(User)

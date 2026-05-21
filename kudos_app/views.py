@@ -11,6 +11,7 @@ módulos auxiliares (Bank, Comité de Sabios, etc.).
 
 import csv
 import json
+import time
 from datetime import timedelta
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -33,7 +34,12 @@ from kudos_app.models import (
     Follow, DirectMessage, Bookmark, FeedItem,
     UserPreference,
     CapsuleVersion, CapsuleAport,
+    Place,
 )
+
+
+# AXÓN · Phase 0 · timestamp de arranque del worker para `uptime` del healthcheck.
+_AXON_BOOT_TS = time.time()
 
 
 # ============================================================
@@ -791,6 +797,61 @@ def api_capsules(request):
 @require_GET
 def api_stats(request):
     return JsonResponse(_site_stats())
+
+
+# ============================================================
+# AXÓN · Phase 0 · FOUNDATION CONTEXTUAL
+# ============================================================
+@require_GET
+def api_health(request):
+    """Healthcheck JSON estable.
+
+    Pensado para que KUDOS Experience (Next.js) verifique el puente con
+    AXÓN sin parsear texto plano. Devuelve siempre 200 si el worker
+    arrancó: cualquier fallo de runtime escala antes de llegar aquí.
+    """
+    resp = JsonResponse({
+        'status': 'ok',
+        'service': 'axon',
+        'version': 'v0.9-axon-core',
+        'uptime': int(time.time() - _AXON_BOOT_TS),
+    })
+    # No-cache: cada ping debe ser fresco.
+    resp['Cache-Control'] = 'no-store'
+    return resp
+
+
+@require_GET
+def api_place_detail(request, slug):
+    """Detalle de un Place canónico.
+
+    Shape estable consumido por experience/app/places/[slug]/page.tsx:
+        {
+          slug, name, country, lat, lon,
+          summary, description, image,
+          era_range: { from, to },
+          capsule_count,
+        }
+    """
+    place = get_object_or_404(Place, slug=slug)
+    resp = JsonResponse({
+        'slug': place.slug,
+        'name': place.name,
+        'country': place.country or None,
+        'lat': place.latitud,
+        'lon': place.longitud,
+        'summary': place.summary or '',
+        'description': place.description or '',
+        'image': place.image or '',
+        'era_range': {
+            'from': place.era_range_from,
+            'to': place.era_range_to,
+        },
+        'capsule_count': place.capsule_count,
+    })
+    # Place cambia poco: cache público corto.
+    resp['Cache-Control'] = 'public, max-age=300'
+    return resp
 
 
 # ============================================================
