@@ -1,0 +1,131 @@
+/**
+ * KUDOS Experience · globals.css
+ *
+ * Capa atmosférica base. Define CSS vars que reflejan los design tokens,
+ * el fondo cinematográfico profundo, y reglas de motion/accesibilidad.
+ *
+ * Tokens canónicos: `design-system/tokens.ts`.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Paleta — reflejo de design-system/tokens.ts. Si cambian allí, cambiar aquí también. */
+    --kudos-bg: #040614;
+    --kudos-surface: #080d24;
+    --kudos-glass: rgba(255, 255, 255, 0.04);
+    --kudos-glass-hi: rgba(255, 255, 255, 0.08);
+    --kudos-accent: #a78bfa;
+    --kudos-accent-bright: #c4b5fd;
+    --kudos-accent-deep: #6d28d9;
+    --kudos-accent-glow: rgba(167, 139, 250, 0.45);
+    --kudos-accent-glow-soft: rgba(167, 139, 250, 0.18);
+    --kudos-ai: #38bdf8;
+    --kudos-ai-bright: #7dd3fc;
+    --kudos-ai-glow: rgba(56, 189, 248, 0.35);
+    --kudos-ink: #f5f5fa;
+    --kudos-ink-mid: #a4a8c4;
+    --kudos-ink-low: #6b7193;
+    --kudos-ink-invert: #0a0118;
+    --kudos-border: rgba(255, 255, 255, 0.10);
+    --kudos-border-strong: rgba(255, 255, 255, 0.18);
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100dvh;
+    background: var(--kudos-bg);
+    color: var(--kudos-ink);
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-family: "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* Atmósfera viva: gradiente sutil + grano vectorial. */
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124, 58, 237, 0.18), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 100%, rgba(56, 189, 248, 0.10), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 10% 90%, rgba(167, 139, 250, 0.12), transparent 60%),
+      linear-gradient(to bottom, var(--kudos-surface), var(--kudos-bg) 60%);
+    background-attachment: fixed;
+  }
+
+  /* Grano sutil para que el negro no parezca plano. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.04;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Selección con color marca. */
+  ::selection {
+    background: var(--kudos-accent-glow);
+    color: var(--kudos-ink);
+  }
+
+  /* Focus visible accesible y elegante. */
+  *:focus-visible {
+    outline: 2px solid var(--kudos-accent);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  /* Scrollbar discreta en navegadores webkit. */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.18); }
+
+  /* Reduce motion estrictamente respetado. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Snap container para feed vertical. */
+  .kudos-snap-y {
+    scroll-snap-type: y mandatory;
+    overscroll-behavior-y: contain;
+  }
+  .kudos-snap-item {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  /* Ken-burns sutil (zoom 1.0 → 1.08, 18s, alternate). */
+  @keyframes kudos-kenburns {
+    0%   { transform: scale(1.0)  translate3d(0, 0, 0); }
+    100% { transform: scale(1.08) translate3d(-1%, -1%, 0); }
+  }
+  .kudos-kenburns {
+    animation: kudos-kenburns 18s ease-in-out infinite alternate;
+    transform-origin: center center;
+  }
+
+  /* Glow text suave. */
+  .kudos-text-glow {
+    text-shadow: 0 0 32px var(--kudos-accent-glow-soft);
+  }
+}
