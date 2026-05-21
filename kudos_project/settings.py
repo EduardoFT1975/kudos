@@ -160,9 +160,17 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# WhiteNoise: comprime y cachea estáticos en producción
+# WhiteNoise: comprime estáticos en producción.
+# P0.8 fix · cambiado de CompressedManifestStaticFilesStorage a
+# CompressedStaticFilesStorage. La variante "Manifest" requiere que TODO
+# {% static %} referenciado exista en `staticfiles/` post-collectstatic;
+# si falta uno (vídeo, imagen, fuente custom), Django lanza
+# ValueError("Missing staticfiles manifest entry") → 500 en producción.
+# La variante sin Manifest sirve los ficheros tal cual sin cache-busting
+# hash, y devuelve 404 limpio en ficheros faltantes en lugar de tirar el
+# render entero. Trade-off: pierdes cache-busting por hash. Aceptable beta.
 if IS_PRODUCTION:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

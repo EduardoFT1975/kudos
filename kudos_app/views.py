@@ -87,16 +87,47 @@ def healthcheck(request):
 
 
 def home(request):
-    recent_capsules = Capsule.objects.filter(privacy='publico').order_by('-timestamp')[:6]
-    trending_capsules = Capsule.objects.filter(privacy='publico').order_by('-likes', '-views')[:3]
+    """Home pública.
+
+    P0.8 hardening · todas las queries de DB y la render del template
+    envueltas en try/except. Si ALGO falla (schema drift, DB connection,
+    missing static asset, template error), devolvemos un fallback mínimo
+    HttpResponse en vez de propagar 500 a Render. Logs registran el error
+    para diagnóstico.
+    """
+    import logging as _log_mod
+    _log = _log_mod.getLogger(__name__)
+
     context = {
-        'recent_capsules': recent_capsules,
-        'trending_capsules': trending_capsules,
-        'stats': _site_stats(),
+        'recent_capsules': [],
+        'trending_capsules': [],
+        'stats': {},
     }
-    if request.user.is_authenticated:
-        context['user_capsules'] = Capsule.objects.filter(usuario=request.user).order_by('-timestamp')[:3]
-    return render(request, 'home.html', context)
+    try:
+        context['recent_capsules'] = list(
+            Capsule.objects.filter(privacy='publico').order_by('-timestamp')[:6]
+        )
+        context['trending_capsules'] = list(
+            Capsule.objects.filter(privacy='publico').order_by('-likes', '-views')[:3]
+        )
+        context['stats'] = _site_stats()
+        if request.user.is_authenticated:
+            context['user_capsules'] = list(
+                Capsule.objects.filter(usuario=request.user).order_by('-timestamp')[:3]
+            )
+    except Exception as exc:
+        _log.exception("home: DB query failed, degrading to empty context: %s", exc)
+
+    try:
+        return render(request, 'home.html', context)
+    except Exception as exc:
+        _log.exception("home: template render failed, serving minimal fallback: %s", exc)
+        return HttpResponse(
+            "KUDOS\n\nLa pagina principal esta temporalmente en mantenimiento.\n"
+            "Si eres operador, revisa los logs de Render para el stack trace.",
+            content_type="text/plain; charset=utf-8",
+            status=200,
+        )
 
 
 @login_required
