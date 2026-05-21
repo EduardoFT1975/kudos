@@ -6,11 +6,7 @@ import { CapsuleSparseDiscovery } from "./states/CapsuleSparseDiscovery";
 import { CapsuleEmptyZone } from "./states/CapsuleEmptyZone";
 import { CapsuleSuccess } from "./states/CapsuleSuccess";
 import { CapsuleSystemUnavailable } from "./states/CapsuleSystemUnavailable";
-import { RichCapsuleLiveRenderer } from "./RichCapsuleLiveRenderer";
-import { MidCapsuleRenderer } from "./MidCapsuleRenderer";
-import { classifyCapsuleTier } from "@/lib/capsule/quality";
-import { track } from "@/lib/analytics/plausible";
-import type { CapsuleResponse, CapsuleData } from "@/types/capsule-state";
+import type { CapsuleResponse } from "@/types/capsule-state";
 
 interface CapsuleStateRouterProps {
   response: CapsuleResponse | null;
@@ -63,12 +59,12 @@ export function CapsuleStateRouter({
   if (response.state === "success") {
     if (response.capsule) {
       return (
-        <SuccessTierRenderer
+        <CapsuleSuccess
           capsule={response.capsule}
+          onExploreNearby={onExpand}
+          onNext={onNext ?? onManual}
           lat={lat}
           lng={lng}
-          onExpand={onExpand}
-          onNext={onNext ?? onManual}
         />
       );
     }
@@ -76,66 +72,4 @@ export function CapsuleStateRouter({
   }
 
   return emptyZone;
-}
-
-interface SuccessTierRendererProps {
-  capsule: CapsuleData;
-  lat: number | null;
-  lng: number | null;
-  onExpand?: () => void;
-  onNext?: () => void;
-}
-
-function SuccessTierRenderer({
-  capsule,
-  lat,
-  lng,
-  onExpand,
-  onNext,
-}: SuccessTierRendererProps) {
-  const tierResult = React.useMemo(() => classifyCapsuleTier(capsule), [capsule]);
-  const lastTrackedIdRef = React.useRef<string | null>(null);
-
-  React.useEffect(() => {
-    if (lastTrackedIdRef.current === capsule.id) return;
-    lastTrackedIdRef.current = capsule.id;
-    track("capsule_render_tier", {
-      tier: tierResult.tier,
-      reason: tierResult.reason,
-    });
-  }, [capsule.id, tierResult.tier, tierResult.reason]);
-
-  if (tierResult.tier === "A") {
-    return (
-      <RichCapsuleLiveRenderer
-        capsule={capsule}
-        lat={lat}
-        lng={lng}
-        onExploreNearby={onExpand}
-        onNext={onNext}
-      />
-    );
-  }
-
-  if (tierResult.tier === "B") {
-    return (
-      <MidCapsuleRenderer
-        capsule={capsule}
-        lat={lat}
-        lng={lng}
-        onExploreNearby={onExpand}
-        onNext={onNext}
-      />
-    );
-  }
-
-  return (
-    <CapsuleSuccess
-      capsule={capsule}
-      onExploreNearby={onExpand}
-      onNext={onNext}
-      lat={lat}
-      lng={lng}
-    />
-  );
 }
