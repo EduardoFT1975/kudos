@@ -134,6 +134,9 @@ export async function askMind(opts: {
   csrfToken?: string;
   signal?: AbortSignal;
 }): Promise<MindAskResponse> {
+  // Destructure `signal` from opts so the shorthand fetch option resolves.
+  // Matches the pattern used by fetchCapsules5D + fetchCapsuleLight above.
+  const { signal, csrfToken } = opts;
   const fd = new FormData();
   fd.append("mode", opts.mode);
   if (opts.capsule) fd.append("capsule", opts.capsule);
@@ -142,7 +145,7 @@ export async function askMind(opts: {
   if (opts.year !== undefined) fd.append("year", String(opts.year));
 
   const headers: HeadersInit = {};
-  if (opts.csrfToken) headers["X-CSRFToken"] = opts.csrfToken;
+  if (csrfToken) headers["X-CSRFToken"] = csrfToken;
 
   const r = await fetch(API_ROUTES.mindAsk, {
     method: "POST",
