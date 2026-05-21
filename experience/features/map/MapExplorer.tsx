@@ -44,6 +44,11 @@ export function MapExplorer() {
   // poder limpiarlos cuando el set de memorias cambie sin tener que
   // re-init el mapa entero.
   const memoryMarkersRef = React.useRef<Array<{ remove: () => void }>>([]);
+  // P0 viewport capsule markers · markers de cápsulas existentes en el bbox
+  // del mapa · se re-cargan en cada moveend (debounce 400ms).
+  const capsuleMarkersRef = React.useRef<Array<{ remove: () => void }>>([]);
+  const viewportFetchTimerRef = React.useRef<number | null>(null);
+  const viewportAbortRef = React.useRef<AbortController | null>(null);
   const [maplibre, setMaplibre] = React.useState<MapLibreModule | null>(null);
   const [mapReady, setMapReady] = React.useState(false);
   const [clicked, setClicked] = React.useState<ClickedCoords | null>(null);
@@ -74,14 +79,22 @@ export function MapExplorer() {
       style: {
         version: 8,
         sources: {
-          osm: {
+          // P0 cinematic base · CartoDB Dark Matter · free, no API key.
+          // Attribution required: OSM + CARTO.
+          carto_dark: {
             type: "raster",
-            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+            tiles: [
+              "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+              "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+              "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+              "https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+            ],
             tileSize: 256,
-            attribution: "© OpenStreetMap contributors",
+            attribution:
+              "© <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> · © <a href='https://carto.com/attributions'>CARTO</a>",
           },
         },
-        layers: [{ id: "osm", type: "raster", source: "osm" }],
+        layers: [{ id: "carto_dark", type: "raster", source: "carto_dark" }],
         glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
       },
       center: _DEFAULT_CENTER,
@@ -93,6 +106,74 @@ export function MapExplorer() {
       mapRef.current = map;
       setMapReady(true);
     });
+
+    // P0 viewport capsule fetch · debounced 400ms on moveend
+    const fetchViewport = () => {
+      if (viewportFetchTimerRef.current !== null) {
+        window.clearTimeout(viewportFetchTimerRef.current);
+      }
+      viewportFetchTimerRef.current = window.setTimeout(() => {
+        const bounds = map.getBounds();
+        const minLng = bounds.getWest();
+        const minLat = bounds.getSouth();
+        const maxLng = bounds.getEast();
+        const maxLat = bounds.getNorth();
+        const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+        const url =
+          apiBase +
+          "/api/capsules/viewport/?bbox=" +
+          [minLng, minLat, maxLng, maxLat]
+            .map((n) => n.toFixed(5))
+            .join(",") +
+          "&limit=100";
+        // Abort prior in-flight viewport fetch
+        if (viewportAbortRef.current) {
+          viewportAbortRef.current.abort();
+        }
+        const ctrl = new AbortController();
+        viewportAbortRef.current = ctrl;
+        fetch(url, { signal: ctrl.signal, cache: "no-store" })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((data) => {
+            if (!data || !Array.isArray(data.capsules)) return;
+            // Clear previous capsule markers
+            for (const m of capsuleMarkersRef.current) {
+              try { m.remove(); } catch { /* defensive */ }
+            }
+            capsuleMarkersRef.current = [];
+            for (const cap of data.capsules as Array<{
+              id: string; title: string; lat: number; lng: number;
+              thumbnail_url?: string; image_url?: string;
+            }>) {
+              if (typeof cap.lat !== "number" || typeof cap.lng !== "number") continue;
+              const el = document.createElement("div");
+              el.style.cssText =
+                "width:14px;height:14px;border-radius:50%;" +
+                "background:rgba(167,139,250,0.65);" +
+                "border:2px solid var(--kudos-accent-bright);" +
+                "box-shadow:0 0 14px var(--kudos-accent-glow);" +
+                "cursor:pointer;";
+              el.setAttribute("role", "button");
+              el.setAttribute("aria-label", "Cápsula: " + cap.title);
+              el.title = cap.title;
+              el.addEventListener("click", (ev) => {
+                ev.stopPropagation();
+                setClicked({ lat: cap.lat, lng: cap.lng });
+              });
+              const marker = new maplibre.Marker({ element: el })
+                .setLngLat([cap.lng, cap.lat])
+                .addTo(map);
+              capsuleMarkersRef.current.push(marker);
+            }
+          })
+          .catch(() => {
+            // Swallowed · network / abort / parse · UX no-op
+          });
+      }, 400);
+    };
+
+    map.on("moveend", fetchViewport);
+    map.on("load", fetchViewport);
 
     map.on("click", (e: { lngLat: { lng: number; lat: number } }) => {
       const lat = e.lngLat.lat;
@@ -112,6 +193,16 @@ export function MapExplorer() {
     });
 
     return () => {
+      if (viewportFetchTimerRef.current !== null) {
+        window.clearTimeout(viewportFetchTimerRef.current);
+      }
+      if (viewportAbortRef.current) {
+        viewportAbortRef.current.abort();
+      }
+      for (const m of capsuleMarkersRef.current) {
+        try { m.remove(); } catch { /* defensive */ }
+      }
+      capsuleMarkersRef.current = [];
       map.remove();
       mapRef.current = null;
     };

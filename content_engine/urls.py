@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from django.urls import path
 
-from content_engine.api import capsule_nearby, place_capsule
+from content_engine.api import capsule_nearby, capsules_viewport, place_capsule
 
 app_name = "content_engine"
 
@@ -26,4 +26,7 @@ urlpatterns = [
     # Phase 11 back-compat alias (with + without slash)
     path("api/capsule/nearby/", capsule_nearby, name="capsule_nearby"),
     path("api/capsule/nearby", capsule_nearby, name="capsule_nearby_noslash"),
+    # P0 map layer · viewport bbox query for visible capsule markers
+    path("api/capsules/viewport/", capsules_viewport, name="capsules_viewport"),
+    path("api/capsules/viewport", capsules_viewport, name="capsules_viewport_noslash"),
 ]

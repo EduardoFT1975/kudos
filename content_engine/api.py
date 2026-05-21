@@ -44,10 +44,10 @@ from typing import Any
 
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django_ratelimit.decorators import ratelimit
 
-from content_engine.models import PlaceCapsule
+from content_engine.models import GenerationAttempt, PlaceCapsule
 from content_engine.pipeline import PipelineResult, generate_place_capsule
 
 log = logging.getLogger(__name__)
@@ -366,17 +366,105 @@ def _translate_to_ux_response(
     }
 
 
+# ---------------------------------------------------------------------------
+# View · GET /api/capsules/viewport (P0 map layer)
+# ---------------------------------------------------------------------------
+@csrf_exempt
+@require_GET
+def capsules_viewport(request: HttpRequest) -> JsonResponse:
+    """GET /api/capsules/viewport?bbox=minLng,minLat,maxLng,maxLat&limit=100
+
+    Returns minimal capsule headers for markers in the requested viewport.
+    Used by the MapExplorer to populate visible pins on map move/idle.
+
+    Response shape:
+      {
+        "capsules": [
+          {"id": "...", "title": "...", "lat": ..., "lng": ...,
+           "thumbnail_url": "...", "image_url": "...", "entity_id": "..."},
+          ...
+        ],
+        "count": N
+      }
+    """
+    bbox_raw = (request.GET.get("bbox") or "").strip()
+    if not bbox_raw:
+        return JsonResponse({"error": "missing bbox"}, status=400)
+    try:
+        parts = [float(p) for p in bbox_raw.split(",")]
+    except ValueError:
+        return JsonResponse({"error": "invalid bbox numerics"}, status=400)
+    if len(parts) != 4:
+        return JsonResponse({"error": "bbox must be 4 numbers"}, status=400)
+    min_lng, min_lat, max_lng, max_lat = parts
+    # Sanity checks · prevents oversized queries
+    if not (-180.0 <= min_lng <= 180.0 and -180.0 <= max_lng <= 180.0):
+        return JsonResponse({"error": "lng out of range"}, status=400)
+    if not (-90.0 <= min_lat <= 90.0 and -90.0 <= max_lat <= 90.0):
+        return JsonResponse({"error": "lat out of range"}, status=400)
+    if min_lat > max_lat or min_lng > max_lng:
+        return JsonResponse({"error": "bbox min > max"}, status=400)
+
+    try:
+        limit = int(request.GET.get("limit") or "100")
+    except ValueError:
+        limit = 100
+    limit = max(1, min(limit, 500))
+
+    # Query GenerationAttempt (carries spatial coords) joined to PlaceCapsule.
+    # Dedupe by capsule_id in Python · low cardinality at expected scale.
+    qs = (
+        GenerationAttempt.objects.filter(
+            status=GenerationAttempt.STATUS_APPROVED,
+            place_capsule__isnull=False,
+            input_lat__gte=min_lat,
+            input_lat__lte=max_lat,
+            input_lng__gte=min_lng,
+            input_lng__lte=max_lng,
+        )
+        .select_related("place_capsule")
+        .order_by("-input_timestamp")[: limit * 4]
+    )
+
+    seen: set[str] = set()
+    out: list[dict[str, Any]] = []
+    for att in qs:
+        cap = att.place_capsule
+        if cap is None:
+            continue
+        cap_id = str(cap.id)
+        if cap_id in seen:
+            continue
+        seen.add(cap_id)
+        out.append({
+            "id": cap_id,
+            "entity_id": cap.entity_id,
+            "title": cap.title,
+            "lat": att.input_lat,
+            "lng": att.input_lng,
+            "image_url": getattr(cap, "image_url", "") or "",
+            "thumbnail_url": getattr(cap, "thumbnail_url", "") or "",
+        })
+        if len(out) >= limit:
+            break
+
+    return JsonResponse({"capsules": out, "count": len(out)}, status=200)
+
+
 def _serialize_capsule(capsule: PlaceCapsule) -> dict[str, Any]:
     """UX-safe capsule serialization.
 
     EXPOSES:
         id, entity_id, title, factual_anchor, context_block, source_refs
+        + P2 media fields (optional · only when present):
+        image_url, thumbnail_url, gallery, video_url, media_source,
+        media_caption, media_debug (temporary diagnostic)
 
     OMITS (internal · not for client):
         content_hash, confidence_breakdown, generator_model,
         prompt_version, pipeline_run_id, created_at, updated_at.
     """
-    return {
+    payload: dict[str, Any] = {
         "id": str(capsule.id),
         "entity_id": capsule.entity_id,
         "title": capsule.title,
@@ -384,3 +472,59 @@ def _serialize_capsule(capsule: PlaceCapsule) -> dict[str, Any]:
         "context_block": capsule.context_block,
         "source_refs": capsule.source_refs,
     }
+
+    # P2 · media fields · only emit non-empty values · keeps wire payload
+    # tight for capsules without media (e.g., older rows pre-migration).
+    image_url = getattr(capsule, "image_url", "") or ""
+    thumbnail_url = getattr(capsule, "thumbnail_url", "") or ""
+    gallery = getattr(capsule, "gallery", []) or []
+    video_url = getattr(capsule, "video_url", "") or ""
+    media_source = getattr(capsule, "media_source", "") or ""
+    media_caption = getattr(capsule, "media_caption", "") or ""
+
+    if image_url:
+        payload["image_url"] = image_url
+    if thumbnail_url:
+        payload["thumbnail_url"] = thumbnail_url
+    if gallery:
+        payload["gallery"] = gallery
+    if video_url:
+        payload["video_url"] = video_url
+    if media_source:
+        payload["media_source"] = media_source
+    if media_caption:
+        payload["media_caption"] = media_caption
+
+    # P2.6 · Generative visual fallback · siempre se computa (pure +
+    # ~1ms). Cuando documentary media existe, frontend prioriza image_url.
+    # Cuando no, el frontend cascade lo recoge via generated_fallback_url
+    # (que el client puede mapear a image_url si quiere).
+    try:
+        from content_engine.media_generation import build_generated_fallback
+        gen = build_generated_fallback(capsule)
+        payload["hero_prompt"] = gen["hero_prompt"]
+        payload["hero_style"] = gen["hero_style"]
+        payload["generated_fallback_url"] = gen["generated_fallback_url"]
+        # Si documentary chain no entregó imagen, promovemos el procedural
+        # a image_url + thumbnail_url para que el frontend cascade existente
+        # lo consuma sin cambios.
+        if not image_url:
+            payload["image_url"] = gen["generated_fallback_url"]
+            payload["thumbnail_url"] = gen["generated_fallback_url"]
+            if not media_source:
+                payload["media_source"] = "KUDOS Generated"
+    except Exception:  # noqa: BLE001
+        # Generación nunca debe romper la respuesta · degradamos a campos
+        # documentary tal cual estaban.
+        pass
+
+    # P2 / P2.6 debug · "REAL" cuando documentary OK · "GENERATED" cuando
+    # solo procedural · "NONE" si todo falló (no debería ocurrir post-P2.6).
+    if image_url:
+        payload["media_debug"] = "REAL"
+    elif payload.get("generated_fallback_url"):
+        payload["media_debug"] = "GENERATED"
+    else:
+        payload["media_debug"] = "NONE"
+
+    return payload
