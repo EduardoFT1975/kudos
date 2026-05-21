@@ -70,7 +70,7 @@ export interface UseGeolocationOptions {
 }
 
 const _DEFAULT_TIMEOUT_MS = 10_000;
-const _DEFAULT_MAX_AGE_MS = 60_000;
+const _DEFAULT_MAX_AGE_MS = 0;
 const _DEFAULT_WATCHDOG_MS = 30_000;
 
 export function useGeolocation(
@@ -131,6 +131,14 @@ export function useGeolocation(
         if (resolved) return;
         resolved = true;
         window.clearTimeout(watchdog);
+        if ((pos.coords.accuracy ?? Infinity) > 10000) {
+          setState({ status: "unavailable" });
+          track("geolocation_unavailable", {
+            reason: "low_accuracy",
+            accuracy_m: Math.round(pos.coords.accuracy ?? 0),
+          });
+          return;
+        }
         setState({
           status: "ready",
           lat: pos.coords.latitude,
