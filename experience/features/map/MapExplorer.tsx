@@ -53,6 +53,22 @@ export function MapExplorer() {
   const [mapReady, setMapReady] = React.useState(false);
   const [clicked, setClicked] = React.useState<ClickedCoords | null>(null);
   const [memoryLayerVisible, setMemoryLayerVisible] = React.useState<boolean>(true);
+  // TEMP DEBUG · render-chain diagnostic state (P0 map markers)
+  const [debug, setDebug] = React.useState<{
+    fetchCount: number;
+    lastUrl: string;
+    lastStatus: string;
+    viewportCount: number;
+    markersMounted: number;
+    apiBase: string;
+  }>({
+    fetchCount: 0,
+    lastUrl: "",
+    lastStatus: "init",
+    viewportCount: 0,
+    markersMounted: 0,
+    apiBase: process.env.NEXT_PUBLIC_API_BASE_URL ?? "(unset · relative)",
+  });
   const geo = useGeolocation({ enableHighAccuracy: true });
   // P0.9 Memory Graph · lee las memorias del store local. SSR-safe ·
   // entries=[] hasta hydrated. Reactivo a writes en otras pestañas y
@@ -126,48 +142,97 @@ export function MapExplorer() {
             .map((n) => n.toFixed(5))
             .join(",") +
           "&limit=100";
-        // Abort prior in-flight viewport fetch
+        // eslint-disable-next-line no-console
+        console.log("[KUDOS MAP] viewport fetch start", url);
+        setDebug((d) => ({
+          ...d,
+          fetchCount: d.fetchCount + 1,
+          lastUrl: url,
+          lastStatus: "fetching",
+        }));
         if (viewportAbortRef.current) {
           viewportAbortRef.current.abort();
         }
         const ctrl = new AbortController();
         viewportAbortRef.current = ctrl;
         fetch(url, { signal: ctrl.signal, cache: "no-store" })
-          .then((r) => (r.ok ? r.json() : null))
+          .then((r) => {
+            // eslint-disable-next-line no-console
+            console.log("[KUDOS MAP] viewport fetch response", r.status, r.ok);
+            if (!r.ok) {
+              setDebug((d) => ({ ...d, lastStatus: "http_" + r.status }));
+              return null;
+            }
+            return r.json();
+          })
           .then((data) => {
-            if (!data || !Array.isArray(data.capsules)) return;
-            // Clear previous capsule markers
+            if (!data || !Array.isArray(data.capsules)) {
+              // eslint-disable-next-line no-console
+              console.warn("[KUDOS MAP] viewport bad shape", data);
+              setDebug((d) => ({ ...d, lastStatus: "bad_shape" }));
+              return;
+            }
+            // eslint-disable-next-line no-console
+            console.log("[KUDOS MAP] capsules received =", data.capsules.length);
             for (const m of capsuleMarkersRef.current) {
               try { m.remove(); } catch { /* defensive */ }
             }
             capsuleMarkersRef.current = [];
+            let mounted = 0;
+            const mountedCoords: Array<[number, number]> = [];
             for (const cap of data.capsules as Array<{
               id: string; title: string; lat: number; lng: number;
               thumbnail_url?: string; image_url?: string;
             }>) {
-              if (typeof cap.lat !== "number" || typeof cap.lng !== "number") continue;
+              const lat = typeof cap.lat === "number" ? cap.lat : Number(cap.lat);
+              const lng = typeof cap.lng === "number" ? cap.lng : Number(cap.lng);
+              if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+                // eslint-disable-next-line no-console
+                console.warn("[KUDOS MAP] skip non-finite coords", cap);
+                continue;
+              }
               const el = document.createElement("div");
+              // TEMP HARD-DEBUG · giant red circle, impossible to miss.
+              // Revert to subtle purple in patch follow-up cuando founder
+              // confirme que SÍ aparecen visualmente.
               el.style.cssText =
-                "width:14px;height:14px;border-radius:50%;" +
-                "background:rgba(167,139,250,0.65);" +
-                "border:2px solid var(--kudos-accent-bright);" +
-                "box-shadow:0 0 14px var(--kudos-accent-glow);" +
-                "cursor:pointer;";
+                "width:32px;height:32px;border-radius:50%;" +
+                "background:#ef4444;" +
+                "border:3px solid #ffffff;" +
+                "box-shadow:0 0 18px rgba(239,68,68,0.85);" +
+                "cursor:pointer;" +
+                "z-index:9999;" +
+                "pointer-events:auto;";
               el.setAttribute("role", "button");
               el.setAttribute("aria-label", "Cápsula: " + cap.title);
               el.title = cap.title;
               el.addEventListener("click", (ev) => {
                 ev.stopPropagation();
-                setClicked({ lat: cap.lat, lng: cap.lng });
+                setClicked({ lat, lng });
               });
               const marker = new maplibre.Marker({ element: el })
-                .setLngLat([cap.lng, cap.lat])
+                .setLngLat([lng, lat])
                 .addTo(map);
               capsuleMarkersRef.current.push(marker);
+              mounted += 1;
+              mountedCoords.push([lng, lat]);
             }
+            // eslint-disable-next-line no-console
+            console.log("[KUDOS MAP] markers mounted =", mounted, mountedCoords);
+            setDebug((d) => ({
+              ...d,
+              lastStatus: "ok",
+              viewportCount: data.capsules.length,
+              markersMounted: mounted,
+            }));
           })
-          .catch(() => {
-            // Swallowed · network / abort / parse · UX no-op
+          .catch((err) => {
+            // eslint-disable-next-line no-console
+            console.error("[KUDOS MAP] viewport fetch FAILED", err);
+            setDebug((d) => ({
+              ...d,
+              lastStatus: "error:" + (err?.name ?? "unknown"),
+            }));
           });
       }, 400);
     };
@@ -311,6 +376,21 @@ export function MapExplorer() {
         className="absolute inset-0"
         style={{ background: "var(--kudos-bg)" }}
       />
+
+      {/* TEMP DEBUG overlay top-left · render-chain diagnostic.
+          Remove once map markers confirmed working in production. */}
+      <div
+        className="pointer-events-none absolute left-3 top-3 z-50 rounded-lg border border-red-500/40 bg-black/80 px-3 py-2 font-mono text-[10px] leading-[1.4] text-white/90 backdrop-blur-sm"
+        style={{ maxWidth: 320 }}
+      >
+        <div>MAP DEBUG · P0 viewport diagnostic</div>
+        <div>api_base: {debug.apiBase || "(empty)"}</div>
+        <div>fetch_count: {debug.fetchCount}</div>
+        <div>last_status: {debug.lastStatus}</div>
+        <div>viewport_capsules: {debug.viewportCount}</div>
+        <div>markers_mounted: {debug.markersMounted}</div>
+        <div className="truncate opacity-60">{debug.lastUrl}</div>
+      </div>
 
       {/* Overlay instruccional cuando no hay click aún */}
       {!clicked ? (
