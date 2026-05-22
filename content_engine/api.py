@@ -48,7 +48,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django_ratelimit.decorators import ratelimit
 
-from content_engine.models import GenerationAttempt, PlaceCapsule
+from content_engine.models import GenerationAttempt, PlaceCapsule, TemporalLandmark
 from content_engine.pipeline import PipelineResult, generate_place_capsule
 
 log = logging.getLogger(__name__)
@@ -607,6 +607,96 @@ def capsules_debug_count(request: HttpRequest) -> JsonResponse:
     if errors:
         out["errors"] = errors
     return JsonResponse(out, status=200)
+
+
+# ---------------------------------------------------------------------------
+# View · GET /api/landmarks/viewport (P3 temporal layer)
+# ---------------------------------------------------------------------------
+@csrf_exempt
+@require_GET
+def landmarks_viewport(request: HttpRequest) -> JsonResponse:
+    """GET /api/landmarks/viewport/?bbox=minLng,minLat,maxLng,maxLat&year=YYYY&limit=N
+
+    Returns a GeoJSON-shaped FeatureCollection of temporal landmarks
+    whose bbox intersects the query bbox AND whose [start_year, end_year]
+    window contains the query year.
+
+    Response:
+      {
+        "features": [
+          {"type":"Feature","geometry":{...},"properties":{...}},
+          ...
+        ],
+        "count": N
+      }
+    """
+    bbox_raw = (request.GET.get("bbox") or "").strip()
+    if not bbox_raw:
+        return JsonResponse({"error": "missing bbox"}, status=400)
+    try:
+        parts = [float(p) for p in bbox_raw.split(",")]
+    except ValueError:
+        return JsonResponse({"error": "invalid bbox numerics"}, status=400)
+    if len(parts) != 4:
+        return JsonResponse({"error": "bbox must be 4 numbers"}, status=400)
+    min_lng, min_lat, max_lng, max_lat = parts
+    if not (-180.0 <= min_lng <= 180.0 and -180.0 <= max_lng <= 180.0):
+        return JsonResponse({"error": "lng out of range"}, status=400)
+    if not (-90.0 <= min_lat <= 90.0 and -90.0 <= max_lat <= 90.0):
+        return JsonResponse({"error": "lat out of range"}, status=400)
+    if min_lat > max_lat or min_lng > max_lng:
+        return JsonResponse({"error": "bbox min > max"}, status=400)
+
+    try:
+        year = int(request.GET.get("year") or "2026")
+    except ValueError:
+        year = 2026
+    try:
+        limit = int(request.GET.get("limit") or "200")
+    except ValueError:
+        limit = 200
+    limit = max(1, min(limit, 500))
+
+    from django.db.models import Q
+    qs = TemporalLandmark.objects.filter(
+        # bbox intersect: landmark bbox overlaps query bbox
+        bbox_min_lng__lte=max_lng,
+        bbox_max_lng__gte=min_lng,
+        bbox_min_lat__lte=max_lat,
+        bbox_max_lat__gte=min_lat,
+        # start <= year
+        start_year__lte=year,
+    ).filter(
+        # year <= end OR end is open (NULL)
+        Q(end_year__isnull=True) | Q(end_year__gte=year),
+    )[:limit]
+
+    features: list[dict[str, Any]] = []
+    for lm in qs:
+        meta = lm.metadata if isinstance(lm.metadata, dict) else {}
+        props: dict[str, Any] = {
+            "id": str(lm.id),
+            "title": lm.title,
+            "city": lm.city,
+            "kind": lm.kind,
+            "start_year": lm.start_year,
+            "end_year": lm.end_year,
+            "thumbnail_url": lm.thumbnail_url or "",
+            "clip_url": lm.clip_url or "",
+            "hero_image": lm.hero_image or "",
+            "ambience_url": lm.ambience_url or "",
+        }
+        # Merge metadata last · never overwrites canonical fields above
+        for k, v in meta.items():
+            if k not in props:
+                props[k] = v
+        features.append({
+            "type": "Feature",
+            "geometry": lm.geometry_geojson,
+            "properties": props,
+        })
+
+    return JsonResponse({"features": features, "count": len(features)}, status=200)
 
 
 def _serialize_capsule(capsule: PlaceCapsule) -> dict[str, Any]:

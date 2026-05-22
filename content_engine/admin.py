@@ -4,7 +4,12 @@ from __future__ import annotations
 from django.contrib import admin, messages
 from django.utils import timezone
 
-from content_engine.models import GenerationAttempt, PlaceCapsule, WikidataGeoCache
+from content_engine.models import (
+    GenerationAttempt,
+    PlaceCapsule,
+    TemporalLandmark,
+    WikidataGeoCache,
+)
 
 
 @admin.register(PlaceCapsule)
@@ -82,6 +87,25 @@ class GenerationAttemptAdmin(admin.ModelAdmin):
     readonly_fields = tuple(f.name for f in GenerationAttempt._meta.fields)
     ordering = ("-input_timestamp",)
     list_per_page = 50
+
+
+@admin.register(TemporalLandmark)
+class TemporalLandmarkAdmin(admin.ModelAdmin):
+    list_display = (
+        "title", "city", "kind", "start_year", "end_year",
+        "bbox_summary", "updated_at",
+    )
+    list_filter = ("city", "kind", "start_year")
+    search_fields = ("title", "city")
+    ordering = ("-updated_at",)
+    list_per_page = 50
+
+    @admin.display(description="bbox lat/lng")
+    def bbox_summary(self, obj: TemporalLandmark) -> str:
+        return (
+            f"{obj.bbox_min_lat:.4f},{obj.bbox_min_lng:.4f} → "
+            f"{obj.bbox_max_lat:.4f},{obj.bbox_max_lng:.4f}"
+        )
 
 
 @admin.register(WikidataGeoCache)

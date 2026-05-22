@@ -18,6 +18,7 @@ from content_engine.api import (
     capsule_nearby,
     capsules_debug_count,
     capsules_viewport,
+    landmarks_viewport,
     place_capsule,
 )
 
@@ -37,4 +38,7 @@ urlpatterns = [
     # P3.1 TEMP · DB inventory diagnostic for viewport empty-payload debug
     path("api/debug/capsules-count/", capsules_debug_count, name="capsules_debug_count"),
     path("api/debug/capsules-count",  capsules_debug_count, name="capsules_debug_count_noslash"),
+    # P3 · Temporal landmarks viewport (year-filtered GeoJSON)
+    path("api/landmarks/viewport/", landmarks_viewport, name="landmarks_viewport"),
+    path("api/landmarks/viewport",  landmarks_viewport, name="landmarks_viewport_noslash"),
 ]

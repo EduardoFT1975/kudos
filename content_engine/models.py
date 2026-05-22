@@ -204,3 +204,97 @@ class WikidataGeoCache(models.Model):
 
     def __str__(self) -> str:
         return f"WikidataGeoCache<{self.cache_key} · {self.status}>"
+
+
+# ---------------------------------------------------------------------------
+# TemporalLandmark · P3 historical map layer · viewport+year filtered
+# ---------------------------------------------------------------------------
+class TemporalLandmark(models.Model):
+    """A historical landmark with geometry + temporal validity window.
+
+    Used by /api/landmarks/viewport/ to render time-filtered overlays
+    on the KUDOS map (polygons/lines that appear/disappear with year).
+    """
+
+    KIND_MONUMENT = "monument"
+    KIND_RUIN = "ruin"
+    KIND_WALL = "wall"
+    KIND_STREET = "street"
+    KIND_BUILDING = "building"
+    KIND_OTHER = "other"
+    KIND_CHOICES = (
+        (KIND_MONUMENT, "monument"),
+        (KIND_RUIN, "ruin"),
+        (KIND_WALL, "wall"),
+        (KIND_STREET, "street"),
+        (KIND_BUILDING, "building"),
+        (KIND_OTHER, "other"),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=200)
+    city = models.CharField(max_length=120, db_index=True)
+    kind = models.CharField(max_length=32, choices=KIND_CHOICES, default=KIND_OTHER)
+    geometry_geojson = models.JSONField()
+    start_year = models.IntegerField(db_index=True)
+    end_year = models.IntegerField(null=True, blank=True, db_index=True)
+    # Precomputed bbox · enables fast viewport filtering without PostGIS
+    bbox_min_lat = models.FloatField(db_index=True, default=0.0)
+    bbox_min_lng = models.FloatField(db_index=True, default=0.0)
+    bbox_max_lat = models.FloatField(db_index=True, default=0.0)
+    bbox_max_lng = models.FloatField(db_index=True, default=0.0)
+    thumbnail_url = models.TextField(blank=True, default="")
+    clip_url = models.TextField(blank=True, default="")
+    hero_image = models.TextField(blank=True, default="")
+    ambience_url = models.TextField(blank=True, default="")
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        app_label = "content_engine"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["city", "start_year"]),
+            models.Index(fields=["bbox_min_lat", "bbox_max_lat"]),
+            models.Index(fields=["bbox_min_lng", "bbox_max_lng"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"TemporalLandmark<{self.city} · {self.title}>"
+
+    def save(self, *args, **kwargs):
+        # Auto-compute bbox from geometry on every save · ensures admin
+        # edits + seed commands always have correct viewport filters.
+        if self.geometry_geojson:
+            bbox = self._compute_bbox(self.geometry_geojson)
+            if bbox is not None:
+                self.bbox_min_lat, self.bbox_min_lng = bbox[0], bbox[1]
+                self.bbox_max_lat, self.bbox_max_lng = bbox[2], bbox[3]
+        super().save(*args, **kwargs)
+
+    @staticmethod
+    def _compute_bbox(geom):
+        """Return (min_lat, min_lng, max_lat, max_lng) from any GeoJSON
+        geometry coords (Point/LineString/Polygon/MultiPolygon)."""
+        coords_collected = []
+
+        def walk(node):
+            if not isinstance(node, list):
+                return
+            if (
+                len(node) >= 2
+                and isinstance(node[0], (int, float))
+                and isinstance(node[1], (int, float))
+            ):
+                coords_collected.append((float(node[0]), float(node[1])))
+                return
+            for sub in node:
+                walk(sub)
+
+        walk(geom.get("coordinates", []))
+        if not coords_collected:
+            return None
+        lngs = [c[0] for c in coords_collected]
+        lats = [c[1] for c in coords_collected]
+        return (min(lats), min(lngs), max(lats), max(lngs))
