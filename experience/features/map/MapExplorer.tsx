@@ -124,6 +124,13 @@ export function MapExplorer() {
       setMapReady(true);
     });
 
+    // Force resize 300ms post-init · cover late layout shift (React +
+    // browser font load + flex/grid settle). MapLibre canvas needs the
+    // container's final size to render tiles correctly.
+    window.setTimeout(() => {
+      try { map.resize(); } catch { /* defensive */ }
+    }, 300);
+
     // P0 viewport capsule fetch · debounced 400ms on moveend
     // BINARY TEST · pure default MapLibre markers · NO custom elements.
     const fetchViewport = () => {
@@ -356,21 +363,16 @@ export function MapExplorer() {
   }, [mapReady, maplibre, memory.entries, memory.hydrated, memoryLayerVisible]);
 
   return (
-    <main
-      className="relative w-full overflow-hidden"
-      // Header global ocupa h-14 (56px). Resto del viewport para el mapa.
-      style={{ height: "calc(100dvh - 56px)" }}
-    >
-      {/* Mapa fullscreen */}
+    <div className="relative w-screen h-screen overflow-hidden">
+      {/* Mapa fullscreen · no bg / no opacity / no blur · z-0 base */}
       <div
         ref={mapContainerRef}
-        className="absolute inset-0"
-        style={{ background: "var(--kudos-bg)" }}
+        className="absolute inset-0 w-full h-full z-0"
       />
 
-      {/* TEMP DEBUG overlay · minimal binary test */}
+      {/* TEMP DEBUG overlay · minimal binary test · z-50 nunca tapa map */}
       <div
-        className="pointer-events-none absolute left-3 top-3 z-50 rounded-lg border border-red-500/40 bg-black/85 px-3 py-2 font-mono text-[11px] leading-[1.5] text-white/95 backdrop-blur-sm"
+        className="pointer-events-none absolute top-4 left-4 z-50 rounded-lg border border-red-500/40 bg-black/85 px-3 py-2 font-mono text-[11px] leading-[1.5] text-white/95 backdrop-blur-sm"
       >
         <div>viewport_capsules: {debug.viewportCount}</div>
         <div>markers_mounted: {debug.markersMounted}</div>
@@ -447,6 +449,6 @@ export function MapExplorer() {
           <CapsuleSession lat={clicked.lat} lng={clicked.lng} />
         </div>
       ) : null}
-    </main>
+    </div>
   );
 }
