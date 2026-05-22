@@ -33,9 +33,11 @@ type MapLibreModule = typeof import("maplibre-gl");
 
 // MVP demo · Rome is the only city with seeded TemporalLandmarks (P3).
 // Cold-start cinematic position over Coliseo so first-paint reveals the
-// historical overlay layer. useGeolocation still flies map to user's
-// real coords once permission resolves (~1-2s), so this only affects
-// the initial reveal — actual location-aware UX is unchanged.
+// historical overlay layer. useGeolocation flyTo is INTENTIONALLY
+// DISABLED in this MVP (see effect ~line 805) — without that override
+// the camera would jump to the user's real coords (Spain/Galicia/etc.)
+// and the landmark layer would never be visible. User's pin is still
+// placed on the map at their real location · they can pan manually.
 const _DEFAULT_CENTER: [number, number] = [12.4922, 41.8902]; // Roma · Coliseo [lng, lat]
 const _DEFAULT_ZOOM = 14;
 
@@ -794,14 +796,18 @@ export function MapExplorer() {
     }
   }, [selectedYear, mapReady]);
 
-  // Centra el mapa en geo cuando granted · pin usuario
+  // Pin del usuario cuando geo granted.
+  // MVP · NO auto-flyTo: el cold-start debe permanecer sobre Coliseo
+  // (única ciudad con TemporalLandmarks sembrados) para que el overlay
+  // P3 sea visible en primer pintado. El usuario sigue viendo su pin
+  // en su ubicación real · puede panear manualmente si quiere navegar.
+  // Restaurar auto-flyTo cuando exista cobertura de landmarks en más
+  // ciudades (post-MVP).
   React.useEffect(() => {
     if (!mapReady || !maplibre || !mapRef.current) return;
     if (geo.status !== "ready" || typeof geo.lat !== "number" || typeof geo.lng !== "number") return;
-    const map = mapRef.current as {
-      flyTo: (opts: { center: [number, number]; zoom: number; duration: number }) => void;
-    };
-    map.flyTo({ center: [geo.lng, geo.lat], zoom: 14, duration: 1200 });
+    // map.flyTo({ center: [geo.lng, geo.lat], zoom: 14, duration: 1200 });
+    // ^^^ INTENTIONALLY DISABLED · see comment above. Re-enable post-MVP.
     if (userMarkerRef.current && typeof (userMarkerRef.current as { remove: () => void }).remove === "function") {
       (userMarkerRef.current as { remove: () => void }).remove();
     }
