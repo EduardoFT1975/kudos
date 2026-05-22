@@ -18,6 +18,11 @@
  *     "maplibre-gl": "^4.7.1"
  */
 import * as React from "react";
+// CRITICAL · maplibre-gl markers necesitan el CSS de la librería para
+// posicionarse absolutamente sobre el mapa. Sin este import los markers
+// se montan en el DOM pero quedan invisibles (default position static).
+// Solo afecta a markers · tiles renderizan via canvas sin CSS.
+import "maplibre-gl/dist/maplibre-gl.css";
 import { CapsuleSession } from "@/features/capsule/CapsuleSession";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useMemoryGraph } from "@/lib/memory/useMemoryGraph";
@@ -121,6 +126,46 @@ export function MapExplorer() {
     map.on("load", () => {
       mapRef.current = map;
       setMapReady(true);
+
+      // TEMP DEBUG · default MapLibre Marker (no custom element).
+      // If THIS default marker appears at (0,0) lat/lng on the map,
+      // problem = custom element CSS/style.
+      // If THIS default marker also invisible · problem = map instance,
+      // DOM layer, parent CSS, or cleanup race.
+      try {
+        const defaultMarker = new maplibre.Marker()
+          .setLngLat([0, 0])
+          .addTo(map);
+        const el = defaultMarker.getElement();
+        const cs = window.getComputedStyle(el);
+        // eslint-disable-next-line no-console
+        console.log("[KUDOS MAP DEBUG] DEFAULT marker @ (0,0)", {
+          html: el.outerHTML.slice(0, 200),
+          offsetW: el.offsetWidth,
+          offsetH: el.offsetHeight,
+          position: cs.position,
+          display: cs.display,
+          visibility: cs.visibility,
+          opacity: cs.opacity,
+          transform: cs.transform.slice(0, 80),
+          zIndex: cs.zIndex,
+          parentClass: el.parentElement?.className,
+          parentChain: (() => {
+            const chain: string[] = [];
+            let p: HTMLElement | null = el.parentElement;
+            let depth = 0;
+            while (p && depth < 5) {
+              chain.push(`${p.tagName}.${p.className || "(none)"}`);
+              p = p.parentElement;
+              depth++;
+            }
+            return chain;
+          })(),
+        });
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error("[KUDOS MAP DEBUG] DEFAULT marker FAILED", err);
+      }
     });
 
     // P0 viewport capsule fetch · debounced 400ms on moveend
@@ -216,6 +261,46 @@ export function MapExplorer() {
               capsuleMarkersRef.current.push(marker);
               mounted += 1;
               mountedCoords.push([lng, lat]);
+
+              // TEMP DEBUG · inspect first marker DOM lifecycle.
+              // Captures size, computed style, parent class, position.
+              if (mounted === 1) {
+                try {
+                  const mEl = marker.getElement();
+                  const mcs = window.getComputedStyle(mEl);
+                  // eslint-disable-next-line no-console
+                  console.log("[KUDOS MAP DEBUG] CUSTOM marker[0]", {
+                    lngLat: marker.getLngLat(),
+                    offsetW: mEl.offsetWidth,
+                    offsetH: mEl.offsetHeight,
+                    position: mcs.position,
+                    display: mcs.display,
+                    visibility: mcs.visibility,
+                    opacity: mcs.opacity,
+                    transform: mcs.transform.slice(0, 80),
+                    zIndex: mcs.zIndex,
+                    background: mcs.background.slice(0, 60),
+                    width: mcs.width,
+                    height: mcs.height,
+                    parentClass: mEl.parentElement?.className,
+                    parentChain: (() => {
+                      const chain: string[] = [];
+                      let p: HTMLElement | null = mEl.parentElement;
+                      let depth = 0;
+                      while (p && depth < 5) {
+                        chain.push(`${p.tagName}.${p.className || "(none)"}`);
+                        p = p.parentElement;
+                        depth++;
+                      }
+                      return chain;
+                    })(),
+                    sameMapInstance: mapRef.current === map,
+                  });
+                } catch (err) {
+                  // eslint-disable-next-line no-console
+                  console.error("[KUDOS MAP DEBUG] marker inspect FAILED", err);
+                }
+              }
             }
             // eslint-disable-next-line no-console
             console.log("[KUDOS MAP] markers mounted =", mounted, mountedCoords);
