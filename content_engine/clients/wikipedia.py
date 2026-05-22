@@ -155,11 +155,147 @@ class WikipediaClient:
         canonical_title = payload.get("title") or title
         page_url = self._extract_page_url(payload, title=canonical_title, lang=lang)
 
+        # P2 · media enrichment from REST summary (zero extra HTTP).
+        # Priority: originalimage > thumbnail. Both may be None for stub
+        # pages; downstream stays silent when missing.
+        image_url = self._extract_image_field(payload, "originalimage")
+        thumbnail_url = self._extract_image_field(payload, "thumbnail")
+        description = payload.get("description")
+        if not isinstance(description, str):
+            description = ""
+
         return {
             "title": canonical_title,
             "extract": extract.strip(),
             "page_url": page_url,
+            "image_url": image_url,
+            "thumbnail_url": thumbnail_url,
+            "description": description.strip(),
         }
+
+    @staticmethod
+    def _extract_image_field(payload: dict[str, Any], key: str) -> str:
+        """Pull `payload[key].source` if it's a non-empty https URL. Returns
+        empty string on any deviation. Used for `originalimage` and
+        `thumbnail` which Wikipedia REST always shapes as {source, width,
+        height}."""
+        block = payload.get(key)
+        if not isinstance(block, dict):
+            return ""
+        src = block.get("source")
+        if isinstance(src, str) and src.startswith("https://"):
+            return src
+        return ""
+
+    # -----------------------------------------------------------------
+    # P2.5 · pageimages fallback · cuando REST summary no expone imagen
+    # (común en stubs y municipios pequeños), prop=pageimages a veces
+    # devuelve algo. Mismo endpoint, distinta cobertura.
+    # -----------------------------------------------------------------
+    def get_pageimages(self, title: str, lang: str = "es") -> dict[str, str] | None:
+        """Fetch pageimages via action=query&prop=pageimages.
+
+        Returns {"image_url": str, "thumbnail_url": str} when at least
+        one of original|thumbnail is present. Empty strings for missing
+        sub-fields. Returns None on transport / HTTP / parse failure.
+        Never raises.
+        """
+        if not title:
+            return None
+        lang = lang if lang in _ALLOWED_LANGS else "es"
+        url = _MEDIAWIKI_API_URL_TPL.format(lang=lang)
+        params = {
+            "action": "query",
+            "format": "json",
+            "prop": "pageimages",
+            "piprop": "original|thumbnail|name",
+            "pithumbsize": "640",
+            "titles": title,
+            "redirects": "1",
+        }
+        try:
+            with httpx.Client(timeout=self._timeout_s) as client:
+                response = client.get(
+                    url,
+                    params=params,
+                    headers={"User-Agent": self._ua, "Accept": "application/json"},
+                )
+        except (httpx.TimeoutException, httpx.TransportError) as exc:
+            log.info("Wikipedia pageimages transport for %r [%s]: %s", title, lang, exc)
+            return None
+        if response.status_code >= 400:
+            return None
+        try:
+            payload = response.json()
+        except ValueError:
+            return None
+        if not isinstance(payload, dict):
+            return None
+        pages = (payload.get("query") or {}).get("pages") or {}
+        if not isinstance(pages, dict):
+            return None
+        for page in pages.values():
+            if not isinstance(page, dict):
+                continue
+            original = self._extract_image_field(page, "original")
+            thumb = self._extract_image_field(page, "thumbnail")
+            if original or thumb:
+                return {"image_url": original, "thumbnail_url": thumb}
+        return None
+
+    # -----------------------------------------------------------------
+    # P2.5 · Wikidata P18 (image) · ultimate fallback cuando Wikipedia
+    # no devuelve imagen. P18 contiene filename Commons · construimos
+    # URL vía Special:FilePath (redirect → upload.wikimedia.org).
+    # -----------------------------------------------------------------
+    def get_entity_image(self, qid: str) -> str:
+        """Fetch P18 (image) claim from Wikidata for a single QID.
+        Returns Commons URL (Special:FilePath redirect) or empty string.
+        Never raises.
+        """
+        # Inline QID validation · ^Q[1-9]\d*$
+        if not qid or not (
+            qid.startswith("Q") and len(qid) >= 2 and qid[1:].isdigit()
+            and qid[1] != "0"
+        ):
+            return ""
+        params = {
+            "action": "wbgetentities",
+            "ids": qid,
+            "props": "claims",
+            "format": "json",
+        }
+        try:
+            with httpx.Client(timeout=self._timeout_s) as client:
+                response = client.get(
+                    _WIKIDATA_API_URL,
+                    params=params,
+                    headers={"User-Agent": self._ua, "Accept": "application/json"},
+                )
+        except (httpx.TimeoutException, httpx.TransportError) as exc:
+            log.info("Wikidata P18 transport for %s: %s", qid, exc)
+            return ""
+        if response.status_code >= 400:
+            return ""
+        try:
+            payload = response.json()
+        except ValueError:
+            return ""
+        ent = (payload.get("entities") or {}).get(qid)
+        if not isinstance(ent, dict):
+            return ""
+        claims = ent.get("claims") or {}
+        p18 = claims.get("P18") or []
+        if not isinstance(p18, list) or not p18:
+            return ""
+        try:
+            value = p18[0]["mainsnak"]["datavalue"]["value"]
+        except (KeyError, TypeError, IndexError):
+            return ""
+        if not isinstance(value, str) or not value:
+            return ""
+        # Commons Special:FilePath redirects to actual upload.wikimedia.org URL
+        return f"https://commons.wikimedia.org/wiki/Special:FilePath/{quote(value, safe='')}"
 
     # ------------------------------------------------------------- helpers
     @staticmethod

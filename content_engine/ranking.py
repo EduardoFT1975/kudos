@@ -106,6 +106,51 @@ def _is_local_poi(candidate: WikidataCandidate) -> bool:
 def _is_hostile_water(candidate: WikidataCandidate) -> bool:
     return _has_class(candidate, _HOSTILE_WATER_CLASSES)
 
+
+# P2.4 · locality fallback · clases que identifican el LUGAR
+# habitado/admin del usuario · pueblo, villa, ciudad, municipio,
+# concejo, parroquia, lugar (hamlet GAL/AST/LEÓN). Usado por
+# select_nearest_locality cuando no hay landmark notable cercano.
+LOCALITY_CLASSES: frozenset[str] = frozenset({
+    "Q532",      # village / settlement
+    "Q515",      # city
+    "Q5119",     # capital city
+    "Q15284",    # municipality
+    "Q3957",     # town
+    "Q123705",   # neighborhood
+    "Q3055118",  # lugar (Galician/Leonese hamlet)
+    "Q840482",   # civil parish · parroquia
+    "Q3257518",  # concejo Asturiano
+    "Q2196917",  # admin subdivision
+    "Q19860854", # admin subdivision
+    "Q6126497",  # admin subdivision
+    "Q213643",   # admin / civic class
+    "Q1107656",  # locality
+    "Q486972",   # human settlement (top-level)
+})
+
+
+def is_locality(candidate: WikidataCandidate) -> bool:
+    """True if any class identifies an inhabited/admin place."""
+    return _has_class(candidate, LOCALITY_CLASSES)
+
+
+def select_nearest_locality(
+    candidates: list[WikidataCandidate],
+) -> WikidataCandidate | None:
+    """Pick the geographically closest locality candidate.
+
+    Used as fallback when select_winner returns None (sparse area · no
+    notable landmark within radius) · ensures user in Magaz de Abajo
+    gets Magaz de Abajo capsule instead of empty_zone.
+
+    Returns None when no locality candidates exist.
+    """
+    localities = [c for c in candidates if is_locality(c)]
+    if not localities:
+        return None
+    return min(localities, key=lambda c: c.distance_m)
+
 # ---------------------------------------------------------------------------
 # Class weight table (locked)
 # ---------------------------------------------------------------------------

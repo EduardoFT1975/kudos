@@ -72,7 +72,11 @@ from content_engine.landmarks import (
     find_nearby_landmarks,
 )
 from content_engine.models import GenerationAttempt, PlaceCapsule, WikidataGeoCache
-from content_engine.ranking import compute_rank_score, select_winner
+from content_engine.ranking import (
+    compute_rank_score,
+    select_nearest_locality,
+    select_winner,
+)
 from content_engine.schemas import (
     EvidenceSet,
     GeosearchResult,
@@ -101,6 +105,26 @@ _FC_WIKIDATA_PARSE_ERROR = "WIKIDATA_PARSE_ERROR"
 _FC_NO_CANDIDATES = "NO_CANDIDATES"
 _FC_LOW_RANK = "LOW_RANK"
 _FC_AMBIGUOUS_WINNER = "AMBIGUOUS_WINNER"
+_FC_DISTANT_WINNER = "DISTANT_WINNER"      # P2.4 · winner > MAX distance · rejected
+_FC_LOCALITY_FALLBACK = "LOCALITY_FALLBACK"  # P2.4 · used locality fallback (telemetry)
+_FC_HYGIENE_GATE = "HYGIENE_GATE"            # P3 · hard gate rejected store
+
+# P2.4 · distance ceiling para winner aceptado.
+_MAX_WINNER_DISTANCE_M = 10000
+
+# P3 · hygiene tiers
+_HYGIENE_VALID_M = 3000
+_HYGIENE_SUSPECT_M = 10000
+_GENERATION_VERSION = "P3.0"
+
+
+def _hygiene_for(distance_m: float) -> str:
+    """Classify capsule hygiene by winner→origin distance."""
+    if distance_m <= _HYGIENE_VALID_M:
+        return "VALID"
+    if distance_m <= _HYGIENE_SUSPECT_M:
+        return "SUSPECT"
+    return "INVALID"
 _FC_LLM_TIMEOUT = "LLM_TIMEOUT"
 _FC_LLM_TRANSIENT = "LLM_TRANSIENT"
 _FC_LLM_JSON_FAIL = "LLM_JSON_FAIL"
@@ -341,6 +365,55 @@ def generate_place_capsule(
             injected_qids |= newly_injected
             winner, fail = select_winner(candidates, normalized.radius_m)
 
+    # P2.4 · distance gate · reject distant winners (anti-substitution rule).
+    # Prevents pipeline from serving Palma del Río when user is in León (or
+    # similar coord-drift cases). MediaWiki gsradius caps at 10km · si
+    # geosearch devuelve un winner más lejos que MAX, es señal de drift.
+    if winner is not None and winner.distance_m > _MAX_WINNER_DISTANCE_M:
+        log.info(
+            "winner rejected DISTANT_WINNER: %s :: %s :: %.0fm > %dm",
+            winner.entity_id, winner.label, winner.distance_m,
+            _MAX_WINNER_DISTANCE_M,
+        )
+        winner = None
+        fail = _FC_DISTANT_WINNER
+
+    # P2.4 · locality fallback · si no hay winner notable cercano, usar la
+    # localidad/municipio donde físicamente está el usuario. Magaz de Abajo
+    # devuelve "Magaz de Abajo" (no empty_zone). Solo aplica a pools
+    # válidos · no se inventan candidatos · NO se hace re-fetch.
+    if winner is None and candidates:
+        nearest_locality = select_nearest_locality(candidates)
+        if (
+            nearest_locality is not None
+            and nearest_locality.distance_m <= _MAX_WINNER_DISTANCE_M
+        ):
+            log.info(
+                "locality fallback used: %s :: %s :: %.0fm",
+                nearest_locality.entity_id,
+                nearest_locality.label,
+                nearest_locality.distance_m,
+            )
+            rank_score = compute_rank_score(nearest_locality, normalized.radius_m)
+            # P2.4 · WinningEntity construction · solo campos válidos del
+            # schema. wikipedia_title_es default = label (best guess para
+            # ES Wikipedia · Stage 5 hace 404-silent si no existe la page).
+            # wikipedia_title_en omitido (None default).
+            winner = WinningEntity(
+                entity_id=nearest_locality.entity_id,
+                label=nearest_locality.label,
+                distance_m=nearest_locality.distance_m,
+                rank_score=rank_score,
+                classes=nearest_locality.classes,
+                wikipedia_title_es=(
+                    nearest_locality.label if nearest_locality.has_es_wiki else None
+                ),
+                wikipedia_title_en=(
+                    nearest_locality.label if nearest_locality.has_en_wiki else None
+                ),
+            )
+            fail = None
+
     if winner is not None:
         print(
             f"winner candidate chosen: {winner.entity_id} :: "
@@ -369,13 +442,27 @@ def generate_place_capsule(
     # Stage 5 · wikipedia enrich (reuses shared wp_client from Stage 2) -----
     wiki_summary_text: str | None = None
     wiki_ref: SourceRef | None = None
+    # P2 · media enrichment captured from REST summary (zero extra HTTP).
+    media_image_url: str = ""
+    media_thumbnail_url: str = ""
+    media_caption: str = ""
+    media_source_label: str = ""
+    last_attempt_title: str = ""
+    last_attempt_lang: str = "es"
     for lang, title in _wiki_title_attempts(winner):
         if not title:
             continue
+        last_attempt_title = title
+        last_attempt_lang = lang
         summary = wp_client.get_summary(title, lang=lang)
         if summary is None:
             continue
         wiki_summary_text = summary["extract"]
+        media_image_url = summary.get("image_url", "") or ""
+        media_thumbnail_url = summary.get("thumbnail_url", "") or ""
+        media_caption = summary.get("description", "") or ""
+        if media_image_url or media_thumbnail_url:
+            media_source_label = "Wikipedia"
         wiki_ref = SourceRef(
             index=1,
             source_type="wikipedia",
@@ -386,6 +473,29 @@ def generate_place_capsule(
             supports_sentence_indices=(),
         )
         break
+
+    # P2.5 · media fallback chain · si Wikipedia REST summary no expone
+    # imagen (común en stubs y municipios pequeños):
+    #   1. prop=pageimages contra el mismo título · a veces sí cubre
+    #   2. Wikidata P18 (image claim) → Commons FilePath redirect
+    # Solo se activan cuando media_image_url sigue vacío tras Stage 5
+    # principal. Cada paso es transport-safe (never raises).
+    if not media_image_url and last_attempt_title:
+        pi = wp_client.get_pageimages(last_attempt_title, lang=last_attempt_lang)
+        if pi:
+            media_image_url = pi.get("image_url", "") or media_image_url
+            media_thumbnail_url = (
+                pi.get("thumbnail_url", "") or media_thumbnail_url
+            )
+            if media_image_url or media_thumbnail_url:
+                media_source_label = "Wikipedia"
+    if not media_image_url and not media_thumbnail_url:
+        commons_url = wp_client.get_entity_image(winner.entity_id)
+        if commons_url:
+            media_image_url = commons_url
+            if not media_thumbnail_url:
+                media_thumbnail_url = commons_url
+            media_source_label = "Wikidata Commons"
 
     # Build verified ref set · wikidata entity is always ref[0]
     wikidata_ref = SourceRef(
@@ -463,14 +573,17 @@ def generate_place_capsule(
 
     # Stage 9 · store --------------------------------------------------------
     try:
-        stored = _store_approved(
-            normalized=normalized,
+        stored = _store_approved(            normalized=normalized,
             winner=winner,
             draft=draft,
             verified_refs=verified_refs,
             content_hash=content_hash,
             confidence=confidence,
             breakdown=breakdown,
+            media_image_url=media_image_url,
+            media_thumbnail_url=media_thumbnail_url,
+            media_caption=media_caption,
+            media_source_label=media_source_label,
         )
         return _result(stored)
     except IntegrityError as exc:
@@ -491,6 +604,13 @@ def generate_place_capsule(
             confidence=confidence,
         )
         return _result(None)
+    except ValueError as exc:
+        # P3 hygiene hard gate rejected the store.
+        log.warning("Pipeline HYGIENE_GATE: %s", exc)
+        _record_suppressed(
+            normalized, _FC_HYGIENE_GATE, winner=winner, confidence=confidence,
+        )
+        return _result(None)
 
 
 # ---------------------------------------------------------------------------
@@ -505,8 +625,30 @@ def _store_approved(
     content_hash: str,
     confidence: float,
     breakdown: dict,
+    media_image_url: str = "",
+    media_thumbnail_url: str = "",
+    media_caption: str = "",
+    media_source_label: str = "",
 ) -> PlaceCapsule:
-    """Single atomic dual-write: PlaceCapsule + GenerationAttempt."""
+    """Single atomic dual-write: PlaceCapsule + GenerationAttempt.
+
+    P3 hygiene · hard gate · winner > _MAX_WINNER_DISTANCE_M raises
+    ValueError. Caller (run_pipeline) treats as suppressed.
+    """
+    # P3 · HARD GATE · no poisoned insert
+    if winner.distance_m > _MAX_WINNER_DISTANCE_M:
+        raise ValueError(
+            f"hygiene gate: winner distance "
+            f"{winner.distance_m:.0f}m > {_MAX_WINNER_DISTANCE_M}m"
+        )
+
+    hygiene_status = _hygiene_for(winner.distance_m)
+    if media_source_label:
+        media_source = media_source_label
+    elif media_image_url:
+        media_source = "Wikipedia"
+    else:
+        media_source = ""
     with transaction.atomic():
         capsule = PlaceCapsule.objects.create(
             content_hash=content_hash,
@@ -520,6 +662,17 @@ def _store_approved(
             generator_model=MODEL_NAME,
             prompt_version=PROMPT_VERSION,
             pipeline_run_id=normalized.pipeline_run_id,
+            image_url=media_image_url,
+            thumbnail_url=media_thumbnail_url,
+            gallery=[],
+            video_url="",
+            media_source=media_source,
+            media_caption=media_caption,
+            hygiene_status=hygiene_status,
+            origin_lat=normalized.lat,
+            origin_lng=normalized.lng,
+            winner_distance_m=winner.distance_m,
+            generation_version=_GENERATION_VERSION,
         )
         GenerationAttempt.objects.create(
             status=GenerationAttempt.STATUS_APPROVED,

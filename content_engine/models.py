@@ -52,6 +52,33 @@ class PlaceCapsule(models.Model):
     prompt_version = models.CharField(max_length=32)
     pipeline_run_id = models.CharField(max_length=128, db_index=True)
 
+    # P2 · Media enrichment (Wikipedia REST summary · zero extra fetch).
+    image_url = models.TextField(blank=True, default="")
+    thumbnail_url = models.TextField(blank=True, default="")
+    gallery = models.JSONField(blank=True, default=list)
+    video_url = models.TextField(blank=True, default="")
+    media_source = models.CharField(max_length=128, blank=True, default="")
+    media_caption = models.TextField(blank=True, default="")
+
+    # P3 · Hygiene · per-capsule data quality classification
+    HYGIENE_VALID = "VALID"
+    HYGIENE_SUSPECT = "SUSPECT"
+    HYGIENE_INVALID = "INVALID"
+    HYGIENE_CHOICES = (
+        (HYGIENE_VALID, "VALID"),
+        (HYGIENE_SUSPECT, "SUSPECT"),
+        (HYGIENE_INVALID, "INVALID"),
+    )
+    hygiene_status = models.CharField(
+        max_length=16, choices=HYGIENE_CHOICES, default=HYGIENE_VALID, db_index=True,
+    )
+    origin_lat = models.FloatField(null=True, blank=True)
+    origin_lng = models.FloatField(null=True, blank=True)
+    winner_distance_m = models.FloatField(null=True, blank=True)
+    generation_version = models.CharField(max_length=32, blank=True, default="")
+    invalidated_at = models.DateTimeField(null=True, blank=True)
+    invalidation_reason = models.CharField(max_length=128, blank=True, default="")
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
