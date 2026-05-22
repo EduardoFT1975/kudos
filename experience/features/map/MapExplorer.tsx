@@ -170,18 +170,48 @@ export function MapExplorer() {
               lngLats.push([lng, lat]);
               mounted += 1;
             }
-            // Auto-fit to capsules so founder sees them even if currently
-            // outside viewport · padding 80px · maxZoom 10 to avoid
-            // over-zooming on single-point cluster.
+            // Defer fitBounds · resize canvas first to prevent blank
+            // render state · duration 0 to avoid mid-animation paint stall.
+            // Single-point pools use flyTo (bounds NW=SE is degenerate).
+            // After move settles, force resize+repaint to guarantee tiles.
             let fit = false;
-            if (lngLats.length > 0) {
+            if (lngLats.length >= 2) {
               try {
-                const bounds = new maplibre.LngLatBounds(
-                  lngLats[0],
-                  lngLats[0],
-                );
-                for (const ll of lngLats) bounds.extend(ll);
-                map.fitBounds(bounds, { padding: 80, maxZoom: 10, duration: 800 });
+                requestAnimationFrame(() => {
+                  map.resize();
+                  const bounds = new maplibre.LngLatBounds(
+                    lngLats[0],
+                    lngLats[0],
+                  );
+                  for (const ll of lngLats) bounds.extend(ll);
+                  map.fitBounds(bounds, {
+                    padding: 80,
+                    maxZoom: 10,
+                    duration: 0,
+                  });
+                });
+                map.once("moveend", () => {
+                  map.resize();
+                  map.triggerRepaint();
+                });
+                fit = true;
+              } catch {
+                fit = false;
+              }
+            } else if (lngLats.length === 1) {
+              try {
+                requestAnimationFrame(() => {
+                  map.resize();
+                  map.flyTo({
+                    center: lngLats[0],
+                    zoom: 12,
+                    duration: 0,
+                  });
+                });
+                map.once("moveend", () => {
+                  map.resize();
+                  map.triggerRepaint();
+                });
                 fit = true;
               } catch {
                 fit = false;
