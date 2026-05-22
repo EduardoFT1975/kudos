@@ -14,7 +14,12 @@ from __future__ import annotations
 
 from django.urls import path
 
-from content_engine.api import capsule_nearby, capsules_viewport, place_capsule
+from content_engine.api import (
+    capsule_nearby,
+    capsules_debug_count,
+    capsules_viewport,
+    place_capsule,
+)
 
 app_name = "content_engine"
 
@@ -29,4 +34,7 @@ urlpatterns = [
     # P0 map layer · viewport bbox query for visible capsule markers
     path("api/capsules/viewport/", capsules_viewport, name="capsules_viewport"),
     path("api/capsules/viewport", capsules_viewport, name="capsules_viewport_noslash"),
+    # P3.1 TEMP · DB inventory diagnostic for viewport empty-payload debug
+    path("api/debug/capsules-count/", capsules_debug_count, name="capsules_debug_count"),
+    path("api/debug/capsules-count",  capsules_debug_count, name="capsules_debug_count_noslash"),
 ]

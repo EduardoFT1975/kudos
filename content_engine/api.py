@@ -411,12 +411,45 @@ def capsules_viewport(request: HttpRequest) -> JsonResponse:
         limit = 100
     limit = max(1, min(limit, 500))
 
-    # Query GenerationAttempt (carries spatial coords) joined to PlaceCapsule.
-    # Dedupe by capsule_id in Python · low cardinality at expected scale.
+    # P3 hygiene · default excludes INVALID. SUSPECT opt-in via flag.
+    include_suspect = (request.GET.get("include_suspect") or "").lower() in (
+        "1", "true", "yes",
+    )
+    allowed_status = ["VALID"]
+    if include_suspect:
+        allowed_status.append("SUSPECT")
+
+    # ---- TEMP DEBUG · viewport queryset stage counts (P3.1) ---------------
+    total_cap = PlaceCapsule.objects.count()
+    total_app = GenerationAttempt.objects.filter(
+        status=GenerationAttempt.STATUS_APPROVED, place_capsule__isnull=False,
+    ).count()
+    bbox_qs = GenerationAttempt.objects.filter(
+        status=GenerationAttempt.STATUS_APPROVED,
+        place_capsule__isnull=False,
+        input_lat__gte=min_lat,
+        input_lat__lte=max_lat,
+        input_lng__gte=min_lng,
+        input_lng__lte=max_lng,
+    )
+    bbox_count = bbox_qs.count()
+    after_hygiene_count = bbox_qs.filter(
+        place_capsule__hygiene_status__in=allowed_status,
+    ).count()
+    print(
+        f"[VIEWPORT DEBUG] bbox=({min_lng:.4f},{min_lat:.4f})-"
+        f"({max_lng:.4f},{max_lat:.4f}) "
+        f"total_caps={total_cap} approved_attempts={total_app} "
+        f"after_bbox={bbox_count} after_hygiene={after_hygiene_count} "
+        f"allowed_status={allowed_status}"
+    )
+    # ---- END TEMP DEBUG ----------------------------------------------------
+
     qs = (
         GenerationAttempt.objects.filter(
             status=GenerationAttempt.STATUS_APPROVED,
             place_capsule__isnull=False,
+            place_capsule__hygiene_status__in=allowed_status,
             input_lat__gte=min_lat,
             input_lat__lte=max_lat,
             input_lng__gte=min_lng,
@@ -444,11 +477,106 @@ def capsules_viewport(request: HttpRequest) -> JsonResponse:
             "lng": att.input_lng,
             "image_url": getattr(cap, "image_url", "") or "",
             "thumbnail_url": getattr(cap, "thumbnail_url", "") or "",
+            "hygiene_status": getattr(cap, "hygiene_status", "VALID"),
         })
         if len(out) >= limit:
             break
 
+    # ---- TEMP DEBUG · final serialized count -----------------------------
+    print(
+        f"[VIEWPORT DEBUG] serialized_returned={len(out)} "
+        f"raw_qs_iterated={len(seen)}"
+    )
+    # ---- END TEMP DEBUG --------------------------------------------------
     return JsonResponse({"capsules": out, "count": len(out)}, status=200)
+
+
+# ---------------------------------------------------------------------------
+# View · GET /api/debug/capsules-count (P3.1 inventory · TEMP)
+# ---------------------------------------------------------------------------
+@csrf_exempt
+@require_GET
+def capsules_debug_count(request: HttpRequest) -> JsonResponse:
+    """GET /api/debug/capsules-count
+
+    DB inventory diagnostic · no params · returns counts grouped by
+    hygiene status, attempt linkage, and bbox tests for canonical regions.
+    Temporary endpoint · safe to remove once viewport behavior validated.
+    """
+    from django.db.models import Count
+
+    total_cap = PlaceCapsule.objects.count()
+
+    by_hygiene_qs = PlaceCapsule.objects.values("hygiene_status").annotate(n=Count("id"))
+    by_hygiene = {row["hygiene_status"] or "NULL": row["n"] for row in by_hygiene_qs}
+
+    null_hygiene = PlaceCapsule.objects.filter(hygiene_status__isnull=True).count()
+    null_winner_distance = PlaceCapsule.objects.filter(
+        winner_distance_m__isnull=True,
+    ).count()
+
+    approved_attempts = GenerationAttempt.objects.filter(
+        status=GenerationAttempt.STATUS_APPROVED,
+    ).count()
+    linked_attempts = GenerationAttempt.objects.filter(
+        status=GenerationAttempt.STATUS_APPROVED,
+        place_capsule__isnull=False,
+    ).count()
+
+    def _bbox_count(min_lat, min_lng, max_lat, max_lng) -> int:
+        return GenerationAttempt.objects.filter(
+            status=GenerationAttempt.STATUS_APPROVED,
+            place_capsule__isnull=False,
+            input_lat__gte=min_lat, input_lat__lte=max_lat,
+            input_lng__gte=min_lng, input_lng__lte=max_lng,
+        ).count()
+
+    bbox_tests = {
+        "world":           _bbox_count(-90,  -180, 90,  180),
+        "europe":          _bbox_count( 35,   -15, 70,   45),
+        "iberia":          _bbox_count( 35,   -10, 45,    5),
+        "madrid_1deg":     _bbox_count( 39.9, -4.2, 40.9, -3.2),
+        "rome_1deg":       _bbox_count( 41.4, 12.0, 42.4, 13.0),
+        "spain_andalucia": _bbox_count( 36,   -7.5, 38.5, -1.5),
+    }
+
+    # Sample first 10 approved attempts · raw input coords + capsule id
+    sample = list(
+        GenerationAttempt.objects.filter(
+            status=GenerationAttempt.STATUS_APPROVED,
+            place_capsule__isnull=False,
+        ).select_related("place_capsule")
+        .order_by("-input_timestamp")[:10]
+        .values(
+            "input_lat", "input_lng",
+            "place_capsule__id",
+            "place_capsule__title",
+            "place_capsule__hygiene_status",
+            "place_capsule__winner_distance_m",
+        )
+    )
+    sample_out = [
+        {
+            "lat": s["input_lat"],
+            "lng": s["input_lng"],
+            "capsule_id": str(s["place_capsule__id"]),
+            "title": s["place_capsule__title"],
+            "hygiene": s["place_capsule__hygiene_status"],
+            "winner_distance_m": s["place_capsule__winner_distance_m"],
+        }
+        for s in sample
+    ]
+
+    return JsonResponse({
+        "total_capsules": total_cap,
+        "by_hygiene": by_hygiene,
+        "null_hygiene": null_hygiene,
+        "null_winner_distance": null_winner_distance,
+        "approved_attempts": approved_attempts,
+        "linked_attempts": linked_attempts,
+        "bbox_tests": bbox_tests,
+        "sample_attempts": sample_out,
+    }, status=200)
 
 
 def _serialize_capsule(capsule: PlaceCapsule) -> dict[str, Any]:
@@ -526,5 +654,16 @@ def _serialize_capsule(capsule: PlaceCapsule) -> dict[str, Any]:
         payload["media_debug"] = "GENERATED"
     else:
         payload["media_debug"] = "NONE"
+
+    # P3 hygiene · diagnostic fields · always emitted when present
+    hygiene = getattr(capsule, "hygiene_status", None)
+    if hygiene:
+        payload["hygiene_status"] = hygiene
+    wdm = getattr(capsule, "winner_distance_m", None)
+    if isinstance(wdm, (int, float)):
+        payload["winner_distance_km"] = round(wdm / 1000.0, 2)
+    gen_v = getattr(capsule, "generation_version", "") or ""
+    if gen_v:
+        payload["generation_version"] = gen_v
 
     return payload
