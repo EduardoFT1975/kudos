@@ -58,21 +58,17 @@ export function MapExplorer() {
   const [mapReady, setMapReady] = React.useState(false);
   const [clicked, setClicked] = React.useState<ClickedCoords | null>(null);
   const [memoryLayerVisible, setMemoryLayerVisible] = React.useState<boolean>(true);
-  // TEMP DEBUG · render-chain diagnostic state (P0 map markers)
+  // TEMP DEBUG · minimal binary-test state
   const [debug, setDebug] = React.useState<{
-    fetchCount: number;
-    lastUrl: string;
-    lastStatus: string;
     viewportCount: number;
     markersMounted: number;
-    apiBase: string;
+    fitboundsApplied: boolean;
+    markerMode: string;
   }>({
-    fetchCount: 0,
-    lastUrl: "",
-    lastStatus: "init",
     viewportCount: 0,
     markersMounted: 0,
-    apiBase: process.env.NEXT_PUBLIC_API_BASE_URL ?? "(unset · relative)",
+    fitboundsApplied: false,
+    markerMode: "default (no custom element)",
   });
   const geo = useGeolocation({ enableHighAccuracy: true });
   // P0.9 Memory Graph · lee las memorias del store local. SSR-safe ·
@@ -126,199 +122,79 @@ export function MapExplorer() {
     map.on("load", () => {
       mapRef.current = map;
       setMapReady(true);
-
-      // TEMP DEBUG · default MapLibre Marker (no custom element).
-      // If THIS default marker appears at (0,0) lat/lng on the map,
-      // problem = custom element CSS/style.
-      // If THIS default marker also invisible · problem = map instance,
-      // DOM layer, parent CSS, or cleanup race.
-      try {
-        const defaultMarker = new maplibre.Marker()
-          .setLngLat([0, 0])
-          .addTo(map);
-        const el = defaultMarker.getElement();
-        const cs = window.getComputedStyle(el);
-        // eslint-disable-next-line no-console
-        console.log("[KUDOS MAP DEBUG] DEFAULT marker @ (0,0)", {
-          html: el.outerHTML.slice(0, 200),
-          offsetW: el.offsetWidth,
-          offsetH: el.offsetHeight,
-          position: cs.position,
-          display: cs.display,
-          visibility: cs.visibility,
-          opacity: cs.opacity,
-          transform: cs.transform.slice(0, 80),
-          zIndex: cs.zIndex,
-          parentClass: el.parentElement?.className,
-          parentChain: (() => {
-            const chain: string[] = [];
-            let p: HTMLElement | null = el.parentElement;
-            let depth = 0;
-            while (p && depth < 5) {
-              chain.push(`${p.tagName}.${p.className || "(none)"}`);
-              p = p.parentElement;
-              depth++;
-            }
-            return chain;
-          })(),
-        });
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error("[KUDOS MAP DEBUG] DEFAULT marker FAILED", err);
-      }
     });
 
     // P0 viewport capsule fetch · debounced 400ms on moveend
+    // BINARY TEST · pure default MapLibre markers · NO custom elements.
     const fetchViewport = () => {
       if (viewportFetchTimerRef.current !== null) {
         window.clearTimeout(viewportFetchTimerRef.current);
       }
       viewportFetchTimerRef.current = window.setTimeout(() => {
-        const bounds = map.getBounds();
-        const minLng = bounds.getWest();
-        const minLat = bounds.getSouth();
-        const maxLng = bounds.getEast();
-        const maxLat = bounds.getNorth();
+        const b = map.getBounds();
         const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
         const url =
           apiBase +
           "/api/capsules/viewport/?bbox=" +
-          [minLng, minLat, maxLng, maxLat]
+          [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()]
             .map((n) => n.toFixed(5))
             .join(",") +
           "&limit=100";
-        // eslint-disable-next-line no-console
-        console.log("[KUDOS MAP] viewport fetch start", url);
-        setDebug((d) => ({
-          ...d,
-          fetchCount: d.fetchCount + 1,
-          lastUrl: url,
-          lastStatus: "fetching",
-        }));
         if (viewportAbortRef.current) {
           viewportAbortRef.current.abort();
         }
         const ctrl = new AbortController();
         viewportAbortRef.current = ctrl;
         fetch(url, { signal: ctrl.signal, cache: "no-store" })
-          .then((r) => {
-            // eslint-disable-next-line no-console
-            console.log("[KUDOS MAP] viewport fetch response", r.status, r.ok);
-            if (!r.ok) {
-              setDebug((d) => ({ ...d, lastStatus: "http_" + r.status }));
-              return null;
-            }
-            return r.json();
-          })
+          .then((r) => (r.ok ? r.json() : null))
           .then((data) => {
-            if (!data || !Array.isArray(data.capsules)) {
-              // eslint-disable-next-line no-console
-              console.warn("[KUDOS MAP] viewport bad shape", data);
-              setDebug((d) => ({ ...d, lastStatus: "bad_shape" }));
-              return;
-            }
-            // eslint-disable-next-line no-console
-            console.log("[KUDOS MAP] capsules received =", data.capsules.length);
+            if (!data || !Array.isArray(data.capsules)) return;
+            // Clear previous markers
             for (const m of capsuleMarkersRef.current) {
               try { m.remove(); } catch { /* defensive */ }
             }
             capsuleMarkersRef.current = [];
+            // Mount pure default markers + collect coords for fitBounds
+            const lngLats: Array<[number, number]> = [];
             let mounted = 0;
-            const mountedCoords: Array<[number, number]> = [];
             for (const cap of data.capsules as Array<{
-              id: string; title: string; lat: number; lng: number;
-              thumbnail_url?: string; image_url?: string;
+              lat: number; lng: number;
             }>) {
               const lat = typeof cap.lat === "number" ? cap.lat : Number(cap.lat);
               const lng = typeof cap.lng === "number" ? cap.lng : Number(cap.lng);
-              if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-                // eslint-disable-next-line no-console
-                console.warn("[KUDOS MAP] skip non-finite coords", cap);
-                continue;
-              }
-              const el = document.createElement("div");
-              // TEMP HARD-DEBUG · giant red circle, impossible to miss.
-              // Revert to subtle purple in patch follow-up cuando founder
-              // confirme que SÍ aparecen visualmente.
-              el.style.cssText =
-                "width:32px;height:32px;border-radius:50%;" +
-                "background:#ef4444;" +
-                "border:3px solid #ffffff;" +
-                "box-shadow:0 0 18px rgba(239,68,68,0.85);" +
-                "cursor:pointer;" +
-                "z-index:9999;" +
-                "pointer-events:auto;";
-              el.setAttribute("role", "button");
-              el.setAttribute("aria-label", "Cápsula: " + cap.title);
-              el.title = cap.title;
-              el.addEventListener("click", (ev) => {
-                ev.stopPropagation();
-                setClicked({ lat, lng });
-              });
-              const marker = new maplibre.Marker({ element: el })
+              if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+              const marker = new maplibre.Marker()
                 .setLngLat([lng, lat])
                 .addTo(map);
               capsuleMarkersRef.current.push(marker);
+              lngLats.push([lng, lat]);
               mounted += 1;
-              mountedCoords.push([lng, lat]);
-
-              // TEMP DEBUG · inspect first marker DOM lifecycle.
-              // Captures size, computed style, parent class, position.
-              if (mounted === 1) {
-                try {
-                  const mEl = marker.getElement();
-                  const mcs = window.getComputedStyle(mEl);
-                  // eslint-disable-next-line no-console
-                  console.log("[KUDOS MAP DEBUG] CUSTOM marker[0]", {
-                    lngLat: marker.getLngLat(),
-                    offsetW: mEl.offsetWidth,
-                    offsetH: mEl.offsetHeight,
-                    position: mcs.position,
-                    display: mcs.display,
-                    visibility: mcs.visibility,
-                    opacity: mcs.opacity,
-                    transform: mcs.transform.slice(0, 80),
-                    zIndex: mcs.zIndex,
-                    background: mcs.background.slice(0, 60),
-                    width: mcs.width,
-                    height: mcs.height,
-                    parentClass: mEl.parentElement?.className,
-                    parentChain: (() => {
-                      const chain: string[] = [];
-                      let p: HTMLElement | null = mEl.parentElement;
-                      let depth = 0;
-                      while (p && depth < 5) {
-                        chain.push(`${p.tagName}.${p.className || "(none)"}`);
-                        p = p.parentElement;
-                        depth++;
-                      }
-                      return chain;
-                    })(),
-                    sameMapInstance: mapRef.current === map,
-                  });
-                } catch (err) {
-                  // eslint-disable-next-line no-console
-                  console.error("[KUDOS MAP DEBUG] marker inspect FAILED", err);
-                }
+            }
+            // Auto-fit to capsules so founder sees them even if currently
+            // outside viewport · padding 80px · maxZoom 10 to avoid
+            // over-zooming on single-point cluster.
+            let fit = false;
+            if (lngLats.length > 0) {
+              try {
+                const bounds = new maplibre.LngLatBounds(
+                  lngLats[0],
+                  lngLats[0],
+                );
+                for (const ll of lngLats) bounds.extend(ll);
+                map.fitBounds(bounds, { padding: 80, maxZoom: 10, duration: 800 });
+                fit = true;
+              } catch {
+                fit = false;
               }
             }
-            // eslint-disable-next-line no-console
-            console.log("[KUDOS MAP] markers mounted =", mounted, mountedCoords);
-            setDebug((d) => ({
-              ...d,
-              lastStatus: "ok",
+            setDebug({
               viewportCount: data.capsules.length,
               markersMounted: mounted,
-            }));
+              fitboundsApplied: fit,
+              markerMode: "default (no custom element)",
+            });
           })
-          .catch((err) => {
-            // eslint-disable-next-line no-console
-            console.error("[KUDOS MAP] viewport fetch FAILED", err);
-            setDebug((d) => ({
-              ...d,
-              lastStatus: "error:" + (err?.name ?? "unknown"),
-            }));
-          });
+          .catch(() => { /* swallow · UX no-op */ });
       }, 400);
     };
 
@@ -462,19 +338,14 @@ export function MapExplorer() {
         style={{ background: "var(--kudos-bg)" }}
       />
 
-      {/* TEMP DEBUG overlay top-left · render-chain diagnostic.
-          Remove once map markers confirmed working in production. */}
+      {/* TEMP DEBUG overlay · minimal binary test */}
       <div
-        className="pointer-events-none absolute left-3 top-3 z-50 rounded-lg border border-red-500/40 bg-black/80 px-3 py-2 font-mono text-[10px] leading-[1.4] text-white/90 backdrop-blur-sm"
-        style={{ maxWidth: 320 }}
+        className="pointer-events-none absolute left-3 top-3 z-50 rounded-lg border border-red-500/40 bg-black/85 px-3 py-2 font-mono text-[11px] leading-[1.5] text-white/95 backdrop-blur-sm"
       >
-        <div>MAP DEBUG · P0 viewport diagnostic</div>
-        <div>api_base: {debug.apiBase || "(empty)"}</div>
-        <div>fetch_count: {debug.fetchCount}</div>
-        <div>last_status: {debug.lastStatus}</div>
         <div>viewport_capsules: {debug.viewportCount}</div>
         <div>markers_mounted: {debug.markersMounted}</div>
-        <div className="truncate opacity-60">{debug.lastUrl}</div>
+        <div>fitbounds_applied: {debug.fitboundsApplied ? "yes" : "no"}</div>
+        <div>marker_mode: {debug.markerMode}</div>
       </div>
 
       {/* Overlay instruccional cuando no hay click aún */}
