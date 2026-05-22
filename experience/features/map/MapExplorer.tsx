@@ -664,8 +664,16 @@ export function MapExplorer() {
               }
             } catch { /* defensive · style may not be ready first paint */ }
 
-            // Defer fitBounds · resize first · single-point flyTo
-            if (lngLats.length >= 2) {
+            // MVP · auto-fit camera DISABLED. Cuando el viewport fetch
+            // devuelve capsules dispersas (España/Galicia para el founder),
+            // fitBounds(maxZoom:10) zoom-out a escala continental y rompe
+            // el cold-start cinemático sobre Coliseo. Mantenemos resize
+            // + repaint para que los tiles pinten correctamente, pero NO
+            // movemos la cámara. Restaurar post-MVP cuando exista cobertura
+            // global de TemporalLandmarks o cuando el cold-start sea
+            // condicionado por el primer-click del usuario.
+            const ENABLE_AUTO_FIT = false;
+            if (ENABLE_AUTO_FIT && lngLats.length >= 2) {
               try {
                 requestAnimationFrame(() => {
                   map.resize();
@@ -678,13 +686,21 @@ export function MapExplorer() {
                   map.triggerRepaint();
                 });
               } catch { /* defensive */ }
-            } else if (lngLats.length === 1) {
+            } else if (ENABLE_AUTO_FIT && lngLats.length === 1) {
               try {
                 requestAnimationFrame(() => {
                   map.resize();
                   map.flyTo({ center: lngLats[0], zoom: 12, duration: 0 });
                 });
                 map.once("moveend", () => {
+                  map.resize();
+                  map.triggerRepaint();
+                });
+              } catch { /* defensive */ }
+            } else {
+              // MVP path · only resize+repaint, no camera movement.
+              try {
+                requestAnimationFrame(() => {
                   map.resize();
                   map.triggerRepaint();
                 });
