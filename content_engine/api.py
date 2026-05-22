@@ -42,6 +42,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
+from django.db.models import Count
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
@@ -499,29 +500,40 @@ def capsules_viewport(request: HttpRequest) -> JsonResponse:
 def capsules_debug_count(request: HttpRequest) -> JsonResponse:
     """GET /api/debug/capsules-count
 
-    DB inventory diagnostic · no params · returns counts grouped by
-    hygiene status, attempt linkage, and bbox tests for canonical regions.
-    Temporary endpoint · safe to remove once viewport behavior validated.
+    DB inventory diagnostic · no params. Each section wrapped in try/except
+    so a single field/migration mismatch does not 500 the whole endpoint.
+    Failed sections appear in `errors` instead of crashing.
     """
-    from django.db.models import Count
+    errors: dict[str, str] = {}
+    out: dict[str, Any] = {}
 
-    total_cap = PlaceCapsule.objects.count()
+    def _safe(key: str, fn):
+        try:
+            out[key] = fn()
+        except Exception as exc:  # noqa: BLE001
+            errors[key] = f"{type(exc).__name__}: {exc}"
 
-    by_hygiene_qs = PlaceCapsule.objects.values("hygiene_status").annotate(n=Count("id"))
-    by_hygiene = {row["hygiene_status"] or "NULL": row["n"] for row in by_hygiene_qs}
+    _safe("total_capsules", lambda: PlaceCapsule.objects.count())
 
-    null_hygiene = PlaceCapsule.objects.filter(hygiene_status__isnull=True).count()
-    null_winner_distance = PlaceCapsule.objects.filter(
-        winner_distance_m__isnull=True,
-    ).count()
+    def _by_hygiene():
+        rows = PlaceCapsule.objects.values("hygiene_status").annotate(n=Count("id"))
+        return {(row.get("hygiene_status") or "NULL"): row["n"] for row in rows}
+    _safe("by_hygiene", _by_hygiene)
 
-    approved_attempts = GenerationAttempt.objects.filter(
-        status=GenerationAttempt.STATUS_APPROVED,
-    ).count()
-    linked_attempts = GenerationAttempt.objects.filter(
-        status=GenerationAttempt.STATUS_APPROVED,
-        place_capsule__isnull=False,
-    ).count()
+    _safe("null_hygiene",
+          lambda: PlaceCapsule.objects.filter(hygiene_status__isnull=True).count())
+    _safe("null_winner_distance",
+          lambda: PlaceCapsule.objects.filter(winner_distance_m__isnull=True).count())
+
+    _safe("approved_attempts",
+          lambda: GenerationAttempt.objects.filter(
+              status=GenerationAttempt.STATUS_APPROVED).count())
+    _safe("linked_attempts",
+          lambda: GenerationAttempt.objects.filter(
+              status=GenerationAttempt.STATUS_APPROVED,
+              place_capsule__isnull=False).count())
+    _safe("attempts_total",
+          lambda: GenerationAttempt.objects.count())
 
     def _bbox_count(min_lat, min_lng, max_lat, max_lng) -> int:
         return GenerationAttempt.objects.filter(
@@ -531,52 +543,70 @@ def capsules_debug_count(request: HttpRequest) -> JsonResponse:
             input_lng__gte=min_lng, input_lng__lte=max_lng,
         ).count()
 
-    bbox_tests = {
-        "world":           _bbox_count(-90,  -180, 90,  180),
-        "europe":          _bbox_count( 35,   -15, 70,   45),
-        "iberia":          _bbox_count( 35,   -10, 45,    5),
-        "madrid_1deg":     _bbox_count( 39.9, -4.2, 40.9, -3.2),
-        "rome_1deg":       _bbox_count( 41.4, 12.0, 42.4, 13.0),
-        "spain_andalucia": _bbox_count( 36,   -7.5, 38.5, -1.5),
-    }
+    def _bbox_tests():
+        return {
+            "world":           _bbox_count(-90,  -180, 90,   180),
+            "europe":          _bbox_count( 35,   -15, 70,    45),
+            "iberia":          _bbox_count( 35,   -10, 45,     5),
+            "madrid_1deg":     _bbox_count( 39.9, -4.2, 40.9, -3.2),
+            "rome_1deg":       _bbox_count( 41.4, 12.0, 42.4, 13.0),
+            "italy_country":   _bbox_count( 35,    6.5, 47.5, 19.0),
+            "spain_country":   _bbox_count( 35,   -10, 44,     5),
+            "spain_andalucia": _bbox_count( 36,   -7.5, 38.5, -1.5),
+            "spain_leon":      _bbox_count( 42.0, -7.0, 43.5, -5.0),
+            "france_country":  _bbox_count( 41,   -5,   51,    10),
+            "portugal":        _bbox_count( 36,   -10,  43,    -5.5),
+        }
+    _safe("bbox_tests", _bbox_tests)
 
-    # Sample first 10 approved attempts · raw input coords + capsule id
-    sample = list(
-        GenerationAttempt.objects.filter(
+    def _sample_attempts():
+        rows = list(
+            GenerationAttempt.objects.filter(
+                status=GenerationAttempt.STATUS_APPROVED,
+                place_capsule__isnull=False,
+            ).select_related("place_capsule")
+            .order_by("-input_timestamp")[:10]
+        )
+        result = []
+        for att in rows:
+            cap = att.place_capsule
+            if cap is None:
+                continue
+            result.append({
+                "lat": att.input_lat,
+                "lng": att.input_lng,
+                "capsule_id": str(cap.id),
+                "title": cap.title,
+                "hygiene": getattr(cap, "hygiene_status", None),
+                "winner_distance_m": getattr(cap, "winner_distance_m", None),
+            })
+        return result
+    _safe("sample_attempts", _sample_attempts)
+
+    def _coord_distribution():
+        # Bucket all approved attempts by 10-degree lat/lng cells. Reveals
+        # geographic clustering at a glance (e.g., {"lat40-lng10": 38} =
+        # all Rome).
+        from collections import defaultdict
+        buckets: dict[str, int] = defaultdict(int)
+        qs = GenerationAttempt.objects.filter(
             status=GenerationAttempt.STATUS_APPROVED,
             place_capsule__isnull=False,
-        ).select_related("place_capsule")
-        .order_by("-input_timestamp")[:10]
-        .values(
-            "input_lat", "input_lng",
-            "place_capsule__id",
-            "place_capsule__title",
-            "place_capsule__hygiene_status",
-            "place_capsule__winner_distance_m",
-        )
-    )
-    sample_out = [
-        {
-            "lat": s["input_lat"],
-            "lng": s["input_lng"],
-            "capsule_id": str(s["place_capsule__id"]),
-            "title": s["place_capsule__title"],
-            "hygiene": s["place_capsule__hygiene_status"],
-            "winner_distance_m": s["place_capsule__winner_distance_m"],
-        }
-        for s in sample
-    ]
+        ).values_list("input_lat", "input_lng")
+        for lat, lng in qs:
+            if lat is None or lng is None:
+                buckets["null_coords"] += 1
+                continue
+            lat_bucket = int(lat // 10) * 10
+            lng_bucket = int(lng // 10) * 10
+            key = f"lat{lat_bucket:+03d}_lng{lng_bucket:+04d}"
+            buckets[key] += 1
+        return dict(sorted(buckets.items(), key=lambda kv: -kv[1]))
+    _safe("coord_distribution_10deg", _coord_distribution)
 
-    return JsonResponse({
-        "total_capsules": total_cap,
-        "by_hygiene": by_hygiene,
-        "null_hygiene": null_hygiene,
-        "null_winner_distance": null_winner_distance,
-        "approved_attempts": approved_attempts,
-        "linked_attempts": linked_attempts,
-        "bbox_tests": bbox_tests,
-        "sample_attempts": sample_out,
-    }, status=200)
+    if errors:
+        out["errors"] = errors
+    return JsonResponse(out, status=200)
 
 
 def _serialize_capsule(capsule: PlaceCapsule) -> dict[str, Any]:
