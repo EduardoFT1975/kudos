@@ -102,28 +102,22 @@ def is_enabled(name: str) -> bool:
 # ----------------------------------------------------------------------------
 # Importante: los nombres aquí DEBEN coincidir con `name=...` en urls.py.
 PUBLIC_URL_NAMES = frozenset({
-    # Home / institucional / auth (Users feature)
-    "home", "register", "login", "logout", "onboarding",
-    "profile", "edit_profile", "public_profile",
-    "about", "terms", "privacy", "manifesto",
+    # Home / auth · únicas surfaces server-rendered con tráfico real
+    "home", "register", "login", "logout",
     "password_change", "password_change_done",
-    # Map 5D
+    # Map · solo el contrato kudos_app API usado por Next.js
     "map",
     "api_capsules_5d", "api_capsules_nearby", "near",
-    # Capsules (CRUD core + share natural)
-    "capsule_list", "capsule_detail", "create_capsule",
-    "toggle_like", "delete_capsule",
+    # Capsules · solo lectura · CRUD se mueve al frontend Next.js
+    "capsule_list", "capsule_detail", "toggle_like", "delete_capsule",
     "api_capsules", "api_stats",
     # AXÓN · Phase 0 fundación contextual
     "api_health", "api_place_detail",
-    # Search
-    "search",
-    # Timeline básico
-    "timeline",
-    # Mind Lite (solo entry + chat reducido)
-    "ai_panel", "ai_chat", "ai_chat_send",
-    # Dashboard básico (entrypoint post-login, no expone dormant)
-    "dashboard", "control_panel",
+    # F.3 quarantine · estos nombres MOVIDOS a DORMANT_PATH_PREFIXES:
+    #   timeline, dashboard, control_panel, onboarding, manifesto,
+    #   about, terms, privacy, profile, edit_profile, public_profile,
+    #   search, create_capsule, ai_panel, ai_chat, ai_chat_send
+    # Las defs viven en views.py; sus rutas devuelven 404 ya.
 })
 
 
@@ -162,8 +156,7 @@ DORMANT_PATH_PREFIXES = (
     "/export/",
     "/founder/",
     "/assistant/",      # incluye /assistant/characters/*
-    "/mind/insight/",
-    "/mind/directive/",
+    "/mind/",           # F.3 · todo /mind/ (panel, chat, ask, insight, directive)
     "/feed/",
     "/follow/",
     "/messages/",
@@ -173,8 +166,21 @@ DORMANT_PATH_PREFIXES = (
     "/preferences/",
     "/historical-map/",
     "/geolocation/",
+    # F.3 quarantine · server-rendered surfaces sin tráfico Next.js
+    "/timeline/",
+    "/dashboard/",
+    "/control_panel/",
+    "/onboarding/",
+    "/manifiesto/",     # nota: la ruta en urls.py es /manifiesto/ (español)
+    "/about/",
+    "/terms/",
+    "/privacy/",
+    "/profile/",
+    "/search/",
+    "/capsules/create/",
+    "/api/django/",     # namespace fantasma referenciado solo en docs
     # Cápsulas: subrecursos congelados (AR/VR/audio/versions/aport/dialog)
-    # No bloqueamos /capsules/ entero porque es PUBLIC CORE.
+    # No bloqueamos /capsules/ entero porque /capsules/<uid>/ sigue PUBLIC.
     # Bloqueamos solo subrutas concretas vía DORMANT_PATH_REGEX.
 )
 
@@ -185,6 +191,7 @@ DORMANT_PATH_REGEX = (
 )
 
 # Rutas siempre permitidas (overrides infraestructurales).
+# Contratos API que el frontend Next.js consume · explicit allowlist.
 ALWAYS_ALLOWED_PREFIXES = (
     "/admin/",
     "/accounts/",
@@ -194,10 +201,11 @@ ALWAYS_ALLOWED_PREFIXES = (
     "/api/capsules/nearby/",
     "/api/health/",
     "/api/places/",
-    # Phase 13 Content Engine API · explicit allowlist so future
-    # additions to DORMANT_PATH_PREFIXES cannot accidentally 404 these
-    # public endpoints. Today they would pass through anyway (no dormant
-    # rule matches), but this lock makes the contract intentional.
-    "/api/place-capsule",       # Phase 13 canonical
-    "/api/capsule/nearby",      # Phase 11 back-compat alias
+    "/api/place-capsule",
+    "/api/capsule/nearby",
+    "/api/capsules/viewport",
+    "/api/landmarks/viewport",
+    "/api/local-capsules",
+    "/api/echo/synthesize",
+    "/api/debug/",
 )

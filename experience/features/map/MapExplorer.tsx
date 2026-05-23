@@ -404,7 +404,42 @@ function generateClipPrompt(capsule: CapsuleLike): string {
 // ClickedCoords / HoveredPreview interfaces ELIMINADAS · única state
 // surface es ProvisionalView (Echo card). Sin paneles paralelos.
 
-export function MapExplorer() {
+// EchoPortalLayout integration props · all optional · standalone mode
+// preservado para back-compat (renderiza su propio modal).
+export interface MapExplorerProps {
+  /** Cuando true, el modal interno NO se renderiza · parent layout (EchoPortalLayout)
+   *  consume el activeEcho via onEchoChange y lo renderiza en su propio chrome. */
+  embedded?: boolean;
+  /** Se llama cuando provisionalView cambia · parent puede leer activeEcho. */
+  onEchoChange?: (echo: ProvisionalView | null) => void;
+  /** Se llama tras cada fetch local-capsules · parent puede leer la lista. */
+  onNearbyChange?: (entries: Array<{
+    entity_id?: string; title?: string; lat?: number; lng?: number;
+    distance_m?: number; wikipedia_url_es?: string; wikipedia_url_en?: string;
+  }>) => void;
+  /** Si parent quiere abrir un POI específico (ej · click en Cerca de aquí),
+   *  pasa un objeto con title/lat/lng/etc · cambia identidad para gatillar. */
+  externalEchoRequest?: {
+    entity_id?: string; title?: string; lat?: number; lng?: number;
+    distance_m?: number; wikipedia_url_es?: string; wikipedia_url_en?: string;
+  } | null;
+  /** Callback cuando externalEchoRequest se ha consumido · parent debe nullify. */
+  onEchoRequestConsumed?: () => void;
+  /** FIX 2 · parent pide pan + fetch local-capsules en nuevo centro (city preset). */
+  externalPanRequest?: { lat: number; lng: number } | null;
+  onPanRequestConsumed?: () => void;
+}
+
+export function MapExplorer(props: MapExplorerProps = {}) {
+  const {
+    embedded, onEchoChange, onNearbyChange,
+    externalEchoRequest, onEchoRequestConsumed,
+    externalPanRequest, onPanRequestConsumed,
+  } = props;
+  // FIX 2 · override de coords cuando parent fuerza pan (city preset).
+  // Cuando set, local-capsules fetch usa estas coords en vez de geo.lat/lng.
+  // Reset a null tras el siguiente fetch.
+  const panOverrideRef = React.useRef<{ lat: number; lng: number } | null>(null);
   const mapContainerRef = React.useRef<HTMLDivElement | null>(null);
   const mapRef = React.useRef<unknown>(null); // maplibre.Map · lazy typed
   const userMarkerRef = React.useRef<unknown>(null);
@@ -1034,6 +1069,52 @@ export function MapExplorer() {
     if (provisionalView) setEchoTab("historia");
   }, [provisionalView?.entity_id, provisionalView?.title]);
 
+  // EMBEDDED MODE · notifica al parent (EchoPortalLayout) cada cambio
+  // de provisionalView para que el portal sincronice left/right/bottom.
+  React.useEffect(() => {
+    if (onEchoChange) onEchoChange(provisionalView);
+  }, [provisionalView, onEchoChange]);
+
+  // FIX 2 · EXTERNAL PAN · parent pide flyTo + re-fetch en nuevo centro.
+  // Setea panOverrideRef y dispara fetch manual via state-tick.
+  const [panTick, setPanTick] = React.useState<number>(0);
+  React.useEffect(() => {
+    if (!externalPanRequest) return;
+    if (!mapRef.current) return;
+    const map = mapRef.current as {
+      flyTo: (opts: { center: [number, number]; zoom: number; duration: number }) => void;
+    };
+    panOverrideRef.current = { lat: externalPanRequest.lat, lng: externalPanRequest.lng };
+    map.flyTo({ center: [externalPanRequest.lng, externalPanRequest.lat], zoom: 14, duration: 1400 });
+    autoOpenedEchoRef.current = false; // allow new auto-open after pan
+    setPanTick((t) => t + 1);
+    if (onPanRequestConsumed) onPanRequestConsumed();
+  }, [externalPanRequest, onPanRequestConsumed]);
+
+  // EXTERNAL PICK · el parent pide abrir un POI específico (ej · click
+  // en módulo "Cerca de aquí"). Lo abrimos via setProvisionalView y
+  // notificamos al parent que consumimos la petición.
+  React.useEffect(() => {
+    if (!externalEchoRequest) return;
+    if (typeof externalEchoRequest.lat !== "number" || typeof externalEchoRequest.lng !== "number") return;
+    setProvisionalView({
+      entity_id: externalEchoRequest.entity_id ?? "",
+      title: externalEchoRequest.title ?? "Lugar",
+      lat: externalEchoRequest.lat,
+      lng: externalEchoRequest.lng,
+      distance_m: typeof externalEchoRequest.distance_m === "number" ? externalEchoRequest.distance_m : 0,
+      wikidata_url: "",
+      wikipedia_url_es: externalEchoRequest.wikipedia_url_es ?? "",
+      wikipedia_url_en: externalEchoRequest.wikipedia_url_en ?? "",
+      narrative: null,
+      imageUrl: null,
+      description: null,
+      pageUrl: null,
+      loading: true,
+    });
+    if (onEchoRequestConsumed) onEchoRequestConsumed();
+  }, [externalEchoRequest, onEchoRequestConsumed]);
+
   // ACTIVE MARKER LINK · cuando Echo card abre, el marker seleccionado
   // se vuelve protagonista (scale + glow boost) · resto baja opacity.
   // Cuando se cierra, todos vuelven a estado normal. Animado vía CSS
@@ -1179,7 +1260,10 @@ export function MapExplorer() {
   // reales (sin LLM, sin alucinación) sourced de Wikidata SPARQL.
   React.useEffect(() => {
     if (!mapReady || !maplibre || !mapRef.current) return;
-    if (geo.status !== "ready" || typeof geo.lat !== "number" || typeof geo.lng !== "number") return;
+    // FIX 2 · si parent forzó pan (panOverrideRef), proceder aunque geo
+    // esté denied / pending · el city preset es agencia válida del user.
+    const hasOverride = panOverrideRef.current !== null;
+    if (!hasOverride && (geo.status !== "ready" || typeof geo.lat !== "number" || typeof geo.lng !== "number")) return;
     const map = mapRef.current as Parameters<InstanceType<MapLibreModule["Marker"]>["addTo"]>[0];
 
     // Premium Echo node · north-star marker.
@@ -1254,10 +1338,14 @@ export function MapExplorer() {
     }
     localCapsuleTimerRef.current = window.setTimeout(() => {
       const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+      // FIX 2 · si parent forzó pan, usar esas coords; else geo del user.
+      const override = panOverrideRef.current;
+      const useLat = override ? override.lat : (geo.lat as number);
+      const useLng = override ? override.lng : (geo.lng as number);
       const url =
         apiBase +
-        "/api/local-capsules/?lat=" + (geo.lat as number).toFixed(5) +
-        "&lng=" + (geo.lng as number).toFixed(5) +
+        "/api/local-capsules/?lat=" + useLat.toFixed(5) +
+        "&lng=" + useLng.toFixed(5) +
         "&radius_km=10&limit=8";
       if (localCapsuleAbortRef.current) localCapsuleAbortRef.current.abort();
       const ctrl = new AbortController();
@@ -1279,6 +1367,10 @@ export function MapExplorer() {
           localCapsuleMarkersRef.current = [];
           if (!data || !Array.isArray(data.capsules)) return;
           localCapsulesCacheRef.current = data.capsules.slice();
+          // Notify embedded parent (EchoPortalLayout) of nearby list update.
+          if (onNearbyChange) {
+            try { onNearbyChange(data.capsules.slice()); } catch { /* defensive */ }
+          }
           localMarkerElMapRef.current.clear();
           for (const cap of data.capsules) {
             if (typeof cap.lat !== "number" || typeof cap.lng !== "number") continue;
@@ -1364,7 +1456,7 @@ export function MapExplorer() {
         localCapsuleAbortRef.current.abort();
       }
     };
-  }, [mapReady, maplibre, geo.status, geo.lat, geo.lng]);
+  }, [mapReady, maplibre, geo.status, geo.lat, geo.lng, panTick]);
 
   // P0.9 Memory Graph · render markers persistentes de las memorias
   // guardadas. Se ejecuta cuando:
@@ -1506,13 +1598,13 @@ export function MapExplorer() {
         className="absolute inset-0 z-0 h-full w-full"
         style={{
           // Cinematic grade · mapa se siente "telón de fondo".
-          // Cuando Echo card open · deep dim + slight desaturation +
-          // micro scale-down ilusión (transform-origin centro mapa
-          // mantiene tile alignment) · card se vuelve protagonista.
-          filter: provisionalView
+          // En standalone mode, cuando Echo card open hace deep dim +
+          // scale-down ilusión. En embedded mode el portal controla el
+          // tratamiento visual del map column · keep mapa legible.
+          filter: !embedded && provisionalView
             ? "saturate(0.45) contrast(0.82) brightness(0.48) blur(0.4px)"
             : "saturate(0.85) contrast(0.94) brightness(0.85)",
-          transform: provisionalView ? "scale(1.04)" : "scale(1)",
+          transform: !embedded && provisionalView ? "scale(1.04)" : "scale(1)",
           transformOrigin: "50% 50%",
           transition: "filter 700ms ease, transform 900ms cubic-bezier(.2,.7,.2,1)",
         }}
@@ -1536,7 +1628,7 @@ export function MapExplorer() {
           está abierto. Reforzado por vignette + filter. Click-through
           NO: este overlay también captura para cerrar al tap-out.
           (Cierra Echo card al click fuera del card.) */}
-      {provisionalView ? (
+      {!embedded && provisionalView ? (
         <div
           className="absolute inset-0 z-[2] cursor-default"
           style={{
@@ -1555,12 +1647,12 @@ export function MapExplorer() {
           auto-opens en cold-start (north star), los markers son la
           invitación, el mapa es background no protagonista. */}
 
-      {/* HERO ECHO CARD V1 · vertical storytelling · north star feel.
-          ~70vh centered, rounded-[32px], hero 45% + body 55%, premium
-          shadow stack, glass dark. Visualmente convergente con la
-          referencia TikTok/Netflix cinematic emotional. Phase 3 swap
-          el narrative source a LLM cinematic prose · scaffolding intacto. */}
-      {provisionalView ? (() => {
+      {/* HERO ECHO CARD V1 · standalone mode only.
+          Cuando embedded=true, el parent (EchoPortalLayout) renderiza
+          su propio chrome a partir del onEchoChange callback · este
+          bloque NO se monta. Mantiene el feature standalone para
+          back-compat y demos isolados. */}
+      {!embedded && provisionalView ? (() => {
         // Subtitle poético · si Wikipedia da description corta usable
         // (≤ 80 chars), la usamos; si no, fallback rotado deterministicamente
         // por entity_id hash · siempre cinematic, nunca dev label.
@@ -2363,7 +2455,7 @@ export function MapExplorer() {
 
       {/* MICRO TIMELINE · Netflix-grade pill · era + year + thin track.
           Auto-fade cuando Echo card abre · cinematic focus shift. */}
-      {!provisionalView ? (
+      {!embedded && !provisionalView ? (
         <div
           className="pointer-events-auto absolute left-1/2 z-30"
           style={{

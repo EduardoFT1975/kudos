@@ -839,41 +839,66 @@ def local_capsules_generate(request: HttpRequest) -> JsonResponse:
 
     radius_m = int(radius_km * 1000)
 
-    # Wikidata SPARQL geosearch · uses existing WikidataClient.
-    # Failures swallowed → empty payload (200) rather than 500, so the
-    # frontend just renders nothing if Wikidata is unreachable.
+    # FIX 5 · DYNAMIC RADIUS ESCALATION.
+    # Si la zona del usuario es Wikidata-pobre (rural, mar, etc) y el
+    # radio base devuelve <3 POIs notables, escalamos 10→25→50 km hasta
+    # encontrar contenido o agotar opciones. Evita el "dead loop" del
+    # mapa vacío que mata la primera impression.
     try:
         from content_engine.clients.wikidata import (
             WikidataClient,
             RetrievalError,
         )
-        client = WikidataClient(timeout_s=12.0, fail_fast_429=True)
-        candidates = client.search_around(lat, lng, radius_m)
-    except RetrievalError as exc:
+    except Exception as exc:
         return JsonResponse({
-            "capsules": [],
-            "count": 0,
-            "provisional": True,
-            "source": "wikidata",
-            "error": "wikidata_unavailable",
+            "capsules": [], "count": 0, "provisional": True,
+            "source": "wikidata", "error": "import_failed",
             "error_detail": str(exc)[:200],
-            "radius_km": radius_km,
-            "center": [lat, lng],
-        }, status=200)
-    except Exception as exc:  # broad · don't 500 on transient
-        return JsonResponse({
-            "capsules": [],
-            "count": 0,
-            "provisional": True,
-            "source": "wikidata",
-            "error": "unexpected",
-            "error_detail": str(exc)[:200],
-            "radius_km": radius_km,
-            "center": [lat, lng],
+            "radius_km": radius_km, "center": [lat, lng],
         }, status=200)
 
-    # Confidence filter · drop single-sitelink (often vanity) entries.
-    filtered = [c for c in candidates if c.sitelinks_count >= 2]
+    # Escalation ladder · base radius first, then expand if sparse.
+    ladder = [radius_km]
+    if radius_km < 25.0:
+        ladder.append(25.0)
+    if radius_km < 50.0:
+        ladder.append(50.0)
+
+    client = WikidataClient(timeout_s=12.0, fail_fast_429=True)
+    candidates: list = []
+    filtered: list = []
+    radius_used = radius_km
+    escalation_steps = 0
+    last_error = None
+
+    for try_radius_km in ladder:
+        try_radius_m = int(try_radius_km * 1000)
+        try:
+            candidates = client.search_around(lat, lng, try_radius_m)
+        except RetrievalError as exc:
+            last_error = ("wikidata_unavailable", str(exc)[:200])
+            candidates = []
+        except Exception as exc:
+            last_error = ("unexpected", str(exc)[:200])
+            candidates = []
+        filtered = [c for c in candidates if c.sitelinks_count >= 2]
+        radius_used = try_radius_km
+        escalation_steps += 1
+        # Stop escalating once we have at least 3 notable candidates
+        if len(filtered) >= 3:
+            last_error = None
+            break
+
+    if not filtered and last_error:
+        err_code, err_detail = last_error
+        return JsonResponse({
+            "capsules": [], "count": 0, "provisional": True,
+            "source": "wikidata", "error": err_code,
+            "error_detail": err_detail,
+            "radius_km": radius_used, "center": [lat, lng],
+            "escalation_steps": escalation_steps,
+        }, status=200)
+
     # Sort: notability first, then proximity.
     filtered.sort(key=lambda c: (-c.sitelinks_count, c.distance_m))
 
@@ -908,8 +933,80 @@ def local_capsules_generate(request: HttpRequest) -> JsonResponse:
         "count": len(out),
         "provisional": True,
         "source": "wikidata",
-        "radius_km": radius_km,
+        "radius_km": radius_used,
+        "radius_km_requested": radius_km,
+        "escalation_steps": escalation_steps,
         "center": [lat, lng],
         "raw_count": len(candidates),
         "filtered_count": len(filtered),
     }, status=200)
+
+
+# ---------------------------------------------------------------------------
+# View · GET /api/echo/synthesize · LLM cinematic Echo for one POI
+# ---------------------------------------------------------------------------
+@csrf_exempt
+@require_GET
+def echo_synthesize(request: HttpRequest) -> JsonResponse:
+    """GET /api/echo/synthesize/?entity_id=&title=&lat=&lng=&wikipedia_url_es=&wikipedia_url_en=&wikidata_url=
+
+    KUDOS Echo · cache-first (Django cache 30d) · Anthropic tool-use LLM ·
+    Wikipedia-derived fallback. Cost guards: rate-limit 60/h por IP +
+    char caps. Never 500s. `source`: cache/llm/wikipedia_fallback/
+    minimal_fallback/pipeline_fail.
+    """
+    from django.core.cache import cache as dj_cache
+    from content_engine.echo_synthesis import synthesize_echo
+
+    entity_id = (request.GET.get("entity_id") or "").strip()[:32]
+    title = (request.GET.get("title") or "").strip()[:200]
+    if not title:
+        return JsonResponse({"error": "missing title"}, status=400)
+
+    try:
+        lat = float(request.GET.get("lat") or "")
+        lng = float(request.GET.get("lng") or "")
+    except (TypeError, ValueError):
+        return JsonResponse({"error": "invalid lat/lng"}, status=400)
+    if not (-90.0 <= lat <= 90.0 and -180.0 <= lng <= 180.0):
+        return JsonResponse({"error": "lat/lng out of range"}, status=400)
+
+    wiki_es = (request.GET.get("wikipedia_url_es") or "").strip()[:400]
+    wiki_en = (request.GET.get("wikipedia_url_en") or "").strip()[:400]
+    wikidata = (request.GET.get("wikidata_url") or "").strip()[:400]
+
+    ip = (
+        (request.META.get("HTTP_X_FORWARDED_FOR") or "").split(",")[0].strip()
+        or request.META.get("REMOTE_ADDR")
+        or "anon"
+    )[:48]
+    rl_key = f"echo:rl:{ip}"
+    count = dj_cache.get(rl_key) or 0
+    if isinstance(count, int) and count >= 60:
+        return JsonResponse({
+            "error": "rate_limited",
+            "detail": "60 requests per hour cap reached.",
+        }, status=429)
+    dj_cache.set(rl_key, int(count) + 1, 3600)
+
+    try:
+        result = synthesize_echo(
+            entity_id=entity_id, title=title, lat=lat, lng=lng,
+            wikipedia_url_es=wiki_es,
+            wikipedia_url_en=wiki_en,
+            wikidata_url=wikidata,
+        )
+    except Exception as exc:
+        return JsonResponse({
+            "title": title,
+            "subtitle": "Un eco que aun busca su voz.",
+            "micro_narrative": "El lugar continua siendo paisaje. Su historia llegara pronto.",
+            "cultural_dna": ["Memoria", "Tiempo", "Lugar"],
+            "hero_image": "",
+            "wikipedia_url": wiki_es or wiki_en,
+            "wikidata_url": wikidata,
+            "source": "pipeline_fail",
+            "error_detail": str(exc)[:200],
+        }, status=200)
+
+    return JsonResponse(result, status=200)
