@@ -23,7 +23,8 @@ import * as React from "react";
 // se montan en el DOM pero quedan invisibles (default position static).
 // Solo afecta a markers · tiles renderizan via canvas sin CSS.
 import "maplibre-gl/dist/maplibre-gl.css";
-import { CapsuleSession } from "@/features/capsule/CapsuleSession";
+// import CapsuleSession ELIMINADO · legacy capsule panel ya no se renderiza
+// desde el mapa. La única superficie es el Echo card (provisionalView).
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useMemoryGraph } from "@/lib/memory/useMemoryGraph";
 import { track } from "@/lib/analytics/plausible";
@@ -43,20 +44,68 @@ const _DEFAULT_ZOOM = 2;
 
 // Real-geo policy.
 // La cámara va SIEMPRE a la posición real del usuario tras geo grant.
-// Si no hay memorias propias dentro de NEARBY_RADIUS_KM, mostramos el
-// empty-state panel con ciudades sembradas como CTAs OPCIONALES de
-// exploración (Roma/Atenas/Egipto en CITY_PRESETS). Nunca teleportamos
-// automáticamente — KUDOS es geolocalizado.
+// CITY_PRESETS / empty-state CTA modal eliminados por mandato producto:
+// rompían el feel cinematográfico. El Echo card auto-opens en cold-start
+// del POI más notable cercano (north star: producto, no herramienta).
 const NEARBY_RADIUS_KM = 25;
-const CITY_PRESETS: ReadonlyArray<{
-  id: string;
-  label: string;
-  center: [number, number];
-}> = [
-  { id: "roma",   label: "Roma",            center: [12.4922, 41.8902] },
-  { id: "atenas", label: "Atenas",          center: [23.7261, 37.9755] },
-  { id: "egipto", label: "Egipto · Gizeh",  center: [31.1342, 29.9792] },
-];
+
+// Region inference por coords · derivación contextual sin backend.
+// Devuelve { name, tags } para alimentar el tab LUGAR · cinematic chips.
+// Pad regions amplios · fallback genérico nunca técnico.
+function regionFromCoords(lat: number, lng: number): { name: string; tags: string[] } {
+  if (lat >= 41.8 && lat <= 43.8 && lng >= -9.4 && lng <= -6.8) {
+    return {
+      name: "Galicia",
+      tags: ["Galicia", "Atlántico", "Mariscadores", "Granito", "Niebla", "Costa", "Celta"],
+    };
+  }
+  if (lat >= 41.0 && lat <= 43.7 && lng >= -3.5 && lng <= 0.5) {
+    return {
+      name: "Cantábrico",
+      tags: ["Cantábrico", "Verde", "Costa", "Cordillera", "Niebla"],
+    };
+  }
+  if (lat >= 36.0 && lat <= 38.7 && lng >= -7.5 && lng <= -1.4) {
+    return {
+      name: "Andalucía",
+      tags: ["Andalucía", "Mediterráneo", "Al-Ándalus", "Olivar", "Flamenco", "Sol"],
+    };
+  }
+  if (lat >= 40.0 && lat <= 41.6 && lng >= -4.5 && lng <= -2.5) {
+    return {
+      name: "Castilla",
+      tags: ["Castilla", "Meseta", "Trigo", "Catedrales", "Páramo"],
+    };
+  }
+  if (lat >= 40.5 && lat <= 42.9 && lng >= 0.2 && lng <= 3.5) {
+    return {
+      name: "Catalunya",
+      tags: ["Catalunya", "Mediterráneo", "Pirineo", "Modernisme", "Costa Brava"],
+    };
+  }
+  if (lat >= 41.5 && lat <= 42.2 && lng >= 12.2 && lng <= 12.8) {
+    return {
+      name: "Roma",
+      tags: ["Roma", "Imperio", "Mediterráneo", "Travertino", "Latín", "Eterna"],
+    };
+  }
+  if (lat >= 36.5 && lat <= 38.5 && lng >= 22.0 && lng <= 24.5) {
+    return {
+      name: "Ática",
+      tags: ["Ática", "Egeo", "Mármol", "Mito", "Polis"],
+    };
+  }
+  if (lat >= 29.5 && lat <= 30.5 && lng >= 30.5 && lng <= 32.0) {
+    return {
+      name: "Egipto",
+      tags: ["Egipto", "Nilo", "Desierto", "Piedra", "Dinastía"],
+    };
+  }
+  return {
+    name: "Paisaje",
+    tags: ["Paisaje", "Memoria", "Tierra", "Tiempo"],
+  };
+}
 
 function haversineKm(a: [number, number], b: [number, number]): number {
   const R = 6371;
@@ -97,11 +146,13 @@ type ProvisionalView = {
   wikidata_url: string;
   wikipedia_url_es: string;
   wikipedia_url_en: string;
-  // Async-populated state · narrative + hero image + canonical page URL.
-  narrative: string | null;
-  imageUrl: string | null;
-  description: string | null;
-  pageUrl: string | null;
+  // Async-populated · backend /api/echo/synthesize/ payload.
+  narrative: string | null;     // micro_narrative (cinematic)
+  imageUrl: string | null;      // hero_image
+  description: string | null;   // subtitle (poética del LLM)
+  pageUrl: string | null;       // wikipedia_url
+  culturalDna?: string[];       // LUGAR tab override · LLM-derived (optional · undefined si no llegó)
+  echoSource?: string;          // cache | llm | wikipedia_fallback | minimal_fallback | pipeline_fail
   loading: boolean;
   errorMessage?: string;
 };
@@ -350,26 +401,14 @@ function generateClipPrompt(capsule: CapsuleLike): string {
   );
 }
 
-interface ClickedCoords {
-  lat: number;
-  lng: number;
-  title?: string;
-  hero?: ResolvedMedia;
-}
-interface HoveredPreview {
-  x: number;
-  y: number;
-  title: string;
-  thumbnail: string;
-  year: string;
-  hasClip: boolean;
-}
+// ClickedCoords / HoveredPreview interfaces ELIMINADAS · única state
+// surface es ProvisionalView (Echo card). Sin paneles paralelos.
 
 export function MapExplorer() {
   const mapContainerRef = React.useRef<HTMLDivElement | null>(null);
   const mapRef = React.useRef<unknown>(null); // maplibre.Map · lazy typed
   const userMarkerRef = React.useRef<unknown>(null);
-  const clickMarkerRef = React.useRef<unknown>(null);
+  // clickMarkerRef retirado · ya no hay map-tap → click marker.
   // P0.9 Memory Graph · markers persistentes de las memorias guardadas.
   // Cada entry crea un Marker propio · los acumulamos en una ref para
   // poder limpiarlos cuando el set de memorias cambie sin tener que
@@ -389,17 +428,24 @@ export function MapExplorer() {
   const localCapsuleMarkersRef = React.useRef<Array<{ remove: () => void }>>([]);
   const localCapsuleAbortRef = React.useRef<AbortController | null>(null);
   const localCapsuleTimerRef = React.useRef<number | null>(null);
+  // One-shot · auto-open Echo card del POI más notable en cold-start.
+  // Evita que se re-dispare en cada update de geo (watchPosition tick).
+  const autoOpenedEchoRef = React.useRef<boolean>(false);
+  // Cache de la última fetched list · feed el tab ECOS (otros lugares
+  // cercanos al actualmente abierto).
+  const localCapsulesCacheRef = React.useRef<Array<{
+    entity_id?: string; title?: string; lat?: number; lng?: number;
+    distance_m?: number; wikipedia_url_es?: string; wikipedia_url_en?: string;
+  }>>([]);
+  // Mapa entity_id → root element del marker · habilita aplicar estado
+  // ACTIVE/INACTIVE en respuesta a provisionalView sin re-render del map.
+  const localMarkerElMapRef = React.useRef<Map<string, HTMLDivElement>>(new Map());
   const [maplibre, setMaplibre] = React.useState<MapLibreModule | null>(null);
   const [mapReady, setMapReady] = React.useState(false);
-  const [clicked, setClicked] = React.useState<ClickedCoords | null>(null);
+  // clicked / hoveredPreview state ELIMINADOS · solo provisionalView.
   const [memoryLayerVisible, setMemoryLayerVisible] = React.useState<boolean>(true);
-  // P2 · Floating media preview on marker hover
-  const [hoveredPreview, setHoveredPreview] =
-    React.useState<HoveredPreview | null>(null);
-  // Real-geo decision · emptyNearby=true cuando geo está ready, memory
-  // hidratado, y no hay memorias dentro de NEARBY_RADIUS_KM. Dispara
-  // el CTA panel con ciudades sembradas (Roma/Atenas/Egipto).
-  const [emptyNearby, setEmptyNearby] = React.useState<boolean>(false);
+  // emptyNearby state retired · CTA modal eliminado por mandato producto.
+  // (hasNearby computado in-effect ya no necesita exterior state.)
   // Cluster-expansion list · cuando un cluster se clickea pero el mapa
   // ya está al máximo zoom razonable, en vez de hacer más zoom abrimos
   // un panel con la lista de cápsulas del grupo.
@@ -411,6 +457,30 @@ export function MapExplorer() {
   // para LLM-synthesized cinematic narrative.
   const [provisionalView, setProvisionalView] =
     React.useState<ProvisionalView | null>(null);
+  // Echo tab state · HISTORIA (default) / LUGAR / ECOS · mini portal.
+  const [echoTab, setEchoTab] = React.useState<"historia" | "lugar" | "ecos">("historia");
+  // Closing flag · run exit animation antes de nullify provisionalView.
+  // Evita el snap brutal · cinematic close.
+  const [closing, setClosing] = React.useState<boolean>(false);
+  const closeEchoCinematic = React.useCallback(() => {
+    setClosing(true);
+    window.setTimeout(() => {
+      setProvisionalView(null);
+      setClosing(false);
+    }, 280);
+  }, []);
+  // Image error state · si Wikipedia thumbnail falla (404, CORS,
+  // broken host) caemos al poster fallback sin mostrar broken-image.
+  const [heroImgFailed, setHeroImgFailed] = React.useState<boolean>(false);
+  React.useEffect(() => {
+    setHeroImgFailed(false);
+  }, [provisionalView?.entity_id, provisionalView?.title, provisionalView?.imageUrl]);
+  // Dev mode flag · si localStorage.kudos_dev === "1" mostramos source
+  // badge (LLM/CACHE/FALLBACK). Founder-only · invisible al user.
+  const isDevMode = React.useMemo(() => {
+    if (typeof window === "undefined") return false;
+    try { return window.localStorage.getItem("kudos_dev") === "1"; } catch { return false; }
+  }, []);
   // P1 · Temporal map · year slider state. Range -500 BC → 2026.
   // Default 2026 (present). Future capsules filter by year via viewport
   // API param. Visual tint switches by era band.
@@ -650,8 +720,6 @@ export function MapExplorer() {
                   ev.stopPropagation();
                   const currentZoom = map.getZoom();
                   if (currentZoom < 14) {
-                    // eslint-disable-next-line no-console
-                    console.log("FLYTO CLUSTER", [avgLng, avgLat], { fromZoom: currentZoom });
                     map.flyTo({
                       center: [avgLng, avgLat],
                       zoom: Math.min(currentZoom + 2, 16),
@@ -676,30 +744,24 @@ export function MapExplorer() {
                 el = buildKudosMarkerEl(cap.title ?? "Cápsula");
                 el.addEventListener("click", (ev) => {
                   ev.stopPropagation();
-                  const hero = resolveTemporalMedia(cap, selectedYearRef.current);
-                  setClicked({
+                  // Verified capsule marker → Echo card (single surface).
+                  setProvisionalView({
+                    entity_id: "",
+                    title: cap.title ?? "Lugar",
                     lat: cap.lat,
                     lng: cap.lng,
-                    title: cap.title,
-                    hero,
+                    distance_m: 0,
+                    wikidata_url: "",
+                    wikipedia_url_es: "",
+                    wikipedia_url_en: "",
+                    narrative: null,
+                    imageUrl: null,
+                    description: null,
+                    pageUrl: null,
+                    loading: true,
                   });
                 });
-                // P2 · floating preview on hover · positioned via map.project
-                el.addEventListener("mouseenter", () => {
-                  const pt = map.project([cap.lng, cap.lat]);
-                  const hero = resolveTemporalMedia(cap, selectedYearRef.current);
-                  setHoveredPreview({
-                    x: pt.x,
-                    y: pt.y,
-                    title: cap.title ?? "Cápsula",
-                    thumbnail: hero.thumbnailUrl || hero.imageUrl,
-                    year: labelForYear(selectedYearRef.current),
-                    hasClip: Boolean(hero.clipUrl),
-                  });
-                });
-                el.addEventListener("mouseleave", () => {
-                  setHoveredPreview(null);
-                });
+                // hover preview ELIMINADO · feel engineering.
               }
 
               const marker = new maplibre.Marker({ element: el })
@@ -787,8 +849,6 @@ export function MapExplorer() {
                   map.resize();
                   const bounds = new maplibre.LngLatBounds(lngLats[0], lngLats[0]);
                   for (const ll of lngLats) bounds.extend(ll);
-                  // eslint-disable-next-line no-console
-                  console.log("FLYTO VIEWPORT (fitBounds)", { count: lngLats.length });
                   map.fitBounds(bounds, { padding: 80, maxZoom: 10, duration: 0 });
                 });
                 map.once("moveend", () => {
@@ -800,8 +860,6 @@ export function MapExplorer() {
               try {
                 requestAnimationFrame(() => {
                   map.resize();
-                  // eslint-disable-next-line no-console
-                  console.log("FLYTO VIEWPORT (single)", lngLats[0]);
                   map.flyTo({ center: lngLats[0], zoom: 12, duration: 0 });
                 });
                 map.once("moveend", () => {
@@ -852,20 +910,7 @@ export function MapExplorer() {
             renderTemporalLandmarks(
               map as unknown as TemporalMapLike,
               data ?? { features: [] },
-              (pt) => {
-                if (!pt) {
-                  setHoveredPreview(null);
-                  return;
-                }
-                setHoveredPreview({
-                  x: pt.x,
-                  y: pt.y,
-                  title: pt.data.title,
-                  thumbnail: pt.data.thumbnail,
-                  year: pt.data.year,
-                  hasClip: pt.data.hasClip,
-                });
-              },
+              // onHover removed · hover preview path eliminado.
             );
           })
           .catch(() => {
@@ -881,9 +926,10 @@ export function MapExplorer() {
     map.on("moveend", fetchLandmarks);
     map.on("load", fetchLandmarks);
 
-    map.on("click", (e: { lngLat: { lng: number; lat: number } }) => {
-      setClicked({ lat: e.lngLat.lat, lng: e.lngLat.lng });
-    });
+    // map.on("click", ...) ELIMINADO · cualquier tap-anywhere en el mapa
+    // gatillaba CapsuleSession → "Este lugar guarda silencio". Ahora la
+    // navegación es solo por markers (provisional/memory/cluster) → Echo
+    // card. El mapa es background, no surface accionable.
 
     return () => {
       if (viewportFetchTimerRef.current !== null) {
@@ -946,30 +992,9 @@ export function MapExplorer() {
     };
     const userLngLat: [number, number] = [geo.lng, geo.lat];
 
-    // Memorias propias dentro del radio cercano · suficiente para que
-    // la zona "valga la pena" como cold-start. Capsules públicas del
-    // viewport fetch no cuentan aquí (esas se cargan después y no
-    // sabemos en este momento si la zona está poblada).
-    let hasNearby = false;
-    for (const entry of memory.entries) {
-      if (typeof entry.lat !== "number" || typeof entry.lng !== "number") continue;
-      if (haversineKm(userLngLat, [entry.lng, entry.lat]) <= NEARBY_RADIUS_KM) {
-        hasNearby = true;
-        break;
-      }
-    }
-
     // Política: la cámara va SIEMPRE a la posición real del usuario.
     // Geolocation es la única autoridad sobre la cámara inicial.
-    // eslint-disable-next-line no-console
-    console.log("FLYTO GEO", userLngLat, { hasNearby });
     map.flyTo({ center: userLngLat, zoom: 14, duration: 1200 });
-    setEmptyNearby(!hasNearby);
-
-    // TEMP DEBUG · verifica que el effect corre con coords válidas.
-    // Quitar tras confirmar pin visible en producción.
-    // eslint-disable-next-line no-console
-    console.log("[KUDOS · map] USER GEO:", userLngLat);
 
     // Destroy + recreate · evita marker zombie con coords viejas si el
     // effect re-corre (geo update / memory change).
@@ -1003,87 +1028,145 @@ export function MapExplorer() {
     } catch { /* defensive */ }
   }, [mapReady, maplibre, geo.status, geo.lat, geo.lng, memory.hydrated, memory.entries]);
 
-  // Local Capsule Generator · Phase 2 narrative fetch.
-  // Cuando se abre provisionalView con loading=true, fetch Wikipedia
-  // REST summary (es preferred, en fallback). Sin backend · API REST
-  // de Wikipedia es CORS-enabled y free. Resultado se merge al state.
+  // Reset Echo tab a HISTORIA cuando abre un nuevo POI · evita que
+  // quede pegado el tab de la cápsula anterior.
+  React.useEffect(() => {
+    if (provisionalView) setEchoTab("historia");
+  }, [provisionalView?.entity_id, provisionalView?.title]);
+
+  // ACTIVE MARKER LINK · cuando Echo card abre, el marker seleccionado
+  // se vuelve protagonista (scale + glow boost) · resto baja opacity.
+  // Cuando se cierra, todos vuelven a estado normal. Animado vía CSS
+  // transitions ya presentes en el el.style.transition del marker.
+  React.useEffect(() => {
+    const map = localMarkerElMapRef.current;
+    const activeKey = provisionalView ? (provisionalView.entity_id || provisionalView.title) : "";
+    map.forEach((el, key) => {
+      const isActive = key === activeKey;
+      if (!provisionalView) {
+        // Reset all to default
+        el.style.transform = "scale(1)";
+        el.style.opacity = "1";
+        el.style.zIndex = "";
+        const core = el.children[1] as HTMLDivElement | undefined;
+        if (core) {
+          core.style.transform = "translate(-50%,-50%) scale(1)";
+          core.style.boxShadow =
+            "0 0 12px rgba(167,139,250,0.85)," +
+            "0 0 2px rgba(255,255,255,0.6) inset," +
+            "0 2px 4px rgba(0,0,0,0.55)";
+        }
+        return;
+      }
+      if (isActive) {
+        // Active · scale up, full opacity, raised, intense glow
+        el.style.transform = "scale(1.55)";
+        el.style.opacity = "1";
+        el.style.zIndex = "10";
+        const core = el.children[1] as HTMLDivElement | undefined;
+        if (core) {
+          core.style.transform = "translate(-50%,-50%) scale(1.5)";
+          core.style.boxShadow =
+            "0 0 26px rgba(196,181,253,1)," +
+            "0 0 10px rgba(255,255,255,0.6)," +
+            "0 0 4px rgba(255,255,255,0.95) inset," +
+            "0 3px 8px rgba(0,0,0,0.7)";
+        }
+      } else {
+        // Inactive · dim, slightly smaller
+        el.style.transform = "scale(0.85)";
+        el.style.opacity = "0.32";
+        el.style.zIndex = "";
+        const core = el.children[1] as HTMLDivElement | undefined;
+        if (core) {
+          core.style.transform = "translate(-50%,-50%) scale(1)";
+          core.style.boxShadow =
+            "0 0 6px rgba(167,139,250,0.4)," +
+            "0 1px 2px rgba(0,0,0,0.4)";
+        }
+      }
+    });
+  }, [provisionalView?.entity_id, provisionalView?.title, provisionalView]);
+
+  // Echo Synthesis · Phase 3 backend pipeline.
+  // Cuando se abre provisionalView con loading=true, llamamos al backend
+  // /api/echo/synthesize/ que devuelve subtitle + micro_narrative +
+  // cultural_dna + hero_image · cache-first (30d TTL), LLM via Anthropic
+  // tool-use, fallback a Wikipedia-derived KUDOS-tone si no hay API key.
   React.useEffect(() => {
     if (!provisionalView || !provisionalView.loading) return;
     let cancelled = false;
     const ctrl = new AbortController();
 
-    const fetchSummary = async () => {
-      const tries: Array<{ lang: "es" | "en"; title: string }> = [
-        { lang: "es", title: provisionalView.title },
-        { lang: "en", title: provisionalView.title },
-      ];
-      for (const t of tries) {
-        try {
-          const url =
-            `https://${t.lang}.wikipedia.org/api/rest_v1/page/summary/` +
-            encodeURIComponent(t.title);
-          const r = await fetch(url, {
-            signal: ctrl.signal,
-            cache: "no-store",
-            headers: { Accept: "application/json" },
-          });
-          if (!r.ok) continue;
-          const j = await r.json();
-          const extract = typeof j?.extract === "string" ? j.extract.trim() : "";
-          if (extract.length >= 30) {
-            // Hero image: thumbnail preferred (already CDN-sized · ~320px).
-            // originalimage como fallback (puede ser MB-sized · evitar).
-            const thumbSrc =
-              typeof j?.thumbnail?.source === "string" ? j.thumbnail.source : null;
-            const origSrc =
-              typeof j?.originalimage?.source === "string" ? j.originalimage.source : null;
-            const imageUrl = thumbSrc ?? origSrc ?? null;
-            const description =
-              typeof j?.description === "string" && j.description.trim().length > 0
-                ? j.description.trim()
-                : null;
-            const pageUrl =
-              typeof j?.content_urls?.desktop?.page === "string"
-                ? j.content_urls.desktop.page
-                : null;
-            if (!cancelled) {
-              setProvisionalView((prev) =>
-                prev && prev.entity_id === provisionalView.entity_id
-                  ? {
-                      ...prev,
-                      narrative: extract,
-                      imageUrl,
-                      description,
-                      pageUrl,
-                      loading: false,
-                    }
-                  : prev,
-              );
-            }
-            return;
-          }
-        } catch {
-          // try next lang
-        }
+    // Hard timeout · 30s absorbe cold-start Render free (~20s) +
+    // backend Wikipedia (~8s) + Anthropic (~14s) en el peor caso.
+    // Tras 30s abortamos y mostramos errorMessage cinematic en vez de
+    // shimmer infinito. Cache hits subsiguientes son sub-segundo.
+    const timeoutId = window.setTimeout(() => {
+      try { ctrl.abort(); } catch { /* defensive */ }
+    }, 30000);
+
+    const fetchEcho = async () => {
+      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+      const params = new URLSearchParams({
+        entity_id: provisionalView.entity_id || "",
+        title: provisionalView.title,
+        lat: provisionalView.lat.toFixed(5),
+        lng: provisionalView.lng.toFixed(5),
+        wikipedia_url_es: provisionalView.wikipedia_url_es || "",
+        wikipedia_url_en: provisionalView.wikipedia_url_en || "",
+        wikidata_url: provisionalView.wikidata_url || "",
+      });
+      const url = `${apiBase}/api/echo/synthesize/?${params.toString()}`;
+      try {
+        const r = await fetch(url, {
+          signal: ctrl.signal,
+          cache: "no-store",
+          headers: { Accept: "application/json" },
+        });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const j = await r.json();
         if (cancelled) return;
-      }
-      if (!cancelled) {
+        setProvisionalView((prev) => {
+          const sameTarget =
+            prev &&
+            (prev.entity_id
+              ? prev.entity_id === provisionalView.entity_id
+              : prev.title === provisionalView.title);
+          if (!sameTarget) return prev;
+          return {
+            ...prev,
+            narrative: typeof j?.micro_narrative === "string" ? j.micro_narrative : null,
+            imageUrl: typeof j?.hero_image === "string" && j.hero_image ? j.hero_image : null,
+            description: typeof j?.subtitle === "string" && j.subtitle ? j.subtitle : null,
+            pageUrl: typeof j?.wikipedia_url === "string" && j.wikipedia_url ? j.wikipedia_url : null,
+            culturalDna: Array.isArray(j?.cultural_dna)
+              ? j.cultural_dna.filter((x: unknown) => typeof x === "string" && (x as string).trim().length > 0)
+              : [],
+            echoSource: typeof j?.source === "string" ? j.source : "",
+            loading: false,
+          };
+        });
+      } catch (err) {
+        if (cancelled) return;
+        if ((err as { name?: string })?.name === "AbortError") return;
         setProvisionalView((prev) =>
           prev && prev.entity_id === provisionalView.entity_id
             ? {
                 ...prev,
                 narrative: null,
                 loading: false,
-                errorMessage: "Sin resumen disponible · abre la fuente para leer más.",
+                errorMessage: "El eco no llegó a despertarse. Intenta de nuevo en un instante.",
               }
             : prev,
         );
       }
     };
 
-    void fetchSummary();
+    void fetchEcho();
     return () => {
       cancelled = true;
+      window.clearTimeout(timeoutId);
       ctrl.abort();
     };
   }, [provisionalView]);
@@ -1099,28 +1182,68 @@ export function MapExplorer() {
     if (geo.status !== "ready" || typeof geo.lat !== "number" || typeof geo.lng !== "number") return;
     const map = mapRef.current as Parameters<InstanceType<MapLibreModule["Marker"]>["addTo"]>[0];
 
-    // Cyan AI provisional marker · SIMPLIFICADO para garantizar pintado.
-    // El diseño previo usaba radial-gradient + filter:blur que pueden
-    // fallar en silencio en algunos GPU stacks. Esta versión es un círculo
-    // sólido + border + box-shadow glow · primitivas universalmente
-    // soportadas. El nuclear-test (built-in marker rojo) abajo en el loop
-    // confirma de forma independiente que el marker se posiciona bien.
+    // Premium Echo node · north-star marker.
+    //   · Outer ring (28px) · violet hairline + breathing pulse
+    //   · Inner core (8px) · radial gradient · violet glow
+    //   · Drop shadow profundidad
+    //   · Hover · scale + glow boost (magnetic feel)
+    // NO mas debug dots · esto se siente producto.
     const buildProvisionalMarkerEl = (title: string) => {
       const root = document.createElement("div");
       root.title = title;
-      root.setAttribute("aria-label", `Capsule provisional: ${title}`);
+      root.setAttribute("aria-label", `Echo: ${title}`);
       root.style.cssText =
-        "width:16px;height:16px;border-radius:50%;" +
-        "background:#38bdf8;" +
-        "border:2px solid #ffffff;" +
-        "box-shadow:0 0 12px rgba(56,189,248,0.85),0 0 4px rgba(0,0,0,0.4);" +
-        "cursor:pointer;" +
-        "transition:transform .18s ease;";
+        "position:relative;width:28px;height:28px;cursor:pointer;" +
+        "transition:transform .28s cubic-bezier(.2,.7,.2,1);";
+
+      // Outer ring · breathing
+      const ring = document.createElement("div");
+      ring.style.cssText =
+        "position:absolute;inset:0;border-radius:50%;" +
+        "border:1px solid rgba(167,139,250,0.55);" +
+        "box-shadow:0 0 0 1px rgba(167,139,250,0.08)," +
+          "0 8px 20px -8px rgba(0,0,0,0.6);" +
+        "will-change:transform,opacity;";
+      ring.animate(
+        [
+          { transform: "scale(1)",    opacity: 0.55 },
+          { transform: "scale(1.18)", opacity: 0.15 },
+          { transform: "scale(1)",    opacity: 0.55 },
+        ],
+        { duration: 3600, iterations: Infinity, easing: "ease-in-out" },
+      );
+
+      // Inner core · violet gradient sphere
+      const core = document.createElement("div");
+      core.style.cssText =
+        "position:absolute;top:50%;left:50%;" +
+        "transform:translate(-50%,-50%);" +
+        "width:10px;height:10px;border-radius:50%;" +
+        "background:radial-gradient(circle at 32% 32%," +
+          "#ffffff 0%,#e9e3ff 14%,#c4b5fd 38%,#a78bfa 62%,#7c3aed 100%);" +
+        "box-shadow:0 0 12px rgba(167,139,250,0.85)," +
+          "0 0 2px rgba(255,255,255,0.6) inset," +
+          "0 2px 4px rgba(0,0,0,0.55);" +
+        "transition:transform .22s cubic-bezier(.2,.7,.2,1);";
+
+      root.appendChild(ring);
+      root.appendChild(core);
+
       root.addEventListener("mouseenter", () => {
-        root.style.transform = "scale(1.35)";
+        root.style.transform = "scale(1.18)";
+        core.style.transform = "translate(-50%,-50%) scale(1.35)";
+        core.style.boxShadow =
+          "0 0 22px rgba(196,181,253,0.95)," +
+          "0 0 4px rgba(255,255,255,0.85) inset," +
+          "0 2px 6px rgba(0,0,0,0.65)";
       });
       root.addEventListener("mouseleave", () => {
         root.style.transform = "scale(1)";
+        core.style.transform = "translate(-50%,-50%) scale(1)";
+        core.style.boxShadow =
+          "0 0 12px rgba(167,139,250,0.85)," +
+          "0 0 2px rgba(255,255,255,0.6) inset," +
+          "0 2px 4px rgba(0,0,0,0.55)";
       });
       return root;
     };
@@ -1149,14 +1272,14 @@ export function MapExplorer() {
           wikipedia_url_es?: string;
           wikipedia_url_en?: string;
         }> } | null) => {
-          // eslint-disable-next-line no-console
-          console.log("LOCAL CAPSULES", data?.capsules?.length ?? 0, data);
           // Clear previous provisional markers
           for (const m of localCapsuleMarkersRef.current) {
             try { m.remove(); } catch { /* defensive */ }
           }
           localCapsuleMarkersRef.current = [];
           if (!data || !Array.isArray(data.capsules)) return;
+          localCapsulesCacheRef.current = data.capsules.slice();
+          localMarkerElMapRef.current.clear();
           for (const cap of data.capsules) {
             if (typeof cap.lat !== "number" || typeof cap.lng !== "number") continue;
 
@@ -1175,6 +1298,10 @@ export function MapExplorer() {
             };
 
             const el = buildProvisionalMarkerEl(provCtx.title);
+            // Index el por entity_id (o title como fallback) para que
+            // el effect de active-marker pueda re-estilar al abrir Echo.
+            const indexKey = provCtx.entity_id || provCtx.title;
+            if (indexKey) localMarkerElMapRef.current.set(indexKey, el);
             el.addEventListener("click", (ev) => {
               ev.stopPropagation();
               setProvisionalView({
@@ -1191,8 +1318,33 @@ export function MapExplorer() {
               .addTo(map);
             localCapsuleMarkersRef.current.push(marker);
           }
-          // eslint-disable-next-line no-console
-          console.log("PROVISIONAL MARKERS ADDED", localCapsuleMarkersRef.current.length, "(cyan only · nuclear removed)");
+
+          // ECHO AUTO-OPEN · cold-start UX. Si todavía no hay nada abierto,
+          // abrimos el Echo card del POI más notable (top de la lista, ya
+          // ordenado por sitelinks_count desc). One-shot via ref · no
+          // re-fire en updates de geo. KUDOS arranca sintiéndose producto,
+          // no mapa vacío.
+          if (!autoOpenedEchoRef.current && data.capsules.length > 0) {
+            const top = data.capsules[0];
+            if (typeof top.lat === "number" && typeof top.lng === "number") {
+              autoOpenedEchoRef.current = true;
+              setProvisionalView({
+                entity_id: (top as { entity_id?: string }).entity_id ?? "",
+                title: top.title ?? "Lugar",
+                lat: top.lat as number,
+                lng: top.lng as number,
+                distance_m: typeof top.distance_m === "number" ? top.distance_m : 0,
+                wikidata_url: top.wikidata_url ?? "",
+                wikipedia_url_es: top.wikipedia_url_es ?? "",
+                wikipedia_url_en: top.wikipedia_url_en ?? "",
+                narrative: null,
+                imageUrl: null,
+                description: null,
+                pageUrl: null,
+                loading: true,
+              });
+            }
+          }
         })
         .catch(() => { /* swallow · UX no-op */ });
     }, 600);
@@ -1265,7 +1417,22 @@ export function MapExplorer() {
         track("memory_marker_clicked", {
           capsule_id_short: entry.id.slice(0, 8),
         });
-        setClicked({ lat: entry.lat as number, lng: entry.lng as number });
+        // Memory marker → Echo card · misma surface única.
+        setProvisionalView({
+          entity_id: "",
+          title: entry.title || "Memoria",
+          lat: entry.lat as number,
+          lng: entry.lng as number,
+          distance_m: 0,
+          wikidata_url: "",
+          wikipedia_url_es: "",
+          wikipedia_url_en: "",
+          narrative: null,
+          imageUrl: null,
+          description: null,
+          pageUrl: null,
+          loading: true,
+        });
       });
 
       const marker = new maplibre.Marker({ element: el })
@@ -1287,216 +1454,809 @@ export function MapExplorer() {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden">
-      {/* Mapa fullscreen · no bg / no opacity / no blur · z-0 base */}
+      {/* One-time keyframe injection · Echo motion vocabulary.
+          Todo en mismo lenguaje cinematográfico · sin gimmicks. */}
+      <style>{`
+        @keyframes kudos-fade-in {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes kudos-hero-rise {
+          0%   { opacity: 0; transform: translate(-50%, calc(-50% + 28px)); filter: blur(10px); }
+          60%  { opacity: 1; filter: blur(0px); }
+          100% { opacity: 1; transform: translate(-50%, -50%); filter: blur(0px); }
+        }
+        @keyframes kudos-marker-rise {
+          from { opacity: 0; transform: scale(0.6); }
+          to   { opacity: 1; transform: scale(1); }
+        }
+        /* Ken Burns · scale + drift lento · cinematic hero alive */
+        @keyframes kudos-ken-burns {
+          0%   { transform: scale(1.00) translate(0, 0); }
+          100% { transform: scale(1.08) translate(-1.5%, -1.2%); }
+        }
+        @keyframes kudos-tab-fade {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes kudos-float {
+          0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+          50%      { transform: translate(-50%, -50%) translateY(-4px); }
+        }
+        @keyframes kudos-hero-exit {
+          0%   { opacity: 1; transform: translate(-50%, -50%); filter: blur(0px); }
+          100% { opacity: 0; transform: translate(-50%, calc(-50% + 16px)); filter: blur(6px); }
+        }
+        /* Soundless cinema · ambient waveform mini glyph */
+        @keyframes kudos-wave-1 { 0%,100% { transform: scaleY(0.35); } 50% { transform: scaleY(1); } }
+        @keyframes kudos-wave-2 { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(0.45); } }
+        @keyframes kudos-wave-3 { 0%,100% { transform: scaleY(0.55); } 50% { transform: scaleY(0.85); } }
+        /* Skeleton shimmer · loading premium · no dead state */
+        @keyframes kudos-shimmer {
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+      `}</style>
+
+      {/* Mapa · background layer · NO protagonista.
+          Tiles renderizan a z-0 con un filter sutil que reduce contraste
+          de roads + dims overall · empuja el mapa visualmente atrás. */}
       <div
         ref={mapContainerRef}
-        className="absolute inset-0 w-full h-full z-0"
+        className="absolute inset-0 z-0 h-full w-full"
+        style={{
+          // Cinematic grade · mapa se siente "telón de fondo".
+          // Cuando Echo card open · deep dim + slight desaturation +
+          // micro scale-down ilusión (transform-origin centro mapa
+          // mantiene tile alignment) · card se vuelve protagonista.
+          filter: provisionalView
+            ? "saturate(0.45) contrast(0.82) brightness(0.48) blur(0.4px)"
+            : "saturate(0.85) contrast(0.94) brightness(0.85)",
+          transform: provisionalView ? "scale(1.04)" : "scale(1)",
+          transformOrigin: "50% 50%",
+          transition: "filter 700ms ease, transform 900ms cubic-bezier(.2,.7,.2,1)",
+        }}
       />
 
-      {/* Overlay instruccional cuando no hay click aún */}
-      {!clicked ? (
-        <div className="pointer-events-none absolute left-1/2 top-6 z-10 -translate-x-1/2 transform">
-          <span className="rounded-full border border-white/15 bg-[rgba(5,10,31,0.78)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.32em] text-white/70 backdrop-blur-md">
-            Tap en cualquier punto para descubrir
-          </span>
-        </div>
-      ) : null}
+      {/* Atmospheric vignette · radial fade desde centro a esquinas.
+          Empuja la atención al Echo (centro). pointer-events-none para
+          no interceptar clicks de markers/mapa. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-[1]"
+        style={{
+          background:
+            "radial-gradient(120% 90% at 50% 50%, rgba(7,11,28,0) 35%, rgba(7,11,28,0.35) 70%, rgba(7,11,28,0.75) 100%)",
+          opacity: provisionalView ? 1 : 0.7,
+          transition: "opacity 600ms ease",
+        }}
+      />
 
-      {/* EMPTY-NEARBY CTA · usuario está en zona sin memorias propias en
-          radio NEARBY_RADIUS_KM. Tras fallback flyTo Roma, ofrecemos
-          ciudades sembradas como puntos de partida. Auto-dismiss al
-          abrir capsule o cluster panel. */}
-      {emptyNearby && !clicked && !clusterList ? (
-        <div className="pointer-events-auto absolute left-1/2 top-1/2 z-20 w-[min(320px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 transform">
-          <div className="flex flex-col items-center gap-3 rounded-2xl border border-white/12 bg-[rgba(5,10,31,0.88)] px-5 py-5 text-center backdrop-blur-md">
-            <p className="font-display text-[15px] font-light leading-snug text-white/88">
-              Todavía no hay memorias aquí
-            </p>
-            <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-white/45">
-              Explora una ciudad con historia sembrada
-            </p>
-            <div className="flex flex-wrap justify-center gap-2 pt-1">
-              {CITY_PRESETS.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => {
-                    const m = mapRef.current as {
-                      flyTo: (opts: { center: [number, number]; zoom: number; duration: number }) => void;
-                    } | null;
-                    if (m) {
-                      // eslint-disable-next-line no-console
-                      console.log("FLYTO PRESET", c.id, c.center);
-                      m.flyTo({ center: c.center, zoom: 14, duration: 1400 });
-                      setEmptyNearby(false);
-                    }
-                  }}
-                  className="rounded-full border border-[var(--kudos-accent)]/40 bg-[var(--kudos-accent)]/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--kudos-accent-bright)] transition-colors hover:bg-[var(--kudos-accent)]/22"
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => setEmptyNearby(false)}
-              className="mt-1 font-mono text-[9px] uppercase tracking-[0.24em] text-white/35 hover:text-white/65 transition-colors"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      ) : null}
-
-      {/* ECHO CARD · primer card cinematográfico del Echo Portal.
-          Visual converge a north star · NO debug aesthetic. Hero image
-          full-width, título display, micro-narrativa, single CTA.
-          Phase 3 reemplaza el narrative Wikipedia por LLM-synthesized
-          cinematic prose · scaffolding queda intacto. */}
+      {/* Auto hero focus · dim suave sobre el mapa cuando Echo card
+          está abierto. Reforzado por vignette + filter. Click-through
+          NO: este overlay también captura para cerrar al tap-out.
+          (Cierra Echo card al click fuera del card.) */}
       {provisionalView ? (
-        <div className="pointer-events-auto absolute left-1/2 top-1/2 z-40 w-[min(420px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 transform">
+        <div
+          className="absolute inset-0 z-[2] cursor-default"
+          style={{
+            background:
+              "radial-gradient(80% 60% at 50% 50%, rgba(7,11,28,0) 0%, rgba(7,11,28,0.45) 75%, rgba(7,11,28,0.72) 100%)",
+            animation: closing
+              ? "kudos-fade-in 280ms ease reverse both"
+              : "kudos-fade-in 360ms ease both",
+          }}
+          onClick={closeEchoCinematic}
+        />
+      ) : null}
+
+      {/* Empty-state CTA modal y banner instruccional ELIMINADOS por
+          mandato producto: rompen el feel cinematográfico. El Echo card
+          auto-opens en cold-start (north star), los markers son la
+          invitación, el mapa es background no protagonista. */}
+
+      {/* HERO ECHO CARD V1 · vertical storytelling · north star feel.
+          ~70vh centered, rounded-[32px], hero 45% + body 55%, premium
+          shadow stack, glass dark. Visualmente convergente con la
+          referencia TikTok/Netflix cinematic emotional. Phase 3 swap
+          el narrative source a LLM cinematic prose · scaffolding intacto. */}
+      {provisionalView ? (() => {
+        // Subtitle poético · si Wikipedia da description corta usable
+        // (≤ 80 chars), la usamos; si no, fallback rotado deterministicamente
+        // por entity_id hash · siempre cinematic, nunca dev label.
+        const POETIC_FALLBACKS = [
+          "Una memoria que sigue caminando entre estos pasos.",
+          "Un eco que el lugar nunca llegó a callar.",
+          "Donde el tiempo dobla la esquina y mira atrás.",
+          "Lo que el lugar recuerda cuando nadie lo escucha.",
+          "Aquí algo respira más despacio que el presente.",
+          "El paisaje guarda nombres que no pronuncia.",
+        ];
+        const hashSeed = (provisionalView.entity_id || provisionalView.title).split("")
+          .reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7);
+        const fallbackSubtitle = POETIC_FALLBACKS[Math.abs(hashSeed) % POETIC_FALLBACKS.length];
+        const rawDesc = (provisionalView.description ?? "").trim();
+        const subtitle = rawDesc && rawDesc.length <= 80 ? rawDesc : fallbackSubtitle;
+
+        // Micro story · 3-5 líneas · primera frase O 320 chars (más que
+        // antes para llenar visual hero card sin saturar).
+        const story = (() => {
+          if (!provisionalView.narrative) return null;
+          const raw = provisionalView.narrative.trim();
+          const firstStop = raw.search(/(?<=[.!?])\s/);
+          const sentenceEnd = firstStop > 100 && firstStop < 360 ? firstStop + 1 : 320;
+          const cut = raw.slice(0, sentenceEnd).trim();
+          return raw.length > cut.length ? cut + " …" : cut;
+        })();
+
+        const sourceUrl =
+          provisionalView.pageUrl ||
+          provisionalView.wikipedia_url_es ||
+          provisionalView.wikipedia_url_en ||
+          provisionalView.wikidata_url ||
+          "";
+
+        return (
           <div
-            className="overflow-hidden rounded-3xl border border-white/10 bg-[rgba(5,10,31,0.96)] backdrop-blur-xl"
+            className="pointer-events-auto absolute left-1/2 top-1/2 z-40 w-[min(440px,calc(100vw-32px))]"
             style={{
-              boxShadow:
-                "0 24px 80px -20px rgba(0,0,0,0.65),0 0 0 1px rgba(167,139,250,0.10),0 0 40px -10px rgba(139,92,246,0.18)",
+              transform: "translate(-50%, -50%)",
+              animation: closing
+                ? "kudos-hero-exit 260ms cubic-bezier(.6,.0,.7,.2) both"
+                : "kudos-hero-rise 520ms cubic-bezier(.16,.84,.28,1) both," +
+                  " kudos-float 8s ease-in-out 1s infinite",
             }}
           >
-            {/* Hero · imagen + gradient fade · 16:9 aprox */}
-            <div className="relative h-[180px] w-full overflow-hidden bg-[rgba(13,17,38,1)]">
-              {provisionalView.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={provisionalView.imageUrl}
-                  alt=""
-                  className="h-full w-full object-cover"
-                  style={{ filter: "saturate(0.92) contrast(1.04)" }}
-                />
-              ) : (
+            <div
+              className="flex h-[min(70vh,720px)] flex-col overflow-hidden rounded-[32px]"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(11,16,38,0.96) 0%, rgba(7,11,28,0.96) 100%)",
+                border: "1px solid rgba(167,139,250,0.12)",
+                backdropFilter: "blur(24px) saturate(140%)",
+                WebkitBackdropFilter: "blur(24px) saturate(140%)",
+                // Multi-layer depth stack · float premium object
+                boxShadow:
+                  "0 48px 120px -32px rgba(0,0,0,0.85)," +     // deep drop
+                  "0 24px 60px -20px rgba(0,0,0,0.55)," +       // mid drop
+                  "0 0 0 1px rgba(167,139,250,0.12)," +         // hairline ring
+                  "0 0 120px -24px rgba(139,92,246,0.42)," +    // violet ambient halo
+                  "inset 0 1px 0 rgba(255,255,255,0.08)," +     // top glass highlight
+                  "inset 0 -1px 0 rgba(0,0,0,0.4)",             // bottom seal
+              }}
+            >
+              {/* HERO · 45% height · poster-like con lockup overlay */}
+              <div className="relative w-full overflow-hidden bg-[rgba(11,15,34,1)]" style={{ flex: "0 0 45%" }}>
+                {provisionalView.imageUrl && !heroImgFailed ? (
+                  // Ken Burns · scale + drift slow · cinematic alive sin video.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={provisionalView.imageUrl}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    style={{
+                      filter: "saturate(0.94) contrast(1.08) brightness(0.88)",
+                      animation: "kudos-ken-burns 22s ease-out both",
+                      transformOrigin: "55% 40%",
+                    }}
+                    onError={() => setHeroImgFailed(true)}
+                  />
+                ) : (() => {
+                  // Premium fallback poster · feel intentional, no "missing image".
+                  // Iniciales del título (max 2) sobre textura ambient + frase poética.
+                  const initials = provisionalView.title
+                    .split(/\s+/)
+                    .filter((w) => w.length > 0)
+                    .slice(0, 2)
+                    .map((w) => w.charAt(0).toUpperCase())
+                    .join("");
+                  return (
+                    <div className="relative h-full w-full overflow-hidden">
+                      {/* Capa textura abstracta · radial violet + cyan + dust */}
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background:
+                            "radial-gradient(140% 90% at 25% 20%, rgba(196,181,253,0.38) 0%, rgba(109,40,217,0.26) 32%, rgba(7,11,28,0) 65%)," +
+                            "radial-gradient(90% 70% at 78% 88%, rgba(56,189,248,0.22) 0%, rgba(7,11,28,0) 58%)," +
+                            "radial-gradient(60% 40% at 60% 40%, rgba(167,139,250,0.18) 0%, rgba(7,11,28,0) 70%)",
+                          animation: "kudos-ken-burns 22s ease-out both",
+                          transformOrigin: "40% 50%",
+                        }}
+                      />
+                      {/* Grain/dust pattern · imágenes inexistentes pero usamos
+                          radial dot pattern micro para textura premium. */}
+                      <div
+                        aria-hidden
+                        className="absolute inset-0 mix-blend-overlay opacity-30"
+                        style={{
+                          background:
+                            "radial-gradient(circle, rgba(255,255,255,0.08) 0.5px, transparent 1px) 0 0/8px 8px",
+                        }}
+                      />
+                      {/* Iniciales gigantes · letterpress display */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span
+                          aria-hidden
+                          className="font-display font-extralight tracking-[-0.04em] text-white/[0.045] select-none"
+                          style={{
+                            fontSize: "clamp(120px, 28vw, 200px)",
+                            lineHeight: 1,
+                            textShadow: "0 4px 24px rgba(0,0,0,0.4)",
+                          }}
+                        >
+                          {initials || "·"}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
+                {/* Edge vignette · oscurece esquinas para enfocar centro */}
                 <div
-                  className="h-full w-full"
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0"
                   style={{
                     background:
-                      "radial-gradient(120% 80% at 30% 20%, rgba(139,92,246,0.32) 0%, rgba(109,40,217,0.18) 35%, rgba(5,10,31,0) 70%)," +
-                      "radial-gradient(80% 60% at 80% 90%, rgba(56,189,248,0.18) 0%, rgba(5,10,31,0) 65%)",
+                      "radial-gradient(110% 80% at 50% 45%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.55) 100%)",
                   }}
                 />
-              )}
-              {/* Gradient fade to card body */}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-[80px]"
-                style={{
-                  background:
-                    "linear-gradient(180deg, rgba(5,10,31,0) 0%, rgba(5,10,31,0.85) 70%, rgba(5,10,31,1) 100%)",
-                }}
-              />
-              {/* Close · top-right, subtle glass */}
-              <button
-                type="button"
-                onClick={() => setProvisionalView(null)}
-                aria-label="Cerrar"
-                className="absolute right-3 top-3 grid size-7 place-items-center rounded-full border border-white/15 bg-[rgba(5,10,31,0.55)] text-[14px] leading-none text-white/70 backdrop-blur-md transition-all hover:bg-[rgba(5,10,31,0.85)] hover:text-white"
-              >
-                ×
-              </button>
-              {/* Echo glyph · single faint dot, no label · sustituye el
-                  badge "Cápsula IA provisional" del debug aesthetic */}
-              <span
-                aria-hidden
-                className="absolute left-4 top-4 inline-block size-1.5 rounded-full"
-                style={{
-                  background: "var(--kudos-accent-bright)",
-                  boxShadow: "0 0 12px var(--kudos-accent-glow), 0 0 4px rgba(0,0,0,0.5)",
-                }}
-              />
-            </div>
+                {/* Title glow zone · soft violet wash detrás del lockup */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%]"
+                  style={{
+                    background:
+                      "radial-gradient(80% 100% at 20% 100%, rgba(139,92,246,0.22) 0%, rgba(7,11,28,0) 60%)",
+                  }}
+                />
+                {/* Gradient fade to body */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-[62%]"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, rgba(7,11,28,0) 0%, rgba(7,11,28,0.55) 50%, rgba(7,11,28,0.95) 90%, rgba(11,16,38,0.96) 100%)",
+                  }}
+                />
 
-            {/* Body */}
-            <div className="flex flex-col gap-3 px-5 pb-5 pt-2">
-              <div className="flex flex-col gap-1">
-                <h2 className="font-display text-[22px] font-light leading-[1.15] tracking-tight text-white/95">
-                  {provisionalView.title}
-                </h2>
-                {provisionalView.description ? (
-                  <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-[var(--kudos-accent-bright)]/85">
-                    {provisionalView.description}
+                {/* LOCKUP OVERLAY · bottom-left poster-feel.
+                    Echo glyph + small title repeat + poetic subtitle.
+                    Esto convierte el hero en cartel, no foto + body. */}
+                <div className="absolute bottom-4 left-5 right-12 flex flex-col gap-1">
+                  <div className="flex items-center gap-2.5">
+                    <span
+                      aria-hidden
+                      className="inline-block size-1.5 rounded-full"
+                      style={{
+                        background: "var(--kudos-accent-bright)",
+                        boxShadow: "0 0 14px var(--kudos-accent-glow), 0 0 4px rgba(0,0,0,0.55)",
+                        animation: "kudos-breathe 3.2s ease-in-out infinite",
+                      }}
+                    />
+                    <span className="font-mono text-[9px] uppercase tracking-[0.40em] text-white/55">
+                      Echo
+                    </span>
+                    {/* Soundless cinema · waveform mini glyph · "alive" feel */}
+                    <span aria-hidden className="ml-1 inline-flex h-3 items-end gap-[2px]">
+                      <span
+                        className="block w-[2px] rounded-sm"
+                        style={{
+                          height: "100%",
+                          background: "var(--kudos-accent-bright)",
+                          opacity: 0.55,
+                          transformOrigin: "bottom",
+                          animation: "kudos-wave-1 1.6s ease-in-out infinite",
+                        }}
+                      />
+                      <span
+                        className="block w-[2px] rounded-sm"
+                        style={{
+                          height: "100%",
+                          background: "var(--kudos-accent-bright)",
+                          opacity: 0.55,
+                          transformOrigin: "bottom",
+                          animation: "kudos-wave-2 1.6s ease-in-out infinite",
+                        }}
+                      />
+                      <span
+                        className="block w-[2px] rounded-sm"
+                        style={{
+                          height: "100%",
+                          background: "var(--kudos-accent-bright)",
+                          opacity: 0.55,
+                          transformOrigin: "bottom",
+                          animation: "kudos-wave-3 1.6s ease-in-out infinite",
+                        }}
+                      />
+                    </span>
+                  </div>
+                  <p
+                    className="truncate font-display text-[15px] font-light tracking-tight text-white/92"
+                    style={{ textShadow: "0 2px 12px rgba(0,0,0,0.6)" }}
+                  >
+                    {provisionalView.title}
                   </p>
-                ) : provisionalView.distance_m > 0 ? (
-                  <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/35">
-                    a {(provisionalView.distance_m / 1000).toFixed(1)} km
-                  </p>
-                ) : null}
+                </div>
+
+                {/* Top-right close · glass, NOT dev chrome */}
+                <button
+                  type="button"
+                  onClick={closeEchoCinematic}
+                  aria-label="Cerrar"
+                  className="absolute right-4 top-4 grid size-8 place-items-center rounded-full border border-white/14 bg-[rgba(7,11,28,0.5)] text-[15px] leading-none text-white/75 backdrop-blur-md transition-all hover:bg-[rgba(7,11,28,0.82)] hover:text-white"
+                  style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.4)" }}
+                >
+                  ×
+                </button>
               </div>
 
-              {provisionalView.loading ? (
-                <div className="flex items-center gap-2 py-2 font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
-                  <span
-                    aria-hidden
-                    className="inline-block size-1.5 rounded-full bg-[var(--kudos-accent-bright)]"
-                    style={{
-                      animation: "kudos-breathe 1.4s ease-in-out infinite",
-                      boxShadow: "0 0 8px var(--kudos-accent-glow)",
-                    }}
-                  />
-                  Despertando el eco…
+              {/* BODY · Mini Echo Portal · tabs HISTORIA / LUGAR / ECOS.
+                  55% height, internal scroll en el tab content (no la
+                  card entera). Card permanece bounded · portal feel. */}
+              <div className="flex min-h-0 flex-1 flex-col gap-3 px-6 pb-5 pt-4">
+                {/* Title + poetic subtitle · siempre visible.
+                    Mientras backend sintetiza subtitle, mostramos shimmer
+                    line en vez del fallback poético · evita flash. */}
+                <div className="flex flex-col gap-1.5">
+                  <h2 className="font-display text-[clamp(24px,5.5vw,34px)] font-extralight leading-[1.05] tracking-[-0.01em] text-white/97">
+                    {provisionalView.title}
+                  </h2>
+                  {provisionalView.loading && !provisionalView.description ? (
+                    <span
+                      aria-hidden
+                      className="block h-3.5 w-[78%] rounded-full"
+                      style={{
+                        background:
+                          "linear-gradient(90deg, rgba(196,181,253,0.10) 0%, rgba(196,181,253,0.28) 50%, rgba(196,181,253,0.10) 100%)",
+                        backgroundSize: "200% 100%",
+                        animation: "kudos-shimmer 1.6s ease-in-out infinite",
+                      }}
+                    />
+                  ) : (
+                    <p className="font-display text-[14px] font-light italic leading-snug text-[var(--kudos-accent-bright)]/82">
+                      {subtitle}
+                    </p>
+                  )}
                 </div>
-              ) : provisionalView.narrative ? (
-                <p className="font-display text-[14.5px] font-light leading-[1.55] text-white/82">
-                  {(() => {
-                    // Micro-narrativa cinematográfica · primera frase
-                    // o ~220 chars, lo que llegue primero. Ellipsis si
-                    // truncamos. El "leer más" vive en el CTA, no aquí.
-                    const raw = provisionalView.narrative.trim();
-                    const firstStop = raw.search(/(?<=[.!?])\s/);
-                    const sentenceEnd = firstStop > 80 && firstStop < 260
-                      ? firstStop + 1
-                      : 220;
-                    const cut = raw.slice(0, sentenceEnd).trim();
-                    return raw.length > cut.length ? cut + " …" : cut;
-                  })()}
-                </p>
-              ) : (
-                <p className="font-display text-[13px] font-light italic leading-relaxed text-white/55">
-                  Este eco aún no tiene palabras propias. Toca la fuente para escucharlo.
-                </p>
-              )}
 
-              {/* CTA · single primary action. Si hay pageUrl real abre
-                  Wikipedia en nueva tab · si no, el wikidata_url. Botón
-                  con tratamiento glow KUDOS · no debug button look. */}
-              <a
-                href={
-                  provisionalView.pageUrl ||
-                  provisionalView.wikipedia_url_es ||
-                  provisionalView.wikipedia_url_en ||
-                  provisionalView.wikidata_url ||
-                  "#"
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => {
-                  // No-op si no hay destino · evita link "#" que recarga
-                  const dest =
-                    provisionalView.pageUrl ||
-                    provisionalView.wikipedia_url_es ||
-                    provisionalView.wikipedia_url_en ||
-                    provisionalView.wikidata_url;
-                  if (!dest) e.preventDefault();
-                }}
-                className="mt-1 inline-flex w-fit items-center gap-2 rounded-full border border-[var(--kudos-accent)]/55 bg-[var(--kudos-accent)]/12 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--kudos-accent-bright)] transition-all hover:bg-[var(--kudos-accent)]/22"
-                style={{
-                  boxShadow:
-                    "0 0 0 1px rgba(167,139,250,0.10),0 12px 24px -10px rgba(139,92,246,0.45)",
-                }}
-              >
-                <span>Entrar en este eco</span>
-                <span aria-hidden style={{ letterSpacing: 0 }}>→</span>
-              </a>
+                {/* TAB STRIP · 3 premium glass chips */}
+                {(() => {
+                  const tabs: Array<{ id: "historia" | "lugar" | "ecos"; label: string }> = [
+                    { id: "historia", label: "Historia" },
+                    { id: "lugar",    label: "Lugar" },
+                    { id: "ecos",     label: "Ecos" },
+                  ];
+                  return (
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                      {tabs.map((t) => {
+                        const active = echoTab === t.id;
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => setEchoTab(t.id)}
+                            className="relative inline-flex items-center rounded-full px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.30em] transition-all"
+                            style={{
+                              background: active
+                                ? "rgba(167,139,250,0.14)"
+                                : "rgba(255,255,255,0.025)",
+                              border: active
+                                ? "1px solid rgba(167,139,250,0.55)"
+                                : "1px solid rgba(255,255,255,0.06)",
+                              color: active
+                                ? "var(--kudos-accent-bright)"
+                                : "rgba(255,255,255,0.5)",
+                              boxShadow: active
+                                ? "0 0 16px -4px rgba(167,139,250,0.55), inset 0 1px 0 rgba(255,255,255,0.06)"
+                                : "none",
+                            }}
+                          >
+                            {t.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+
+                {/* TAB CONTENT · single scrollable region · cross-fade
+                    via key prop · React remounts → keyframe re-triggers. */}
+                <div
+                  key={echoTab}
+                  className="-mr-2 min-h-[120px] flex-1 overflow-y-auto pr-2"
+                  style={{ animation: "kudos-tab-fade 340ms cubic-bezier(.2,.7,.2,1) both" }}
+                >
+                  {echoTab === "historia" ? (
+                    provisionalView.loading ? (
+                      // Skeleton · shimmer lines premium · no "loading" text feel.
+                      <div className="flex flex-col gap-2 py-1">
+                        <span
+                          aria-hidden
+                          className="block h-3 w-[88%] rounded-full"
+                          style={{
+                            background:
+                              "linear-gradient(90deg, rgba(167,139,250,0.08) 0%, rgba(167,139,250,0.22) 50%, rgba(167,139,250,0.08) 100%)",
+                            backgroundSize: "200% 100%",
+                            animation: "kudos-shimmer 1.6s ease-in-out infinite",
+                          }}
+                        />
+                        <span
+                          aria-hidden
+                          className="block h-3 w-[72%] rounded-full"
+                          style={{
+                            background:
+                              "linear-gradient(90deg, rgba(167,139,250,0.08) 0%, rgba(167,139,250,0.22) 50%, rgba(167,139,250,0.08) 100%)",
+                            backgroundSize: "200% 100%",
+                            animation: "kudos-shimmer 1.6s ease-in-out 0.2s infinite",
+                          }}
+                        />
+                        <span
+                          aria-hidden
+                          className="block h-3 w-[55%] rounded-full"
+                          style={{
+                            background:
+                              "linear-gradient(90deg, rgba(167,139,250,0.08) 0%, rgba(167,139,250,0.22) 50%, rgba(167,139,250,0.08) 100%)",
+                            backgroundSize: "200% 100%",
+                            animation: "kudos-shimmer 1.6s ease-in-out 0.4s infinite",
+                          }}
+                        />
+                      </div>
+                    ) : story ? (
+                      <p className="font-display text-[15.5px] font-light leading-[1.6] text-white/82">
+                        {story}
+                      </p>
+                    ) : (
+                      <p className="font-display text-[14px] font-light italic leading-relaxed text-white/55">
+                        El lugar guarda silencio · todavía no encuentra palabras propias.
+                      </p>
+                    )
+                  ) : null}
+
+                  {echoTab === "lugar" ? (() => {
+                    const region = regionFromCoords(provisionalView.lat, provisionalView.lng);
+                    // ADN cultural · prefer LLM-derived dna del backend Echo
+                    // synthesis; cae a region table fallback solo si el
+                    // backend no devolvió nada.
+                    const llmDna = (provisionalView.culturalDna ?? []).filter((t) => t && t !== region.name);
+                    const dna = llmDna.length > 0
+                      ? llmDna.slice(0, 6)
+                      : region.tags.filter((t) => t !== region.name).slice(0, 6);
+                    return (
+                      <div className="flex flex-col gap-5 pt-1">
+                        {/* Region name · editorial big */}
+                        <div className="flex flex-col gap-1">
+                          <span className="font-mono text-[9px] uppercase tracking-[0.40em] text-white/35">
+                            Región
+                          </span>
+                          <h3 className="font-display text-[26px] font-extralight tracking-tight text-white/95">
+                            {region.name}
+                          </h3>
+                        </div>
+
+                        {/* ADN cultural · editorial chip cluster */}
+                        <div className="flex flex-col gap-2">
+                          <span className="font-mono text-[9px] uppercase tracking-[0.40em] text-white/35">
+                            ADN cultural
+                          </span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {dna.map((c, i) => (
+                              <span
+                                key={`${c}-${i}`}
+                                className="rounded-full px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.32em] text-white/72"
+                                style={{
+                                  background: "rgba(255,255,255,0.028)",
+                                  border: "1px solid rgba(255,255,255,0.07)",
+                                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+                                }}
+                              >
+                                {c}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Coordenadas · editorial row */}
+                        <div className="flex flex-col gap-2 border-t border-white/6 pt-3">
+                          <span className="font-mono text-[9px] uppercase tracking-[0.40em] text-white/35">
+                            Coordenadas
+                          </span>
+                          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+                            <div className="flex flex-col">
+                              <span className="font-mono text-[8.5px] uppercase tracking-[0.30em] text-white/30">lat</span>
+                              <span className="font-display text-[15px] font-light tracking-tight text-white/82">
+                                {provisionalView.lat.toFixed(4)}°
+                              </span>
+                            </div>
+                            <span aria-hidden className="h-5 w-px bg-white/10" />
+                            <div className="flex flex-col">
+                              <span className="font-mono text-[8.5px] uppercase tracking-[0.30em] text-white/30">lng</span>
+                              <span className="font-display text-[15px] font-light tracking-tight text-white/82">
+                                {provisionalView.lng.toFixed(4)}°
+                              </span>
+                            </div>
+                            {provisionalView.distance_m > 0 ? (
+                              <>
+                                <span aria-hidden className="h-5 w-px bg-white/10" />
+                                <div className="flex flex-col">
+                                  <span className="font-mono text-[8.5px] uppercase tracking-[0.30em] text-white/30">distancia</span>
+                                  <span className="font-display text-[15px] font-light tracking-tight text-[var(--kudos-accent-bright)]/85">
+                                    {(provisionalView.distance_m / 1000).toFixed(2)} km
+                                  </span>
+                                </div>
+                              </>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })() : null}
+
+                  {echoTab === "ecos" ? (() => {
+                    const others = localCapsulesCacheRef.current
+                      .filter((c) =>
+                        typeof c.lat === "number" &&
+                        typeof c.lng === "number" &&
+                        (c.entity_id ? c.entity_id !== provisionalView.entity_id : true) &&
+                        (c.title ?? "") !== provisionalView.title,
+                      )
+                      .slice(0, 4);
+                    // Poetic stubs · deterministic hash → subtitle.
+                    // Da textura emocional sin backend ni data extra.
+                    const ECO_STUBS = [
+                      "Un eco que aún respira.",
+                      "El paisaje lo recuerda.",
+                      "Vivo entre olas y piedra.",
+                      "Memoria que el viento guarda.",
+                      "Voz que no calla nunca.",
+                      "Donde la tierra escucha.",
+                      "Pequeña historia eterna.",
+                    ];
+                    const stubFor = (id: string) => {
+                      const h = id.split("").reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 11);
+                      return ECO_STUBS[Math.abs(h) % ECO_STUBS.length];
+                    };
+                    if (others.length === 0) {
+                      return (
+                        <p className="font-display text-[13px] font-light italic leading-relaxed text-white/50">
+                          Otros ecos cercanos aparecerán cuando el mapa explore más territorio.
+                        </p>
+                      );
+                    }
+                    return (
+                      <div className="flex flex-col gap-3 pt-1">
+                        <div className="flex items-baseline justify-between">
+                          <p className="font-display text-[13px] font-light italic leading-snug text-white/55">
+                            Otros lugares que resuenan cerca.
+                          </p>
+                          <span className="font-mono text-[9px] uppercase tracking-[0.30em] text-white/30">
+                            {others.length}
+                          </span>
+                        </div>
+                        <div className="relative flex flex-col gap-2">
+                          {/* Constellation rail · hairline vertical violet
+                              que conecta los stubs · memorias relacionadas */}
+                          {others.length > 1 ? (
+                            <span
+                              aria-hidden
+                              className="pointer-events-none absolute left-[27px] top-3 bottom-3 w-px"
+                              style={{
+                                background:
+                                  "linear-gradient(180deg, rgba(167,139,250,0) 0%, rgba(167,139,250,0.32) 18%, rgba(167,139,250,0.32) 82%, rgba(167,139,250,0) 100%)",
+                              }}
+                            />
+                          ) : null}
+                          {others.map((o, i) => {
+                            const dKm = typeof o.distance_m === "number"
+                              ? (o.distance_m / 1000).toFixed(1) + " km"
+                              : "";
+                            const stub = stubFor((o.entity_id ?? "") + (o.title ?? ""));
+                            return (
+                              <button
+                                key={(o.entity_id ?? "") + i}
+                                type="button"
+                                onClick={() => {
+                                  if (typeof o.lat !== "number" || typeof o.lng !== "number") return;
+                                  setProvisionalView({
+                                    entity_id: o.entity_id ?? "",
+                                    title: o.title ?? "Lugar",
+                                    lat: o.lat,
+                                    lng: o.lng,
+                                    distance_m: typeof o.distance_m === "number" ? o.distance_m : 0,
+                                    wikidata_url: "",
+                                    wikipedia_url_es: o.wikipedia_url_es ?? "",
+                                    wikipedia_url_en: o.wikipedia_url_en ?? "",
+                                    narrative: null,
+                                    imageUrl: null,
+                                    description: null,
+                                    pageUrl: null,
+                                    loading: true,
+                                  });
+                                }}
+                                className="group relative flex items-center gap-3 rounded-2xl px-3.5 py-3 text-left"
+                                style={{
+                                  background: "rgba(255,255,255,0.028)",
+                                  border: "1px solid rgba(255,255,255,0.06)",
+                                  transition: "transform .28s cubic-bezier(.2,.7,.2,1), background .25s ease, border-color .25s ease, box-shadow .3s ease",
+                                }}
+                                onMouseEnter={(e) => {
+                                  const el = e.currentTarget;
+                                  el.style.transform = "translateY(-2px)";
+                                  el.style.background = "rgba(167,139,250,0.06)";
+                                  el.style.borderColor = "rgba(167,139,250,0.30)";
+                                  el.style.boxShadow = "0 8px 24px -10px rgba(139,92,246,0.45), inset 0 1px 0 rgba(255,255,255,0.06)";
+                                }}
+                                onMouseLeave={(e) => {
+                                  const el = e.currentTarget;
+                                  el.style.transform = "translateY(0)";
+                                  el.style.background = "rgba(255,255,255,0.028)";
+                                  el.style.borderColor = "rgba(255,255,255,0.06)";
+                                  el.style.boxShadow = "none";
+                                }}
+                              >
+                                {/* Thumbnail placeholder · violet gradient orb · feel
+                                    de "memory stub" sin requerir thumbnail data. */}
+                                <span
+                                  aria-hidden
+                                  className="grid size-10 shrink-0 place-items-center rounded-xl"
+                                  style={{
+                                    background:
+                                      "radial-gradient(circle at 30% 30%, rgba(196,181,253,0.45) 0%, rgba(139,92,246,0.22) 60%, rgba(7,11,28,0.4) 100%)",
+                                    border: "1px solid rgba(167,139,250,0.22)",
+                                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
+                                  }}
+                                >
+                                  <span
+                                    className="inline-block size-1.5 rounded-full"
+                                    style={{
+                                      background: "var(--kudos-accent-bright)",
+                                      boxShadow: "0 0 10px var(--kudos-accent-glow)",
+                                    }}
+                                  />
+                                </span>
+                                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                                  <span className="truncate font-display text-[14.5px] font-light tracking-tight text-white/92">
+                                    {o.title ?? "Lugar"}
+                                  </span>
+                                  <span className="truncate font-display text-[11.5px] font-light italic text-[var(--kudos-accent-bright)]/65">
+                                    {stub}
+                                  </span>
+                                  {dKm ? (
+                                    <span className="font-mono text-[9px] uppercase tracking-[0.28em] text-white/35">
+                                      {dKm}
+                                    </span>
+                                  ) : null}
+                                </div>
+                                <span
+                                  aria-hidden
+                                  className="font-mono text-[13px] text-white/30 transition-all group-hover:translate-x-1 group-hover:text-[var(--kudos-accent-bright)]"
+                                >
+                                  →
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })() : null}
+                </div>
+
+                {/* CTA ZONE · primary + secondary actions */}
+                <div className="flex flex-col items-center gap-2 pt-1">
+                  <a
+                    href={sourceUrl || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => { if (!sourceUrl) e.preventDefault(); }}
+                    className="group inline-flex items-center gap-3 rounded-full border border-[var(--kudos-accent)]/60 bg-[var(--kudos-accent)]/15 px-7 py-3.5 font-mono text-[11px] uppercase tracking-[0.36em] text-[var(--kudos-accent-bright)] transition-all hover:bg-[var(--kudos-accent)]/25 hover:tracking-[0.40em]"
+                    style={{
+                      boxShadow:
+                        "0 0 0 1px rgba(167,139,250,0.12)," +
+                        "0 16px 32px -12px rgba(139,92,246,0.55)," +
+                        "0 0 32px -8px rgba(167,139,250,0.45)",
+                    }}
+                  >
+                    <span>Entrar en este Echo</span>
+                    <span
+                      aria-hidden
+                      className="transition-transform group-hover:translate-x-0.5"
+                      style={{ letterSpacing: 0 }}
+                    >
+                      →
+                    </span>
+                  </a>
+
+                  {/* Source badge · dev mode only (localStorage.kudos_dev=1).
+                      Invisible al user normal · founder debug truth. */}
+                  {isDevMode && provisionalView.echoSource ? (
+                    <span
+                      className="mx-auto font-mono text-[8.5px] uppercase tracking-[0.36em] text-white/30"
+                      style={{
+                        textShadow: "0 1px 0 rgba(0,0,0,0.4)",
+                      }}
+                    >
+                      {provisionalView.echoSource}
+                    </span>
+                  ) : null}
+
+                  {/* Secondary actions · glass pills · wrap-safe en mobile. */}
+                  <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                    {(() => {
+                      const pillStyle: React.CSSProperties = {
+                        background: "rgba(255,255,255,0.035)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+                        transition: "all .25s ease",
+                      };
+                      const liftIn = (e: React.MouseEvent<HTMLElement>) => {
+                        const el = e.currentTarget as HTMLElement;
+                        el.style.background = "rgba(167,139,250,0.10)";
+                        el.style.borderColor = "rgba(167,139,250,0.35)";
+                        el.style.boxShadow =
+                          "inset 0 1px 0 rgba(255,255,255,0.06)," +
+                          "0 6px 16px -8px rgba(139,92,246,0.45)";
+                      };
+                      const liftOut = (e: React.MouseEvent<HTMLElement>) => {
+                        const el = e.currentTarget as HTMLElement;
+                        el.style.background = "rgba(255,255,255,0.035)";
+                        el.style.borderColor = "rgba(255,255,255,0.08)";
+                        el.style.boxShadow = "inset 0 1px 0 rgba(255,255,255,0.04)";
+                      };
+                      return (
+                        <>
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 font-mono text-[9.5px] uppercase tracking-[0.28em] text-white/65"
+                            style={pillStyle}
+                            onMouseEnter={liftIn}
+                            onMouseLeave={liftOut}
+                          >
+                            <span aria-hidden style={{ fontSize: "12px", lineHeight: 1 }}>♡</span>
+                            Guardar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (typeof navigator !== "undefined" && navigator.share && sourceUrl) {
+                                navigator.share({
+                                  title: provisionalView.title,
+                                  text: subtitle,
+                                  url: sourceUrl,
+                                }).catch(() => { /* user cancel · ignore */ });
+                              }
+                            }}
+                            className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 font-mono text-[9.5px] uppercase tracking-[0.28em] text-white/65"
+                            style={pillStyle}
+                            onMouseEnter={liftIn}
+                            onMouseLeave={liftOut}
+                          >
+                            <span aria-hidden style={{ fontSize: "12px", lineHeight: 1 }}>↗</span>
+                            Compartir
+                          </button>
+                          {sourceUrl ? (
+                            <a
+                              href={sourceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 font-mono text-[9.5px] uppercase tracking-[0.28em] text-white/65"
+                              style={pillStyle}
+                              onMouseEnter={liftIn}
+                              onMouseLeave={liftOut}
+                            >
+                              <span aria-hidden style={{ fontSize: "12px", lineHeight: 1 }}>◐</span>
+                              Fuente
+                            </a>
+                          ) : null}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      ) : null}
+        );
+      })() : null}
 
       {/* CLUSTER-LIST PANEL · cuando un cluster ya está al máximo zoom
           razonable (≥14) y el usuario lo clickea, en vez de hacer más
@@ -1524,12 +2284,21 @@ export function MapExplorer() {
                   <button
                     type="button"
                     onClick={() => {
-                      const hero = resolveTemporalMedia(cap, selectedYearRef.current);
-                      setClicked({
+                      // Cluster list item → Echo card surface única.
+                      setProvisionalView({
+                        entity_id: "",
+                        title: cap.title ?? "Lugar",
                         lat: cap.lat,
                         lng: cap.lng,
-                        title: cap.title,
-                        hero,
+                        distance_m: 0,
+                        wikidata_url: "",
+                        wikipedia_url_es: "",
+                        wikipedia_url_en: "",
+                        narrative: null,
+                        imageUrl: null,
+                        description: null,
+                        pageUrl: null,
+                        loading: true,
                       });
                       setClusterList(null);
                     }}
@@ -1592,19 +2361,36 @@ export function MapExplorer() {
         </div>
       ) : null}
 
-      {/* P1 · Temporal map · year slider · bottom centered.
-          Range -500 (500 a.C.) → 2026. Hide when capsule panel open. */}
-      {!clicked ? (
-        <div className="pointer-events-auto absolute bottom-6 left-1/2 z-30 -translate-x-1/2 transform">
-          <div className="flex flex-col items-center gap-2 rounded-2xl border border-[var(--kudos-accent)]/30 bg-[rgba(5,10,31,0.78)] px-5 py-3 backdrop-blur-md">
-            <div className="flex items-baseline gap-3">
-              <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-white/45">
-                {eraOfYear(selectedYear)}
-              </span>
-              <span className="font-display text-[18px] font-light tracking-tight text-[var(--kudos-accent-bright)]">
-                {labelForYear(selectedYear)}
-              </span>
-            </div>
+      {/* MICRO TIMELINE · Netflix-grade pill · era + year + thin track.
+          Auto-fade cuando Echo card abre · cinematic focus shift. */}
+      {!provisionalView ? (
+        <div
+          className="pointer-events-auto absolute left-1/2 z-30"
+          style={{
+            bottom: "max(1.5rem, env(safe-area-inset-bottom))",
+            transform: "translateX(-50%)",
+            animation: "kudos-fade-in 480ms ease 200ms both",
+          }}
+        >
+          <div
+            className="flex items-center gap-4 rounded-full border border-white/6 px-5 py-2.5"
+            style={{
+              background: "rgba(7,11,28,0.55)",
+              backdropFilter: "blur(20px) saturate(140%)",
+              WebkitBackdropFilter: "blur(20px) saturate(140%)",
+              boxShadow: "0 12px 32px -16px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
+            }}
+          >
+            <span className="font-mono text-[9px] uppercase tracking-[0.36em] text-white/35">
+              {eraOfYear(selectedYear)}
+            </span>
+            <span
+              aria-hidden
+              className="h-3 w-px bg-white/10"
+            />
+            <span className="font-display text-[13.5px] font-extralight tracking-tight text-[var(--kudos-accent-bright)]">
+              {labelForYear(selectedYear)}
+            </span>
             <input
               type="range"
               min={-500}
@@ -1612,113 +2398,22 @@ export function MapExplorer() {
               step={10}
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              aria-label="Año del mapa temporal"
-              className="kudos-year-slider w-[280px] cursor-pointer appearance-none bg-transparent"
+              aria-label="Año"
+              className="kudos-year-slider w-[160px] cursor-pointer appearance-none bg-transparent"
               style={{
-                ["--track" as string]: "rgba(139,92,246,0.20)",
-                ["--fill" as string]: "rgba(139,92,246,0.70)",
+                ["--track" as string]: "rgba(167,139,250,0.12)",
+                ["--fill" as string]: "rgba(196,181,253,0.75)",
               }}
             />
-            <div className="flex w-[280px] justify-between font-mono text-[9px] uppercase tracking-[0.28em] text-white/35">
-              <span>500 a.C.</span>
-              <span>2026</span>
-            </div>
           </div>
         </div>
       ) : null}
 
-      {/* P2 · Floating preview on marker hover · glass mini-card
-          positioned via map.project · pointer-events-none so it can't
-          intercept marker click */}
-      {hoveredPreview && !clicked ? (
-        <div
-          className="pointer-events-none absolute z-40"
-          style={{
-            left: hoveredPreview.x + 18,
-            top: hoveredPreview.y - 56,
-          }}
-        >
-          <div className="flex items-center gap-3 rounded-2xl border border-[var(--kudos-accent)]/30 bg-[rgba(5,10,31,0.92)] p-2 pr-3 backdrop-blur-md shadow-[0_8px_30px_-8px_rgba(139,92,246,0.4)]">
-            {hoveredPreview.thumbnail ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={hoveredPreview.thumbnail}
-                alt=""
-                className="size-12 rounded-lg object-cover"
-              />
-            ) : (
-              <div
-                className="size-12 rounded-lg"
-                style={{
-                  background:
-                    "radial-gradient(circle at 35% 30%, #a78bfa 0%, #8b5cf6 60%, #6d28d9 100%)",
-                }}
-              />
-            )}
-            <div className="flex flex-col gap-0.5">
-              <span className="max-w-[160px] truncate font-display text-[13px] font-light text-white/95">
-                {hoveredPreview.title}
-              </span>
-              <span className="font-mono text-[9px] uppercase tracking-[0.28em] text-white/45">
-                {hoveredPreview.year}
-                {hoveredPreview.hasClip ? " · clip" : ""}
-              </span>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {/* Panel inferior con CapsuleSession cuando hay click.
-          P2 · hero media (video preferido si clip_url · else image) se
-          renderiza ENCIMA del CapsuleSession standard · cero touch a
-          CapsuleSession internals. */}
-      {clicked ? (
-        <div
-          className="absolute inset-x-0 bottom-0 z-20 max-h-[65dvh] overflow-y-auto border-t border-white/10 bg-[rgba(5,10,31,0.92)] backdrop-blur-md"
-          style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-        >
-          <button
-            type="button"
-            onClick={() => setClicked(null)}
-            aria-label="Cerrar capsule"
-            className="absolute right-3 top-3 z-30 grid size-8 place-items-center rounded-full border border-white/15 bg-white/[0.05] text-white/60 transition hover:text-white/95"
-          >
-            ×
-          </button>
-          {clicked.hero && (clicked.hero.clipUrl || clicked.hero.imageUrl) ? (
-            <div className="relative w-full overflow-hidden" style={{ aspectRatio: "16 / 9" }}>
-              {clicked.hero.clipUrl && clicked.hero.mediaType === "video" ? (
-                <video
-                  src={clicked.hero.clipUrl}
-                  poster={clicked.hero.imageUrl || undefined}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={clicked.hero.imageUrl}
-                  alt={clicked.title ?? ""}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              )}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[rgba(5,10,31,0.95)] via-[rgba(5,10,31,0.4)] to-transparent"
-              />
-              {clicked.title ? (
-                <div className="absolute bottom-3 left-4 right-12 font-display text-[18px] font-light text-white/95 truncate">
-                  {clicked.title}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-          <CapsuleSession lat={clicked.lat} lng={clicked.lng} />
-        </div>
-      ) : null}
+      {/* PURGED: hover preview mini-card y bottom CapsuleSession panel.
+          Eran la fuente del "Este lugar guarda silencio" y del feel
+          engineering. Reemplazados por el Echo card único (provisionalView).
+          Cualquier click ahora se enruta a setProvisionalView · una sola
+          superficie cinematográfica para todo el producto. */}
     </div>
   );
 }
