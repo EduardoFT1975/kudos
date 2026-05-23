@@ -41,6 +41,48 @@ type MapLibreModule = typeof import("maplibre-gl");
 const _DEFAULT_CENTER: [number, number] = [12.4922, 41.8902]; // Roma · Coliseo [lng, lat]
 const _DEFAULT_ZOOM = 14;
 
+// Real-geo fallback policy.
+// Si el usuario tiene memorias en su entorno (radio NEARBY_RADIUS_KM)
+// el mapa va a su ubicación. Si no, fallback a Roma + empty-state con
+// ciudades sembradas. Roma deja de ser cold-start obligatorio.
+const ROMA_CENTER: [number, number] = [12.4922, 41.8902];
+const NEARBY_RADIUS_KM = 25;
+const CITY_PRESETS: ReadonlyArray<{
+  id: string;
+  label: string;
+  center: [number, number];
+}> = [
+  { id: "roma",   label: "Roma",            center: [12.4922, 41.8902] },
+  { id: "atenas", label: "Atenas",          center: [23.7261, 37.9755] },
+  { id: "egipto", label: "Egipto · Gizeh",  center: [31.1342, 29.9792] },
+];
+
+function haversineKm(a: [number, number], b: [number, number]): number {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b[1] - a[1]);
+  const dLng = toRad(b[0] - a[0]);
+  const la1 = toRad(a[1]);
+  const la2 = toRad(b[1]);
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+
+// Type for the cluster-expansion list panel (lifted out so the state
+// type doesn't depend on the closure-local `Cap` inside fetchViewport).
+type ClusterListEntry = {
+  lat: number; lng: number; title?: string;
+  image_url?: string; thumbnail_url?: string;
+  clip_url?: string; media_type?: "image" | "video";
+  temporal_media?: TemporalMediaEntry[];
+};
+type ClusterListState = {
+  center: [number, number];
+  capsules: ClusterListEntry[];
+};
+
 // P1 · Temporal map · era band → CSS filter applied to map container.
 // Provides visual cue without historical tile sources (those come later).
 type Era = "ancient" | "medieval" | "industrial" | "modern";
@@ -325,6 +367,15 @@ export function MapExplorer() {
   // P2 · Floating media preview on marker hover
   const [hoveredPreview, setHoveredPreview] =
     React.useState<HoveredPreview | null>(null);
+  // Real-geo decision · emptyNearby=true cuando geo está ready, memory
+  // hidratado, y no hay memorias dentro de NEARBY_RADIUS_KM. Dispara
+  // el CTA panel con ciudades sembradas (Roma/Atenas/Egipto).
+  const [emptyNearby, setEmptyNearby] = React.useState<boolean>(false);
+  // Cluster-expansion list · cuando un cluster se clickea pero el mapa
+  // ya está al máximo zoom razonable, en vez de hacer más zoom abrimos
+  // un panel con la lista de cápsulas del grupo.
+  const [clusterList, setClusterList] =
+    React.useState<ClusterListState | null>(null);
   // P1 · Temporal map · year slider state. Range -500 BC → 2026.
   // Default 2026 (present). Future capsules filter by year via viewport
   // API param. Visual tint switches by era band.
@@ -555,13 +606,33 @@ export function MapExplorer() {
               let el: HTMLDivElement;
               if (group.length > 1) {
                 el = buildClusterEl(group.length);
+                // Cluster UX:
+                //   · zoom < 14 → zoom in (intenta expandir)
+                //   · zoom ≥ 14 → ya no podemos separarlos visualmente,
+                //     abrimos lista de memorias del grupo. El círculo
+                //     con número NUNCA se queda muerto sin acción.
                 el.addEventListener("click", (ev) => {
                   ev.stopPropagation();
-                  map.flyTo({
-                    center: [avgLng, avgLat],
-                    zoom: Math.min(map.getZoom() + 2, 16),
-                    duration: 600,
-                  });
+                  const currentZoom = map.getZoom();
+                  if (currentZoom < 14) {
+                    map.flyTo({
+                      center: [avgLng, avgLat],
+                      zoom: Math.min(currentZoom + 2, 16),
+                      duration: 600,
+                    });
+                  } else {
+                    setClusterList({
+                      center: [avgLng, avgLat],
+                      capsules: group.map((c) => ({
+                        lat: c.lat, lng: c.lng, title: c.title,
+                        image_url: c.image_url,
+                        thumbnail_url: c.thumbnail_url,
+                        clip_url: c.clip_url,
+                        media_type: c.media_type,
+                        temporal_media: c.temporal_media,
+                      })),
+                    });
+                  }
                 });
               } else {
                 const cap = group[0];
@@ -812,18 +883,47 @@ export function MapExplorer() {
     }
   }, [selectedYear, mapReady]);
 
-  // Pin del usuario cuando geo granted.
-  // MVP · NO auto-flyTo: el cold-start debe permanecer sobre Coliseo
-  // (única ciudad con TemporalLandmarks sembrados) para que el overlay
-  // P3 sea visible en primer pintado. El usuario sigue viendo su pin
-  // en su ubicación real · puede panear manualmente si quiere navegar.
-  // Restaurar auto-flyTo cuando exista cobertura de landmarks en más
-  // ciudades (post-MVP).
+  // REAL-GEO PRIORITY · MVP fallback policy.
+  // Cuando geo está ready Y memory hidratado:
+  //   · si hay memorias dentro de NEARBY_RADIUS_KM (25 km) del usuario
+  //     → flyTo coords reales (KUDOS es un producto geolocalizado, no
+  //     una demo fija sobre Roma)
+  //   · si no → flyTo Roma + emptyNearby=true (dispara CTA panel con
+  //     ciudades sembradas)
+  // El pin del usuario se planta SIEMPRE en su ubicación real, exista
+  // o no flyTo. Esperamos a `memory.hydrated` antes de decidir para
+  // evitar un primer flyTo a Roma seguido de re-flyTo a user coords.
   React.useEffect(() => {
     if (!mapReady || !maplibre || !mapRef.current) return;
     if (geo.status !== "ready" || typeof geo.lat !== "number" || typeof geo.lng !== "number") return;
-    // map.flyTo({ center: [geo.lng, geo.lat], zoom: 14, duration: 1200 });
-    // ^^^ INTENTIONALLY DISABLED · see comment above. Re-enable post-MVP.
+    if (!memory.hydrated) return;
+
+    const map = mapRef.current as {
+      flyTo: (opts: { center: [number, number]; zoom: number; duration: number }) => void;
+    };
+    const userLngLat: [number, number] = [geo.lng, geo.lat];
+
+    // Memorias propias dentro del radio cercano · suficiente para que
+    // la zona "valga la pena" como cold-start. Capsules públicas del
+    // viewport fetch no cuentan aquí (esas se cargan después y no
+    // sabemos en este momento si la zona está poblada).
+    let hasNearby = false;
+    for (const entry of memory.entries) {
+      if (typeof entry.lat !== "number" || typeof entry.lng !== "number") continue;
+      if (haversineKm(userLngLat, [entry.lng, entry.lat]) <= NEARBY_RADIUS_KM) {
+        hasNearby = true;
+        break;
+      }
+    }
+
+    if (hasNearby) {
+      map.flyTo({ center: userLngLat, zoom: 14, duration: 1200 });
+      setEmptyNearby(false);
+    } else {
+      map.flyTo({ center: ROMA_CENTER, zoom: 14, duration: 1400 });
+      setEmptyNearby(true);
+    }
+
     if (userMarkerRef.current && typeof (userMarkerRef.current as { remove: () => void }).remove === "function") {
       (userMarkerRef.current as { remove: () => void }).remove();
     }
@@ -832,9 +932,9 @@ export function MapExplorer() {
       "width:14px;height:14px;border-radius:50%;background:var(--kudos-ai);" +
       "box-shadow:0 0 14px var(--kudos-ai-glow);border:2px solid white;";
     userMarkerRef.current = new maplibre.Marker({ element: el })
-      .setLngLat([geo.lng, geo.lat])
+      .setLngLat(userLngLat)
       .addTo(mapRef.current as Parameters<InstanceType<MapLibreModule["Marker"]>["addTo"]>[0]);
-  }, [mapReady, maplibre, geo.status, geo.lat, geo.lng]);
+  }, [mapReady, maplibre, geo.status, geo.lat, geo.lng, memory.hydrated, memory.entries]);
 
   // P0.9 Memory Graph · render markers persistentes de las memorias
   // guardadas. Se ejecuta cuando:
@@ -921,6 +1021,101 @@ export function MapExplorer() {
           <span className="rounded-full border border-white/15 bg-[rgba(5,10,31,0.78)] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.32em] text-white/70 backdrop-blur-md">
             Tap en cualquier punto para descubrir
           </span>
+        </div>
+      ) : null}
+
+      {/* EMPTY-NEARBY CTA · usuario está en zona sin memorias propias en
+          radio NEARBY_RADIUS_KM. Tras fallback flyTo Roma, ofrecemos
+          ciudades sembradas como puntos de partida. Auto-dismiss al
+          abrir capsule o cluster panel. */}
+      {emptyNearby && !clicked && !clusterList ? (
+        <div className="pointer-events-auto absolute left-1/2 top-1/2 z-20 w-[min(320px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 transform">
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-white/12 bg-[rgba(5,10,31,0.88)] px-5 py-5 text-center backdrop-blur-md">
+            <p className="font-display text-[15px] font-light leading-snug text-white/88">
+              Todavía no hay memorias aquí
+            </p>
+            <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-white/45">
+              Explora una ciudad con historia sembrada
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 pt-1">
+              {CITY_PRESETS.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => {
+                    const m = mapRef.current as {
+                      flyTo: (opts: { center: [number, number]; zoom: number; duration: number }) => void;
+                    } | null;
+                    if (m) {
+                      m.flyTo({ center: c.center, zoom: 14, duration: 1400 });
+                      setEmptyNearby(false);
+                    }
+                  }}
+                  className="rounded-full border border-[var(--kudos-accent)]/40 bg-[var(--kudos-accent)]/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--kudos-accent-bright)] transition-colors hover:bg-[var(--kudos-accent)]/22"
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setEmptyNearby(false)}
+              className="mt-1 font-mono text-[9px] uppercase tracking-[0.24em] text-white/35 hover:text-white/65 transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {/* CLUSTER-LIST PANEL · cuando un cluster ya está al máximo zoom
+          razonable (≥14) y el usuario lo clickea, en vez de hacer más
+          zoom mostramos la lista de cápsulas agrupadas. Click en una
+          fila abre el capsule panel normal. */}
+      {clusterList ? (
+        <div className="pointer-events-auto absolute left-1/2 top-1/2 z-30 w-[min(320px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 transform">
+          <div className="flex flex-col gap-2 rounded-2xl border border-[var(--kudos-accent)]/30 bg-[rgba(5,10,31,0.94)] p-4 backdrop-blur-md">
+            <div className="mb-1 flex items-center justify-between">
+              <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/55">
+                {clusterList.capsules.length} memorias aquí
+              </span>
+              <button
+                type="button"
+                onClick={() => setClusterList(null)}
+                aria-label="Cerrar"
+                className="text-[18px] leading-none text-white/45 transition-colors hover:text-white/85"
+              >
+                ×
+              </button>
+            </div>
+            <ul className="flex max-h-[280px] flex-col gap-1.5 overflow-y-auto">
+              {clusterList.capsules.map((cap, idx) => (
+                <li key={`${cap.lat}-${cap.lng}-${idx}`}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const hero = resolveTemporalMedia(cap, selectedYearRef.current);
+                      setClicked({
+                        lat: cap.lat,
+                        lng: cap.lng,
+                        title: cap.title,
+                        hero,
+                      });
+                      setClusterList(null);
+                    }}
+                    className="block w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-left transition-colors hover:border-[var(--kudos-accent)]/45 hover:bg-white/[0.06]"
+                  >
+                    <div className="truncate font-display text-[13px] font-light text-white/90">
+                      {cap.title ?? "Cápsula"}
+                    </div>
+                    <div className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.24em] text-white/40">
+                      {cap.lat.toFixed(4)}, {cap.lng.toFixed(4)}
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       ) : null}
 
