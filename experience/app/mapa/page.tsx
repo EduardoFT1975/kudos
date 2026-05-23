@@ -1,29 +1,34 @@
 /**
- * KUDOS Experience · /mapa (Atlas multidimensional · P0.9 MVP)
+ * KUDOS Experience · /mapa · ECHO PORTAL
  *
- * Map-first surface. Pantalla completa con MapLibre GL. Tap-to-explore:
- * usuario tap en un punto del mapa → fetch capsule para esas coords →
- * panel inferior renderiza CapsuleStateRouter con respuesta.
- *
- * MapLibre GL es open source · sin token API · sin coste mensual. Estilo
- * default OSM raster tiles. Upgrade futuro: vector tiles via Protomaps,
- * estilos custom KUDOS, layer switcher (history/personal/social/...).
+ * Surface architecture (north star):
+ *   LEFT   - Echo hero (poster · persistent story card)
+ *   CENTER - Map intelligence (contextual)
+ *   RIGHT  - Context panel stack
+ *   BOTTOM - 4-module strip
  */
-import { MapExplorer } from "@/features/map/MapExplorer";
+import { EchoPortalLayout } from "@/features/map/EchoPortalLayout";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "KUDOS · Atlas",
+  title: "KUDOS · Echo Portal",
   description:
-    "Atlas multidimensional · explora la memoria del mundo punto por punto.",
+    "Atlas narrativo · cada lugar tiene un eco · explora memoria humana sobre un mapa vivo.",
+  icons: {
+    icon: [
+      { url: "/brand/kudos-symbol.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/brand/kudos-symbol.svg",
+    apple: "/brand/kudos-symbol.svg",
+  },
   openGraph: {
-    title: "KUDOS · Atlas",
-    description: "Atlas multidimensional · explora la memoria del mundo.",
+    title: "KUDOS · Echo Portal",
+    description: "Atlas narrativo · cada lugar tiene un eco.",
     type: "website",
   },
 };
 
 export default function MapaPage() {
-  return <MapExplorer />;
+  return <EchoPortalLayout />;
 }

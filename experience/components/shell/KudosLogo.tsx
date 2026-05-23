@@ -1,112 +1,94 @@
 /**
  * KUDOS Experience · <KudosLogo />
  *
- * Brand mark con dos variantes:
- *   - "wordmark" (default) · "KUDOS" tipográfico + dot accent (usado en
- *     header desktop, footer, hero copy).
- *   - "mark" · solo icono circular con K estilizada (usado en mobile
- *     compact, favicons, loading states, embeds). Coincide con el
- *     logomark del north-star deck (mock 3).
+ * Brand mark loaded from /public/brand/ SVG assets. Founder puede
+ * reemplazar los archivos en `experience/public/brand/` por exports
+ * oficiales del designer sin tocar este componente.
  *
- * Tres tamaños: sm (header inline), md (default), lg (hero).
+ * Variantes:
+ *   - "wordmark" (default) · KUDOS + mark a la izquierda (horizontal lockup)
+ *   - "mark"               · solo el símbolo K-pin circular
+ *   - "vertical"           · símbolo arriba + KUDOS + tagline debajo
  *
- * Sin dependencias externas (no usa lucide ni next/image). Render-safe
- * en server + client. Hereda color via currentColor para tematización.
+ * Tres tamaños · sm / md / lg.
+ *
+ * Asset paths (servidos desde /):
+ *   /brand/kudos-symbol.svg
+ *   /brand/kudos-logo.svg
+ *   /brand/kudos-logo-vertical.svg
+ *
+ * Render-safe en server + client. Uses native <img> para evitar
+ * configurar remotePatterns de next/image.
  */
 import * as React from "react";
 
 export interface KudosLogoProps {
   size?: "sm" | "md" | "lg";
   className?: string;
-  /** Solo afecta a variant="wordmark". Cuando false, oculta el dot
-   *  accent del wordmark. La variante "mark" siempre lleva su propio
-   *  dot interno · ignora este prop. */
+  /** Solo afecta variant="wordmark". Cuando false oculta el dot accent
+   *  decorativo (aplicable a layouts compactos legacy). Default true. */
   withDot?: boolean;
-  /** "wordmark" · KUDOS texto · default · usado en chrome global.
-   *  "mark"     · solo logomark circular K · usado en mobile compact,
-   *               loaders, brand stamps. */
-  variant?: "wordmark" | "mark";
+  /** "wordmark" · símbolo + KUDOS horizontal (default · chrome global)
+   *  "mark"     · solo K-pin circular (mobile compact, favicon, brand stamps)
+   *  "vertical" · símbolo + KUDOS + tagline (splash, hero, share previews) */
+  variant?: "wordmark" | "mark" | "vertical";
 }
 
-const _SIZES: Record<NonNullable<KudosLogoProps["size"]>, { font: string; gap: string; dot: string; mark: string }> = {
-  sm: { font: "text-[14px]", gap: "gap-1.5", dot: "size-1",   mark: "size-6"  },
-  md: { font: "text-[18px]", gap: "gap-2",   dot: "size-1.5", mark: "size-8"  },
-  lg: { font: "text-[28px]", gap: "gap-3",   dot: "size-2",   mark: "size-12" },
-};
+const _SIZES = {
+  sm: { mark: 24, wordmark: { h: 28, w: 105 }, vertical: { h: 96, w: 104 } },
+  md: { mark: 36, wordmark: { h: 40, w: 150 }, vertical: { h: 140, w: 152 } },
+  lg: { mark: 56, wordmark: { h: 60, w: 225 }, vertical: { h: 220, w: 238 } },
+} as const;
 
 export function KudosLogo({
   size = "md",
   className = "",
-  withDot = true,
+  withDot: _withDot = true,
   variant = "wordmark",
 }: KudosLogoProps) {
+  // withDot kept in props signature for back-compat · ignored in the
+  // SVG-asset rendering path (asset itself is the canonical brand).
+  void _withDot;
+
   const s = _SIZES[size];
 
   if (variant === "mark") {
     return (
-      <span
-        aria-label="KUDOS"
-        role="img"
-        className={`inline-flex items-center justify-center ${s.mark} text-white/95 ${className}`}
-      >
-        <MarkSVG />
-      </span>
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src="/brand/kudos-symbol.svg"
+        alt="KUDOS"
+        width={s.mark}
+        height={s.mark}
+        className={`inline-block ${className}`}
+        style={{ width: s.mark, height: s.mark }}
+      />
+    );
+  }
+
+  if (variant === "vertical") {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src="/brand/kudos-logo-vertical.svg"
+        alt="KUDOS · The Meaning Layer of Reality"
+        width={s.vertical.w}
+        height={s.vertical.h}
+        className={`inline-block ${className}`}
+        style={{ width: s.vertical.w, height: s.vertical.h }}
+      />
     );
   }
 
   return (
-    <span
-      aria-label="KUDOS"
-      className={`inline-flex items-center ${s.gap} font-display font-light tracking-[0.32em] uppercase text-white/95 ${s.font} ${className}`}
-    >
-      {withDot ? (
-        <span
-          aria-hidden
-          className={`${s.dot} rounded-full bg-[var(--kudos-accent)]`}
-          style={{ boxShadow: "0 0 12px var(--kudos-accent-glow)" }}
-        />
-      ) : null}
-      KUDOS
-    </span>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// MarkSVG · logomark circular con K estilizada + dot accent
-// ---------------------------------------------------------------------------
-function MarkSVG() {
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      fill="none"
-      stroke="currentColor"
-      aria-hidden
-      className="size-full"
-      style={{ filter: "drop-shadow(0 0 6px var(--kudos-accent-glow))" }}
-    >
-      {/* Círculo exterior · hairline minimal */}
-      <circle
-        cx="16"
-        cy="16"
-        r="14"
-        strokeWidth="1.2"
-        opacity="0.45"
-      />
-      {/* K estilizada · trazos lineales */}
-      <path
-        d="M11.5 9 L11.5 23 M11.5 16 L19 9 M11.5 16 L19 23"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Dot accent · ubicado en el cruce superior · sello del producto */}
-      <circle
-        cx="22"
-        cy="11"
-        r="1.6"
-        fill="var(--kudos-accent)"
-        stroke="none"
-      />
-    </svg>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/brand/kudos-logo.svg"
+      alt="KUDOS"
+      width={s.wordmark.w}
+      height={s.wordmark.h}
+      className={`inline-block ${className}`}
+      style={{ width: s.wordmark.w, height: s.wordmark.h }}
+    />
   );
 }

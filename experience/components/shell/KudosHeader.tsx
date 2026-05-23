@@ -57,10 +57,19 @@ export function KudosHeader() {
       }}
     >
       <div className="mx-auto flex h-14 max-w-[1280px] items-center justify-between px-4 sm:px-6">
-        {/* Logo siempre vuelve a / (atlas entry). NO a /aqui · el brand mark
-            es "volver al producto" no "volver al capsule". */}
-        <Link href="/" aria-label="Inicio KUDOS" className="shrink-0">
+        {/* Logo + tagline lockup · brand block estructural.
+            Logo siempre vuelve a / (atlas entry). El tagline "The Meaning
+            Layer" sólo en desktop · mobile lo oculta para no saturar. */}
+        <Link href="/" aria-label="Inicio KUDOS" className="group flex shrink-0 items-center gap-3">
           <KudosLogo size="sm" />
+          <span
+            aria-hidden
+            className="hidden sm:block h-3 w-px"
+            style={{ background: "rgba(167,139,250,0.30)" }}
+          />
+          <span className="hidden sm:inline font-mono text-[9.5px] uppercase tracking-[0.38em] text-white/45 transition-colors group-hover:text-[var(--kudos-accent-bright)]/85">
+            The Meaning Layer
+          </span>
         </Link>
 
         <nav aria-label="Navegación principal" className="hidden md:block">

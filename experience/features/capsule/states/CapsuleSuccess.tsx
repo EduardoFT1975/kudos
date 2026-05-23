@@ -35,6 +35,58 @@ import { RememberPill } from "@/features/memory/RememberPill";
 import { track } from "@/lib/analytics/plausible";
 import type { CapsuleData } from "@/types/capsule-state";
 
+// P2.3 · inline hero · cascade backend image → backend thumbnail →
+// static demo JPG → static demo SVG. onError cascade automático ·
+// NUNCA broken-image. Debug chip muestra REAL/FALLBACK en bottom-left
+// para verificación del pipeline backend.
+function CapsuleHero({ capsule }: { capsule: CapsuleData }) {
+  const candidates = [
+    capsule.image_url ?? "",
+    capsule.thumbnail_url ?? "",
+    "/media/demo/hero-default.svg",
+  ].filter((s): s is string => s.length > 0);
+  const [idx, setIdx] = React.useState(0);
+  const src = candidates[idx];
+  const isLast = idx >= candidates.length - 1;
+  // Backend authoritative signal · "REAL" solo cuando el serializer
+  // emitió image_url. "FALLBACK" en cualquier otro caso (NONE explícito,
+  // ausente, o cuando estamos sirviendo el demo asset).
+  const debugLabel =
+    capsule.media_debug === "REAL" && idx === 0 ? "REAL MEDIA" : "FALLBACK";
+  return (
+    <div className="relative mb-8 aspect-video w-full overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-900 via-slate-900 to-black">
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt={capsule.title}
+          loading="eager"
+          onError={() => {
+            if (!isLast) setIdx((i) => i + 1);
+          }}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : null}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#050a1f] via-[rgba(5,10,31,0.55)] to-transparent"
+      />
+      {capsule.media_source ? (
+        <span className="pointer-events-none absolute bottom-2 right-3 font-mono text-[9px] uppercase tracking-[0.22em] text-white/55">
+          © {capsule.media_source}
+        </span>
+      ) : null}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-1 left-2 font-mono uppercase tracking-[0.2em] text-white/40"
+        style={{ fontSize: "8px" }}
+      >
+        MEDIA: {debugLabel}
+      </span>
+    </div>
+  );
+}
+
 interface CapsuleSuccessProps {
   capsule: CapsuleData;
   /** Phase 14.6 loop · "Descubrir cerca" (primary). Same coords, larger
@@ -112,12 +164,12 @@ export function CapsuleSuccess({
           animate="visible"
           className="space-y-10 text-center"
         >
-          {/* P1.2 · Inline hero placeholder · zero-dependency visual
-              hierarchy hasta que backend exponga media fields. */}
+          {/* P2.1 · Hero media · prioridad: backend image_url → backend
+              thumbnail_url → static demo fallback (/media/demo/hero-default.svg
+              o .jpg cuando exista). onError oculta el <img> y deja
+              visible el bloque gradient base · NUNCA broken-image icon. */}
           <motion.div variants={contextualReveal}>
-            <div className="aspect-video w-full rounded-2xl bg-gradient-to-br from-indigo-900 via-slate-900 to-black mb-8 flex items-center justify-center text-white/40 text-sm">
-              MEMORIA VISUAL · COMING SOON
-            </div>
+            <CapsuleHero capsule={capsule} />
           </motion.div>
 
           {/* Verified indicator · accent dot + mono label */}

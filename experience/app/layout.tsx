@@ -33,9 +33,17 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "KUDOS",
     locale: "es_ES",
+    images: [
+      { url: "/brand/kudos-logo-vertical.svg", width: 280, height: 260 },
+    ],
   },
   twitter: { card: "summary_large_image" },
   formatDetection: { telephone: false },
+  icons: {
+    icon: [{ url: "/brand/kudos-symbol.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/brand/kudos-symbol.svg" }],
+    shortcut: ["/brand/kudos-symbol.svg"],
+  },
 };
 
 export const viewport: Viewport = {

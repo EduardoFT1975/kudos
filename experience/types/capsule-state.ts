@@ -58,6 +58,11 @@ export interface CapsuleData {
   factual_anchor: string;
   context_block: string;
   source_refs: CapsuleSourceRef[];
+  image_url?: string;
+  thumbnail_url?: string;
+  media_source?: string;
+  media_caption?: string;
+  media_debug?: "REAL" | "NONE";
 }
 
 export interface CapsuleStateMeta {
