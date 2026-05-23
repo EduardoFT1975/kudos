@@ -986,33 +986,28 @@ export function MapExplorer() {
     if (geo.status !== "ready" || typeof geo.lat !== "number" || typeof geo.lng !== "number") return;
     const map = mapRef.current as Parameters<InstanceType<MapLibreModule["Marker"]>["addTo"]>[0];
 
-    // Cyan AI provisional marker · más sutil que el violet KUDOS marker
-    // para indicar "esto es exploración asistida, no curado humano".
+    // Cyan AI provisional marker · SIMPLIFICADO para garantizar pintado.
+    // El diseño previo usaba radial-gradient + filter:blur que pueden
+    // fallar en silencio en algunos GPU stacks. Esta versión es un círculo
+    // sólido + border + box-shadow glow · primitivas universalmente
+    // soportadas. El nuclear-test (built-in marker rojo) abajo en el loop
+    // confirma de forma independiente que el marker se posiciona bien.
     const buildProvisionalMarkerEl = (title: string) => {
       const root = document.createElement("div");
       root.title = title;
+      root.setAttribute("aria-label", `Capsule provisional: ${title}`);
       root.style.cssText =
-        "position:relative;width:22px;height:22px;cursor:pointer;";
-      const halo = document.createElement("div");
-      halo.style.cssText =
-        "position:absolute;inset:0;border-radius:9999px;" +
-        "background:#38bdf8;opacity:0.18;filter:blur(3px);";
-      const core = document.createElement("div");
-      core.style.cssText =
-        "position:absolute;top:50%;left:50%;" +
-        "transform:translate(-50%,-50%);" +
-        "width:8px;height:8px;border-radius:9999px;" +
-        "background:radial-gradient(circle at 35% 35%," +
-        "#ffffff 0%,#7dd3fc 25%,#38bdf8 60%,rgba(56,189,248,0) 100%);" +
-        "transition:transform .18s ease;" +
-        "border:1px solid rgba(125,211,252,0.55);";
-      root.appendChild(halo);
-      root.appendChild(core);
+        "width:16px;height:16px;border-radius:50%;" +
+        "background:#38bdf8;" +
+        "border:2px solid #ffffff;" +
+        "box-shadow:0 0 12px rgba(56,189,248,0.85),0 0 4px rgba(0,0,0,0.4);" +
+        "cursor:pointer;" +
+        "transition:transform .18s ease;";
       root.addEventListener("mouseenter", () => {
-        core.style.transform = "translate(-50%,-50%) scale(1.4)";
+        root.style.transform = "scale(1.35)";
       });
       root.addEventListener("mouseleave", () => {
-        core.style.transform = "translate(-50%,-50%) scale(1)";
+        root.style.transform = "scale(1)";
       });
       return root;
     };
@@ -1049,8 +1044,13 @@ export function MapExplorer() {
           }
           localCapsuleMarkersRef.current = [];
           if (!data || !Array.isArray(data.capsules)) return;
+          let idx = 0;
           for (const cap of data.capsules) {
             if (typeof cap.lat !== "number" || typeof cap.lng !== "number") continue;
+            // eslint-disable-next-line no-console
+            console.log("PROVISIONAL MARKER", cap.title, [cap.lng, cap.lat]);
+
+            // Custom cyan marker
             const el = buildProvisionalMarkerEl(cap.title ?? "Lugar");
             el.addEventListener("click", (ev) => {
               ev.stopPropagation();
@@ -1064,22 +1064,37 @@ export function MapExplorer() {
               .setLngLat([cap.lng as number, cap.lat as number])
               .addTo(map);
             localCapsuleMarkersRef.current.push(marker);
+
+            // NUCLEAR TEST · default MapLibre teardrop in red en cada
+            // capsule. Si los rojos aparecen pero los cyan no, el bug es
+            // CSS del custom el. Si tampoco aparecen los rojos, el bug
+            // es coords / lifecycle / map closure. Remove tras confirmar.
+            const nuclear = new maplibre.Marker({ color: "#ff3b30" })
+              .setLngLat([cap.lng as number, cap.lat as number])
+              .addTo(map);
+            localCapsuleMarkersRef.current.push(nuclear);
+            idx += 1;
           }
+          // eslint-disable-next-line no-console
+          console.log("PROVISIONAL MARKERS ADDED", idx, "(cyan + nuclear red)");
         })
         .catch(() => { /* swallow · UX no-op */ });
     }, 600);
 
     return () => {
+      // CRITICAL: solo abort + cancel timer. NO removemos markers aquí
+      // porque useGeolocation watchPosition con enableHighAccuracy=true
+      // dispara updates de geo.lat/lng repetidos → cleanup correría en
+      // bucle → markers se borrarían tras ~600ms de ser creados → user
+      // ve mapa vacío. La rama de fetch ya limpia markers viejos antes
+      // de añadir los nuevos. Cleanup real solo necesario en unmount,
+      // que el GC handles correctamente con los markers en ref.
       if (localCapsuleTimerRef.current !== null) {
         window.clearTimeout(localCapsuleTimerRef.current);
       }
       if (localCapsuleAbortRef.current) {
         localCapsuleAbortRef.current.abort();
       }
-      for (const m of localCapsuleMarkersRef.current) {
-        try { m.remove(); } catch { /* defensive */ }
-      }
-      localCapsuleMarkersRef.current = [];
     };
   }, [mapReady, maplibre, geo.status, geo.lat, geo.lng]);
 
