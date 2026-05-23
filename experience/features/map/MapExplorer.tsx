@@ -41,11 +41,12 @@ type MapLibreModule = typeof import("maplibre-gl");
 const _DEFAULT_CENTER: [number, number] = [12.4922, 41.8902]; // Roma · Coliseo [lng, lat]
 const _DEFAULT_ZOOM = 14;
 
-// Real-geo fallback policy.
-// Si el usuario tiene memorias en su entorno (radio NEARBY_RADIUS_KM)
-// el mapa va a su ubicación. Si no, fallback a Roma + empty-state con
-// ciudades sembradas. Roma deja de ser cold-start obligatorio.
-const ROMA_CENTER: [number, number] = [12.4922, 41.8902];
+// Real-geo policy.
+// La cámara va SIEMPRE a la posición real del usuario tras geo grant.
+// Si no hay memorias propias dentro de NEARBY_RADIUS_KM, mostramos el
+// empty-state panel con ciudades sembradas como CTAs OPCIONALES de
+// exploración (Roma/Atenas/Egipto en CITY_PRESETS). Nunca teleportamos
+// automáticamente — KUDOS es geolocalizado.
 const NEARBY_RADIUS_KM = 25;
 const CITY_PRESETS: ReadonlyArray<{
   id: string;
@@ -916,24 +917,49 @@ export function MapExplorer() {
       }
     }
 
-    if (hasNearby) {
-      map.flyTo({ center: userLngLat, zoom: 14, duration: 1200 });
-      setEmptyNearby(false);
-    } else {
-      map.flyTo({ center: ROMA_CENTER, zoom: 14, duration: 1400 });
-      setEmptyNearby(true);
-    }
+    // Política revisada: la cámara va SIEMPRE a la posición real del
+    // usuario. Si no hay memorias cercanas, mostramos el empty-state
+    // panel como overlay (CTAs a Roma/Atenas/Egipto opcionales) pero
+    // NO teleportamos automáticamente. KUDOS es geolocalizado: nadie
+    // espera abrir un mapa y aterrizar a 2000 km de su casa.
+    map.flyTo({ center: userLngLat, zoom: 14, duration: 1200 });
+    setEmptyNearby(!hasNearby);
 
+    // TEMP DEBUG · verifica que el effect corre con coords válidas.
+    // Quitar tras confirmar pin visible en producción.
+    // eslint-disable-next-line no-console
+    console.log("[KUDOS · map] USER GEO:", userLngLat);
+
+    // Destroy + recreate · evita marker zombie con coords viejas si el
+    // effect re-corre (geo update / memory change).
     if (userMarkerRef.current && typeof (userMarkerRef.current as { remove: () => void }).remove === "function") {
       (userMarkerRef.current as { remove: () => void }).remove();
+      userMarkerRef.current = null;
     }
-    const el = document.createElement("div");
-    el.style.cssText =
-      "width:14px;height:14px;border-radius:50%;background:var(--kudos-ai);" +
-      "box-shadow:0 0 14px var(--kudos-ai-glow);border:2px solid white;";
-    userMarkerRef.current = new maplibre.Marker({ element: el })
+
+    // Pin built-in MapLibre · SVG teardrop nativo en color cyan KUDOS
+    // (#00D1FF). Más fiable que un div custom: no depende de CSS vars
+    // cascadeando hasta el wrapper de marker, no se ve afectado por
+    // overflow/z-index de containers ni por failed paint del border-radius.
+    // El built-in marker está garantizado visible mientras el LngLat
+    // esté dentro del viewport actual.
+    const userMap = mapRef.current as Parameters<
+      InstanceType<MapLibreModule["Marker"]>["addTo"]
+    >[0];
+    userMarkerRef.current = new maplibre.Marker({ color: "#00D1FF" })
       .setLngLat(userLngLat)
-      .addTo(mapRef.current as Parameters<InstanceType<MapLibreModule["Marker"]>["addTo"]>[0]);
+      .addTo(userMap);
+
+    // Force repaint · garantiza que el canvas + marker DOM se pinten en
+    // el mismo frame tras flyTo programático.
+    try {
+      const repaintable = mapRef.current as {
+        resize?: () => void;
+        triggerRepaint?: () => void;
+      };
+      if (typeof repaintable.resize === "function") repaintable.resize();
+      if (typeof repaintable.triggerRepaint === "function") repaintable.triggerRepaint();
+    } catch { /* defensive */ }
   }, [mapReady, maplibre, geo.status, geo.lat, geo.lng, memory.hydrated, memory.entries]);
 
   // P0.9 Memory Graph · render markers persistentes de las memorias
