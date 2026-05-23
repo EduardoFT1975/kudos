@@ -787,3 +787,129 @@ def _serialize_capsule(capsule: PlaceCapsule) -> dict[str, Any]:
         payload["generation_version"] = gen_v
 
     return payload
+
+
+# ---------------------------------------------------------------------------
+# View · GET /api/local-capsules · MVP Local Capsule Generator (Phase 1)
+# ---------------------------------------------------------------------------
+@csrf_exempt
+@require_GET
+def local_capsules_generate(request: HttpRequest) -> JsonResponse:
+    """GET /api/local-capsules/?lat=LAT&lng=LNG&radius_km=R&limit=N
+
+    MVP Local Capsule Generator (Phase 1 · no-LLM variant).
+
+    Surfaces real Wikidata entities within `radius_km` of (lat, lng)
+    as PROVISIONAL capsules. No LLM synthesis · zero hallucination
+    risk · zero token cost · cached via WikidataGeoCache.
+
+    Used by the map when the user is in an area with no verified
+    capsules: returns real geospatial entities so the map never sits
+    empty. Each entity is labeled `provisional=true` so the frontend
+    can render it with a distinct visual state.
+
+    Confidence proxy: sitelinks_count >= 2 (entity exists in at
+    least 2 language Wikipedia editions = real-world signal, not
+    a single-language vanity entry). Sorted by sitelinks_count
+    desc, then distance asc.
+
+    Phase 2 (next iteration) will optionally invoke
+    pipeline.generate_place_capsule on the top-N candidates for
+    full Claude-synthesized narratives. Out of scope here.
+    """
+    try:
+        lat = float(request.GET.get("lat") or "")
+        lng = float(request.GET.get("lng") or "")
+    except (TypeError, ValueError):
+        return JsonResponse({"error": "invalid lat/lng"}, status=400)
+    if not (-90.0 <= lat <= 90.0 and -180.0 <= lng <= 180.0):
+        return JsonResponse({"error": "lat/lng out of range"}, status=400)
+
+    try:
+        radius_km = float(request.GET.get("radius_km") or "10")
+    except ValueError:
+        radius_km = 10.0
+    radius_km = max(0.5, min(radius_km, 30.0))
+
+    try:
+        limit = int(request.GET.get("limit") or "8")
+    except ValueError:
+        limit = 8
+    limit = max(1, min(limit, 20))
+
+    radius_m = int(radius_km * 1000)
+
+    # Wikidata SPARQL geosearch · uses existing WikidataClient.
+    # Failures swallowed → empty payload (200) rather than 500, so the
+    # frontend just renders nothing if Wikidata is unreachable.
+    try:
+        from content_engine.clients.wikidata import (
+            WikidataClient,
+            RetrievalError,
+        )
+        client = WikidataClient(timeout_s=12.0, fail_fast_429=True)
+        candidates = client.search_around(lat, lng, radius_m)
+    except RetrievalError as exc:
+        return JsonResponse({
+            "capsules": [],
+            "count": 0,
+            "provisional": True,
+            "source": "wikidata",
+            "error": "wikidata_unavailable",
+            "error_detail": str(exc)[:200],
+            "radius_km": radius_km,
+            "center": [lat, lng],
+        }, status=200)
+    except Exception as exc:  # broad · don't 500 on transient
+        return JsonResponse({
+            "capsules": [],
+            "count": 0,
+            "provisional": True,
+            "source": "wikidata",
+            "error": "unexpected",
+            "error_detail": str(exc)[:200],
+            "radius_km": radius_km,
+            "center": [lat, lng],
+        }, status=200)
+
+    # Confidence filter · drop single-sitelink (often vanity) entries.
+    filtered = [c for c in candidates if c.sitelinks_count >= 2]
+    # Sort: notability first, then proximity.
+    filtered.sort(key=lambda c: (-c.sitelinks_count, c.distance_m))
+
+    out: list[dict[str, Any]] = []
+    for c in filtered[:limit]:
+        wiki_es_url = (
+            f"https://es.wikipedia.org/wiki/Special:Redirect/wikidata/{c.entity_id}"
+            if c.has_es_wiki else ""
+        )
+        wiki_en_url = (
+            f"https://en.wikipedia.org/wiki/Special:Redirect/wikidata/{c.entity_id}"
+            if c.has_en_wiki else ""
+        )
+        out.append({
+            "id": f"wd-{c.entity_id}",
+            "entity_id": c.entity_id,
+            "title": c.label,
+            "lat": c.lat,
+            "lng": c.lng,
+            "distance_m": c.distance_m,
+            "classes": list(c.classes),
+            "sitelinks_count": c.sitelinks_count,
+            "wikidata_url": f"https://www.wikidata.org/wiki/{c.entity_id}",
+            "wikipedia_url_es": wiki_es_url,
+            "wikipedia_url_en": wiki_en_url,
+            "provisional": True,
+            "source": "wikidata",
+        })
+
+    return JsonResponse({
+        "capsules": out,
+        "count": len(out),
+        "provisional": True,
+        "source": "wikidata",
+        "radius_km": radius_km,
+        "center": [lat, lng],
+        "raw_count": len(candidates),
+        "filtered_count": len(filtered),
+    }, status=200)

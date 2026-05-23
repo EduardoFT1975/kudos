@@ -19,6 +19,7 @@ from content_engine.api import (
     capsules_debug_count,
     capsules_viewport,
     landmarks_viewport,
+    local_capsules_generate,
     place_capsule,
 )
 
@@ -41,4 +42,7 @@ urlpatterns = [
     # P3 · Temporal landmarks viewport (year-filtered GeoJSON)
     path("api/landmarks/viewport/", landmarks_viewport, name="landmarks_viewport"),
     path("api/landmarks/viewport",  landmarks_viewport, name="landmarks_viewport_noslash"),
+    # Local Capsule Generator (MVP · Phase 1 · no-LLM Wikidata POIs)
+    path("api/local-capsules/", local_capsules_generate, name="local_capsules"),
+    path("api/local-capsules",  local_capsules_generate, name="local_capsules_noslash"),
 ]

@@ -361,6 +361,12 @@ export function MapExplorer() {
   // P3 · landmark viewport fetch · same lifecycle pattern
   const landmarksAbortRef = React.useRef<AbortController | null>(null);
   const landmarksFetchTimerRef = React.useRef<number | null>(null);
+  // Local Capsule Generator (MVP) · provisional Wikidata POIs fetched
+  // around the user. Painted with cyan AI markers · separate ref set
+  // so they're independent of verified capsule markers.
+  const localCapsuleMarkersRef = React.useRef<Array<{ remove: () => void }>>([]);
+  const localCapsuleAbortRef = React.useRef<AbortController | null>(null);
+  const localCapsuleTimerRef = React.useRef<number | null>(null);
   const [maplibre, setMaplibre] = React.useState<MapLibreModule | null>(null);
   const [mapReady, setMapReady] = React.useState(false);
   const [clicked, setClicked] = React.useState<ClickedCoords | null>(null);
@@ -968,6 +974,114 @@ export function MapExplorer() {
       if (typeof repaintable.triggerRepaint === "function") repaintable.triggerRepaint();
     } catch { /* defensive */ }
   }, [mapReady, maplibre, geo.status, geo.lat, geo.lng, memory.hydrated, memory.entries]);
+
+  // Local Capsule Generator (MVP · Phase 1)
+  // Cuando geo está ready, pide al backend Wikidata POIs cercanos al
+  // usuario (radio 10 km) y los pinta como provisional markers cyan.
+  // Mantiene el mapa con contenido aunque no haya capsules verificadas
+  // ni memorias propias. Endpoint /api/local-capsules/ devuelve entidades
+  // reales (sin LLM, sin alucinación) sourced de Wikidata SPARQL.
+  React.useEffect(() => {
+    if (!mapReady || !maplibre || !mapRef.current) return;
+    if (geo.status !== "ready" || typeof geo.lat !== "number" || typeof geo.lng !== "number") return;
+    const map = mapRef.current as Parameters<InstanceType<MapLibreModule["Marker"]>["addTo"]>[0];
+
+    // Cyan AI provisional marker · más sutil que el violet KUDOS marker
+    // para indicar "esto es exploración asistida, no curado humano".
+    const buildProvisionalMarkerEl = (title: string) => {
+      const root = document.createElement("div");
+      root.title = title;
+      root.style.cssText =
+        "position:relative;width:22px;height:22px;cursor:pointer;";
+      const halo = document.createElement("div");
+      halo.style.cssText =
+        "position:absolute;inset:0;border-radius:9999px;" +
+        "background:#38bdf8;opacity:0.18;filter:blur(3px);";
+      const core = document.createElement("div");
+      core.style.cssText =
+        "position:absolute;top:50%;left:50%;" +
+        "transform:translate(-50%,-50%);" +
+        "width:8px;height:8px;border-radius:9999px;" +
+        "background:radial-gradient(circle at 35% 35%," +
+        "#ffffff 0%,#7dd3fc 25%,#38bdf8 60%,rgba(56,189,248,0) 100%);" +
+        "transition:transform .18s ease;" +
+        "border:1px solid rgba(125,211,252,0.55);";
+      root.appendChild(halo);
+      root.appendChild(core);
+      root.addEventListener("mouseenter", () => {
+        core.style.transform = "translate(-50%,-50%) scale(1.4)";
+      });
+      root.addEventListener("mouseleave", () => {
+        core.style.transform = "translate(-50%,-50%) scale(1)";
+      });
+      return root;
+    };
+
+    // Debounce + abort previous request
+    if (localCapsuleTimerRef.current !== null) {
+      window.clearTimeout(localCapsuleTimerRef.current);
+    }
+    localCapsuleTimerRef.current = window.setTimeout(() => {
+      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+      const url =
+        apiBase +
+        "/api/local-capsules/?lat=" + (geo.lat as number).toFixed(5) +
+        "&lng=" + (geo.lng as number).toFixed(5) +
+        "&radius_km=10&limit=8";
+      if (localCapsuleAbortRef.current) localCapsuleAbortRef.current.abort();
+      const ctrl = new AbortController();
+      localCapsuleAbortRef.current = ctrl;
+      fetch(url, { signal: ctrl.signal, cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data: { capsules?: Array<{
+          id?: string; title?: string;
+          lat?: number; lng?: number;
+          distance_m?: number;
+          wikidata_url?: string;
+          wikipedia_url_es?: string;
+          wikipedia_url_en?: string;
+        }> } | null) => {
+          // eslint-disable-next-line no-console
+          console.log("LOCAL CAPSULES", data?.capsules?.length ?? 0, data);
+          // Clear previous provisional markers
+          for (const m of localCapsuleMarkersRef.current) {
+            try { m.remove(); } catch { /* defensive */ }
+          }
+          localCapsuleMarkersRef.current = [];
+          if (!data || !Array.isArray(data.capsules)) return;
+          for (const cap of data.capsules) {
+            if (typeof cap.lat !== "number" || typeof cap.lng !== "number") continue;
+            const el = buildProvisionalMarkerEl(cap.title ?? "Lugar");
+            el.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              setClicked({
+                lat: cap.lat as number,
+                lng: cap.lng as number,
+                title: cap.title,
+              });
+            });
+            const marker = new maplibre.Marker({ element: el })
+              .setLngLat([cap.lng as number, cap.lat as number])
+              .addTo(map);
+            localCapsuleMarkersRef.current.push(marker);
+          }
+        })
+        .catch(() => { /* swallow · UX no-op */ });
+    }, 600);
+
+    return () => {
+      if (localCapsuleTimerRef.current !== null) {
+        window.clearTimeout(localCapsuleTimerRef.current);
+      }
+      if (localCapsuleAbortRef.current) {
+        localCapsuleAbortRef.current.abort();
+      }
+      for (const m of localCapsuleMarkersRef.current) {
+        try { m.remove(); } catch { /* defensive */ }
+      }
+      localCapsuleMarkersRef.current = [];
+    };
+  }, [mapReady, maplibre, geo.status, geo.lat, geo.lng]);
 
   // P0.9 Memory Graph · render markers persistentes de las memorias
   // guardadas. Se ejecuta cuando:
