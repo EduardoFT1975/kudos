@@ -31,15 +31,15 @@ import { track } from "@/lib/analytics/plausible";
 // MapLibre dynamic import · cargado client-side only.
 type MapLibreModule = typeof import("maplibre-gl");
 
-// MVP demo · Rome is the only city with seeded TemporalLandmarks (P3).
-// Cold-start cinematic position over Coliseo so first-paint reveals the
-// historical overlay layer. useGeolocation flyTo is INTENTIONALLY
-// DISABLED in this MVP (see effect ~line 805) — without that override
-// the camera would jump to the user's real coords (Spain/Galicia/etc.)
-// and the landmark layer would never be visible. User's pin is still
-// placed on the map at their real location · they can pan manually.
-const _DEFAULT_CENTER: [number, number] = [12.4922, 41.8902]; // Roma · Coliseo [lng, lat]
-const _DEFAULT_ZOOM = 14;
+// Cold-start camera · NEUTRAL world view.
+// Geolocation es la única autoridad sobre la cámara inicial. Si geo se
+// resuelve, flyTo(userCoords). Si NUNCA se resuelve (permission denied
+// / desktop sin GPS / etc.), el usuario ve un mundo neutro · jamás
+// Roma por accidente. Roma solo aparece si:
+//   1) el usuario está en Roma (geo)  ó
+//   2) el usuario clickea Roma en CITY_PRESETS (user-initiated)
+const _DEFAULT_CENTER: [number, number] = [0.0, 25.0]; // mundo neutro · vista pan-continental
+const _DEFAULT_ZOOM = 2;
 
 // Real-geo policy.
 // La cámara va SIEMPRE a la posición real del usuario tras geo grant.
@@ -616,6 +616,8 @@ export function MapExplorer() {
                   ev.stopPropagation();
                   const currentZoom = map.getZoom();
                   if (currentZoom < 14) {
+                    // eslint-disable-next-line no-console
+                    console.log("FLYTO CLUSTER", [avgLng, avgLat], { fromZoom: currentZoom });
                     map.flyTo({
                       center: [avgLng, avgLat],
                       zoom: Math.min(currentZoom + 2, 16),
@@ -751,6 +753,8 @@ export function MapExplorer() {
                   map.resize();
                   const bounds = new maplibre.LngLatBounds(lngLats[0], lngLats[0]);
                   for (const ll of lngLats) bounds.extend(ll);
+                  // eslint-disable-next-line no-console
+                  console.log("FLYTO VIEWPORT (fitBounds)", { count: lngLats.length });
                   map.fitBounds(bounds, { padding: 80, maxZoom: 10, duration: 0 });
                 });
                 map.once("moveend", () => {
@@ -762,6 +766,8 @@ export function MapExplorer() {
               try {
                 requestAnimationFrame(() => {
                   map.resize();
+                  // eslint-disable-next-line no-console
+                  console.log("FLYTO VIEWPORT (single)", lngLats[0]);
                   map.flyTo({ center: lngLats[0], zoom: 12, duration: 0 });
                 });
                 map.once("moveend", () => {
@@ -886,18 +892,20 @@ export function MapExplorer() {
 
   // REAL-GEO PRIORITY · MVP fallback policy.
   // Cuando geo está ready Y memory hidratado:
-  //   · si hay memorias dentro de NEARBY_RADIUS_KM (25 km) del usuario
-  //     → flyTo coords reales (KUDOS es un producto geolocalizado, no
-  //     una demo fija sobre Roma)
-  //   · si no → flyTo Roma + emptyNearby=true (dispara CTA panel con
-  //     ciudades sembradas)
-  // El pin del usuario se planta SIEMPRE en su ubicación real, exista
-  // o no flyTo. Esperamos a `memory.hydrated` antes de decidir para
-  // evitar un primer flyTo a Roma seguido de re-flyTo a user coords.
+  //   · cámara → SIEMPRE coords reales del usuario (autoridad única)
+  //   · si NO hay memorias dentro de NEARBY_RADIUS_KM (25 km)
+  //     → emptyNearby=true (dispara CTA panel con ciudades sembradas)
+  // El pin del usuario se planta SIEMPRE en su ubicación real.
+  // KUDOS es un producto geolocalizado: nunca teleportamos al usuario.
   React.useEffect(() => {
     if (!mapReady || !maplibre || !mapRef.current) return;
     if (geo.status !== "ready" || typeof geo.lat !== "number" || typeof geo.lng !== "number") return;
-    if (!memory.hydrated) return;
+    // NOTA · NO esperamos a memory.hydrated. Si memory aún no hidrató,
+    // memory.entries=[] y hasNearby=false (correcto · emptyNearby
+    // panel se mostrará). Cuando memory finalmente hidrate, el effect
+    // re-corre (memory.hydrated está en deps) y re-evalúa hasNearby.
+    // Esto evita que la cámara se quede atascada en _DEFAULT_CENTER
+    // esperando la hidratación de un store local.
 
     const map = mapRef.current as {
       flyTo: (opts: { center: [number, number]; zoom: number; duration: number }) => void;
@@ -917,11 +925,10 @@ export function MapExplorer() {
       }
     }
 
-    // Política revisada: la cámara va SIEMPRE a la posición real del
-    // usuario. Si no hay memorias cercanas, mostramos el empty-state
-    // panel como overlay (CTAs a Roma/Atenas/Egipto opcionales) pero
-    // NO teleportamos automáticamente. KUDOS es geolocalizado: nadie
-    // espera abrir un mapa y aterrizar a 2000 km de su casa.
+    // Política: la cámara va SIEMPRE a la posición real del usuario.
+    // Geolocation es la única autoridad sobre la cámara inicial.
+    // eslint-disable-next-line no-console
+    console.log("FLYTO GEO", userLngLat, { hasNearby });
     map.flyTo({ center: userLngLat, zoom: 14, duration: 1200 });
     setEmptyNearby(!hasNearby);
 
@@ -1073,6 +1080,8 @@ export function MapExplorer() {
                       flyTo: (opts: { center: [number, number]; zoom: number; duration: number }) => void;
                     } | null;
                     if (m) {
+                      // eslint-disable-next-line no-console
+                      console.log("FLYTO PRESET", c.id, c.center);
                       m.flyTo({ center: c.center, zoom: 14, duration: 1400 });
                       setEmptyNearby(false);
                     }
