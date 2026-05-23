@@ -84,6 +84,28 @@ type ClusterListState = {
   capsules: ClusterListEntry[];
 };
 
+// Echo card · provisional view state. El primer Echo card cinematográfico
+// del producto (north star: Echo Portal). El narrative y la imagen se
+// fetchan async desde Wikipedia REST. Visual converge a la línea premium
+// KUDOS · NO debug aesthetic, NO ingeniería visible.
+type ProvisionalView = {
+  entity_id: string;
+  title: string;
+  lat: number;
+  lng: number;
+  distance_m: number;
+  wikidata_url: string;
+  wikipedia_url_es: string;
+  wikipedia_url_en: string;
+  // Async-populated state · narrative + hero image + canonical page URL.
+  narrative: string | null;
+  imageUrl: string | null;
+  description: string | null;
+  pageUrl: string | null;
+  loading: boolean;
+  errorMessage?: string;
+};
+
 // P1 · Temporal map · era band → CSS filter applied to map container.
 // Provides visual cue without historical tile sources (those come later).
 type Era = "ancient" | "medieval" | "industrial" | "modern";
@@ -383,6 +405,12 @@ export function MapExplorer() {
   // un panel con la lista de cápsulas del grupo.
   const [clusterList, setClusterList] =
     React.useState<ClusterListState | null>(null);
+  // Local Capsule Generator · vista provisional al click. Wikipedia
+  // summary se fetcha desde el frontend (CORS-enabled, no backend).
+  // Phase 3 (next): swap to backend pipeline.generate_place_capsule
+  // para LLM-synthesized cinematic narrative.
+  const [provisionalView, setProvisionalView] =
+    React.useState<ProvisionalView | null>(null);
   // P1 · Temporal map · year slider state. Range -500 BC → 2026.
   // Default 2026 (present). Future capsules filter by year via viewport
   // API param. Visual tint switches by era band.
@@ -975,6 +1003,91 @@ export function MapExplorer() {
     } catch { /* defensive */ }
   }, [mapReady, maplibre, geo.status, geo.lat, geo.lng, memory.hydrated, memory.entries]);
 
+  // Local Capsule Generator · Phase 2 narrative fetch.
+  // Cuando se abre provisionalView con loading=true, fetch Wikipedia
+  // REST summary (es preferred, en fallback). Sin backend · API REST
+  // de Wikipedia es CORS-enabled y free. Resultado se merge al state.
+  React.useEffect(() => {
+    if (!provisionalView || !provisionalView.loading) return;
+    let cancelled = false;
+    const ctrl = new AbortController();
+
+    const fetchSummary = async () => {
+      const tries: Array<{ lang: "es" | "en"; title: string }> = [
+        { lang: "es", title: provisionalView.title },
+        { lang: "en", title: provisionalView.title },
+      ];
+      for (const t of tries) {
+        try {
+          const url =
+            `https://${t.lang}.wikipedia.org/api/rest_v1/page/summary/` +
+            encodeURIComponent(t.title);
+          const r = await fetch(url, {
+            signal: ctrl.signal,
+            cache: "no-store",
+            headers: { Accept: "application/json" },
+          });
+          if (!r.ok) continue;
+          const j = await r.json();
+          const extract = typeof j?.extract === "string" ? j.extract.trim() : "";
+          if (extract.length >= 30) {
+            // Hero image: thumbnail preferred (already CDN-sized · ~320px).
+            // originalimage como fallback (puede ser MB-sized · evitar).
+            const thumbSrc =
+              typeof j?.thumbnail?.source === "string" ? j.thumbnail.source : null;
+            const origSrc =
+              typeof j?.originalimage?.source === "string" ? j.originalimage.source : null;
+            const imageUrl = thumbSrc ?? origSrc ?? null;
+            const description =
+              typeof j?.description === "string" && j.description.trim().length > 0
+                ? j.description.trim()
+                : null;
+            const pageUrl =
+              typeof j?.content_urls?.desktop?.page === "string"
+                ? j.content_urls.desktop.page
+                : null;
+            if (!cancelled) {
+              setProvisionalView((prev) =>
+                prev && prev.entity_id === provisionalView.entity_id
+                  ? {
+                      ...prev,
+                      narrative: extract,
+                      imageUrl,
+                      description,
+                      pageUrl,
+                      loading: false,
+                    }
+                  : prev,
+              );
+            }
+            return;
+          }
+        } catch {
+          // try next lang
+        }
+        if (cancelled) return;
+      }
+      if (!cancelled) {
+        setProvisionalView((prev) =>
+          prev && prev.entity_id === provisionalView.entity_id
+            ? {
+                ...prev,
+                narrative: null,
+                loading: false,
+                errorMessage: "Sin resumen disponible · abre la fuente para leer más.",
+              }
+            : prev,
+        );
+      }
+    };
+
+    void fetchSummary();
+    return () => {
+      cancelled = true;
+      ctrl.abort();
+    };
+  }, [provisionalView]);
+
   // Local Capsule Generator (MVP · Phase 1)
   // Cuando geo está ready, pide al backend Wikidata POIs cercanos al
   // usuario (radio 10 km) y los pinta como provisional markers cyan.
@@ -1044,39 +1157,42 @@ export function MapExplorer() {
           }
           localCapsuleMarkersRef.current = [];
           if (!data || !Array.isArray(data.capsules)) return;
-          let idx = 0;
           for (const cap of data.capsules) {
             if (typeof cap.lat !== "number" || typeof cap.lng !== "number") continue;
-            // eslint-disable-next-line no-console
-            console.log("PROVISIONAL MARKER", cap.title, [cap.lng, cap.lat]);
 
-            // Custom cyan marker
-            const el = buildProvisionalMarkerEl(cap.title ?? "Lugar");
+            // Capture full provisional context in marker closure · used
+            // por el panel provisional al hacer click para fetch del
+            // Wikipedia summary y resolver el narrative real.
+            const provCtx = {
+              entity_id: (cap as { entity_id?: string }).entity_id ?? "",
+              title: cap.title ?? "Lugar",
+              lat: cap.lat as number,
+              lng: cap.lng as number,
+              wikidata_url: cap.wikidata_url ?? "",
+              wikipedia_url_es: cap.wikipedia_url_es ?? "",
+              wikipedia_url_en: cap.wikipedia_url_en ?? "",
+              distance_m: typeof cap.distance_m === "number" ? cap.distance_m : 0,
+            };
+
+            const el = buildProvisionalMarkerEl(provCtx.title);
             el.addEventListener("click", (ev) => {
               ev.stopPropagation();
-              setClicked({
-                lat: cap.lat as number,
-                lng: cap.lng as number,
-                title: cap.title,
+              setProvisionalView({
+                ...provCtx,
+                narrative: null,
+                imageUrl: null,
+                description: null,
+                pageUrl: null,
+                loading: true,
               });
             });
             const marker = new maplibre.Marker({ element: el })
-              .setLngLat([cap.lng as number, cap.lat as number])
+              .setLngLat([provCtx.lng, provCtx.lat])
               .addTo(map);
             localCapsuleMarkersRef.current.push(marker);
-
-            // NUCLEAR TEST · default MapLibre teardrop in red en cada
-            // capsule. Si los rojos aparecen pero los cyan no, el bug es
-            // CSS del custom el. Si tampoco aparecen los rojos, el bug
-            // es coords / lifecycle / map closure. Remove tras confirmar.
-            const nuclear = new maplibre.Marker({ color: "#ff3b30" })
-              .setLngLat([cap.lng as number, cap.lat as number])
-              .addTo(map);
-            localCapsuleMarkersRef.current.push(nuclear);
-            idx += 1;
           }
           // eslint-disable-next-line no-console
-          console.log("PROVISIONAL MARKERS ADDED", idx, "(cyan + nuclear red)");
+          console.log("PROVISIONAL MARKERS ADDED", localCapsuleMarkersRef.current.length, "(cyan only · nuclear removed)");
         })
         .catch(() => { /* swallow · UX no-op */ });
     }, 600);
@@ -1228,6 +1344,156 @@ export function MapExplorer() {
             >
               Cerrar
             </button>
+          </div>
+        </div>
+      ) : null}
+
+      {/* ECHO CARD · primer card cinematográfico del Echo Portal.
+          Visual converge a north star · NO debug aesthetic. Hero image
+          full-width, título display, micro-narrativa, single CTA.
+          Phase 3 reemplaza el narrative Wikipedia por LLM-synthesized
+          cinematic prose · scaffolding queda intacto. */}
+      {provisionalView ? (
+        <div className="pointer-events-auto absolute left-1/2 top-1/2 z-40 w-[min(420px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 transform">
+          <div
+            className="overflow-hidden rounded-3xl border border-white/10 bg-[rgba(5,10,31,0.96)] backdrop-blur-xl"
+            style={{
+              boxShadow:
+                "0 24px 80px -20px rgba(0,0,0,0.65),0 0 0 1px rgba(167,139,250,0.10),0 0 40px -10px rgba(139,92,246,0.18)",
+            }}
+          >
+            {/* Hero · imagen + gradient fade · 16:9 aprox */}
+            <div className="relative h-[180px] w-full overflow-hidden bg-[rgba(13,17,38,1)]">
+              {provisionalView.imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={provisionalView.imageUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  style={{ filter: "saturate(0.92) contrast(1.04)" }}
+                />
+              ) : (
+                <div
+                  className="h-full w-full"
+                  style={{
+                    background:
+                      "radial-gradient(120% 80% at 30% 20%, rgba(139,92,246,0.32) 0%, rgba(109,40,217,0.18) 35%, rgba(5,10,31,0) 70%)," +
+                      "radial-gradient(80% 60% at 80% 90%, rgba(56,189,248,0.18) 0%, rgba(5,10,31,0) 65%)",
+                  }}
+                />
+              )}
+              {/* Gradient fade to card body */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-[80px]"
+                style={{
+                  background:
+                    "linear-gradient(180deg, rgba(5,10,31,0) 0%, rgba(5,10,31,0.85) 70%, rgba(5,10,31,1) 100%)",
+                }}
+              />
+              {/* Close · top-right, subtle glass */}
+              <button
+                type="button"
+                onClick={() => setProvisionalView(null)}
+                aria-label="Cerrar"
+                className="absolute right-3 top-3 grid size-7 place-items-center rounded-full border border-white/15 bg-[rgba(5,10,31,0.55)] text-[14px] leading-none text-white/70 backdrop-blur-md transition-all hover:bg-[rgba(5,10,31,0.85)] hover:text-white"
+              >
+                ×
+              </button>
+              {/* Echo glyph · single faint dot, no label · sustituye el
+                  badge "Cápsula IA provisional" del debug aesthetic */}
+              <span
+                aria-hidden
+                className="absolute left-4 top-4 inline-block size-1.5 rounded-full"
+                style={{
+                  background: "var(--kudos-accent-bright)",
+                  boxShadow: "0 0 12px var(--kudos-accent-glow), 0 0 4px rgba(0,0,0,0.5)",
+                }}
+              />
+            </div>
+
+            {/* Body */}
+            <div className="flex flex-col gap-3 px-5 pb-5 pt-2">
+              <div className="flex flex-col gap-1">
+                <h2 className="font-display text-[22px] font-light leading-[1.15] tracking-tight text-white/95">
+                  {provisionalView.title}
+                </h2>
+                {provisionalView.description ? (
+                  <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-[var(--kudos-accent-bright)]/85">
+                    {provisionalView.description}
+                  </p>
+                ) : provisionalView.distance_m > 0 ? (
+                  <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/35">
+                    a {(provisionalView.distance_m / 1000).toFixed(1)} km
+                  </p>
+                ) : null}
+              </div>
+
+              {provisionalView.loading ? (
+                <div className="flex items-center gap-2 py-2 font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
+                  <span
+                    aria-hidden
+                    className="inline-block size-1.5 rounded-full bg-[var(--kudos-accent-bright)]"
+                    style={{
+                      animation: "kudos-breathe 1.4s ease-in-out infinite",
+                      boxShadow: "0 0 8px var(--kudos-accent-glow)",
+                    }}
+                  />
+                  Despertando el eco…
+                </div>
+              ) : provisionalView.narrative ? (
+                <p className="font-display text-[14.5px] font-light leading-[1.55] text-white/82">
+                  {(() => {
+                    // Micro-narrativa cinematográfica · primera frase
+                    // o ~220 chars, lo que llegue primero. Ellipsis si
+                    // truncamos. El "leer más" vive en el CTA, no aquí.
+                    const raw = provisionalView.narrative.trim();
+                    const firstStop = raw.search(/(?<=[.!?])\s/);
+                    const sentenceEnd = firstStop > 80 && firstStop < 260
+                      ? firstStop + 1
+                      : 220;
+                    const cut = raw.slice(0, sentenceEnd).trim();
+                    return raw.length > cut.length ? cut + " …" : cut;
+                  })()}
+                </p>
+              ) : (
+                <p className="font-display text-[13px] font-light italic leading-relaxed text-white/55">
+                  Este eco aún no tiene palabras propias. Toca la fuente para escucharlo.
+                </p>
+              )}
+
+              {/* CTA · single primary action. Si hay pageUrl real abre
+                  Wikipedia en nueva tab · si no, el wikidata_url. Botón
+                  con tratamiento glow KUDOS · no debug button look. */}
+              <a
+                href={
+                  provisionalView.pageUrl ||
+                  provisionalView.wikipedia_url_es ||
+                  provisionalView.wikipedia_url_en ||
+                  provisionalView.wikidata_url ||
+                  "#"
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  // No-op si no hay destino · evita link "#" que recarga
+                  const dest =
+                    provisionalView.pageUrl ||
+                    provisionalView.wikipedia_url_es ||
+                    provisionalView.wikipedia_url_en ||
+                    provisionalView.wikidata_url;
+                  if (!dest) e.preventDefault();
+                }}
+                className="mt-1 inline-flex w-fit items-center gap-2 rounded-full border border-[var(--kudos-accent)]/55 bg-[var(--kudos-accent)]/12 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.32em] text-[var(--kudos-accent-bright)] transition-all hover:bg-[var(--kudos-accent)]/22"
+                style={{
+                  boxShadow:
+                    "0 0 0 1px rgba(167,139,250,0.10),0 12px 24px -10px rgba(139,92,246,0.45)",
+                }}
+              >
+                <span>Entrar en este eco</span>
+                <span aria-hidden style={{ letterSpacing: 0 }}>→</span>
+              </a>
+            </div>
           </div>
         </div>
       ) : null}
