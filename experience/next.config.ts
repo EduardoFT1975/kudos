@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
-// Backend Django local. En dev se proxy /api/* al backend para evitar
-// problemas CORS + cookies cross-origin.
+// Backend Django. En dev apunta a localhost:8000. En produccion apunta
+// a la URL publica de Render (NEXT_PUBLIC_API_BASE_URL en el dashboard).
 //
 // trailingSlash:true es necesario porque Django requiere "/" al final
 // y APPEND_SLASH=True NO redirige POSTs (solo GETs), dando 500. Con
@@ -28,8 +28,12 @@ const nextConfig: NextConfig = {
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
 
+  // Rewrite /api/* al backend Django · SIEMPRE (dev Y prod).
+  // En dev evita CORS+cookies cross-origin con localhost.
+  // En prod permite que el frontend (kudos-frontend-rsi3) hable con el
+  // backend (kudos-40cq) sin pelearse con CORS · Next.js hace de proxy
+  // server-side para que el navegador vea todo same-origin.
   async rewrites() {
-    if (process.env.NODE_ENV === "production") return [];
     return [
       { source: "/api/:path*", destination: `${DJANGO_BACKEND}/api/:path*/` },
     ];
