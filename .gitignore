@@ -93,10 +93,11 @@ matplotlib-cache/
 prometheus/
 
 # ---------- Legacy duplicates (de la contaminación 246ab1c) ----------
-# Estos paths se eliminaron en el cleanup commit. Bloqueados para que
-# no vuelvan a entrar si el founder los re-crea localmente.
-kudos_project/
-kudos_app/
+# Los paths kudos_project/ y kudos_app/ aparecían duplicados en una
+# contaminación previa. AHORA (2026-05-27) son las carpetas REALES
+# del proyecto y NO deben ignorarse. La regla queda solo para los
+# duplicados que SÍ son archivos viejos (capsulas_prueba, images,
+# clips, translator).
 capsulas_prueba/
 images/
 clips/
