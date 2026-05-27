@@ -80,6 +80,10 @@ deployment_log.txt
 *.avi
 *.webm
 *.mp3
+# EXCEPCION · capsulas servidas por el frontend Next.js (small files).
+# Son los .mp4 0:15 que se sirven directamente desde el static.
+!experience/public/capsules/*.mp4
+!experience/public/capsules/*.webm
 *.wav
 *.flac
 
