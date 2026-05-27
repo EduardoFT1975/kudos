@@ -40,7 +40,8 @@ build/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-media/
+# Solo el media/ de la raiz (uploads Django) · NO los experience/components/media/
+/media/
 staticfiles/
 logs/
 
