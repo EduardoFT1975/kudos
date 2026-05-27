@@ -1,0 +1,699 @@
+{
+  "capsule_id": "galicia_pontevedra_drizzle",
+  "human_presence_audits": [
+    {
+      "shot_id": "shot_00_black_open",
+      "findings": [],
+      "blocked": false
+    },
+    {
+      "shot_id": "shot_01_slate_roof_wide",
+      "findings": [],
+      "blocked": false
+    },
+    {
+      "shot_id": "shot_02_drainage_pipe",
+      "findings": [],
+      "blocked": false
+    },
+    {
+      "shot_id": "shot_03_window_warm_lamp",
+      "findings": [],
+      "blocked": false
+    },
+    {
+      "shot_id": "shot_04_figure_under_umbrella",
+      "findings": [],
+      "blocked": false
+    },
+    {
+      "shot_id": "shot_05_atlantic_horizon",
+      "findings": [],
+      "blocked": false
+    },
+    {
+      "shot_id": "shot_06_pavement_reflections",
+      "findings": [],
+      "blocked": false
+    },
+    {
+      "shot_id": "shot_07_black_close",
+      "findings": [],
+      "blocked": false
+    }
+  ],
+  "microreality_audits": [
+    {
+      "shot_id": "shot_00_black_open",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    },
+    {
+      "shot_id": "shot_01_slate_roof_wide",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    },
+    {
+      "shot_id": "shot_02_drainage_pipe",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    },
+    {
+      "shot_id": "shot_03_window_warm_lamp",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": true,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    },
+    {
+      "shot_id": "shot_04_figure_under_umbrella",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    },
+    {
+      "shot_id": "shot_05_atlantic_horizon",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    },
+    {
+      "shot_id": "shot_06_pavement_reflections",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": true,
+          "required_for_shot": true,
+          "verdict": "ok"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    },
+    {
+      "shot_id": "shot_07_black_close",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    }
+  ],
+  "physical": {
+    "findings": [
+      {
+        "check": "weather_continuity",
+        "severity": "info",
+        "between_shots": [
+          "shot_01_slate_roof_wide",
+          "shot_02_drainage_pipe",
+          "shot_03_window_warm_lamp",
+          "shot_04_figure_under_umbrella",
+          "shot_05_atlantic_horizon",
+          "shot_06_pavement_reflections"
+        ],
+        "message": "weather consistent · drizzle"
+      },
+      {
+        "check": "light_continuity",
+        "severity": "info",
+        "between_shots": [
+          "shot_01_slate_roof_wide",
+          "shot_02_drainage_pipe",
+          "shot_03_window_warm_lamp",
+          "shot_04_figure_under_umbrella",
+          "shot_06_pavement_reflections"
+        ],
+        "message": "5 shots reference sodium-vapor / warm lamp"
+      },
+      {
+        "check": "reflection_consistency",
+        "severity": "info",
+        "between_shots": [
+          "shot_02_drainage_pipe",
+          "shot_03_window_warm_lamp",
+          "shot_04_figure_under_umbrella",
+          "shot_06_pavement_reflections"
+        ],
+        "message": "reflections referenced across 4 shots"
+      },
+      {
+        "check": "environmental_persistence",
+        "severity": "info",
+        "between_shots": [
+          "shot_01_slate_roof_wide",
+          "shot_04_figure_under_umbrella",
+          "shot_06_pavement_reflections"
+        ],
+        "message": "ground material consistent · 3 shots"
+      },
+      {
+        "check": "humidity_realism",
+        "severity": "info",
+        "between_shots": [
+          "shot_01_slate_roof_wide",
+          "shot_02_drainage_pipe",
+          "shot_03_window_warm_lamp",
+          "shot_04_figure_under_umbrella",
+          "shot_05_atlantic_horizon",
+          "shot_06_pavement_reflections"
+        ],
+        "message": "every non-black shot has humidity targets"
+      },
+      {
+        "check": "body_inertia",
+        "severity": "info",
+        "between_shots": [
+          "shot_04_figure_under_umbrella"
+        ],
+        "message": "inertia anchors present"
+      },
+      {
+        "check": "tactile_plausibility",
+        "severity": "info",
+        "between_shots": [
+          "shot_06_pavement_reflections"
+        ],
+        "message": "tactile anchors in 1 shot(s)"
+      },
+      {
+        "check": "atmospheric_coherence",
+        "severity": "info",
+        "between_shots": [],
+        "message": "every shot has an atmospheric goal"
+      }
+    ],
+    "blocking_failures": 0,
+    "composite_score": 100
+  },
+  "subtitle_audit": {
+    "clean": true,
+    "findings": []
+  },
+  "worst_microreality_score": 100
+}

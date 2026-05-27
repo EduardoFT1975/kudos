@@ -1,34 +1,12 @@
-/**
- * KUDOS Experience · /mapa · ECHO PORTAL
- *
- * Surface architecture (north star):
- *   LEFT   - Echo hero (poster · persistent story card)
- *   CENTER - Map intelligence (contextual)
- *   RIGHT  - Context panel stack
- *   BOTTOM - 4-module strip
- */
-import { EchoPortalLayout } from "@/features/map/EchoPortalLayout";
+import type { Metadata } from "next";
+import { MapScreen } from "@/components/screens/map/MapScreen";
 
 export const dynamic = "force-dynamic";
-
-export const metadata = {
-  title: "KUDOS · Echo Portal",
-  description:
-    "Atlas narrativo · cada lugar tiene un eco · explora memoria humana sobre un mapa vivo.",
-  icons: {
-    icon: [
-      { url: "/brand/kudos-symbol.svg", type: "image/svg+xml" },
-    ],
-    shortcut: "/brand/kudos-symbol.svg",
-    apple: "/brand/kudos-symbol.svg",
-  },
-  openGraph: {
-    title: "KUDOS · Echo Portal",
-    description: "Atlas narrativo · cada lugar tiene un eco.",
-    type: "website",
-  },
+export const metadata: Metadata = {
+  title: "Mapa",
+  description: "Explora lugares KUDOS en el mapa.",
 };
 
 export default function MapaPage() {
-  return <EchoPortalLayout />;
+  return <MapScreen />;
 }

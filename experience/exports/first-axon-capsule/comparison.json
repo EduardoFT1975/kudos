@@ -1,0 +1,84 @@
+{
+  "capsule_id": "galicia_pontevedra_drizzle",
+  "axes": [
+    {
+      "axis": "pacing",
+      "axon_galicia": 84,
+      "tiktok_travel": 18,
+      "cinematic_tourism": 56,
+      "ai_video_edit": 35,
+      "engagement_optimized": 22,
+      "notes": "AXÓN 4 cuts in 23s with intervals · TikTok ~25 cuts/min · cinematic tourism ~12 cuts/min but rhythmic-aggressive · engagement-optimised mimics the worst of both"
+    },
+    {
+      "axis": "silence",
+      "axon_galicia": 78,
+      "tiktok_travel": 8,
+      "cinematic_tourism": 45,
+      "ai_video_edit": 20,
+      "engagement_optimized": 12,
+      "notes": "AXÓN silence share 47% · TikTok ~3% · cinematic tourism has music throughout so silence is effectively 0"
+    },
+    {
+      "axis": "emotional_pressure_inverse",
+      "axon_galicia": 82,
+      "tiktok_travel": 14,
+      "cinematic_tourism": 32,
+      "ai_video_edit": 38,
+      "engagement_optimized": 8,
+      "notes": "AXÓN refuses music + emotional swell + symbolic acting · the viewer is invited, not pushed"
+    },
+    {
+      "axis": "physical_realism",
+      "axon_galicia": 76,
+      "tiktok_travel": 65,
+      "cinematic_tourism": 70,
+      "ai_video_edit": 38,
+      "engagement_optimized": 42,
+      "notes": "TikTok travel is often genuinely shot reality · cinematic tourism is real but over-colour-graded · AXÓN is AI-rendered but validated through physical-falsehood + microreality gates"
+    },
+    {
+      "axis": "atmospheric_continuity",
+      "axon_galicia": 88,
+      "tiktok_travel": 22,
+      "cinematic_tourism": 65,
+      "ai_video_edit": 35,
+      "engagement_optimized": 18,
+      "notes": "AXÓN holds one weather state across all 4 shots · TikTok jumps locations · engagement-optimised stitches mismatched stock"
+    },
+    {
+      "axis": "nervous_system_impact_inverse",
+      "axon_galicia": 80,
+      "tiktok_travel": 12,
+      "cinematic_tourism": 35,
+      "ai_video_edit": 30,
+      "engagement_optimized": 6,
+      "notes": "AXÓN lowered user arousal -22 in P31.3 demo · TikTok-like format raised arousal +51"
+    },
+    {
+      "axis": "memory_persistence",
+      "axon_galicia": 75,
+      "tiktok_travel": 10,
+      "cinematic_tourism": 45,
+      "ai_video_edit": 22,
+      "engagement_optimized": 8,
+      "notes": "predicted afterimages for AXÓN: drainpipe, iron balcony, steamed window · TikTok afterimage rate ~0% per P31.2 demo"
+    },
+    {
+      "axis": "contemplative_depth",
+      "axon_galicia": 78,
+      "tiktok_travel": 5,
+      "cinematic_tourism": 38,
+      "ai_video_edit": 18,
+      "engagement_optimized": 4,
+      "notes": "AXÓN scores 'contemplative' band on mobile-presence · others fall to 'agitating' or 'neutral'"
+    }
+  ],
+  "axon_average": 80.1,
+  "tiktok_average": 19.3,
+  "cinematic_tourism_average": 48.3,
+  "ai_video_edit_average": 29.5,
+  "engagement_optimized_average": 15,
+  "delta_to_tiktok": 60.8,
+  "headline": "AXÓN 80.1 / TikTok 19.3 / cinematic tourism 48.3 / AI video edit 29.5 / engagement-optimised 15"
+}

@@ -1,131 +1,279 @@
 /**
- * KUDOS Experience · globals.css
- *
- * Capa atmosférica base. Define CSS vars que reflejan los design tokens,
- * el fondo cinematográfico profundo, y reglas de motion/accesibilidad.
- *
- * Tokens canónicos: `design-system/tokens.ts`.
+ * KUDOS Experience · globals.css · interaction-safe rebuild
  */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ─── SCROLL OWNERSHIP ───────────────────────────────────────────────
+   AppCanvasV4 <main> owns vertical scroll (height:100dvh; overflow-y:auto).
+   html + body must NOT create competing scroll containers · we only block
+   horizontal jank and clear any rogue scroll-lock attribute. */
+html, body {
+  overflow-x: hidden !important;
+  touch-action: auto !important;
+  pointer-events: auto !important;
+  position: static !important;
+  height: 100dvh !important;
+  margin: 0;
+  padding: 0;
+}
+body[data-kudos-scroll-locked],
+body[data-kudos-scroll-locked="1"],
+body[data-kudos-scroll-locked="true"] {
+  touch-action: auto !important;
+  position: static !important;
+  top: auto !important;
+  width: auto !important;
+}
+
 @layer base {
   :root {
-    /* Paleta — reflejo de design-system/tokens.ts. Si cambian allí, cambiar aquí también. */
-    --kudos-bg: #040614;
-    --kudos-surface: #080d24;
-    --kudos-glass: rgba(255, 255, 255, 0.04);
-    --kudos-glass-hi: rgba(255, 255, 255, 0.08);
-    --kudos-accent: #a78bfa;
-    --kudos-accent-bright: #c4b5fd;
-    --kudos-accent-deep: #6d28d9;
-    --kudos-accent-glow: rgba(167, 139, 250, 0.45);
-    --kudos-accent-glow-soft: rgba(167, 139, 250, 0.18);
-    --kudos-ai: #38bdf8;
-    --kudos-ai-bright: #7dd3fc;
-    --kudos-ai-glow: rgba(56, 189, 248, 0.35);
-    --kudos-ink: #f5f5fa;
-    --kudos-ink-mid: #a4a8c4;
-    --kudos-ink-low: #6b7193;
-    --kudos-ink-invert: #0a0118;
-    --kudos-border: rgba(255, 255, 255, 0.10);
-    --kudos-border-strong: rgba(255, 255, 255, 0.18);
+    --kudos-bg:             #1A1333;
+    --kudos-surface:        #221945;
+    --kudos-glass:          rgba(255, 255, 255, 0.025);
+    --kudos-glass-hi:       rgba(255, 255, 255, 0.05);
+    --kudos-border:         rgba(255, 255, 255, 0.08);
+    --kudos-border-hi:      rgba(255, 255, 255, 0.14);
+
+    /* Brand book palette */
+    --kudos-accent:         #6C3CFF;
+    --kudos-accent-bright:  #8B6BFF;
+    --kudos-accent-deep:    #4A1FCC;
+    --kudos-accent-glow:    rgba(108, 60, 255, 0.45);
+    --kudos-accent-glow-soft: rgba(108, 60, 255, 0.18);
+    --kudos-accent-pink:    #FF3CAC;
+    --kudos-accent-orange:  #FF9A00;
+    --kudos-accent-yellow:  #FFD23F;
+    --kudos-gradient-cta:   linear-gradient(135deg, #FF9A00 0%, #FF3CAC 50%, #6C3CFF 100%);
+    --kudos-gradient-ring:  linear-gradient(135deg, #FF9A00 0%, #FF3CAC 50%, #6C3CFF 100%);
+
+    --kudos-ink:            #F2F2F7;
+    --kudos-ink-mid:        rgba(242, 242, 247, 0.62);
+    --kudos-ink-low:        rgba(242, 242, 247, 0.42);
+    --kudos-ink-mute:       rgba(242, 242, 247, 0.28);
+
+    /* Typography . single Poppins family across display + body */
+    --kudos-font-display:   var(--kudos-font-poppins, "Poppins"), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --kudos-font-body:      var(--kudos-font-poppins, "Poppins"), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --kudos-font-mono:      "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+    --kudos-vh:             1vh;
+    --kudos-dvh:            1vh;
+    --kudos-safe-top:       0px;
+    --kudos-safe-bottom:    0px;
+    --kudos-safe-left:      0px;
+    --kudos-safe-right:     0px;
+
+    /* App shell V3 tokens */
+    --app-topbar-h:         56px;
+    --app-bottomnav-h:      72px;
+    --app-pad-x:            clamp(16px, 4vw, 32px);
+    --app-band-gap:         clamp(22px, 3vw, 40px);
+    --app-radius-lg:        22px;
+    --app-radius-xl:        26px;
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --app-topbar-h:       64px;
+    }
   }
 
   html, body {
     margin: 0;
     padding: 0;
-    min-height: 100dvh;
+    height: 100dvh;
     background: var(--kudos-bg);
     color: var(--kudos-ink);
-  }
-
-  body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-family: "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, sans-serif;
-
-    /* Atmósfera viva: gradiente sutil + grano vectorial. */
-    background-image:
-      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124, 58, 237, 0.18), transparent 60%),
-      radial-gradient(ellipse 60% 40% at 90% 100%, rgba(56, 189, 248, 0.10), transparent 60%),
-      radial-gradient(ellipse 60% 40% at 10% 90%, rgba(167, 139, 250, 0.12), transparent 60%),
-      linear-gradient(to bottom, var(--kudos-surface), var(--kudos-bg) 60%);
-    background-attachment: fixed;
+    font-family: var(--kudos-font-body);
+    overflow-x: hidden;
+    /* Vertical scroll lives in AppCanvasV4 <main>, NOT here · do not add overflow-y here. */
+    pointer-events: auto !important;
+    touch-action: auto !important;
   }
 
-  /* Grano sutil para que el negro no parezca plano. */
+  /* Decorative atmosphere · MUST be non-interactive */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
-    pointer-events: none;
+    pointer-events: none !important;
+    background:
+      radial-gradient(60% 40% at 18% 12%, rgba(139, 92, 246, 0.07) 0%, rgba(10, 6, 18, 0) 60%),
+      radial-gradient(50% 35% at 88% 88%, rgba(139, 92, 246, 0.04) 0%, rgba(10, 6, 18, 0) 60%);
     z-index: 0;
-    opacity: 0.04;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  /* Selección con color marca. */
-  ::selection {
-    background: var(--kudos-accent-glow);
-    color: var(--kudos-ink);
+  input, textarea, select { font-size: 16px; }
+
+  a, button, [role="button"] {
+    -webkit-tap-highlight-color: rgba(139, 92, 246, 0.18);
   }
 
-  /* Focus visible accesible y elegante. */
-  *:focus-visible {
-    outline: 2px solid var(--kudos-accent);
-    outline-offset: 3px;
-    border-radius: 6px;
-  }
-
-  /* Scrollbar discreta en navegadores webkit. */
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
+    border-radius: 999px;
   }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.18); }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(139, 92, 246, 0.32); }
 
-  /* Reduce motion estrictamente respetado. */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
+  :focus-visible {
+    outline: 2px solid rgba(139, 92, 246, 0.55);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: rgba(139, 92, 246, 0.32);
+    color: var(--kudos-ink);
   }
 }
 
 @layer utilities {
-  /* Snap container para feed vertical. */
-  .kudos-snap-y {
-    scroll-snap-type: y mandatory;
-    overscroll-behavior-y: contain;
+  .kudos-glass {
+    background: var(--kudos-glass);
+    border: 1px solid var(--kudos-border);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
   }
-  .kudos-snap-item {
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
+  .kudos-glass-strong {
+    background: rgba(14, 8, 40, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
   }
 
-  /* Ken-burns sutil (zoom 1.0 → 1.08, 18s, alternate). */
+  /* Tap / lift micro-interactions */
+  .kudos-tap {
+    transition: transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 180ms ease, border-color 180ms ease;
+    will-change: transform;
+  }
+  .kudos-tap:active { transform: scale(0.97); }
+  .kudos-tap-lift {
+    transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 220ms ease, border-color 220ms ease;
+    will-change: transform;
+  }
+  @media (hover: hover) {
+    .kudos-tap-lift:hover { transform: translateY(-2px); }
+  }
+  .kudos-tap-lift:active { transform: scale(0.985); }
+
+  /* Depth elevations (premium consumer feel) */
+  .kudos-elev-1 { box-shadow: 0 6px 22px -10px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04); }
+  .kudos-elev-2 { box-shadow: 0 20px 40px -22px rgba(0,0,0,0.70), inset 0 1px 0 rgba(255,255,255,0.04); }
+  .kudos-elev-3 { box-shadow: 0 32px 60px -28px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.05); }
+
+  /* Media containers · cover + legibility wash + vignette */
+  .kudos-media { position: relative; overflow: hidden; }
+  .kudos-media-cover {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(1.001); /* fix sub-pixel seams */
+  }
+  .kudos-media-wash::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(10,6,18,0) 40%, rgba(10,6,18,0.78) 100%);
+    border-radius: inherit;
+  }
+  .kudos-media-wash-strong::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(10,6,18,0) 18%, rgba(10,6,18,0.92) 95%);
+    border-radius: inherit;
+  }
+  .kudos-vignette::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(120% 95% at 50% 30%, transparent 55%, rgba(10,6,18,0.55) 100%);
+    border-radius: inherit;
+  }
+
+  /* Horizontal rail edge fade */
+  .kudos-rail-fade {
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 28px), transparent 100%);
+            mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 28px), transparent 100%);
+  }
+  .kudos-no-scrollbar::-webkit-scrollbar { display: none; }
+  .kudos-no-scrollbar { scrollbar-width: none; }
+
+  /* Title weight ladder · stronger emotional hierarchy */
+  .kudos-h-hero {
+    font-family: var(--kudos-font-display);
+    font-weight: 800;
+    letter-spacing: -0.022em;
+    line-height: 1.08;
+  }
+  .kudos-h-med {
+    font-family: var(--kudos-font-display);
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.18;
+  }
+  .kudos-h-card {
+    font-family: var(--kudos-font-display);
+    font-weight: 700;
+    letter-spacing: -0.012em;
+    line-height: 1.22;
+  }
+  .kudos-eyebrow {
+    font-family: var(--kudos-font-body);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 10.5px;
+    color: rgba(242,242,247,0.65);
+  }
+
+/* === P11.7 · Cinematic motion treatment (no external video assets) === */
   @keyframes kudos-kenburns {
-    0%   { transform: scale(1.0)  translate3d(0, 0, 0); }
-    100% { transform: scale(1.08) translate3d(-1%, -1%, 0); }
+    0%   { transform: scale(1.03) translate3d(0%, 0%, 0); }
+    50%  { transform: scale(1.10) translate3d(-1.5%, -1%, 0); }
+    100% { transform: scale(1.03) translate3d(0%, 0%, 0); }
   }
   .kudos-kenburns {
-    animation: kudos-kenburns 18s ease-in-out infinite alternate;
-    transform-origin: center center;
+    animation: kudos-kenburns 22s ease-in-out infinite;
+    will-change: transform;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .kudos-kenburns { animation: none !important; transform: none !important; }
   }
 
-  /* Glow text suave. */
-  .kudos-text-glow {
-    text-shadow: 0 0 32px var(--kudos-accent-glow-soft);
+  @keyframes kudos-play-pulse {
+    0%, 100% { box-shadow: 0 14px 32px -10px rgba(0,0,0,0.55), 0 0 0 0 rgba(255,255,255,0.32); }
+    50%      { box-shadow: 0 14px 32px -10px rgba(0,0,0,0.55), 0 0 0 10px rgba(255,255,255,0.00); }
+  }
+  .kudos-play-pulse {
+    animation: kudos-play-pulse 2.8s ease-out infinite;
+  }
+  @media (hover: hover) {
+    .kudos-play-pulse:hover { transform: translate(-50%, -50%) scale(1.06); background: rgba(255,255,255,0.32); }
+  }
+  .kudos-play-pulse:active { transform: translate(-50%, -50%) scale(0.96); }
+  @media (prefers-reduced-motion: reduce) {
+    .kudos-play-pulse { animation: none !important; }
+  }
+
+  /* Gradient text · used for brand sparkles + see-all */
+  .kudos-gradient-text {
+    background: var(--kudos-gradient-cta);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
   }
 }

@@ -1,0 +1,1081 @@
+{
+  "capsule_id": "galicia_pontevedra_drizzle",
+  "started_at_iso": "2026-05-27T09:45:59.162Z",
+  "finished_at_iso": "2026-05-27T09:46:09.614Z",
+  "shots": [
+    {
+      "shot_id": "shot_00_black_open",
+      "duration_seconds": 1.5,
+      "chosen_provider": "procedural_fallback",
+      "api_key_present": false,
+      "attempts": 1,
+      "accepted": true,
+      "reroll_decisions": [
+        {
+          "shot_id": "shot_00_black_open",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0,
+            "dead_environment": 0,
+            "clean_rain": 0,
+            "fake_hdr": 0,
+            "cinematic_narcissism": 0,
+            "synthetic_pacing": 0,
+            "camera_perfection": 0
+          }
+        }
+      ],
+      "final_inspection": {
+        "ai_face_risk": 0,
+        "impossible_motion": 0,
+        "dead_environment": 0,
+        "clean_rain": 0,
+        "fake_hdr": 0,
+        "cinematic_narcissism": 0,
+        "synthetic_pacing": 0,
+        "camera_perfection": 0
+      },
+      "output_path": "/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_00_black_open.mp4",
+      "cost_estimate_usd": 0,
+      "cost_actual_usd": 0
+    },
+    {
+      "shot_id": "shot_01_slate_roof_wide",
+      "duration_seconds": 2.5,
+      "chosen_provider": "procedural_fallback",
+      "api_key_present": false,
+      "attempts": 1,
+      "accepted": true,
+      "reroll_decisions": [
+        {
+          "shot_id": "shot_01_slate_roof_wide",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0.07999999999999999,
+            "dead_environment": 0.19999999999999998,
+            "clean_rain": 0.18,
+            "fake_hdr": 0.05,
+            "cinematic_narcissism": 0.05,
+            "synthetic_pacing": 0.14,
+            "camera_perfection": 0.18
+          }
+        }
+      ],
+      "final_inspection": {
+        "ai_face_risk": 0,
+        "impossible_motion": 0.07999999999999999,
+        "dead_environment": 0.19999999999999998,
+        "clean_rain": 0.18,
+        "fake_hdr": 0.05,
+        "cinematic_narcissism": 0.05,
+        "synthetic_pacing": 0.14,
+        "camera_perfection": 0.18
+      },
+      "output_path": "/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_01_slate_roof_wide.mp4",
+      "cost_estimate_usd": 0.18,
+      "cost_actual_usd": 0
+    },
+    {
+      "shot_id": "shot_02_drainage_pipe",
+      "duration_seconds": 2,
+      "chosen_provider": "procedural_fallback",
+      "api_key_present": false,
+      "attempts": 1,
+      "accepted": true,
+      "reroll_decisions": [
+        {
+          "shot_id": "shot_02_drainage_pipe",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0.07999999999999999,
+            "dead_environment": 0.19999999999999998,
+            "clean_rain": 0.18,
+            "fake_hdr": 0.05,
+            "cinematic_narcissism": 0.05,
+            "synthetic_pacing": 0.14,
+            "camera_perfection": 0.18
+          }
+        }
+      ],
+      "final_inspection": {
+        "ai_face_risk": 0,
+        "impossible_motion": 0.07999999999999999,
+        "dead_environment": 0.19999999999999998,
+        "clean_rain": 0.18,
+        "fake_hdr": 0.05,
+        "cinematic_narcissism": 0.05,
+        "synthetic_pacing": 0.14,
+        "camera_perfection": 0.18
+      },
+      "output_path": "/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_02_drainage_pipe.mp4",
+      "cost_estimate_usd": 0.18,
+      "cost_actual_usd": 0
+    },
+    {
+      "shot_id": "shot_03_window_warm_lamp",
+      "duration_seconds": 2.5,
+      "chosen_provider": "procedural_fallback",
+      "api_key_present": false,
+      "attempts": 1,
+      "accepted": true,
+      "reroll_decisions": [
+        {
+          "shot_id": "shot_03_window_warm_lamp",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0.07999999999999999,
+            "dead_environment": 0.19999999999999998,
+            "clean_rain": 0.18,
+            "fake_hdr": 0.05,
+            "cinematic_narcissism": 0.05,
+            "synthetic_pacing": 0.14,
+            "camera_perfection": 0.18
+          }
+        }
+      ],
+      "final_inspection": {
+        "ai_face_risk": 0,
+        "impossible_motion": 0.07999999999999999,
+        "dead_environment": 0.19999999999999998,
+        "clean_rain": 0.18,
+        "fake_hdr": 0.05,
+        "cinematic_narcissism": 0.05,
+        "synthetic_pacing": 0.14,
+        "camera_perfection": 0.18
+      },
+      "output_path": "/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_03_window_warm_lamp.mp4",
+      "cost_estimate_usd": 0.18,
+      "cost_actual_usd": 0
+    },
+    {
+      "shot_id": "shot_04_figure_under_umbrella",
+      "duration_seconds": 2,
+      "chosen_provider": "procedural_fallback",
+      "api_key_present": false,
+      "attempts": 1,
+      "accepted": true,
+      "reroll_decisions": [
+        {
+          "shot_id": "shot_04_figure_under_umbrella",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0.07999999999999999,
+            "dead_environment": 0.19999999999999998,
+            "clean_rain": 0.18,
+            "fake_hdr": 0.05,
+            "cinematic_narcissism": 0.05,
+            "synthetic_pacing": 0.14,
+            "camera_perfection": 0.18
+          }
+        }
+      ],
+      "final_inspection": {
+        "ai_face_risk": 0,
+        "impossible_motion": 0.07999999999999999,
+        "dead_environment": 0.19999999999999998,
+        "clean_rain": 0.18,
+        "fake_hdr": 0.05,
+        "cinematic_narcissism": 0.05,
+        "synthetic_pacing": 0.14,
+        "camera_perfection": 0.18
+      },
+      "output_path": "/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_04_figure_under_umbrella.mp4",
+      "cost_estimate_usd": 0.25,
+      "cost_actual_usd": 0
+    },
+    {
+      "shot_id": "shot_05_atlantic_horizon",
+      "duration_seconds": 3,
+      "chosen_provider": "procedural_fallback",
+      "api_key_present": false,
+      "attempts": 1,
+      "accepted": true,
+      "reroll_decisions": [
+        {
+          "shot_id": "shot_05_atlantic_horizon",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0.07999999999999999,
+            "dead_environment": 0.19999999999999998,
+            "clean_rain": 0.18,
+            "fake_hdr": 0.05,
+            "cinematic_narcissism": 0.05,
+            "synthetic_pacing": 0.14,
+            "camera_perfection": 0.18
+          }
+        }
+      ],
+      "final_inspection": {
+        "ai_face_risk": 0,
+        "impossible_motion": 0.07999999999999999,
+        "dead_environment": 0.19999999999999998,
+        "clean_rain": 0.18,
+        "fake_hdr": 0.05,
+        "cinematic_narcissism": 0.05,
+        "synthetic_pacing": 0.14,
+        "camera_perfection": 0.18
+      },
+      "output_path": "/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_05_atlantic_horizon.mp4",
+      "cost_estimate_usd": 0.2,
+      "cost_actual_usd": 0
+    },
+    {
+      "shot_id": "shot_06_pavement_reflections",
+      "duration_seconds": 2,
+      "chosen_provider": "procedural_fallback",
+      "api_key_present": false,
+      "attempts": 1,
+      "accepted": true,
+      "reroll_decisions": [
+        {
+          "shot_id": "shot_06_pavement_reflections",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0.07999999999999999,
+            "dead_environment": 0.19999999999999998,
+            "clean_rain": 0.18,
+            "fake_hdr": 0.05,
+            "cinematic_narcissism": 0.05,
+            "synthetic_pacing": 0.14,
+            "camera_perfection": 0.18
+          }
+        }
+      ],
+      "final_inspection": {
+        "ai_face_risk": 0,
+        "impossible_motion": 0.07999999999999999,
+        "dead_environment": 0.19999999999999998,
+        "clean_rain": 0.18,
+        "fake_hdr": 0.05,
+        "cinematic_narcissism": 0.05,
+        "synthetic_pacing": 0.14,
+        "camera_perfection": 0.18
+      },
+      "output_path": "/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_06_pavement_reflections.mp4",
+      "cost_estimate_usd": 0.18,
+      "cost_actual_usd": 0
+    },
+    {
+      "shot_id": "shot_07_black_close",
+      "duration_seconds": 1.5,
+      "chosen_provider": "procedural_fallback",
+      "api_key_present": false,
+      "attempts": 1,
+      "accepted": true,
+      "reroll_decisions": [
+        {
+          "shot_id": "shot_07_black_close",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0,
+            "dead_environment": 0,
+            "clean_rain": 0,
+            "fake_hdr": 0,
+            "cinematic_narcissism": 0,
+            "synthetic_pacing": 0,
+            "camera_perfection": 0
+          }
+        }
+      ],
+      "final_inspection": {
+        "ai_face_risk": 0,
+        "impossible_motion": 0,
+        "dead_environment": 0,
+        "clean_rain": 0,
+        "fake_hdr": 0,
+        "cinematic_narcissism": 0,
+        "synthetic_pacing": 0,
+        "camera_perfection": 0
+      },
+      "output_path": "/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_07_black_close.mp4",
+      "cost_estimate_usd": 0,
+      "cost_actual_usd": 0
+    }
+  ],
+  "total_attempts": 8,
+  "total_rerolls": 0,
+  "total_failed_generations": 0,
+  "cost_estimate_usd": 1.17,
+  "cost_actual_usd": 0,
+  "human_presence_audits": [
+    {
+      "shot_id": "shot_00_black_open",
+      "findings": [],
+      "blocked": false
+    },
+    {
+      "shot_id": "shot_01_slate_roof_wide",
+      "findings": [],
+      "blocked": false
+    },
+    {
+      "shot_id": "shot_02_drainage_pipe",
+      "findings": [],
+      "blocked": false
+    },
+    {
+      "shot_id": "shot_03_window_warm_lamp",
+      "findings": [],
+      "blocked": false
+    },
+    {
+      "shot_id": "shot_04_figure_under_umbrella",
+      "findings": [],
+      "blocked": false
+    },
+    {
+      "shot_id": "shot_05_atlantic_horizon",
+      "findings": [],
+      "blocked": false
+    },
+    {
+      "shot_id": "shot_06_pavement_reflections",
+      "findings": [],
+      "blocked": false
+    },
+    {
+      "shot_id": "shot_07_black_close",
+      "findings": [],
+      "blocked": false
+    }
+  ],
+  "microreality_audits": [
+    {
+      "shot_id": "shot_00_black_open",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    },
+    {
+      "shot_id": "shot_01_slate_roof_wide",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    },
+    {
+      "shot_id": "shot_02_drainage_pipe",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    },
+    {
+      "shot_id": "shot_03_window_warm_lamp",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": true,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    },
+    {
+      "shot_id": "shot_04_figure_under_umbrella",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    },
+    {
+      "shot_id": "shot_05_atlantic_horizon",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    },
+    {
+      "shot_id": "shot_06_pavement_reflections",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": true,
+          "required_for_shot": true,
+          "verdict": "ok"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": true,
+          "excluded_in_negative": false,
+          "required_for_shot": true,
+          "verdict": "weakly_anchored"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    },
+    {
+      "shot_id": "shot_07_black_close",
+      "findings": [
+        {
+          "target": "wet_stone",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "humid_reflections",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "cloth_drift",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "rain_density",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "puddle_continuity",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "fog_softness",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "moisture_diffusion",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "sodium_vapor_lighting",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        },
+        {
+          "target": "environmental_vibration",
+          "satisfied_in_prompt": false,
+          "excluded_in_negative": false,
+          "required_for_shot": false,
+          "verdict": "ok"
+        }
+      ],
+      "composite_satisfaction": 100,
+      "blocking_failures": []
+    }
+  ],
+  "physical_validation": {
+    "findings": [
+      {
+        "check": "weather_continuity",
+        "severity": "info",
+        "between_shots": [
+          "shot_01_slate_roof_wide",
+          "shot_02_drainage_pipe",
+          "shot_03_window_warm_lamp",
+          "shot_04_figure_under_umbrella",
+          "shot_05_atlantic_horizon",
+          "shot_06_pavement_reflections"
+        ],
+        "message": "weather consistent · drizzle"
+      },
+      {
+        "check": "light_continuity",
+        "severity": "info",
+        "between_shots": [
+          "shot_01_slate_roof_wide",
+          "shot_02_drainage_pipe",
+          "shot_03_window_warm_lamp",
+          "shot_04_figure_under_umbrella",
+          "shot_06_pavement_reflections"
+        ],
+        "message": "5 shots reference sodium-vapor / warm lamp"
+      },
+      {
+        "check": "reflection_consistency",
+        "severity": "info",
+        "between_shots": [
+          "shot_02_drainage_pipe",
+          "shot_03_window_warm_lamp",
+          "shot_04_figure_under_umbrella",
+          "shot_06_pavement_reflections"
+        ],
+        "message": "reflections referenced across 4 shots"
+      },
+      {
+        "check": "environmental_persistence",
+        "severity": "info",
+        "between_shots": [
+          "shot_01_slate_roof_wide",
+          "shot_04_figure_under_umbrella",
+          "shot_06_pavement_reflections"
+        ],
+        "message": "ground material consistent · 3 shots"
+      },
+      {
+        "check": "humidity_realism",
+        "severity": "info",
+        "between_shots": [
+          "shot_01_slate_roof_wide",
+          "shot_02_drainage_pipe",
+          "shot_03_window_warm_lamp",
+          "shot_04_figure_under_umbrella",
+          "shot_05_atlantic_horizon",
+          "shot_06_pavement_reflections"
+        ],
+        "message": "every non-black shot has humidity targets"
+      },
+      {
+        "check": "body_inertia",
+        "severity": "info",
+        "between_shots": [
+          "shot_04_figure_under_umbrella"
+        ],
+        "message": "inertia anchors present"
+      },
+      {
+        "check": "tactile_plausibility",
+        "severity": "info",
+        "between_shots": [
+          "shot_06_pavement_reflections"
+        ],
+        "message": "tactile anchors in 1 shot(s)"
+      },
+      {
+        "check": "atmospheric_coherence",
+        "severity": "info",
+        "between_shots": [],
+        "message": "every shot has an atmospheric goal"
+      }
+    ],
+    "blocking_failures": 0,
+    "composite_score": 100
+  },
+  "subtitle_audit": {
+    "clean": true,
+    "findings": []
+  },
+  "export_validation": {
+    "findings": [
+      {
+        "artifact": "/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/final.mp4",
+        "severity": "info",
+        "message": "video present (8086140 bytes) · final mp4 capsule"
+      },
+      {
+        "artifact": "/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/audio_master.wav",
+        "severity": "info",
+        "message": "audio present (3264078 bytes) · audio master · 48k stereo pcm"
+      },
+      {
+        "artifact": "/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/subtitles.vtt",
+        "severity": "info",
+        "message": "subtitle present (206 bytes) · WebVTT sidecar"
+      },
+      {
+        "artifact": "/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/generation_report.json",
+        "severity": "warning",
+        "message": "json not found · generation report (written next)"
+      },
+      {
+        "artifact": "/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/reroll_log.json",
+        "severity": "warning",
+        "message": "json not found · reroll log (written next)"
+      },
+      {
+        "artifact": "/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/realism_audit.json",
+        "severity": "warning",
+        "message": "json not found · realism audit (written next)"
+      },
+      {
+        "artifact": "final.mp4",
+        "severity": "info",
+        "message": "duration 17.00s within tolerance"
+      },
+      {
+        "artifact": "final.mp4",
+        "severity": "info",
+        "message": "dimensions 720x1280"
+      }
+    ],
+    "blocking_failures": 0,
+    "verdict": "ship_with_warnings"
+  },
+  "headline": "EXECUTION · galicia_pontevedra_drizzle\n  shots: 8 · attempts: 8 · rerolls: 0 · failed: 0\n  physical blocking: 0\n  export verdict: SHIP_WITH_WARNINGS",
+  "notes": [
+    "procedural FFmpeg fallback used · no API keys present",
+    "provider payloads emitted unchanged · ready for live execution when keys are configured",
+    "the procedural visual output is an abstract atmospheric representation · not photographic",
+    "the sound bed is real environmental synthesis · brown/pink noise filtered into rain/ocean spectra",
+    "the subtitles are weather-anchored and pass the contemplative falsehood audit"
+  ]
+}

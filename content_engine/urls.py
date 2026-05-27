@@ -9,6 +9,8 @@ from __future__ import annotations
 from django.urls import path
 
 from content_engine.api import (
+    echo_share_count,
+    echo_share_track,
     capsule_nearby,
     capsules_debug_count,
     capsules_viewport,
@@ -42,4 +44,9 @@ urlpatterns = [
     # Echo synthesis · Phase 3 · LLM cinematic narrative per POI
     path("api/echo/synthesize/", echo_synthesize, name="echo_synthesize"),
     path("api/echo/synthesize", echo_synthesize, name="echo_synthesize_noslash"),
+    # Phase 3 viral · share tracking + counter (real social proof)
+    path("api/echo/share/", echo_share_track, name="echo_share_track"),
+    path("api/echo/share", echo_share_track, name="echo_share_track_noslash"),
+    path("api/echo/share-count/", echo_share_count, name="echo_share_count"),
+    path("api/echo/share-count", echo_share_count, name="echo_share_count_noslash"),
 ]

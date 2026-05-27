@@ -1,0 +1,8 @@
+file '/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_00_black_open.mp4'
+file '/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_01_slate_roof_wide.mp4'
+file '/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_02_drainage_pipe.mp4'
+file '/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_03_window_warm_lamp.mp4'
+file '/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_04_figure_under_umbrella.mp4'
+file '/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_05_atlantic_horizon.mp4'
+file '/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_06_pavement_reflections.mp4'
+file '/sessions/exciting-jolly-mccarthy/mnt/kudos_project/experience/exports/galicia-first-real-capsule/shots/shot_07_black_close.mp4'

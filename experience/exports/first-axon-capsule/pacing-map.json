@@ -1,0 +1,43 @@
+{
+  "capsule_id": "galicia_pontevedra_drizzle",
+  "opening_fade_ms": 1500,
+  "closing_fade_ms": 1800,
+  "post_playback_hold_ms": 1800,
+  "shot_durations_s": [
+    5,
+    4,
+    4,
+    3
+  ],
+  "intervals": [
+    {
+      "kind": "silence_window",
+      "after_shot": 0,
+      "duration_ms": 1500,
+      "intent": "let the rain be heard alone before the silhouette arrives"
+    },
+    {
+      "kind": "atmospheric_carryover",
+      "after_shot": 1,
+      "duration_ms": 1800,
+      "intent": "rain texture settles into the opening 1.8s of the macro shot"
+    },
+    {
+      "kind": "silence_window",
+      "after_shot": 2,
+      "duration_ms": 1500,
+      "intent": "the drainpipe pulse holds · then we move to the steamed window"
+    },
+    {
+      "kind": "silence_window",
+      "after_shot": 3,
+      "duration_ms": 2000,
+      "intent": "final decompression · the rain holds for 2s after the cut"
+    }
+  ],
+  "total_capsule_duration_s": 26.1,
+  "silence_share_0_1": 0.39,
+  "average_shot_s": 4,
+  "cuts_per_minute": 9.2,
+  "cut_philosophy": "four cuts in 23 seconds · cuts_per_minute ≈ 10 inside the capsule alone · but the silence between cuts averages 1.7s · the lived rhythm of someone who stopped walking to look at something · NOT TikTok pacing"
+}

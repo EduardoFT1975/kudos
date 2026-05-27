@@ -5,6 +5,7 @@ Cada ruta apunta a una vista en kudos_app/views.py.
 """
 from django.urls import path
 from kudos_app import views
+from kudos_app import api_mvp
 
 app_name = None  # Sin namespace para que {% url 'home' %} funcione
 
@@ -212,4 +213,13 @@ urlpatterns = [
     path('personal/health/', views.personal_health, name='personal_health'),
     path('personal/crypto/', views.personal_crypto, name='personal_crypto'),
     path('personal/habit/<int:habit_id>/toggle/', views.personal_habit_toggle, name='personal_habit_toggle'),
+
+    # ─── MVP Maquetas · API Mérito + Mi Mundo (P32.05) ───
+    path('api/merit/snapshot/', api_mvp.api_merit_snapshot, name='api_merit_snapshot'),
+    path('api/merit/events/', api_mvp.api_merit_events, name='api_merit_events'),
+    path('api/merit/events/add/', api_mvp.api_merit_add_event, name='api_merit_add_event'),
+    path('api/bookmarks/', api_mvp.api_bookmarks, name='api_bookmarks'),
+    path('api/visits/', api_mvp.api_visits, name='api_visits'),
+    path('api/streak/', api_mvp.api_streak, name='api_streak'),
+    path('api/collections/', api_mvp.api_collections, name='api_collections'),
 ]

@@ -1010,3 +1010,70 @@ def echo_synthesize(request: HttpRequest) -> JsonResponse:
         }, status=200)
 
     return JsonResponse(result, status=200)
+
+
+
+
+# ---------------------------------------------------------------------------
+# View · /api/echo/share + /api/echo/share-count · Phase 3 social-proof
+# ---------------------------------------------------------------------------
+_ECHO_SHARE_CHANNELS = ("native", "whatsapp", "x", "copy", "download", "link")
+
+
+@csrf_exempt
+@require_POST
+def echo_share_track(request):
+    """POST /api/echo/share body JSON {entity_id, channel}. Returns {count}."""
+    from django.core.cache import cache as dj_cache
+
+    try:
+        body = json.loads(request.body.decode("utf-8") or "{}")
+    except (ValueError, UnicodeDecodeError):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+
+    entity_id = (body.get("entity_id") or "").strip()[:48]
+    channel = (body.get("channel") or "unknown").strip().lower()[:24]
+    if not entity_id:
+        return JsonResponse({"error": "missing entity_id"}, status=400)
+    if channel not in _ECHO_SHARE_CHANNELS:
+        channel = "unknown"
+
+    ip = (
+        (request.META.get("HTTP_X_FORWARDED_FOR") or "").split(",")[0].strip()
+        or request.META.get("REMOTE_ADDR")
+        or "anon"
+    )[:48]
+    rl_key = "echo:share:rl:" + ip
+    rl_count = dj_cache.get(rl_key) or 0
+    if isinstance(rl_count, int) and rl_count >= 20:
+        return JsonResponse({"error": "rate_limited"}, status=429)
+    dj_cache.set(rl_key, int(rl_count) + 1, 60)
+
+    count_key = "echo:share:count:" + entity_id
+    current = dj_cache.get(count_key)
+    if not isinstance(current, int):
+        current = 0
+    new_count = current + 1
+    dj_cache.set(count_key, new_count, 60 * 60 * 24 * 90)
+
+    log.info("ECHO SHARE %s channel=%s count=%d", entity_id, channel, new_count)
+    return JsonResponse({
+        "entity_id": entity_id,
+        "channel": channel,
+        "count": new_count,
+    }, status=200)
+
+
+@csrf_exempt
+@require_GET
+def echo_share_count(request):
+    """GET /api/echo/share-count?entity_id=Q123"""
+    from django.core.cache import cache as dj_cache
+    entity_id = (request.GET.get("entity_id") or "").strip()[:48]
+    if not entity_id:
+        return JsonResponse({"error": "missing entity_id"}, status=400)
+    count_key = "echo:share:count:" + entity_id
+    current = dj_cache.get(count_key)
+    if not isinstance(current, int):
+        current = 0
+    return JsonResponse({"entity_id": entity_id, "count": current}, status=200)

@@ -1,20 +1,25 @@
 /**
- * KUDOS Experience · Root Layout
- *
- * SHELL P0 · estructura mínima. La instalación de fonts, el theme provider,
- * el atmosphere layer y la sidebar persistente se incorporan tras recibir
- * Design System v1.0 (ver EXPERIENCE_FOUNDATION_PLAN.md §3).
+ * KUDOS Experience . Root Layout.
+ * Minimal . html/body scaffold + metadata + Poppins font (next/font).
+ * All providers + shell live in <AppShellV4>.
  */
 import type { Metadata, Viewport } from "next";
+import { Poppins } from "next/font/google";
 import { PlausibleProvider } from "@/components/analytics/PlausibleProvider";
-import { KudosHeader } from "@/components/shell/KudosHeader";
-import { KudosFooter } from "@/components/shell/KudosFooter";
+import { AppShellV4 } from "@/components/shell-v4/AppShellV4";
+import { BackendHydration } from "@/components/providers/BackendHydration";
 import { checkEnv } from "@/lib/env/check";
 import "./globals.css";
 
-// Phase 14.10 · run once at app boot. Throws in dev if NEXT_PUBLIC_API_BASE_URL
-// is missing · soft-warns in prod (won't take the site down for misconfig).
 checkEnv();
+
+// Brand book . single family Poppins . loaded via next/font (auto-optimized)
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--kudos-font-poppins",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -24,21 +29,22 @@ export const metadata: Metadata = {
       "http://localhost:3000"
   ),
   title: {
-    default: "KUDOS · Memoria humana sobre un mapa temporal vivo",
-    template: "%s · KUDOS",
+    default: "KUDOS . Merito. Descubrimiento. Memoria.",
+    template: "%s . KUDOS",
   },
   description:
-    "Google Earth emocional + histórico + humano. Explora memoria humana sobre un mapa temporal vivo.",
+    "KUDOS conecta a las personas con los lugares del mundo que realmente merecen ser descubiertos, recordados y compartidos.",
+  applicationName: "KUDOS",
+  manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
     siteName: "KUDOS",
     locale: "es_ES",
-    images: [
-      { url: "/brand/kudos-logo-vertical.svg", width: 280, height: 260 },
-    ],
+    images: [{ url: "/brand/kudos-logo-vertical.svg", width: 280, height: 260 }],
   },
   twitter: { card: "summary_large_image" },
   formatDetection: { telephone: false },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "KUDOS" },
   icons: {
     icon: [{ url: "/brand/kudos-symbol.svg", type: "image/svg+xml" }],
     apple: [{ url: "/brand/kudos-symbol.svg" }],
@@ -50,7 +56,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#050a1f", // pendiente · vendrá de design-system/tokens/colors.ts
+  themeColor: "#1A1333",
 };
 
 export default function RootLayout({
@@ -59,11 +65,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className="dark" suppressHydrationWarning>
-      <body className="flex min-h-[100dvh] flex-col">
-        <KudosHeader />
-        <div className="flex-1">{children}</div>
-        <KudosFooter />
+    <html lang="es" className={`${poppins.variable} dark`} suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://picsum.photos" />
+        <link rel="preconnect" href="https://fastly.picsum.photos" />
+        <link rel="preconnect" href="https://a.tile.openstreetmap.org" />
+        <link rel="preconnect" href="https://b.tile.openstreetmap.org" />
+        <link rel="preconnect" href="https://c.tile.openstreetmap.org" />
+        <link rel="preconnect" href="https://unpkg.com" />
+      </head>
+      <body>
+        <BackendHydration />
+        <AppShellV4>{children}</AppShellV4>
       </body>
       <PlausibleProvider />
     </html>

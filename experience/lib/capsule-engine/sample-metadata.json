@@ -1,0 +1,42 @@
+{
+  "capsule_id": "cap-coliseo-demo-1779808783875",
+  "poi_id": "coliseo",
+  "tier": "tier3_story_card",
+  "duration_seconds": 15,
+  "composed_at": "2026-05-26T15:20:13.464Z",
+  "shots": 4,
+  "assets": {
+    "video": "final.mp4",
+    "thumb": "thumb.png",
+    "subtitles": "subtitles.vtt"
+  },
+  "story": {
+    "title": "Coliseo Romano · Civilizational Continuity",
+    "hook": "Two thousand years ago, fifty thousand voices roared from these stones.",
+    "meaning": "What survives is not the empire but the architecture of an idea: a place where a city held its breath together.",
+    "close": "Rome is still listening.",
+    "angle": "civilizational continuity"
+  },
+  "sources": [
+    {
+      "title": "Coliseo: Rome’s Great Amphitheatre · Hopkins/Beard",
+      "year": "2005"
+    },
+    {
+      "title": "UNESCO World Heritage List · Historic Centre of Rome",
+      "year": "1980"
+    }
+  ],
+  "ffmpeg_invocation": "ffmpeg -y -hide_banner -loglevel error -f concat -safe 0 -i /sessions/exciting-jolly-mccarthy/tmp/kudos-capsule-1779808783874/concat.txt -i /sessions/exciting-jolly-mccarthy/tmp/kudos-capsule-1779808783874/voice.wav -i /sessions/exciting-jolly-mccarthy/tmp/kudos-capsule-1779808783874/music.wav -filter_complex \"[0:v]scale='if(gt(a,1080/1920),1080,-2)':'if(gt(a,1080/1920),-2,1920)',pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1[vscaled];[vscaled]subtitles='/sessions/exciting-jolly-mccarthy/tmp/kudos-capsule-1779808783874/subtitles.vtt':force_style='FontName=DejaVu Sans,FontSize=22,PrimaryColour=&HFFFFFFFF,OutlineColour=&H802A1410,BorderStyle=1,Outline=2,Shadow=1,Alignment=2,MarginV=72'[vfinal];[1:a]volume=0.794,aresample=44100,asplit=2[voice_mix][voice_ref];[2:a]volume=0.126,aresample=44100[music_g];[music_g]aformat=sample_fmts=fltp:channel_layouts=stereo:sample_rates=44100[music_ready];[voice_ref]aformat=sample_fmts=fltp:channel_layouts=stereo:sample_rates=44100[voice_ready];[music_ready][voice_ready]sidechaincompress=threshold=0.04:ratio=8:attack=20:release=300[music_ducked];[voice_mix][music_ducked]amix=inputs=2:duration=longest:dropout_transition=0:normalize=0,loudnorm=I=-16:LRA=11:TP=-1.0[aout]\" -map \"[vfinal]\" -map \"[aout]\" -c:v libx264 -preset medium -profile:v high -b:v 8000k -maxrate 12000k -bufsize 16000k -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart -r 30 /sessions/exciting-jolly-mccarthy/tmp/kudos-capsule-1779808783874/final.mp4",
+  "extra": {
+    "providers_used": {
+      "still_kenburns": 4
+    },
+    "cost_breakdown": {
+      "video": 0,
+      "voice": 0,
+      "music": 0,
+      "compose": 0
+    }
+  }
+}

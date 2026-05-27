@@ -1,0 +1,16 @@
+{
+  "name": "KUDOS · The Meaning Layer of Reality",
+  "short_name": "KUDOS",
+  "description": "Cada lugar tiene una historia. Explora memoria humana sobre un mapa temporal vivo.",
+  "start_url": "/inicio",
+  "display": "standalone",
+  "background_color": "#0a0612",
+  "theme_color": "#0a0612",
+  "orientation": "portrait-primary",
+  "lang": "es-ES",
+  "icons": [
+    { "src": "/brand/kudos-symbol.svg", "sizes": "any",     "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/brand/kudos-symbol.svg", "sizes": "any",     "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "categories": ["education", "lifestyle", "social"]
+}

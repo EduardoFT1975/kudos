@@ -1,18 +1,42 @@
-# ===== Python =====
+# ============================================================
+#  KUDOS · .gitignore (P0.9 hardened · post-246ab1c contamination)
+# ============================================================
+#  Reglas para impedir que un `git add .` accidental vuelva a
+#  meter binarios, dumps, vendored deps, o aspirational dead code.
+#  Mantener esta lista actualizada · cualquier carpeta nueva que
+#  no sea producto real debe añadirse aquí ANTES de commitear.
+# ============================================================
+
+# ---------- Python ----------
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# ===== Entornos virtuales =====
+# ---------- Virtualenvs ----------
 venv/
 env/
 ENV/
-.venv
+.venv/
+.env/
 
-# ===== Django =====
-*.log
+# ---------- Node / Next.js ----------
+node_modules/
+.next/
+out/
+dist/
+build/
+.turbo/
+.vercel/
+.pnp.*
+.yarn/
+*.tsbuildinfo
+
+# ---------- Django ----------
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -20,25 +44,97 @@ media/
 staticfiles/
 logs/
 
-# ===== Variables de entorno =====
+# ---------- Env files (NEVER track real envs) ----------
 .env
 .env.local
+.env.development
 .env.production
+.env.*.local
+# Allow example envs ONLY when explicit
+!.env.example
+!.env.production.example
 
-# ===== Editores =====
+# ---------- Runtime artifacts ----------
+*.log
+*.pid
+*.sock
+dump.rdb
+*.rdb
+celerybeat-schedule
+celerybeat-schedule.*
+*.dat
+deployment_log.txt
+*.crash
+
+# ---------- Binaries (NEVER track executables) ----------
+*.exe
+*.dll
+*.dylib
+*.bin
+*.app
+
+# ---------- Media heavy (use CDN / S3, not git) ----------
+*.mp4
+*.mov
+*.avi
+*.webm
+*.mp3
+*.wav
+*.flac
+
+# ---------- Aspirational dead folders (quarantine) ----------
+ipfs/
+ar_vr/
+blockchain/
+streamlit/
+temp_dockerfiles/
+tensorflow-source/
+matplotlib-cache/
+prometheus/
+
+# ---------- Legacy duplicates (de la contaminación 246ab1c) ----------
+# Estos paths se eliminaron en el cleanup commit. Bloqueados para que
+# no vuelvan a entrar si el founder los re-crea localmente.
+kudos_project/
+kudos_app/
+capsulas_prueba/
+images/
+clips/
+translator/
+
+# ---------- IDE / OS ----------
 .vscode/
 .idea/
-*.swp
-*.swo
 .DS_Store
 Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
 
-# ===== Sistema =====
+# ---------- Coverage / test artifacts ----------
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.cache/
+coverage.xml
+*.cover
+
+# ---------- Cowork session artifacts ----------
+.kudos_deploy_logs/
+
+# ---------- Repo hygiene ----------
+*.bad.txt
+*.tmp
+*.backup
+*.bak
+*.orig
 *.pem
 *.key
-node_modules/
-ar_vr/node_modules/
 
-# ===== Archivos generados por la IA =====
-*.bak
-*.tmp
+# ---------- Scripts locales dev-only (passwords en clear) ----------
+reset_admin.py
+
+# ---------- Archive local (no se sube a produccion) ----------
+legacy/

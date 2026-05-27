@@ -1,0 +1,18 @@
+{
+  "capsule_id": "galicia_pontevedra_drizzle",
+  "opening_fade_ms": 1500,
+  "closing_fade_ms": 1800,
+  "post_playback_minimum_hold_ms": 1800,
+  "between_capsules_minimum_pause_ms": 2200,
+  "autoplay_next_capsule": false,
+  "notification_suppression_ms": 16000,
+  "accept_next_tap_after_ms": 1100,
+  "allow_immediate_replay": "after_hold",
+  "silence_recovery_ms_after_completion": 1800,
+  "chrome_visibility": "hidden_until_explicit_reveal",
+  "haptic_on_completion": "single_low_pulse",
+  "headphone_required_invitation_text": "headphones are part of this. the drainpipe matters.",
+  "do_not_disturb_hint_to_os": false,
+  "audio_bed_continues_during_post_hold": true,
+  "black_frame_held_until_explicit_tap": false
+}

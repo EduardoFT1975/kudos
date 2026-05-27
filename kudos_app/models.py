@@ -1055,14 +1055,43 @@ class DirectMessage(models.Model):
 
 
 class Bookmark(models.Model):
+    """Marcador del usuario · cápsula O lugar (exclusivo).
+
+    KUDOS MVP · `useSaved` del frontend guarda tanto POIs como cápsulas.
+    Hasta 2026-05 sólo cubría cápsulas. Ahora `capsule` es opcional y se
+    añade `place` opcional con CHECK XOR para garantizar coherencia.
+    """
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookmarks')
-    capsule = models.ForeignKey(Capsule, on_delete=models.CASCADE, related_name='bookmarked_by')
+    capsule = models.ForeignKey(Capsule, on_delete=models.CASCADE,
+                                related_name='bookmarked_by',
+                                null=True, blank=True)
+    place = models.ForeignKey('Place', on_delete=models.CASCADE,
+                              related_name='bookmarked_by',
+                              null=True, blank=True)
     note = models.CharField(max_length=200, blank=True, default='')
     created = models.DateTimeField(default=timezone.now)
 
     class Meta:
-        unique_together = ('user', 'capsule')
         ordering = ['-created']
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    models.Q(capsule__isnull=False, place__isnull=True) |
+                    models.Q(capsule__isnull=True, place__isnull=False)
+                ),
+                name='bookmark_xor_capsule_place',
+            ),
+            models.UniqueConstraint(
+                fields=['user', 'capsule'],
+                condition=models.Q(capsule__isnull=False),
+                name='bookmark_unique_user_capsule',
+            ),
+            models.UniqueConstraint(
+                fields=['user', 'place'],
+                condition=models.Q(place__isnull=False),
+                name='bookmark_unique_user_place',
+            ),
+        ]
 
 
 class UserPreference(models.Model):
@@ -1208,3 +1237,161 @@ class FeedItem(models.Model):
 
     class Meta:
         ordering = ['-score', '-created']
+
+
+# ===================== MVP MAQUETAS · MÉRITO + MI MUNDO =====================
+# Modelos nuevos añadidos en 2026-05-27 para que el frontend Next.js
+# (lib/kudos/store.ts) deje localStorage y persista en backend Django.
+#
+# Cubre las pantallas /merito y /mi-mundo y los hooks useMerit, useSaved,
+# useVisited, tickStreak. Sin esto, el MVP completo de maquetas no se
+# puede shipear.
+# ============================================================================
+
+
+class MeritEvent(models.Model):
+    """Evento individual de mérito.
+
+    Es la fuente de verdad. Total / nivel / pilares se calculan al vuelo
+    sobre estos eventos. No hay cache materializada · los eventos por
+    usuario son pocos (decenas/día max).
+
+    Pilares replican exactamente los del frontend (`MeritPillar` en
+    `lib/kudos/store.ts`).
+    """
+    PILLAR_CHOICES = [
+        ('creacion', 'Creación'),
+        ('inspiracion', 'Inspiración'),
+        ('descubrimiento', 'Descubrimiento'),
+        ('comunidad', 'Comunidad'),
+        ('integridad', 'Integridad'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='merit_events')
+    pillar = models.CharField(max_length=20, choices=PILLAR_CHOICES, db_index=True)
+    points = models.IntegerField(
+        help_text='Puntos otorgados. Positivo = ganado, negativo = sancionado.',
+    )
+    label = models.CharField(max_length=200, blank=True, default='',
+                              help_text='Etiqueta legible (ej. "Compartiste una cápsula").')
+    capsule = models.ForeignKey(Capsule, on_delete=models.SET_NULL,
+                                 null=True, blank=True,
+                                 related_name='merit_events')
+    place = models.ForeignKey(Place, on_delete=models.SET_NULL,
+                               null=True, blank=True,
+                               related_name='merit_events')
+    ts = models.DateTimeField(default=timezone.now, db_index=True)
+
+    class Meta:
+        ordering = ['-ts']
+        indexes = [
+            models.Index(fields=['user', '-ts'], name='meritevent_user_ts_idx'),
+            models.Index(fields=['user', 'pillar'], name='meritevent_user_pillar_idx'),
+        ]
+        verbose_name = 'Evento de mérito'
+        verbose_name_plural = 'Eventos de mérito'
+
+    def __str__(self):
+        sign = '+' if self.points >= 0 else ''
+        return f'{sign}{self.points} {self.get_pillar_display()} · {self.user.alias}'
+
+
+class Visit(models.Model):
+    """Registro "Estuve aquí" · usuario visitó un lugar canónico.
+
+    Un usuario puede registrar varias visitas al mismo lugar (timeline),
+    pero `useVisited` del frontend trata la visita como bandera única.
+    Para el MVP usamos `unique_together`; cuando llegue la pantalla
+    `momentos` (post-MVP) se relajará.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='visits')
+    place = models.ForeignKey(Place, on_delete=models.CASCADE,
+                              related_name='visits')
+    ts = models.DateTimeField(default=timezone.now, db_index=True)
+    lat = models.FloatField(null=True, blank=True,
+                            help_text='Lat donde se registró (puede diferir de Place.latitud).')
+    lon = models.FloatField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('user', 'place')
+        ordering = ['-ts']
+        indexes = [
+            models.Index(fields=['user', '-ts'], name='visit_user_ts_idx'),
+        ]
+        verbose_name = 'Visita'
+        verbose_name_plural = 'Visitas'
+
+    def __str__(self):
+        return f'{self.user.alias} → {self.place.name}'
+
+
+class Streak(models.Model):
+    """Racha diaria del usuario · multiplicador de mérito.
+
+    Equivalente a `tickStreak` / `readStreak` del store. Se actualiza
+    en cada acción que cuente. Las maquetas muestran el contador en
+    el bloque "Multiplicadores activos · Racha de N días".
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE,
+                                related_name='streak')
+    last_day = models.DateField(null=True, blank=True,
+                                help_text='Último día (UTC) en que se "tickeó" la racha.')
+    days = models.IntegerField(default=0,
+                               help_text='Días consecutivos activos. 0 = sin racha.')
+    best_days = models.IntegerField(default=0,
+                                    help_text='Récord histórico de días consecutivos.')
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Racha'
+        verbose_name_plural = 'Rachas'
+
+    def __str__(self):
+        return f'{self.user.alias} · {self.days}d (best {self.best_days}d)'
+
+
+class Collection(models.Model):
+    """Colección del usuario · agrupa cápsulas y/o lugares.
+
+    Hay cuatro orígenes (`kind`):
+      - `manual`   → la crea el usuario.
+      - `saved`    → autogenerada: "Todo lo guardado".
+      - `visited`  → autogenerada: "Lugares donde estuve".
+      - `affinity` → autogenerada por temas afines (post-MVP).
+
+    Las autogeneradas se reconstruyen al vuelo desde Bookmark/Visit,
+    pero también pueden persistirse si el usuario las "fija".
+    """
+    KIND_CHOICES = [
+        ('manual', 'Manual'),
+        ('saved', 'Guardados'),
+        ('visited', 'Visitados'),
+        ('affinity', 'Afinidad temática'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='collections')
+    name = models.CharField(max_length=120)
+    slug = models.SlugField(max_length=140)
+    description = models.TextField(blank=True, default='')
+    kind = models.CharField(max_length=20, choices=KIND_CHOICES, default='manual',
+                            db_index=True)
+    capsules = models.ManyToManyField(Capsule, blank=True,
+                                       related_name='collections')
+    places = models.ManyToManyField(Place, blank=True,
+                                     related_name='collections')
+    cover_image = models.CharField(max_length=500, blank=True, default='',
+                                    help_text='URL de portada opcional.')
+    is_public = models.BooleanField(default=False,
+                                     help_text='Si True, otros usuarios pueden verla (post-MVP).')
+    created = models.DateTimeField(default=timezone.now)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'slug')
+        ordering = ['-updated']
+        verbose_name = 'Colección'
+        verbose_name_plural = 'Colecciones'
+
+    def __str__(self):
+        return f'{self.name} · {self.user.alias}'

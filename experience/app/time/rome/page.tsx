@@ -1,25 +1,4 @@
-/**
- * KUDOS Experience · /time/rome (Time Machine · Roma)
- *
- * Entry point del slice del Time Machine. Server Component minimalista —
- * todo el state vive en `<TimeMachine>` (client).
- *
- * Métrica: el primer asombro debe llegar < 5s del aterrizaje.
- */
-import { TimeMachine } from "@/features/time-machine/TimeMachine";
-
-export const metadata = {
-  title: "Roma · Time Machine · KUDOS",
-  description:
-    "Navega 3000 años de Roma. Cinco eras, cinco hotspots, una sola ciudad. La interfaz hace visible el tiempo sobre el mundo físico.",
-  openGraph: {
-    title: "Roma · Time Machine · KUDOS",
-    description:
-      "Navega 3000 años de Roma. Cinco eras, cinco hotspots, una sola ciudad.",
-    type: "website",
-  },
-};
-
-export default function RomaTimePage() {
-  return <TimeMachine />;
-}
+import type { Metadata } from "next";
+import { TimeRomeScreen } from "@/components/screens/time-rome/TimeRomeScreen";
+export const metadata: Metadata = { title: "Time Machine · Roma", description: "27 siglos en una ciudad." };
+export default function Page() { return <TimeRomeScreen />; }

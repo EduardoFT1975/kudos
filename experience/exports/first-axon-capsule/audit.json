@@ -1,0 +1,78 @@
+{
+  "capsule_id": "galicia_pontevedra_drizzle",
+  "findings": [
+    {
+      "dimension": "emotional_honesty",
+      "verdict": "pass",
+      "score_0_100": 82,
+      "evidence": "thesis internally coherent · editorial argument flows from observation, not claim",
+      "remedy_if_fail": "rewrite the editorial argument to follow from a specific observable detail"
+    },
+    {
+      "dimension": "contemplative_integrity",
+      "verdict": "pass",
+      "score_0_100": 84,
+      "evidence": "mobile pacing score 84/100",
+      "remedy_if_fail": "lengthen black frames · raise silence share floor"
+    },
+    {
+      "dimension": "physical_realism",
+      "verdict": "pass",
+      "score_0_100": 77,
+      "evidence": "physical_falsehood verdict honest · tactile realism 76",
+      "remedy_if_fail": "re-run microreality pipeline · raise residue density · material fatigue · humidity continuity"
+    },
+    {
+      "dimension": "human_presence",
+      "verdict": "pass",
+      "score_0_100": 80,
+      "evidence": "human_presence runtime verdict pass",
+      "remedy_if_fail": "remove any face close-up · reroll with indirect humanity prompts · camera grammar must be observational"
+    },
+    {
+      "dimension": "atmospheric_continuity",
+      "verdict": "pass",
+      "score_0_100": 92,
+      "evidence": "cross-shot atmospheric continuity score 0.92",
+      "remedy_if_fail": "pin weather, room tone, humidity, light softness across shots · use atmospheric_carryover between every pair"
+    },
+    {
+      "dimension": "sound_ethics",
+      "verdict": "pass",
+      "score_0_100": 86,
+      "evidence": "audio integration compliant",
+      "remedy_if_fail": "verify room tone present · 3 distant layers · no music · LUFS -19 honoured · no silence breach"
+    },
+    {
+      "dimension": "pacing_integrity",
+      "verdict": "pass",
+      "score_0_100": 84,
+      "evidence": "pacing runtime compliant",
+      "remedy_if_fail": "≤4 cuts/min · avg shot ≥3.5s · silence share ≥25% · opening/closing fades honoured"
+    },
+    {
+      "dimension": "constitutional_compliance",
+      "verdict": "pass",
+      "score_0_100": 100,
+      "evidence": "constitutional layer clear · capsule does not violate P28 floor",
+      "remedy_if_fail": "constitutional issues are never auto-remediable · escalate to human oversight"
+    },
+    {
+      "dimension": "anti_addiction_compliance",
+      "verdict": "pass",
+      "score_0_100": 88,
+      "evidence": "feed_falsehood verdict honest",
+      "remedy_if_fail": "remove engagement metrics, autoplay chain, subscription upsell, wellness vocabulary"
+    },
+    {
+      "dimension": "memory_persistence_potential",
+      "verdict": "pass",
+      "score_0_100": 78,
+      "evidence": "predicted afterimages count: 3",
+      "remedy_if_fail": "raise distant sound layer count · raise material aging signatures · ensure ≥ 2 specific recall hooks"
+    }
+  ],
+  "composite_0_100": 85,
+  "verdict": "ship",
+  "summary": "ship · composite 85/100 · 0 reject · 0 watch · 10 pass"
+}

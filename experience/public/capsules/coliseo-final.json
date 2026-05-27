@@ -1,0 +1,105 @@
+{
+  "capsule_id": "cap-coliseo-es-traveler-15s-cinematic-v1",
+  "schema_version": "kudos.capsule.v1",
+  "quality_mode": "fallback",
+  "quality_mode_reason": "Sandbox offline · Claude/FLUX/Kling/Cartesia/Epidemic unreachable · pipeline executed with ffmpeg + ImageMagick procedural substitutes. Production deploy will swap these stages for real provider calls (interface contract unchanged).",
+  "input": {
+    "poi_name": "Coliseo Romano",
+    "location": "Roma, Italia",
+    "country": "Italia",
+    "coordinates": "41.8902,12.4922",
+    "language": "es",
+    "audience": "traveler",
+    "duration_seconds": 15,
+    "tone": "cinematic epic",
+    "style": "Apple x TikTok x National Geographic"
+  },
+  "story": {
+    "title": "El lago que se convirtió en imperio",
+    "hook": "Un emperador construyó un lago privado donde ardió Roma. Once años después, su sobrino lo enterró bajo el monumento más grande del mundo.",
+    "script": "Año 64. Roma arde. Nerón se queda el suelo quemado. Construye un lago privado. Once años después, todo cambia. Vespasiano devuelve ese suelo al pueblo. Y sobre el lago de Nerón, levanta el Coliseo. La venganza más bella de la historia romana.",
+    "narration_word_count": 38
+  },
+  "shots": [
+    {"shot":1,"s":"0.0-2.8","mood":"caos · fuego","motion":"zoom-in flicker"},
+    {"shot":2,"s":"2.8-6.5","mood":"opulencia fría","motion":"lateral pan slow"},
+    {"shot":3,"s":"6.5-9.8","mood":"transformación","motion":"zoom-out time-lapse · light sweep"},
+    {"shot":4,"s":"9.8-12.6","mood":"reverencia","motion":"forward push · god-rays"},
+    {"shot":5,"s":"12.6-15.0","mood":"catarsis","motion":"zoom-out aerial reveal"}
+  ],
+  "providers": {
+    "story_director":  {"intended": "claude-sonnet-4.6",            "actual": "cached-from-prior-prompt", "status": "fallback"},
+    "image_gen":       {"intended": "flux-1.1-pro-via-replicate",   "actual": "imagemagick-procedural",   "status": "fallback"},
+    "video_gen":       {"intended": "kling-2.1-master-via-piapi",   "actual": "ffmpeg-ken-burns",         "status": "fallback"},
+    "voice_gen":       {"intended": "cartesia-sonic-2-es-male",     "actual": "silent-placeholder",       "status": "fallback"},
+    "music_gen":       {"intended": "epidemic-sound-library",       "actual": "ffmpeg-lavfi-sine-drone",  "status": "fallback"},
+    "sfx_gen":         {"intended": "procedural+library",            "actual": "ffmpeg-lavfi-anoisesrc",   "status": "ok"},
+    "composition":     {"intended": "ffmpeg",                        "actual": "ffmpeg",                   "status": "ok"},
+    "storage":         {"intended": "cloudflare-r2",                "actual": "local-/public/capsules",   "status": "ok"}
+  },
+  "cost_usd": {
+    "would_be_production": 1.30,
+    "actual_this_run":     0.00,
+    "breakdown_production": {
+      "claude_script": 0.027,
+      "flux_5_stills": 0.20,
+      "kling_15s":     1.05,
+      "cartesia_voice": 0.005,
+      "music_amortized": 0.015,
+      "ffmpeg_compute": 0.002,
+      "r2_storage":    0.0002
+    }
+  },
+  "generation_time_s": {
+    "would_be_production": 143,
+    "actual_this_run":     12,
+    "breakdown_actual": {
+      "story_load":     0.1,
+      "image_imagemagick": 1.5,
+      "video_ken_burns": 6.0,
+      "voice_silent":   0.4,
+      "music_sine":     0.8,
+      "sfx_noise":      0.5,
+      "concat_mux_subs": 2.5,
+      "thumbnail":      0.2
+    }
+  },
+  "assets": {
+    "video":      "/capsules/coliseo-final.mp4",
+    "thumbnail":  "/capsules/coliseo-final-thumb.jpg",
+    "subtitles":  "/capsules/coliseo-final.vtt",
+    "metadata":   "/capsules/coliseo-final.json"
+  },
+  "asset_sizes_bytes": {
+    "video":     366232,
+    "thumbnail": 7139,
+    "subtitles": 477
+  },
+  "video_specs": {
+    "codec": "h264 baseline",
+    "pix_fmt": "yuv420p",
+    "resolution": "720x400",
+    "framerate_fps": 24,
+    "duration_s": 15.0,
+    "frames_total": 360,
+    "audio_codec": "aac",
+    "audio_channels": 2,
+    "audio_sample_rate": 44100
+  },
+  "qa": {
+    "duration_exact": true,
+    "audio_present": true,
+    "subtitles_burned_in": true,
+    "voice_track_silent": true,
+    "all_shots_have_motion": true,
+    "playsinline_safe": true,
+    "ready_for_safari_chrome_firefox": true
+  },
+  "fallback_notes": [
+    "Voice channel is silent · production pipeline must call Cartesia.",
+    "Images are brand-gradient procedurals · production pipeline must call FLUX with prompts from OUTPUT 5.",
+    "Videos are ken-burns over stills · production pipeline must call Kling with prompts from OUTPUT 4.",
+    "Music is procedural sine-drone · production pipeline must select from Epidemic library by mood.",
+    "Subtitles are burned-in to guarantee universal playback without VTT support."
+  ]
+}

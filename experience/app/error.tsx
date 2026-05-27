@@ -1,178 +1,124 @@
 "use client";
 
-/**
- * KUDOS Experience · error boundary global.
- *
- * Captura excepciones no controladas de cualquier ruta. Para errores
- * concretos del cliente AXÓN, intenta extraer status + url + body y
- * mostrarlos en un panel debug-friendly. NO se ocultan detalles: en este
- * estadio del proyecto la transparencia con el backend pesa más que el
- * acabado visual.
- */
-import { useEffect } from "react";
+import * as React from "react";
 
 interface ErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
 }
 
-// Extracción defensiva de campos de AxonError sin importar la clase
-// (evitamos importar `lib/axon` aquí para no inflar el client bundle del
-// error boundary; con shape-check basta).
-function readAxonFields(err: unknown): {
-  status?: number;
-  code?: string;
-  url?: string;
-  body?: unknown;
-} {
-  if (!err || typeof err !== "object") return {};
-  const e = err as Record<string, unknown>;
-  if (e.name !== "AxonError") return {};
-  return {
-    status: typeof e.status === "number" ? e.status : undefined,
-    code: typeof e.code === "string" ? e.code : undefined,
-    url: typeof e.url === "string" ? e.url : undefined,
-    body: e.body,
-  };
-}
-
 export default function GlobalError({ error, reset }: ErrorProps) {
-  useEffect(() => {
-    // Log mínimo en consola — Sentry / PostHog se enchufan cuando lleguen.
-    console.error("[KUDOS error boundary]", error);
+  React.useEffect(() => {
+    // Local log only · no vendor telemetry
+    if (typeof window !== "undefined") {
+      try { console.error("[kudos] route error", error); } catch { /* noop */ }
+    }
   }, [error]);
-
-  const axon = readAxonFields(error);
-  const isAxon = axon.status !== undefined;
 
   return (
     <main
-      role="alert"
       style={{
-        minHeight: "100dvh",
         display: "grid",
         placeItems: "center",
-        background: "#050a1f",
-        color: "#e2e8f0",
-        fontFamily: "system-ui, sans-serif",
-        padding: "32px 24px",
+        padding: "24px 20px",
+        minHeight: "calc(var(--kudos-dvh, 1vh) * 80)",
       }}
     >
-      <div style={{ maxWidth: 640, width: "100%" }}>
-        <p
-          style={{
-            fontSize: 11,
-            letterSpacing: "0.28em",
-            textTransform: "uppercase",
-            color: "#f472b6",
-            marginBottom: 12,
-          }}
-        >
-          {isAxon ? "AXÓN · respuesta inesperada" : "KUDOS · error inesperado"}
-        </p>
-        <h1
-          style={{
-            fontSize: "clamp(1.5rem, 4vw, 2.25rem)",
-            margin: "0 0 14px",
-            lineHeight: 1.15,
-            color: "#fff",
-          }}
-        >
-          {isAxon
-            ? `HTTP ${axon.status ?? "?"} · ${axon.code ?? "ERROR"}`
-            : "Algo se cayó en la experiencia."}
+      <section
+        style={{
+          maxWidth: 520,
+          width: "100%",
+          padding: 28,
+          background: "var(--kudos-glass)",
+          border: "1px solid rgba(248, 113, 113, 0.32)",
+          borderRadius: 22,
+          boxShadow: "0 24px 48px -16px rgba(0,0,0,0.6)",
+          backdropFilter: "blur(16px) saturate(140%)",
+          WebkitBackdropFilter: "blur(16px) saturate(140%)",
+        }}
+      >
+        <div style={{
+          fontFamily: "var(--kudos-font-mono)",
+          fontSize: 10.5,
+          color: "#f87171",
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          marginBottom: 8,
+        }}>
+          Algo se rompió
+        </div>
+        <h1 style={{
+          margin: 0,
+          fontFamily: "var(--kudos-font-display)",
+          fontSize: 24,
+          fontWeight: 600,
+          color: "var(--kudos-ink)",
+          letterSpacing: "-0.01em",
+        }}>
+          Te tenemos. Vamos a recuperar.
         </h1>
-        <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.6, margin: 0 }}>
-          {error.message || "Sin mensaje."}
+        <p style={{
+          margin: "10px 0 18px",
+          color: "var(--kudos-ink-mid)",
+          fontFamily: "var(--kudos-font-body)",
+          fontSize: 13.5,
+          lineHeight: 1.55,
+        }}>
+          La pantalla anterior tuvo un problema. Reintentar suele resolverlo. Si persiste, vuelve al inicio.
         </p>
-
-        {axon.url && (
-          <div
-            style={{
-              marginTop: 22,
-              padding: "12px 14px",
-              border: "1px solid rgba(167, 139, 250, 0.25)",
-              borderRadius: 8,
-              background: "rgba(167, 139, 250, 0.06)",
-              fontSize: 12,
-              color: "#cbd5f5",
-              wordBreak: "break-all",
-            }}
-          >
-            <div style={{ opacity: 0.7, marginBottom: 4 }}>endpoint</div>
-            <code style={{ color: "#00f0ff" }}>{axon.url}</code>
+        <details style={{
+          marginBottom: 18,
+          padding: 12,
+          background: "rgba(255,255,255,0.025)",
+          border: "1px solid var(--kudos-border)",
+          borderRadius: 12,
+          fontFamily: "var(--kudos-font-mono)",
+          fontSize: 11,
+          color: "var(--kudos-ink-low)",
+        }}>
+          <summary style={{ cursor: "pointer", color: "var(--kudos-ink-mid)" }}>Detalles técnicos</summary>
+          <div style={{ marginTop: 8, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+            {error?.message ?? "error desconocido"}
+            {error?.digest ? "\ndigest: " + error.digest : ""}
           </div>
-        )}
-
-        {axon.body !== undefined && axon.body !== null && (
-          <details
-            style={{
-              marginTop: 14,
-              fontSize: 12,
-              color: "#94a3b8",
-            }}
-          >
-            <summary style={{ cursor: "pointer", color: "#a78bfa" }}>
-              Cuerpo de respuesta
-            </summary>
-            <pre
-              style={{
-                marginTop: 8,
-                padding: 12,
-                background: "#0a132c",
-                border: "1px solid rgba(255,255,255,0.06)",
-                borderRadius: 6,
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-                maxHeight: 280,
-                overflow: "auto",
-              }}
-            >
-              {typeof axon.body === "string"
-                ? axon.body
-                : JSON.stringify(axon.body, null, 2)}
-            </pre>
-          </details>
-        )}
-
-        <div style={{ marginTop: 26, display: "flex", gap: 12, flexWrap: "wrap" }}>
+        </details>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <button
             type="button"
             onClick={() => reset()}
             style={{
-              background: "#a78bfa",
-              color: "#0b1024",
-              border: 0,
-              padding: "10px 18px",
-              borderRadius: 8,
+              padding: "10px 16px",
+              borderRadius: 999,
+              background: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
+              border: "1px solid #8b5cf6",
+              color: "#0a0612",
+              fontFamily: "var(--kudos-font-body)",
+              fontSize: 13,
               fontWeight: 600,
               cursor: "pointer",
-              letterSpacing: "0.04em",
             }}
           >
             Reintentar
           </button>
           <a
-            href="/"
+            href="/inicio"
             style={{
-              padding: "10px 18px",
-              borderRadius: 8,
-              border: "1px solid rgba(255,255,255,0.16)",
-              color: "#e2e8f0",
+              padding: "10px 16px",
+              borderRadius: 999,
+              background: "transparent",
+              border: "1px solid var(--kudos-border-hi)",
+              color: "var(--kudos-ink)",
+              fontFamily: "var(--kudos-font-body)",
+              fontSize: 13,
               textDecoration: "none",
-              fontWeight: 500,
+              display: "inline-flex",
+              alignItems: "center",
             }}
           >
-            Volver al inicio
+            Inicio
           </a>
         </div>
-
-        {error.digest && (
-          <p style={{ marginTop: 22, fontSize: 11, color: "#64748b" }}>
-            digest · <code>{error.digest}</code>
-          </p>
-        )}
-      </div>
+      </section>
     </main>
   );
 }

@@ -1,0 +1,197 @@
+{
+  "capsule_id": "galicia_pontevedra_drizzle",
+  "per_shot": [
+    {
+      "shot_id": "shot_00_black_open",
+      "attempts": 1,
+      "accepted": true,
+      "decisions": [
+        {
+          "shot_id": "shot_00_black_open",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0,
+            "dead_environment": 0,
+            "clean_rain": 0,
+            "fake_hdr": 0,
+            "cinematic_narcissism": 0,
+            "synthetic_pacing": 0,
+            "camera_perfection": 0
+          }
+        }
+      ]
+    },
+    {
+      "shot_id": "shot_01_slate_roof_wide",
+      "attempts": 1,
+      "accepted": true,
+      "decisions": [
+        {
+          "shot_id": "shot_01_slate_roof_wide",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0.07999999999999999,
+            "dead_environment": 0.19999999999999998,
+            "clean_rain": 0.18,
+            "fake_hdr": 0.05,
+            "cinematic_narcissism": 0.05,
+            "synthetic_pacing": 0.14,
+            "camera_perfection": 0.18
+          }
+        }
+      ]
+    },
+    {
+      "shot_id": "shot_02_drainage_pipe",
+      "attempts": 1,
+      "accepted": true,
+      "decisions": [
+        {
+          "shot_id": "shot_02_drainage_pipe",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0.07999999999999999,
+            "dead_environment": 0.19999999999999998,
+            "clean_rain": 0.18,
+            "fake_hdr": 0.05,
+            "cinematic_narcissism": 0.05,
+            "synthetic_pacing": 0.14,
+            "camera_perfection": 0.18
+          }
+        }
+      ]
+    },
+    {
+      "shot_id": "shot_03_window_warm_lamp",
+      "attempts": 1,
+      "accepted": true,
+      "decisions": [
+        {
+          "shot_id": "shot_03_window_warm_lamp",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0.07999999999999999,
+            "dead_environment": 0.19999999999999998,
+            "clean_rain": 0.18,
+            "fake_hdr": 0.05,
+            "cinematic_narcissism": 0.05,
+            "synthetic_pacing": 0.14,
+            "camera_perfection": 0.18
+          }
+        }
+      ]
+    },
+    {
+      "shot_id": "shot_04_figure_under_umbrella",
+      "attempts": 1,
+      "accepted": true,
+      "decisions": [
+        {
+          "shot_id": "shot_04_figure_under_umbrella",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0.07999999999999999,
+            "dead_environment": 0.19999999999999998,
+            "clean_rain": 0.18,
+            "fake_hdr": 0.05,
+            "cinematic_narcissism": 0.05,
+            "synthetic_pacing": 0.14,
+            "camera_perfection": 0.18
+          }
+        }
+      ]
+    },
+    {
+      "shot_id": "shot_05_atlantic_horizon",
+      "attempts": 1,
+      "accepted": true,
+      "decisions": [
+        {
+          "shot_id": "shot_05_atlantic_horizon",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0.07999999999999999,
+            "dead_environment": 0.19999999999999998,
+            "clean_rain": 0.18,
+            "fake_hdr": 0.05,
+            "cinematic_narcissism": 0.05,
+            "synthetic_pacing": 0.14,
+            "camera_perfection": 0.18
+          }
+        }
+      ]
+    },
+    {
+      "shot_id": "shot_06_pavement_reflections",
+      "attempts": 1,
+      "accepted": true,
+      "decisions": [
+        {
+          "shot_id": "shot_06_pavement_reflections",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0.07999999999999999,
+            "dead_environment": 0.19999999999999998,
+            "clean_rain": 0.18,
+            "fake_hdr": 0.05,
+            "cinematic_narcissism": 0.05,
+            "synthetic_pacing": 0.14,
+            "camera_perfection": 0.18
+          }
+        }
+      ]
+    },
+    {
+      "shot_id": "shot_07_black_close",
+      "attempts": 1,
+      "accepted": true,
+      "decisions": [
+        {
+          "shot_id": "shot_07_black_close",
+          "attempt": 1,
+          "accept": true,
+          "reasons": [],
+          "halt_reason": "passed",
+          "inspection": {
+            "ai_face_risk": 0,
+            "impossible_motion": 0,
+            "dead_environment": 0,
+            "clean_rain": 0,
+            "fake_hdr": 0,
+            "cinematic_narcissism": 0,
+            "synthetic_pacing": 0,
+            "camera_perfection": 0
+          }
+        }
+      ]
+    }
+  ]
+}

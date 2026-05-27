@@ -1,0 +1,117 @@
+{
+  "capsule_id": "galicia_pontevedra_drizzle",
+  "total_duration_s": 16,
+  "shot_count": 4,
+  "shots": [
+    {
+      "shot_index": 0,
+      "duration_s": 5,
+      "preferred_provider": "kling-2.1-master-pro",
+      "fallback_provider": "kling-2.1-master-std",
+      "emotional_function": "open_the_room",
+      "pacing_role": "open",
+      "visual_intent": "wide observational view down rúa Sarmiento · arcaded street · slate cobbles uniformly dark with rain · granite arcades · iron balconies above · no people visible in foreground · day is grey · drizzle persistent",
+      "subject_motion": "still",
+      "atmospheric_state_id": "rain_dampens_next",
+      "humidity_regime": "atlantic_drizzle_wet",
+      "room_tone_kind": "rain_diffusion",
+      "distant_sound_at_this_shot": [
+        "traffic_softened_by_rain"
+      ],
+      "human_trace_audio": [
+        "footsteps offscreen at t≈2.5s"
+      ],
+      "implied_humanity": [
+        "umbrella tip offscreen lower-right corner"
+      ],
+      "material_focus": [
+        "wet_cobble",
+        "granite_arcade"
+      ],
+      "tactile_realism_target_0_100": 78,
+      "emotional_truth_target_0_100": 68
+    },
+    {
+      "shot_index": 1,
+      "duration_s": 4,
+      "preferred_provider": "runway-gen-4",
+      "fallback_provider": "kling-2.1-master-pro",
+      "emotional_function": "indirect_human_evidence",
+      "pacing_role": "transitional",
+      "visual_intent": "silhouette of a person with umbrella crosses the frame from right to left at middle-distance · we never see their face · their pace is unhurried · they exit the frame on the left · the rain has not paused for them",
+      "subject_motion": "walking",
+      "atmospheric_state_id": "rain_dampens_next",
+      "humidity_regime": "atlantic_drizzle_wet",
+      "room_tone_kind": "rain_diffusion",
+      "distant_sound_at_this_shot": [
+        "traffic_softened_by_rain",
+        "footsteps_close"
+      ],
+      "human_trace_audio": [
+        "wet shoes on slate · 1.3s/step"
+      ],
+      "implied_humanity": [
+        "silhouette_crossing_rain",
+        "umbrella_tip_offscreen"
+      ],
+      "material_focus": [
+        "wet_cobble"
+      ],
+      "tactile_realism_target_0_100": 76,
+      "emotional_truth_target_0_100": 70
+    },
+    {
+      "shot_index": 2,
+      "duration_s": 4,
+      "preferred_provider": "kling-2.1-master-pro",
+      "fallback_provider": "luma-dream-machine",
+      "emotional_function": "tactile_environmental_moment",
+      "pacing_role": "still",
+      "visual_intent": "macro detail · iron balcony bleeding rust streaks down granite façade · drainpipe at the corner of frame · single rain drop visible falling · the streaks are decades old · the city is in conversation with the climate",
+      "subject_motion": "still",
+      "atmospheric_state_id": "rain_dampens_next",
+      "humidity_regime": "atlantic_drizzle_wet",
+      "room_tone_kind": "rain_diffusion",
+      "distant_sound_at_this_shot": [
+        "drainpipe_pulse",
+        "harbor_horn_at_night"
+      ],
+      "human_trace_audio": [],
+      "implied_humanity": [],
+      "material_focus": [
+        "rusted_iron_balcony",
+        "granite_with_water_streaks"
+      ],
+      "tactile_realism_target_0_100": 80,
+      "emotional_truth_target_0_100": 68
+    },
+    {
+      "shot_index": 3,
+      "duration_s": 3,
+      "preferred_provider": "kling-2.1-master-std",
+      "fallback_provider": "pika-2.2",
+      "emotional_function": "closing_resonance",
+      "pacing_role": "unresolved",
+      "visual_intent": "static through café window · interior warmth implied · window steamed from inside · person seated obscured by the steam · we are outside · we will not enter · cut before the moment completes",
+      "subject_motion": "still",
+      "atmospheric_state_id": "rain_dampens_next",
+      "humidity_regime": "atlantic_drizzle_wet",
+      "room_tone_kind": "rain_diffusion",
+      "distant_sound_at_this_shot": [
+        "radio_through_thin_wall"
+      ],
+      "human_trace_audio": [
+        "kitchen clatter offscreen left"
+      ],
+      "implied_humanity": [
+        "person_behind_steamed_window"
+      ],
+      "material_focus": [
+        "fogged_glass",
+        "warm_interior_through_glass"
+      ],
+      "tactile_realism_target_0_100": 74,
+      "emotional_truth_target_0_100": 72
+    }
+  ]
+}

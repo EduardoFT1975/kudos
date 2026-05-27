@@ -1,0 +1,18 @@
+{
+  "capsule_id": "galicia_pontevedra_drizzle",
+  "ideal_environment": "a private room · indoor · the actual real-world weather outside the room is irrelevant but the room itself should be still",
+  "headphone_conditions": "closed-back over-ear · consumer 4-star+ or better · level set to absolute SPL ~64 dBA at the eardrum · loudness checked with a phone meter before playback",
+  "lighting_conditions": "low ambient light · no overhead fluorescent · ideally just a single bedside or floor lamp · the room dims itself toward the screen",
+  "emotional_state": "neither acute crisis nor performative calm · ordinary baseline · the viewer is themselves",
+  "contemplative_preparation": "two minutes of doing nothing before opening the app · no transition from social-media scroll · no transition from a phone call · the head settles before the room",
+  "interruption_minimization": "phone in Do Not Disturb · the app suppresses notifications during playback and for 12 seconds after · partner / housemates / pets informed · door closed",
+  "post_view_silence": "two minutes minimum of doing nothing after the closing fade ends · phone face-down · eyes anywhere except a screen · the question is what stays",
+  "minimum_setup_time_minutes": 5,
+  "headphone_grade": "consumer_4_star_plus",
+  "absolute_spl_target_db_a": 64,
+  "room_ambient_noise_max_db": 30,
+  "view_count_first_session": 1,
+  "time_until_replay_allowed_min": 30,
+  "follow_up_silence_target_minutes": 2,
+  "notes": "the first viewing is not data collection · it is the moment AXÓN is allowed to exist for the first time. If the protocol is violated, the data is contaminated. If the data is contaminated, we will not know whether the capsule failed or whether the conditions failed. The protocol matters more than the eagerness to ship."
+}

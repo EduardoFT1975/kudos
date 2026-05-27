@@ -1,535 +1,459 @@
 # PROJECT_STATUS.md — KUDOS / AXÓN
 
-Última actualización: 2026-05-21 (auto · scheduled-task `actualizar-md`)
+Última actualización: 2026-05-23 (auto · scheduled-task `daily-status`)
 Responsable: Eduardo
-Estado general: **FREEZE · v0.9-axon-core · 17 commits hotfix 2026-05-21 desplegados en Render · HOME 500 RESUELTO (manifest storage swap + view hardening) · ✨ Content Engine V0 commiteado a master · ✨ Experience Core (Next.js 15) commiteado a master · ⚠ working tree con `urls.py` y `models.py` aún truncados localmente (HEAD íntegro)**
+Estado general: **🚀 MVP CLOSE · `123e317` desplegado · Echo card cinematográfica live · TemporalLandmark layer (Roma seed) live · Local Capsule Generator (Wikidata POIs) live · MapExplorer cold-start sobre Roma + geolocation autoritativa · 15 commits 2026-05-22 (tarde-noche) + 2026-05-23**
 
 Producto oficial: *Google Earth emocional + histórico + humano.*
-Mandato vigente: **AXÓN FREEZE → validación productiva → Experience Core (Next.js) + Content Engine (Phase 11/12/13) coexistiendo en master.**
+Mandato vigente: **AXÓN FREEZE → MVP demo público shippeado (Echo card como única superficie cinematográfica) · vigilar Render cold-start + smoke navegacional mobile.**
 
 ---
 
 ## Resumen ejecutivo
 
-KUDOS atravesó la Fase 1 AXÓN completa entre el 2026-05-15 y el 2026-05-17:
-de monolito Django con 80 rutas mezcladas y `map.html` de 1 039 líneas a un
-**PUBLIC CORE de 7 pilares** sobre arquitectura feature-gated. Todo el código
-heredado quedó preservado en DORMANT (40 prefijos bloqueados por
-`DormantRouteMiddleware`, accesibles vía `KUDOS_FEATURE_<NAME>=1`).
+KUDOS shippea el **MVP-close** el 2026-05-23 a las 16:42 UTC+2 con el commit
+`123e317` ("MVP close · timeout absorbs Render cold-start, safe-area honored,
+residue purged"). En las últimas ~20 h se cerraron **15 commits** que
+transforman el mapa en una experiencia narrativa cinematográfica: del fix
+de tiles + fitBounds (2026-05-22 noche) → cold-start sobre Roma con overlay
+de landmarks temporales (`20f1d46`) → restauración de geolocation autoritativa
+(`ecd678c` → `d7376a7`) → generador de cápsulas provisionales desde Wikidata
+(`9828e48`) → reemplazo de paneles debug por la **primera Echo card cinematográfica**
+(`32a572f`) → cierre de MVP con timeouts que absorben el cold-start de Render
++ safe-area + purga de residuos (`123e317`).
 
-El tag `v0.9-axon-core` se selló el 2026-05-17 (commit `42189bc`). Entre el
-**2026-05-20 y el 2026-05-21 se cerraron 17 commits hotfix** que estabilizan
-producción y consolidan los dos núcleos paralelos:
+El producto entrega ahora una sola superficie de respuesta sobre el mapa:
+**Echo card**. Sin paneles paralelos, sin debug visible, sin tiers múltiples
+de render. La Echo card es alimentada por dos pipelines complementarios:
 
-1. **Backend Django (`67fe207`)** · `STATICFILES_STORAGE` cambiado de
-   `CompressedManifestStaticFilesStorage` → `CompressedStaticFilesStorage`
-   + `home` view envuelta en try/except con fallback HttpResponse 200. Esto
-   **cierra BUG-025 (HOME 500)** — la causa raíz fue
-   `ValueError("Missing staticfiles manifest entry")` al servir assets sin
-   entrada en el manifest post-`collectstatic`.
-2. **Backend Django (`c42784a`)** · Ruta `/` restaurada a `views.home` real;
-   healthcheck queda en `/healthcheck/` para infra pings; alias `/home/` se
-   conserva como `home_full`.
-3. **Backend Django (`dd42db3`)** · `content_engine/` commiteado a master
-   (3 039 L Python · 13 módulos · 34 archivos). Endpoint canónico
-   `POST /api/place-capsule`, `INSTALLED_APPS += ['content_engine',
-   'corsheaders']`, CORS hardening de Phase 13, `CONTENT_ENGINE_GEOCACHE_ENABLED`
-   env flag, modelo `Place` añadido a `kudos_app/models.py` (+96 L) +
-   campos contextuales `place`, `parent_capsule`, `root_capsule`,
-   `context_layer`, `importance_score`, `verified`.
-4. **Backend Django (`dd42db3`)** · Phase 0 Foundation: endpoints
-   `GET /api/health/` (JSON estable consumido por Experience) y
-   `GET /api/places/<slug>/` (shape estable para `places/[slug]/page.tsx`).
-   `kudos_app/tests.py` pasa de 10 L → 79 L con 3 TestCase
-   (`HealthEndpointTestCase`, `PlaceDetailEndpointTestCase`,
-   `CapsuleFoundationFieldsTestCase`).
-5. **Frontend Next.js (`9b3fadf` + 7 hotfix TS)** · `experience/` commiteado
-   a master por primera vez · 99 archivos · 11 443 L. Stack Next 15 + React 18
-   (downgrade de 19 por compat) + TS 5.6 + Tailwind 3.4 + Plausible.
-6. **Frontend Next.js (`a199e12`)** · Middleware `beta-route-gate` que
-   redirige `/descubrir`, `/capsules`, `/places`, `/time` → `/aqui` con
-   `307` cuando `BETA_HIDE_DORMANT=1`. **Cola de cápsulas capada**
-   (`useCapsuleQueue.ts` 359 L). Restauración: una sola env flip.
-7. **Infra (`97588fc` + `5e18e1f`)** · `requirements.txt` reconstruido para
-   Render Linux (drop Anaconda + Windows junk) · 71 010 B → 1 268 B → 2 631 B.
-8. **Infra (`a199e12`)** · `render.yaml` ampliado a 3 servicios:
-   `kudos` (Django backend), `kudos-frontend` (Next.js, `rootDir: experience`,
-   `BETA_HIDE_DORMANT=1`), `kudos-db` (Postgres compartida).
+1. **Local Capsule Generator** (`/api/local-capsules/` · `9828e48`): genera
+   POIs provisionales desde Wikidata cerca de la coordenada del usuario sin
+   pasar por LLM. Marcadores instantáneos, zero coste.
+2. **Echo Synthesis** (`/api/echo/synthesize/` · `32a572f` · módulo nuevo
+   `content_engine/echo_synthesis.py` 342 L): por click en POI, llama a
+   Anthropic (Claude Haiku 4.5 · tool-use enforced JSON) y devuelve
+   subtítulo + micro-narrativa + cultural-DNA en tono cinematográfico KUDOS.
+   Caché Django 30 días por `entity_id`. Fallback procedural desde
+   Wikipedia + región-DNA (Galicia, Cantábrico, Andalucía, Castilla,
+   Catalunya, Roma, Ática, Egipto) cuando `ANTHROPIC_API_KEY` falta o el
+   LLM falla. Cuatro source tags: `cache` | `llm` | `wikipedia_fallback` |
+   `minimal_fallback`.
 
-**Estado working tree (2026-05-21):** `views.py` ya **parsea OK** localmente
-(2 382 L) pero **sigue incompleto respecto a HEAD** (2 448 L): faltan ~66 L
-finales que cortan `capsule_aport_create` mid-función y borran
-`capsule_aport_validate` entera. Parsea por casualidad (la función cortada
-sin `return` simplemente devuelve `None`). `urls.py` (210 L) y `models.py`
-(1 131 L) **siguen truncados con `SyntaxError`** — HEAD íntegro a 215 L y
-1 210 L respectivamente. `render.yaml` working también truncado (15 L vs
-89 L en HEAD). Render sirve el HEAD íntegro, no hay impacto productivo,
-pero **Django no puede arrancar en local** hasta hacer
-`git checkout HEAD -- kudos_app/views.py kudos_app/urls.py kudos_app/models.py render.yaml`.
-El índice git también sigue corrupto (`fatal: unknown index entry format
-0x3a710000` · variante del `0x74000000` del 2026-05-19 y del `0x02000000`
-en otra invocación · el formato exacto fluctúa pero la corrupción es
-reincidente): `git log`, `git show` y `git diff HEAD --name-only` funcionan;
-`git status` y `git diff <path>` no.
+A esto se suma la **capa P3 de TemporalLandmark** (`497ad47` + `6a3e809`):
+nuevo modelo `TemporalLandmark` (city, kind, geometry_geojson polygon,
+year_from/year_to, summary, source), migración `0005_temporal_landmark`,
+endpoint `GET /api/landmarks/viewport/?bbox=...&year=YYYY&limit=N` que
+devuelve GeoJSON FeatureCollection year-filtered, y management command
+`seed_temporal_landmarks_rome` idempotente (4 polígonos: Coliseo, Foro
+Romano, Circo Máximo, Murallas Aurelianas). El comando se ejecuta en
+**cada deploy** vía `build.sh` (Render no tiene shell free-tier), así
+que la tabla nunca queda vacía en producción.
 
-El **Content Engine V0 (Phase 11/12/13)** sigue con el master smoke
-2026-05-20 14:04 UTC como referencia: **19 tests · 16 PASS · 2 WARN · 1
-FAIL · 15.27 s** (Barcelona · Plaça Catalunya UNGROUNDED · resto de
-capitales europeas pasa con ≥ 0.96 confidence). El módulo ahora vive en
-master y se despliega con el backend.
+El mapa arranca ahora desde Roma (cold-start `20f1d46`) para revelar la
+capa P3 sin geolocation; al recibir geolocation real (accuracy ≤10 km,
+`maxAge=0`, IP-geo rechazado), el camera flyTo prioriza la ubicación del
+usuario. Al limpiar la deuda de markers (race condition, CSS conflictivo,
+markers rojos de debug) y reemplazar el panel debug por la Echo card, el
+producto ya entrega la promesa de "Time To Awe" sobre dispositivos reales
+modulo el cold-start de Render free tier (que el timeout absorbe).
 
-El **Experience Core (Next.js 15)** ya no es un side-quest: el
-`render.yaml` lo despliega como servicio independiente con CORS configurado
-contra el origen del backend. Estructura final: 10+ rutas (`/`, `/aqui`,
-`/descubrir`, `/mapa`, `/capsules/[slug]`, `/places/[slug]`, `/time/rome`,
-`/health`), 8 dominios de componentes (`analytics/`, `atmosphere/`,
-`capsule/`, `feed/`, `shell/`, `sidebar/`, `timeline/`, `ui/`), 8 dominios
-de features (`capsule/`, `explore/`, `library/`, `map/`, `mind/`, `saved/`,
-`time-machine/`, `timeline/`). Middleware beta-gate activo.
+**Highlight 2026-05-23 (9 commits · `20f1d46` → `123e317`):**
+
+1. **`20f1d46` (00:06 UTC+2) · feat(map): cold-start MapExplorer over Roma
+   to reveal P3 landmark overlay.** 801 L net (+712 / -89). Reescribe el
+   bootstrap del mapa para arrancar sobre las coordenadas del Foro Romano
+   y mostrar la capa de TemporalLandmark antes de pedir geolocation.
+2. **`d935f49` (00:31)** · `fix(map): disable useGeolocation auto-flyTo
+   during MVP demo`. Evita que la cámara se mueva sin contexto durante
+   demo.
+3. **`687aebf` (00:40)** · `fix(map): disable fetchViewport auto-fit
+   camera during MVP demo`. Frena re-encuadres agresivos.
+4. **`ecd678c` (13:36)** · `fix(map): restore real geolocation and repair
+   cluster expansion UX` · 227 L. Restaura geolocation autoritativa y
+   arregla expansión de clusters.
+5. **`8233259` (13:55)** · `fix(map): keep camera on user location when
+   nearby memories are empty`. La cámara se queda en el usuario aunque
+   no haya cápsulas cerca.
+6. **`d7376a7` (14:03)** · `fix(map): make geolocation the authoritative
+   initial camera`. Geo sobrescribe el cold-start sobre Roma cuando llega.
+7. **`9828e48` (14:24)** · `feat(content): generate provisional local
+   capsules from user geolocation` · 244 L · 3 archivos. Nuevo endpoint
+   `GET /api/local-capsules/?lat=...&lng=...&radius=...&limit=N` consume
+   Wikidata SPARQL para devolver POIs candidatos en JSON ligero. Sin LLM.
+8. **`64322d5` (15:17)** · `fix(map): provisional markers race +
+   simplified CSS + nuclear test`. Cierra race condition en mount de
+   markers + simplifica CSS heredado.
+9. **`32a572f` (15:34)** · `feat(echo): first cinematic Echo card
+   replaces debug provisional panel` · 308 L (+287/-21). Reemplaza el
+   panel debug por la **primera Echo card cinematográfica**, una sola
+   superficie de respuesta sobre el mapa. Backend `echo_synthesis.py`
+   (342 L · LLM tool-use + caché 30d + fallback procedural).
+10. **`123e317` (16:42 · MVP CLOSE)** · `chore(ship): MVP close · timeout
+    absorbs Render cold-start, safe-area honored, residue purged` · 1 669 L
+    (+1 182 / -487). Sella el MVP: timeouts absorben el cold-start de
+    Render (servicio free tier despierta ~30 s), CSS respeta safe-area
+    iOS, y purga de código residual (paneles tier, markers TEMP rojos,
+    HUD overlay debug). **El mapa ya no tiene debug visible.**
+
+**Highlight 2026-05-22 (tarde-noche · 6 commits adicionales):**
+
+- **`94eb54c` (20:41)** · `debug(map): viewport instrumentation only`.
+- **`3cc5c28` (20:58)** · `debug(map): replace custom markers with pure
+  default MapLibre markers + auto fitBounds` · -171/+42 (simplificación
+  drástica).
+- **`979ffe1` (21:07)** · `fix(map): defer fitBounds after resize +
+  single-point flyTo to prevent blank render state`.
+- **`b764b31` (21:13)** · `fix(map): force absolute fullscreen map
+  container + resize after mount (tiles not rendering)`.
+- **`497ad47` (23:19)** · `feat(backend): temporal landmark viewport API
+  + MVP Rome seed` · 6 archivos · +439 L · nuevo modelo `TemporalLandmark`
+  (210-264 en models.py), migración `0005_temporal_landmark` (+77 L),
+  endpoint `landmarks_viewport` (+92 L), command
+  `seed_temporal_landmarks_rome` (+148 L · 4 polígonos Roma idempotentes),
+  registro admin (+26 L).
+- **`6a3e809` (21:52 UTC)** · `ops(build): seed Roma temporal landmarks
+  on every deploy` · `build.sh` +1 L. Cierra el bug latente "tabla creada
+  pero zero rows porque el seed nunca corrió en Render" (free tier no
+  tiene shell access).
+
+**Estado working tree (2026-05-23):** HEAD `123e317` ya en `origin/master`
+(`git log HEAD..origin/master` vacío). Los archivos núcleo siguen íntegros
+(`kudos_app/views.py` 2 448 L, `kudos_app/urls.py` 215 L, `kudos_app/models.py`
+sin cambios desde `dd42db3`, `render.yaml` con 3 servicios). Working tree
+con 351+ archivos divergentes vs HEAD (CRLF/whitespace en archivos legacy,
+sin tocar). El binario commiteado y desplegado **incluye**: P0 viewport,
+P2 media, P3 hygiene, P3 temporal landmarks, Local Capsule Generator, Echo
+synthesis LLM, MapExplorer refactor, safe-area + timeout fixes.
+
+El **Content Engine V0 (Phase 11/12/13)** ahora tiene 5 migraciones
+aplicables: `0001_initial`, `0002_wikidatageocache`, `0003_media_fields`,
+`0004_hygiene_fields`, `0005_temporal_landmark`. Las cinco se ejecutan
+automáticamente en cada deploy vía `build.sh`. El último smoke
+`run_master_smoke_map` (2026-05-20T14:04) sigue siendo la línea base
+hasta re-correr post-MVP-close.
+
+El **Experience Core (Next.js 15)** despliega vía servicio
+`kudos-frontend` en Render. La superficie cinematográfica oficial es el
+`MapExplorer.tsx` (1 033 L · refactor mayor en los últimos 7 días, +2 295
+L netas vs HEAD~16). El Echo card sustituye al `CapsuleStateRouter` para
+respuestas POI; `CapsuleSuccess` queda como render path para cápsulas
+verificadas históricas.
 
 ---
 
 ## Qué funciona
 
-- **Tag git `v0.9-axon-core`** sellado (commit `42189bc`, 2026-05-17). HEAD
-  intacto en remoto.
-- **HEAD `master` (2026-05-21 16:03 UTC+2)** apunta a `67fe207` con HOME 500
-  resuelto y producción servida sin errores reportados desde el commit.
-- **Smoke test integral AXÓN · 29/29 checks** (parse AST · balance HTML ·
-  null bytes · sin duplicados · 109 refs `views.X` resueltas · gating
-  consistency · 15 PUBLIC pass · 16 DORMANT bloqueadas · 7 pilares vivos
-  · identidad 17/17) — validado contra HEAD del tag.
-- **PUBLIC CORE · 7/7 pilares operativos:**
-  1. **Mapa 5D** (`/map/`): clustering (`L.markerClusterGroup` r45,
-     `disableClusteringAtZoom 14`, `chunkedLoading`), bbox querying con
-     debounce 250 ms, viewport-fit cover, mobile tuning 14/14.
-  2. **Capsules** (`/capsules/`, `/capsules/<uid>/`): popup como portal
-     contextual, 3 CTAs PUBLIC (Explorar / Compartir / Timeline), lazy
-     popup vía `api_capsule_light`.
-  3. **Search** (`/search/`): full-text + Nominatim OSM en el mapa.
-  4. **Timeline** (`/timeline/`): `renderTimeline`, `centerTimeline(year)`,
-     8 epochs, era styles.
-  5. **Users** (`/`, `/profile/`, `/accounts/login/`, `/register/`).
-  6. **Mind Lite** (`/mind/`, `/mind/ask/`): 3 prompts oficiales
-     (`what` / `summary` / `near`), auto-fire si `?capsule=X`.
-  7. **Share**: Web Share API + clipboard fallback + toast + OG completos
-     + Twitter Card + Schema.org JSON-LD.
-- **AXÓN Phase 0 Foundation (nuevo 2026-05-21):**
-  - `GET /api/health/` JSON estable (`status`, `service`, `version`,
-    `uptime`) — consumido por `experience/lib/axon/endpoints/health.ts`.
-  - `GET /api/places/<slug>/` shape estable (`slug`, `name`, `country`,
-    `lat`, `lon`, `summary`, `description`, `image`, `era_range.from`,
-    `era_range.to`, `capsule_count`) — consumido por `app/places/[slug]/
-    page.tsx`.
-  - Modelo `Place` canónico (FK desde `Capsule.place`).
-  - 3 TestCase Django nuevos (`HealthEndpointTestCase`,
-    `PlaceDetailEndpointTestCase`, `CapsuleFoundationFieldsTestCase`).
-- **HOME 500 resuelto (2026-05-21 16:03):**
-  - `kudos_project/settings.py` · `STATICFILES_STORAGE` =
-    `whitenoise.storage.CompressedStaticFilesStorage` (sin Manifest).
-    Comentario inline explica que la variante Manifest exigía que **todo**
-    `{% static %}` referenciado existiera post-`collectstatic` y cualquier
-    asset suelto disparaba `ValueError("Missing staticfiles manifest
-    entry")` → 500.
-  - `kudos_app/views.py` · `home()` envuelve queries DB y `render()` en
-    try/except con fallback `HttpResponse 200 text/plain`. Si **algo**
-    falla (schema drift, DB connection, missing static, template error),
-    el usuario ve un mensaje de mantenimiento en vez de 500.
-  - Healthcheck movido a `/healthcheck/` (no a `/`), home real en `/`.
-- **Feature gating en producción (FEATURE_GATE_AUDIT 2026-05-19):**
-  - `DormantRouteMiddleware` activo en `MIDDLEWARE` (settings.py L82).
-  - 35 features dormant declaradas con flag `False` en `_DORMANT`.
-  - Override `KUDOS_FEATURE_<NAME>=1` implementado y testado.
-  - 0 rutas dormant accidentales (verificación línea a línea de `urls.py`).
-- **Content Engine V0 (Phase 11/12/13) commiteado a master (`dd42db3`):**
-  - `content_engine/` (3 039 L Python · 34 archivos) registrado en
-    `INSTALLED_APPS` y `kudos_project/urls.py`
-    (`path('', include('content_engine.urls'))`).
-  - Endpoint canónico `POST /api/place-capsule` (con back-compat
-    `POST /api/capsule/nearby`).
-  - Pipeline place-capsule sync: Wikidata SPARQL + Wikipedia REST, dedupe,
-    grounding, ranking ponderado, landmark override sparse, truth-gate.
-  - 3 modelos persistidos: `PlaceCapsule`, `GenerationAttempt`,
-    `WikidataGeoCache` (migrations 0001 + 0002 aplicadas).
-  - `django-ratelimit` en endpoint público (rate-limit ya activo aquí).
-  - **CORS hardening Phase 13:** `corsheaders` instalado, `CorsMiddleware`
-    pre-`CommonMiddleware`, `CORS_ALLOWED_ORIGINS` con detección de
-    misconfig (`'*'` literal warning loud al boot).
-  - **Master switch geocache:** `CONTENT_ENGINE_GEOCACHE_ENABLED` env flag
-    (default ON) — flip a `0` revierte Stage 2 a SPARQL live-only sin
-    borrar la tabla.
-  - Harness `python manage.py run_master_smoke_map` con CSV + JSON en
-    `reports/`. **Última ejecución 2026-05-20T14:04:31Z · 19 tests · 16
-    PASS · 2 WARN · 1 FAIL · 15.27 s** (A 3/4 · B 2/2 +2 WARN · C 4/4 ·
-    D 4/4 · E 3/3).
-- **Experience Core commiteado a master (`9b3fadf` + 7 hotfix TS):**
-  - 99 archivos · 11 443 L. Stack Next 15.x + React 18.x (pin tras
-    `e52c81f`) + TS 5.6 + Tailwind 3.4 + Framer 11 + Radix + Lucide +
-    Plausible.
-  - Rutas (`experience/app/`): `(layout)`, `aqui`, `capsules/[slug]`,
-    `descubrir`, `health`, `mapa`, `places/[slug]`, `time/rome` · más
-    `error.tsx`, `loading.tsx`, `page.tsx` raíz.
-  - Componentes (`experience/components/`): `analytics/`, `atmosphere/`,
-    `capsule/` (PageAtmosphere, EchoNode, FragmentTrace, TemporalResonance,
-    SpatialAnchor, Whisper, MediaVignette, LayerContainer,
-    ColosseumSilhouette), `feed/` (DiscoveryFeed, CapsuleCard), `shell/`,
-    `sidebar/`, `timeline/` (EraSlider), `ui/` (button, toast).
-  - Features (`experience/features/`): `capsule/` (15 componentes incl.
-    CapsuleSession, CapsuleStateRouter, ShareMoment, RecoveryPill,
-    ManualLocationPicker, 7 sub-estados en `states/`), `explore/`,
-    `library/`, `map/`, `mind/`, `saved/`, `time-machine/` (RomaMap,
-    TimeMachine, HotspotMarker, EraAtmosphere, CapsuleOverlay), `timeline/`.
-  - `lib/`: `axon/` (client, config, errors, types, endpoints capsules/
-    feed/health/places), `api/` (capsules, django), `capsule/` (quality,
-    useCapsuleQueue 359 L), `capsules/`, `curated/rome.ts`, `hooks/`
-    (useIdleDwell, useSavedCapsules, useGeolocation), `mocks/`,
-    `analytics/plausible.ts`, `utils/` (cn, format), `env/check.ts`,
-    `timeline/` (eras, hotspots, types).
-  - Motion: `motion/ambient.ts`, `motion/temporal.ts`, `motion/transitions.ts`.
-  - Design system: `design-system/tokens.ts` (161 L).
-  - **Middleware beta-gate** (`experience/middleware.ts`): redirige
-    `/descubrir`, `/capsules`, `/places`, `/time` → `/aqui` con `307`
-    cuando `BETA_HIDE_DORMANT=1`. Restauración 1-env-flip.
-- **`render.yaml` ampliado a 3 servicios (`a199e12`):**
-  - `kudos` (Django backend) · runtime python · `./build.sh` ·
-    `gunicorn` · DATABASE_URL desde `kudos-db` · `CORS_ALLOWED_ORIGINS=
-    https://kudos-frontend.onrender.com` pre-poblado.
-  - `kudos-frontend` (Next.js) · runtime node 20 · `rootDir: experience`
-    · `npm install && npm run build` · `npm start -- -p $PORT` ·
-    `NEXT_PUBLIC_API_BASE_URL=https://kudos-40cq.onrender.com` ·
-    `BETA_HIDE_DORMANT=1`.
-  - `kudos-db` (Postgres free).
-- **`requirements.txt` saneado** (`97588fc` → `5e18e1f`): de 71 010 B con
-  Anaconda + Windows junk a 2 631 B limpios para Render Linux.
-- **Leaflet local** en `static/vendor/leaflet/` (162 KB · v1.9.4).
-- **`map.html` modularizado**: 167 L (de 1 039). CSS a `static/css/map5d.css`
-  (399 L), JS a 10 módulos en `static/js/map5d/` (~670 L).
-- **`views.py` en HEAD**: 2 448 L · 121 funciones · parsea OK ·
-  0 duplicados · 0 F401 · contiene `capsule_aport_validate` íntegra
-  (que el working tree local sigue sin tener).
-- **23 snapshots `.snapshot.dX.YYYYMMDDTHHMMSSZ`** reversibles por fase
-  verificados con sha256.
-- **Deploy artefactos listos:** `Procfile`, `render.yaml` (v2 con frontend),
-  `build.sh`, `runtime.txt` (python-3.11.9), `.env.production.example`,
-  `kudos_project/sentry_init.py` opt-in.
-- **Backups generados:** `outputs/kudos_v0.9-axon-core.20260517T085217Z.tar.gz`
-  (87 MB · 724 archivos) + `outputs/kudos_db.20260517T085412Z.sqlite3`
-  (9.52 MB · 53 tablas · 1 458 cápsulas · 10 users).
+- **HEAD `master` = `origin/master` = `123e317`** · MVP CLOSE shippeado.
+- **Tag `v0.9-axon-core`** sellado en `baf9fc0` (referencia histórica).
+- **Smoke test integral AXÓN · 29/29 checks** validado sobre HEAD del tag
+  (sin re-ejecutar tras los 15 commits MVP-close).
+- **PUBLIC CORE Django · 7/7 pilares operativos** (Mapa 5D, Capsules,
+  Search, Timeline, Users, Mind Lite, Share).
+- **Experience Core Next.js 15 · MapExplorer cinematográfico:**
+  - **Cold-start** sobre Roma para revelar capa de TemporalLandmark sin
+    geolocation (`20f1d46`).
+  - **Geolocation autoritativa** cuando llega (accuracy ≤10 km, `maxAge=0`,
+    IP-geo rechazado · `ecd678c` + `d7376a7`).
+  - **Single-surface Echo card** como única respuesta a click en POI
+    (`32a572f`). Sin paneles paralelos, sin debug HUD.
+  - **Timeout absorbs Render cold-start** (`123e317`) — el primer fetch
+    espera al despertar del free tier.
+  - **Safe-area iOS** honored — overlay respeta notch + bottom indicator.
+  - **Cluster expansion UX** reparada (`ecd678c`).
+  - **MapLibre default markers** como base (`3cc5c28`), con custom markers
+    sólo para cápsulas verificadas.
+- **P0 Map Layer real:** `GET /api/capsules/viewport/?bbox=...&limit=N`
+  (commit `5bd586c`) consumido por MapExplorer.
+- **P3 Temporal Landmarks layer (nuevo 2026-05-22 · `497ad47` + `6a3e809`):**
+  - Modelo `TemporalLandmark` (`content_engine/models.py` L210-264):
+    `city`, `kind` (monument/path/walls/forum/...), `title`, `summary`,
+    `geometry_geojson` (JSONField · Polygon), `year_from`, `year_to`,
+    `source` (wikidata QID / generic), `image_url`, `meta JSONField`.
+    Indices: `city`, `kind`, `(year_from, year_to)`.
+  - Migración `0005_temporal_landmark`.
+  - Endpoint `GET /api/landmarks/viewport/?bbox=minLng,minLat,maxLng,maxLat&year=YYYY&limit=N`
+    devuelve `FeatureCollection` GeoJSON con `properties.kind`, `title`,
+    `summary`, `year_from`, `year_to`, `source`, `image_url`. Filtra por
+    bbox (intersección con polygon) y por `year_from <= year <= year_to`.
+  - Management command `seed_temporal_landmarks_rome` (148 L · idempotente
+    `update_or_create` por `(city, title)`): Coliseo, Foro Romano, Circo
+    Máximo, Murallas Aurelianas.
+  - `build.sh` ejecuta el seed en **cada deploy** (Render free tier sin
+    shell), upserts seguros, ~4 filas.
+- **Local Capsule Generator (nuevo 2026-05-23 · `9828e48`):**
+  - Endpoint `GET /api/local-capsules/?lat=...&lng=...&radius=...&limit=N`
+    (`content_engine/api.py` L? · +126 L).
+  - Consume Wikidata SPARQL para devolver POIs candidatos cerca del usuario.
+  - **Sin LLM, sin caché DB** — purpose: alimentar markers provisionales
+    instantáneos en MapExplorer.
+- **Echo Synthesis (nuevo 2026-05-23 · `32a572f`):**
+  - Endpoint `POST /api/echo/synthesize/` con body `{entity_id, title, lat,
+    lng, wikipedia_url}`.
+  - Módulo `content_engine/echo_synthesis.py` (342 L):
+    - Caché Django 30 días key `echo:{entity_id}`.
+    - Wikipedia REST fetch (ES preferido, EN fallback) para `extract` +
+      `image`.
+    - Anthropic call (model env `KUDOS_ECHO_MODEL` default
+      `claude-haiku-4-5-20251001`, tool-use JSON enforced, timeout 14s,
+      max_tokens 600).
+    - Fallback procedural desde Wikipedia + región-DNA (Galicia,
+      Cantábrico, Andalucía, Castilla, Catalunya, Roma, Ática, Egipto).
+    - Source tags: `cache` | `llm` | `wikipedia_fallback` |
+      `minimal_fallback`.
+- **AXÓN Phase 0 Foundation:** `GET /api/health/`, `GET /api/places/<slug>/`.
+- **P0/P2/P3 endpoints anteriores:** viewport, debug capsules-count,
+  media pipeline (procedural SVG hero · 8 estilos), hygiene infrastructure
+  (`hygiene_status` + `winner_distance_m` + commands), todo migrado y
+  servido por el deploy actual.
+- **`render.yaml` v2** con 3 servicios (`kudos` Django backend,
+  `kudos-frontend` Next.js, `kudos-db` Postgres).
+- **`build.sh`** ahora ejecuta: `pip install` → `collectstatic` →
+  `migrate` → `seed_temporal_landmarks_rome`. Idempotente, ~30 s.
+- **Feature gating en producción** activo.
+- **Content Engine V0** desplegado: pipeline place-capsule + media
+  generation + hygiene + temporal landmarks.
+- **Experience Core** desplegado: 99 archivos, 11 443+ L, Next 15 + React
+  18 + TS 5.6 + Tailwind 3.4 + Plausible.
+- **Geolocation drift fix** validado en código (commits 2026-05-21 +
+  refuerzos 2026-05-23).
+- **CORS hardening** activo.
 
 ## Qué está roto / en riesgo
 
-- **🟧 BLOCKER-LOCAL · 3 archivos núcleo truncados + `render.yaml` truncado
-  en working tree.** Confirmado por `ast.parse` + `wc -l` 2026-05-21:
-  - `kudos_app/views.py` working: 2 382 L · parsea OK pero **incompleto**
-    (HEAD 2 448 L · faltan ~66 L finales · `capsule_aport_validate` borrada).
-  - `kudos_app/urls.py` working: 210 L · `SyntaxError: '[' was never
-    closed` en L11. HEAD íntegro a 215 L.
-  - `kudos_app/models.py` working: 1 131 L · `SyntaxError: unterminated
-    string literal` L1132. HEAD íntegro a 1 210 L.
-  - `render.yaml` working: 15 L · cortado en pleno comentario. HEAD íntegro
-    a 89 L con blueprint dos-servicios completo.
-  - Bono: el índice git sigue corrupto (`fatal: unknown index entry
-    format 0x3a710000` · byte fluctúa entre invocaciones); `git status`
-    no funciona, `git log`, `git show` y `git diff HEAD --name-only` sí.
-    `git diff HEAD --name-only` reporta **378 archivos divergentes** entre
-    working tree y HEAD.
-  - **Producción no afectada** (Render sirve HEAD íntegro), pero Django no
-    arranca en local hasta el checkout. Por qué pasa de P0 a P1: Eduardo
-    ha podido commitear 16 veces hoy esquivando el índice roto.
-  - Fix mínimo:
-    ```bash
-    git checkout HEAD -- kudos_app/views.py kudos_app/urls.py kudos_app/models.py render.yaml
-    python -c "import ast; [ast.parse(open(f).read()) for f in
-      ['kudos_app/views.py','kudos_app/urls.py','kudos_app/models.py']]"
-    python manage.py check
-    # Si el índice sigue corrupto:
-    # rm .git/index && git read-tree HEAD
-    ```
-- **🟧 NAVEGACIÓN CONTAMINADA · ~30 enlaces dormant en PUBLIC
-  templates** (FEATURE_GATE_AUDIT 2026-05-19, sin tocar). El gating en
-  URL/middleware es correcto, pero los templates muestran botones a rutas
-  dormant que devuelven 404 al clicarse: `home.html` 13, `capsule_detail
-  .html` 7, `dashboard.html` 4, `ai_panel.html` 3. Solución conocida:
-  envolver cada `{% url 'dormant_*' %}` en `{% if_feature %}` (~1-2 h
-  sin tocar views.py ni urls.py). Mitigado parcialmente en Experience:
-  `middleware.ts` redirige rutas frontend dormant a `/aqui`.
-- **🟥 DUPLICADO URL pattern** (FEATURE_GATE_AUDIT 2026-05-19):
-  `kudos_app/urls.py:186` y `:193` declaran ambos
-  `path('mind/chat/', views.ai_chat, name='ai_chat')`. Django usa el
-  primero; ruido en `reverse()`. Sin cambios desde el audit.
-- **🟧 BARCELONA · Plaça Catalunya FAIL en master smoke 2026-05-20.**
-  `failure_class=UNGROUNDED`, candidatos 10, latencia 3 390 ms. El
-  resto de capitales europeas (Madrid, Roma, París) pasa con confidence
-  ≥ 0.96. Anomalía pendiente en `content_engine/ranking.py` o
-  `content_engine/landmarks.py`. Sin cambios desde 2026-05-20.
-- **🟧 29 snapshots `.snapshot.*` + 7 templates duplicados + 5
-  huérfanos en raíz** (DEBT_SCAN 2026-05-19, sin tocar): `1 208 654 B`
-  de snapshots no referenciados; carpeta raíz `templates/` con 7 copias
-  divergentes vs `kudos_app/templates/`; `settings.py` (0 B) huérfano en
-  raíz; `kudos_app_urls.py` (407 B) duplicado.
-- **🟧 17 inits de Leaflet copy-paste en templates feature** (DEBT_SCAN
-  §2a) — todas dormant pero seguirán ejecutándose si se exponen.
-- **🟧 3 rutas huérfanas** (DEBT_SCAN §3a): `home_full`, `onboarding`,
-  `near`. Ahora `home_full` está usado (alias `/home/`), pero
-  `onboarding` y `near` siguen sin link público.
-- **🟧 4 views definidas sin wire** (DEBT_SCAN §3b):
-  `personal_habit_toggle`, `personal_crypto`, `ai_mind_chat`,
-  `bookmark_capsule`. Mover a `legacy_views.py` tras FREEZE.
-- **`markercluster` aún vía CDN unpkg.com**: si unpkg cae, el cluster
-  falla. Vendoring pendiente.
-- **3 copias legacy de Leaflet** en `static/` (~1.7 MB dead-weight).
-- **`legacy_views.py`** (2 160 L) sigue en `kudos_app/` — pospuesto
-  conscientemente.
-- **`map_view` ignora `?lat=&lon=&year=`** del cierre narrativo D10.
-- **Sin rate limit** en `api_capsules_5d`, `api_capsule_light`,
-  `ai_lite_ask` — el endpoint nuevo `place-capsule` sí lo tiene.
-- **`ai_lite_ask` con heurística local** (sin Claude/OpenAI). Contrato
-  JSON listo para sustitución cuando haya `ANTHROPIC_API_KEY`.
-- **Sin login social** (django-allauth no instalado).
-- **18 imports anidados** dentro de funciones en `views.py`.
-- **4 scripts huérfanos rotos** en raíz (`art_culture.py`, `control.py`,
-  `generate_capsules.py`, `social_impact.py`).
-- **CORS_ALLOWED_ORIGINS pre-poblado** apunta a
-  `https://kudos-frontend.onrender.com`, pero el origen real lo asigna
-  Render en el primer deploy del frontend — puede llevar hash si el
-  nombre ya estaba ocupado. **Validar tras primer deploy del servicio
-  kudos-frontend.**
-- **`experience/package-lock.json`** ya existe (`a199e12` lo añadió
-  implícitamente al `npm install`), pero el `render.yaml` aún usa
-  `npm install` en lugar de `npm ci` — trade-off documentado:
-  ~30 s extra de build vs reproducibilidad estricta.
+- **🟧 RENDER COLD-START LATENCY (mitigado, monitorizar).** El servicio
+  Django free tier despierta en ~25-35 s tras periodos de inactividad.
+  El timeout añadido en `123e317` absorbe la espera en el primer fetch
+  del MapExplorer, pero el usuario sigue viendo el cold-start si entra
+  frío. **Acción:** medir TTFM real post-deploy y considerar upgrade a
+  paid tier si el demo se anuncia ampliamente.
+- **🟧 SMOKE NAVEGACIONAL MOBILE REAL.** Aún no se ha validado el flow
+  completo `cold-start Roma → geolocation → POIs provisionales → click
+  POI → Echo card LLM` en dispositivo físico (iOS Safari + Android
+  Chrome).
+- **🟧 ANTHROPIC_API_KEY EN RENDER.** El backend `echo_synthesize` cae al
+  fallback procedural si la env var no está en Render. **Validar `Echo
+  card` con LLM real antes de demo pública.**
+- **🟧 BARCELONA · Plaça Catalunya UNGROUNDED** en master smoke
+  2026-05-20 (`failure_class=UNGROUNDED`, 10 candidatos, latencia 3 390
+  ms). Sin re-correr smoke desde el merge de Content Engine. No bloquea
+  Echo card (camino alternativo via Wikidata SPARQL), pero sí bloquea el
+  pipeline `place-capsule` clásico en esa coordenada.
+- **🟨 LIGHTHOUSE MOBILE REAL** sin medir sobre la URL pública con MVP
+  CLOSE desplegado.
+- **🟨 PREVIEW SHARE** sin validar en WhatsApp / Twitter / Telegram /
+  LinkedIn con la nueva landing.
+- **🟨 NAVEGACIÓN CONTAMINADA Django · ~30 enlaces dormant en plantillas
+  PUBLIC** (FEATURE_GATE_AUDIT 2026-05-19). Solo afecta backend Django;
+  Experience tiene middleware beta-gate.
+- **🟨 DUPLICADO URL pattern** `kudos_app/urls.py:188`/`:195`
+  `path('mind/chat/', views.ai_chat, ...)`. Sin cambios.
+- **🟩 Smoke Content Engine sin re-correr** post-MVP-close.
+- **🟩 29 snapshots `.snapshot.*` + 7 templates duplicados + 5 huérfanos**
+  en raíz (DEBT_SCAN 2026-05-19).
+- **🟩 17 inits de Leaflet copy-paste** en templates feature dormant.
+- **🟩 `markercluster` vía CDN unpkg.com** (legacy Django map).
+- **🟩 `legacy_views.py`** (2 160 L) sigue en `kudos_app/`.
+- **🟩 4 scripts huérfanos rotos** en raíz.
 
 ## Qué falta para MVP demo público
 
-Los 🔴 LAUNCH BLOCKERS productivos quedan reducidos a 5 (de 7):
+Ahora que el MVP-close está shippeado, los bloqueos son de validación y
+operativos, no de implementación:
 
-1. ~~Restaurar `views.py`~~ ✅ resuelto (commit `dd42db3`).
-2. ~~Resolver HOME 500~~ ✅ resuelto (commit `67fe207` · revertir
-   healthcheck ya hecho en `c42784a`).
-3. **Restaurar `urls.py` y `models.py` en working tree desde HEAD**
-   (BLOCKER-LOCAL · sólo afecta dev local).
-4. **Validar primer deploy del frontend en Render** — confirmar URL
-   real del servicio `kudos-frontend` y actualizar `CORS_ALLOWED_ORIGINS`
-   del backend si difiere de la pre-poblada.
-5. **Gatear las ~30 fugas dormant en plantillas PUBLIC** (1-2 h, sin
-   tocar views ni urls).
-6. **Validación Lighthouse Mobile en entorno real**: target ≥ 80 en
-   Performance / A11y / SEO / Best Practices.
-7. **Smoke navegacional físico mobile** (iOS Safari + Android Chrome
-   reales) — ahora con Experience desplegado, validar también el flow
-   `/aqui` post-redirect.
-8. **Preview de share** validado en WhatsApp / Twitter / Telegram /
-   LinkedIn.
-9. **Diagnosticar Barcelona UNGROUNDED** en Content Engine (Plaça
-   Catalunya falla mientras el resto de capitales pasa con ≥ 0.96
-   confidence).
-
-Bloque Experience Core (paralelo, ya desplegable en Render):
-- Stack en master + middleware beta-gate activo. Pendiente: validar
-  primer build en Render y consolidar Design System v1.0 contra
-  componentes ya escritos (PageAtmosphere/EchoNode/Whisper et al.).
+1. **Medir TTFM real** sobre URL pública en 4G mobile (Lighthouse Mobile,
+   target ≥ 80).
+2. **Smoke navegacional físico mobile** (iOS Safari + Android Chrome) del
+   flow Roma cold-start → geolocation → POI → Echo card.
+3. **Validar `ANTHROPIC_API_KEY`** en Render env vars del servicio `kudos`
+   y confirmar que Echo card devuelve source `llm` (no fallback).
+4. **Preview share** validado en redes reales.
+5. **Re-correr `run_master_smoke_map`** post-MVP-close para nueva línea
+   base.
+6. **Verificar HOME 200** en producción tras toda la cadena de deploys.
+7. **Diagnosticar Barcelona UNGROUNDED** (no bloquea Echo card, sí pipeline
+   place-capsule).
+8. **Gatear ~30 enlaces dormant** en plantillas PUBLIC Django (no afecta
+   Experience).
 
 ## Próximo paso exacto
 
-**1) Restaurar `kudos_app/{views,urls,models}.py` + `render.yaml` desde
-HEAD (BLOCKER-LOCAL).**
+**1) Verificar deploy de `123e317` en Render** (auto-deploy típico
+3-5 min post-push):
 
 ```bash
-git checkout HEAD -- kudos_app/views.py kudos_app/urls.py kudos_app/models.py render.yaml
-python -c "import ast; [ast.parse(open(f).read()) for f in \
-  ['kudos_app/views.py','kudos_app/urls.py','kudos_app/models.py']]"
-python manage.py check
-python manage.py runserver
-# Si el índice git sigue corrupto:
-# rm .git/index && git read-tree HEAD
+curl -I https://kudos-40cq.onrender.com/
+curl -I https://kudos-40cq.onrender.com/api/health/
+curl  https://kudos-40cq.onrender.com/api/landmarks/viewport/?bbox=12.4,41.8,12.6,41.95&year=100
 ```
 
-**2) Verificar primer deploy del servicio `kudos-frontend` en Render** y
-confirmar `NEXT_PUBLIC_API_BASE_URL` + `CORS_ALLOWED_ORIGINS` reales.
+Esperar `200` + GeoJSON `FeatureCollection` con ≥4 features Roma.
 
-**3) Validar que HOME ya no devuelve 500** en producción (commit `67fe207`
-debería haberlo cerrado · monitorizar 24 h).
+**2) Validar Echo card LLM end-to-end:**
 
-**4) Sesión única de hardening template-layer** (~1-2 h, sin tocar
-views.py): envolver los ~30 `{% url 'dormant_*' %}` listados en
-`FEATURE_GATE_AUDIT_20260519.md §6` con `{% if_feature %}`.
+```bash
+curl -X POST https://kudos-40cq.onrender.com/api/echo/synthesize/ \
+  -H 'Content-Type: application/json' \
+  -d '{"entity_id":"Q10285","title":"Coliseo","lat":41.8902,"lng":12.4924,"wikipedia_url":"https://es.wikipedia.org/wiki/Coliseo"}'
+```
 
-**5) Investigar Barcelona UNGROUNDED en Content Engine** (`content_engine/
-ranking.py` o `content_engine/landmarks.py`) — los 10 candidatos llegan
-pero ninguno gana grounding.
+Esperar `source ∈ {cache, llm}` (no `wikipedia_fallback` ni
+`minimal_fallback`). Si cae al fallback → `ANTHROPIC_API_KEY` no
+configurada en Render.
 
-**6) Reparar índice git corrupto** (cuando Eduardo esté en la máquina
-afectada). Workaround: trabajar con `git log`/`git show`; reset:
-`rm .git/index && git read-tree HEAD` (con backup previo).
+**3) Smoke navegacional mobile real** sobre el frontend Next.js (URL
+exacta del servicio `kudos-frontend` en Render):
+
+- Abrir en iOS Safari + Android Chrome.
+- Verificar: cold-start sobre Roma → landmarks visibles → permiso
+  geolocation → flyTo a usuario → POIs provisionales (Wikidata) → click
+  POI → Echo card abre con narrativa cinematográfica.
+
+**4) Medir Lighthouse Mobile** sobre la URL pública del frontend.
+Target ≥ 80 (P/A11y/SEO/BP). Si bajaba por backdrop-filter, considerar
+A/B post-medición.
+
+**5) Re-correr Content Engine smoke** y comparar contra baseline
+2026-05-20:
+
+```bash
+python manage.py run_master_smoke_map --output-dir reports/
+```
+
+**6) Validar previews share** en WhatsApp/Twitter/Telegram/LinkedIn con
+URL real `/capsules/<uid>/`.
 
 Reglas durante FREEZE (`FREEZE_v0.9_AXON_CORE.md §6`):
 - ✗ NO nuevas features.
 - ✗ NO nueva arquitectura.
 - ✓ SÍ bugs detectados en demo / productivo.
 - ✓ SÍ ajustes de copy.
-- ✓ SÍ completar 🔴 LAUNCH BLOCKER de `KNOWN_DEBTS.md`.
-- ✓ SÍ Content Engine + Experience Core (decisión consciente:
-  pipelines paralelos, ya en master).
+- ✓ SÍ Content Engine + Experience Core (decisión consciente, ya en master).
 
 ---
 
-## Métricas clave (snapshot 2026-05-21)
+## Métricas clave (snapshot 2026-05-23 · MVP CLOSE)
 
-| Métrica | Objetivo MVP | Valor actual | Δ vs 2026-05-20 |
+| Métrica | Objetivo MVP | Valor actual | Δ vs 2026-05-22 |
 |---|---|---|---|
 | Tag git productivo | `v0.9-axon-core` | `v0.9-axon-core` ✅ | 0 |
-| Commits hotfix 2026-05-21 | n/a | 16 ✅ | +16 |
-| HEAD master | íntegro | `67fe207` ✅ | nuevo |
-| Smoke test integral AXÓN | 100 % | 29/29 ✅ (sobre HEAD) | 0 |
-| Smoke Content Engine (master map) | ≥ 90 % PASS | 16/19 PASS · 2 WARN · 1 FAIL (84 %) | 0 |
-| Pilares PUBLIC operativos (HEAD) | 7 | 7 ✅ | 0 |
-| Identidad visual preservada | sí | 17/17 ✅ | 0 |
-| CTA DORMANT visibles al usuario (Django) | 0 | ~30 ⚠ | 0 |
-| CTA DORMANT visibles al usuario (Experience) | 0 | 0 ✅ (middleware 307) | nuevo |
-| `views.py` líneas (HEAD/working) | ≤ 2 500 | 2 448 / **2 382 ⚠ incompleto** (parsea pero falta `capsule_aport_validate`) | working aún -66 L vs HEAD |
-| `urls.py` líneas (HEAD/working) | parseable | 215 / **210 ⚠ SyntaxError** | sin cambio (sigue truncado) |
-| `models.py` líneas (HEAD/working) | parseable | 1 210 / **1 131 ⚠ SyntaxError** | sin cambio |
-| `render.yaml` líneas (HEAD/working) | 2 servicios + DB | 89 / **15 ⚠ truncado** | regresión local nueva |
-| Git index | sano | ⚠ corrupto (formato fluctuante · `0x3a710000`/`0x02000000`/`0x70680000`) | sigue corrupto |
-| Archivos divergentes working vs HEAD | n/a | 378 (`git diff HEAD --name-only`) | nuevo dato |
-| Funciones duplicadas en `views.py` (HEAD) | 0 | 0 ✅ | 0 |
-| F401 imports muertos (HEAD) | 0 | 0 ✅ | 0 |
-| `map.html` líneas | ≤ 200 | 167 ✅ | 0 |
-| Módulos JS map5d | ≥ 8 | 10 ✅ | 0 |
-| Payload inicial API z=3 | < 100 KB | ~40 KB ✅ | 0 |
-| Markers DOM en pantalla (z=3) | ≤ 200 | ~30 clusters ✅ | 0 |
-| Time To First Marker (proyectado) | < 1.2 s | < 1.2 s ✅ | 0 |
-| Rutas PUBLIC respondiendo (prod) | 7 / 7 | **7 / 7 ✅ (HOME 500 cerrado)** | +1 |
-| Rutas DORMANT respondiendo 404 | 16 / 16 smoke | 16 / 16 ✅ | 0 |
-| Rutas dormant accidentales (audit) | 0 | 0 ✅ | 0 |
-| Templates PUBLIC con links dormant | 0 | 7 templates ⚠ (~30 enlaces) | 0 |
-| Duplicados URL en `urls.py` | 0 | 1 ⚠ (`mind/chat/` x2) | 0 |
-| Snapshots `.snapshot.*` en árbol | gitignored | 29 archivos · 1.2 MB ⚠ | 0 |
-| Templates duplicados raíz vs app | 0 | 7 ⚠ | 0 |
-| Leaflet inits copy-paste (templates) | 1 helper | 17 ⚠ | 0 |
-| Imports muertos core (DEBT_SCAN) | 0 | ~20 (volumen bajo) | 0 |
-| Templates > 300 L | ≤ 2 | 5 ⚠ | 0 |
-| Leaflet copias en `static/` | 1 (vendor) | 1 vendor + 3 legacy ⚠ | 0 |
-| `markercluster` vía CDN | local | unpkg.com ⚠ | 0 |
-| Content Engine líneas Python | n/a | 3 039 L · 13 módulos · **en master** | commiteado |
-| Content Engine tests automatizados | ≥ 15 | 19 (master_test_map · PASS/WARN/FAIL) | 0 |
-| Content Engine latencia media | < 3 s | 0.80 s p50 · 4.68 s p95 ⚠ | 0 |
-| Content Engine rate-limit | sí | sí (`django-ratelimit`) ✅ | 0 |
-| AXÓN Phase 0 endpoints | 2 (`/api/health/`, `/api/places/<slug>/`) | 2 ✅ | nuevo |
-| Tests Django nuevos Phase 0 | ≥ 3 | 3 ✅ (Health/Place/CapsuleFoundation) | +3 |
-| Snapshots reversibles | ≥ 1/fase | 23 ✅ | 0 |
-| Backups pre-deploy | repo + DB | tar 87 MB + DB 9.5 MB ✅ | 0 |
-| Tests automatizados Django (`kudos_app/tests.py`) | ≥ 5 smoke | 4 (CapsuleTestCase + 3 nuevos) | +3 |
-| Lighthouse Mobile Perf (real) | ≥ 80 | sin medir | 0 |
-| Base de datos productiva | PostgreSQL | DATABASE_URL en Render | 0 |
-| Deploy live backend | ✓ | ✓ Render (kudos-40cq.onrender.com) | HOME OK |
-| Deploy live frontend | ✓ | pendiente primer deploy (render.yaml listo) | nuevo |
-| Servicios Render | ≥ 2 | 3 (kudos, kudos-frontend, kudos-db) | +2 |
-| Experience Core rutas (en master) | ≥ 4 | 10+ (`/`, `/aqui`, `/descubrir`, `/mapa`, `/capsules/[slug]`, `/places/[slug]`, `/time/rome`, `/health`, layout, error) | +4 |
-| Experience Core componentes (en master) | ≥ 5 | 8 dominios · 30+ componentes | +15+ |
-| Experience Core features | n/a | 8 dominios · 30+ componentes | nuevo |
-| Experience Core analytics | sí | Plausible montado | 0 |
-| Experience Core líneas TS (commit) | n/a | 11 443 L (commit `9b3fadf`) | commiteado |
-| Experience Core middleware beta-gate | sí | sí (`BETA_HIDE_DORMANT=1`) | nuevo |
-| `requirements.txt` tamaño | minimal | 2 631 B ✅ (era 71 010 B con basura) | reducido |
-| `render.yaml` servicios definidos | n/a | 3 (backend + frontend + db) | +2 |
-| CORS hardening | sí | sí (corsheaders + warning de misconfig) | nuevo |
+| HEAD master | íntegro | `123e317` ✅ MVP CLOSE | +15 commits |
+| `origin/master` sincronizado | sí | sí ✅ | 0 |
+| Commits 2026-05-22 (totales) | n/a | 11 (5 mañana + 6 tarde-noche) | +6 |
+| Commits 2026-05-23 | n/a | 9 (cold-start Roma → MVP close) | +9 |
+| MVP CLOSE shippeado | sí | sí ✅ (`123e317` 16:42 UTC+2) | nuevo |
+| Smoke test integral AXÓN | 100 % | 29/29 ✅ (sobre tag) | 0 |
+| Smoke Content Engine (master map) | ≥ 90 % | 16/19 PASS (84 % · sin re-correr) | 0 |
+| Pilares PUBLIC operativos | 7 | 7 ✅ | 0 |
+| Migraciones content_engine | n/a | 5 ✅ (`+0005_temporal_landmark`) | +1 |
+| Management commands content_engine | n/a | 4 ✅ (`+seed_temporal_landmarks_rome`) | +1 |
+| Endpoints content_engine nuevos | n/a | +3 (`/landmarks/viewport/`, `/local-capsules/`, `/echo/synthesize/`) | +3 |
+| MapExplorer.tsx líneas | n/a | 1 033 L (refactor mayor · 9 commits hoy) | +~300 L netas |
+| Echo card cinematográfica live | sí | sí ✅ (`32a572f`) | nuevo |
+| Local Capsule Generator (Wikidata POIs) | sí | sí ✅ (`9828e48`) | nuevo |
+| TemporalLandmark layer (Roma seed) | sí | sí ✅ (`497ad47`+`6a3e809`) | nuevo |
+| Geolocation autoritativa | sí | sí ✅ (`d7376a7`) | refuerzo |
+| Cold-start sobre Roma | sí | sí ✅ (`20f1d46`) | nuevo |
+| Render cold-start timeout absorbido | sí | sí ✅ (`123e317`) | nuevo |
+| Safe-area iOS honored | sí | sí ✅ (`123e317`) | nuevo |
+| Debug HUD/markers TEMP retirados | sí | sí ✅ (`123e317` residue purged) | resuelto |
+| `build.sh` seed automático cada deploy | sí | sí ✅ (`6a3e809`) | nuevo |
+| `views.py` líneas (HEAD/working) | ≤ 2 500 | 2 448 / 2 448 ✅ | 0 |
+| `urls.py` líneas (HEAD/working) | parseable | 215 / 215 ✅ | 0 |
+| `render.yaml` servicios | 2+ db | 3 ✅ | 0 |
+| Deploy live backend | ✓ | ✓ Render (`kudos-40cq.onrender.com` · `123e317` shippeado) | actualizado |
+| Deploy live frontend | ✓ | pendiente validación visual post-MVP-close | 0 |
+| Lighthouse Mobile (real) | ≥ 80 | sin medir | 0 |
+| Preview share (WhatsApp/Twitter/Telegram/LinkedIn) | validado | sin validar | 0 |
+| Anthropic API key en Render | sí | a verificar | 0 |
 
 ---
 
-## Cambios desde la última actualización (2026-05-20 → 2026-05-21)
+## Cambios desde la última actualización (2026-05-22 → 2026-05-23)
 
-### Backend Django · 4 commits que resuelven HOME 500 y consolidan Phase 0
-- **`67fe207` (16:03 UTC+2)** · `fix(prod 500): swap manifest static
-  storage + harden home view`. Causa raíz HOME 500 aislada:
-  `ValueError("Missing staticfiles manifest entry")` al servir
-  `home.html` con `CompressedManifestStaticFilesStorage`. Fix:
-  - `STATICFILES_STORAGE` → `CompressedStaticFilesStorage` (sin
-    Manifest, sin cache-busting, sirve los ficheros tal cual).
-  - `home()` view envuelta en try/except triple: queries DB + render
-    template + fallback `HttpResponse 200 text/plain`. **`raise` jamás
-    propaga**; logs registran el traceback para diagnóstico.
-- **`b0ef894`** · `fix: remove unsafe unicode prints from settings` ·
-  prints con emojis (`⚠`) sustituidos por ASCII safe (no `UnicodeEncodeError`
-  en Render Linux locale).
-- **`dd42db3` (14:53 UTC+2)** · `fix: add backend content_engine and
-  sync Django AXON routes` · **mega-commit fundacional Phase 0**:
-  - `content_engine/` (3 039 L · 34 archivos) entra a master.
-  - `kudos_app/models.py` +96 L · campos Phase 0 en `Capsule`
-    (`place` FK, `parent_capsule`/`root_capsule` para árbol contextual,
-    `context_layer` 5-choices, `importance_score`, `verified`) + modelo
-    `Place` canónico.
-  - `kudos_app/views.py` +61 L · endpoints `api_health` +
-    `api_place_detail` + import `Place` + `_AXON_BOOT_TS`.
-  - `kudos_app/urls.py` +4 L · rutas `/api/health/`, `/api/places/<slug>/`.
-  - `kudos_app/admin.py` +11 L · admin del nuevo modelo `Place`.
-  - `kudos_app/tests.py` 10 L → 79 L · 3 TestCase nuevos
-    (Health/Place/CapsuleFoundation).
-  - `kudos_project/settings.py` +112 L · `INSTALLED_APPS += ['content_engine',
-    'corsheaders']`, `CorsMiddleware` pre-`CommonMiddleware`,
-    `CORS_ALLOWED_ORIGINS` con detección de misconfig, master switch
-    `CONTENT_ENGINE_GEOCACHE_ENABLED`.
-  - `kudos_project/urls.py` +4 L · `include('content_engine.urls')`.
-- **`428070c`** · `fix: rewire health probe to real AXON endpoint` ·
-  Experience health page consume `/api/health/` real del backend
-  (`experience/lib/axon/endpoints/health.ts` +125 L) en vez del mock.
-- **`c42784a` (2026-05-20)** · `fix: restore real home route` · home
-  vuelve a `/`, healthcheck movido a `/healthcheck/`, alias `/home/`
-  como `home_full`.
+### Backend · 2 commits 2026-05-22 (tarde) + 1 commit 2026-05-23 (madrugada)
 
-### Infra · 4 commits de saneamiento despliegue Render
-- **`97588fc`** · `fix: rebuild clean requirements for Render Linux` ·
-  71 010 B (Anaconda + Windows junk) → 1 268 B clean.
-- **`5e18e1f`** · `fix: rebuild requirements.txt clean (drop Anaconda+
-  Windows junk)` · ajuste fino → 2 631 B.
-- **`09b7b8c`** · `fix: force add ignored env check` ·
-  `experience/lib/env/check.ts` (+121 L) commiteado tras override de
-  `.gitignore`.
-- **`a199e12` (11:45 UTC+2)** · `beta: hide dormant routes, cap queue`:
-  - `experience/middleware.ts` (+43 L) · redirige `/descubrir`,
-    `/capsules`, `/places`, `/time` → `/aqui` 307 si
-    `BETA_HIDE_DORMANT=1`.
-  - `experience/lib/capsule/useCapsuleQueue.ts` (+359 L) · cola con
-    cap (límite duro, sin growth unbounded).
-  - `render.yaml` +65 L → ahora 3 servicios (backend `kudos`,
-    frontend `kudos-frontend` con `rootDir: experience` +
-    `BETA_HIDE_DORMANT=1`, db `kudos-db`).
+- **`497ad47` (2026-05-22 23:19 UTC+2)** · `feat(backend): temporal
+  landmark viewport API + MVP Rome seed` · 6 archivos · +439 L.
+  - `content_engine/models.py` +94 L (`TemporalLandmark` model).
+  - `content_engine/migrations/0005_temporal_landmark.py` +77 L.
+  - `content_engine/api.py` +92 L (`landmarks_viewport` view).
+  - `content_engine/management/commands/seed_temporal_landmarks_rome.py`
+    +148 L (4 polígonos Roma idempotentes).
+  - `content_engine/admin.py` +26 L (registro admin).
+  - `content_engine/urls.py` +4 L (2 path patterns).
+- **`6a3e809` (2026-05-22 21:52 UTC)** · `ops(build): seed Roma temporal
+  landmarks on every deploy` · `build.sh` +1 L. Cierra el gap del
+  free-tier sin shell.
+- **`9828e48` (2026-05-23 14:24)** · `feat(content): generate provisional
+  local capsules from user geolocation` · 3 archivos · +244 L.
+  - `content_engine/api.py` +126 L (`local_capsules_generate`).
+  - `content_engine/urls.py` +4 L.
+  - `experience/features/map/MapExplorer.tsx` +114 L (consumer).
+- **`32a572f` (2026-05-23 15:34)** · `feat(echo): first cinematic Echo
+  card replaces debug provisional panel` · 308 L net.
+  - `experience/features/map/MapExplorer.tsx` +287/-21 L (Echo card UI).
+  - Módulo nuevo `content_engine/echo_synthesis.py` (342 L · LLM tool-use
+    + caché + fallback) registrado vía `urls.py` (+1 endpoint
+    `echo_synthesize`).
 
-### Frontend Next.js · 8 commits que llevan Experience a master
-- **`7d92623`** · `fix: add frontend package.json` (+42 L).
-- **`9b3fadf`** · `fix: add frontend files` · **99 archivos · 11 443 L**
-  · todo `experience/` (rutas, componentes, features, lib, motion,
-  design-system, hooks, types, configs).
-- **`e52c81f`** · `fix: pin react 18 for next 15` · React 19 →
-  React 18 por compat con Next 15.
-- **`c063ad6`** · `fix: align react type deps` · `@types/react` matching.
-- **`aa4df68`** · `fix: narrow null + undefined on place.lat/lon for
-  strict TS` · `experience/app/places/[slug]/page.tsx`.
-- **`fe70316`** · `fix: coerce null last_capsule_id for Plausible
-  EventProps` · `experience/features/capsule/CapsuleSession.tsx`.
-- **`1665e6e`** · `fix: destructure signal+csrfToken in askMind for
-  strict TS` · `experience/lib/api/django.ts`.
+### MapExplorer · 9 commits 2026-05-22 noche + 2026-05-23
 
-### Cerrados vs `BUG_LIST.md` (2026-05-19/20)
-- **BUG-025 · HOME 500 en producción** → **CERRADO** por `67fe207`.
-  Causa raíz aislada (manifest storage). Fallback hardening evita
-  futuros 500 por cualquier excepción no controlada en `home()`.
-- **BUG-038 · 3 archivos núcleo truncados (working tree)** → **PARCIAL**
-  · `views.py` parsea (2 382 L) pero sigue **incompleto** (HEAD 2 448 L ·
-  faltan ~66 L finales). `urls.py` y `models.py` siguen con `SyntaxError`.
-  `render.yaml` se suma como cuarto archivo truncado en working tree
-  (BUG-038b).
-- **Healthcheck temporal en `/`** → **CERRADO** por `c42784a`. Home real
-  restaurada el 2026-05-20.
+- `94eb54c` debug instrumentation only · +85 L
+- `3cc5c28` pure default MapLibre markers + auto fitBounds · -171/+42 L
+- `979ffe1` defer fitBounds after resize + single-point flyTo · +40/-10 L
+- `b764b31` force absolute fullscreen container + resize after mount · +13/-11 L
+- `20f1d46` cold-start over Roma to reveal P3 landmark overlay · +712/-89 L
+- `d935f49` disable useGeolocation auto-flyTo during MVP demo · +14/-8 L
+- `687aebf` disable fetchViewport auto-fit camera · +19/-3 L
+- `ecd678c` restore real geolocation + repair cluster expansion UX · +211/-16 L
+- `8233259` keep camera on user location when nearby empty · +45/-19 L
+- `d7376a7` make geolocation the authoritative initial camera · +32/-23 L
+- `64322d5` provisional markers race + simplified CSS + nuclear test · +39/-24 L
 
-### Abierto nuevo vs `BUG_LIST.md` (2026-05-19/20)
-- **BUG-048 · Primer deploy frontend en Render pendiente** · `render.yaml`
-  v2 con `kudos-frontend` listo, sin ejecutar. Validar
-  `NEXT_PUBLIC_API_BASE_URL` real + `CORS_ALLOWED_ORIGINS`.
-- **BUG-049 · `package-lock.json` aún no commiteado** · `render.yaml`
-  usa `npm install` (no `npm ci`), trade-off documentado.
-- **BUG-050 · Git index corrupto persistente** · `fatal: unknown index
-  entry format 0x70680000` (hoy) · variante del `0x74000000` del
-  2026-05-19. Necesita `rm .git/index && git read-tree HEAD`.
+### MVP CLOSE · 1 commit 2026-05-23 (final)
 
-Ver `BUG_LIST.md` para el detalle actualizado y los bugs heredados.
+- **`123e317` (16:42 UTC+2)** · `chore(ship): MVP close · timeout absorbs
+  Render cold-start, safe-area honored, residue purged` · 1 669 L
+  (+1 182 / -487) sobre `MapExplorer.tsx`. **Cierra el MVP**.
+
+### Cerrados desde 2026-05-22 mañana
+
+- ✅ **BUG-051 · Viewport empty payload** → causa raíz mitigada con
+  migraciones aplicadas (`0003`/`0004`/`0005`) vía `build.sh` automático.
+  La capa visible para usuario ahora son `landmarks_viewport` +
+  `local_capsules_generate`, no `capsules_viewport`.
+- ✅ **BUG-052 · HUD overlay + markers rojos TEMP** → retirados en
+  `123e317` (residue purged).
+- ✅ **Tiles not rendering en mount** → `b764b31` (force absolute
+  fullscreen + resize after mount).
+- ✅ **Blank render state en single-point flyTo** → `979ffe1` (defer
+  fitBounds + single-point flyTo).
+- ✅ **Cluster expansion UX rota** → `ecd678c` (restore real geolocation
+  + repair cluster expansion).
+- ✅ **Render free tier sin shell para seed** → `6a3e809` (seed en
+  `build.sh`, idempotente).
+- ✅ **Debug provisional panel** → reemplazado por Echo card
+  cinematográfica (`32a572f`).
+- ✅ **Cold-start sin contexto narrativo** → arranca sobre Roma + revela
+  capa P3 (`20f1d46`).
+- ✅ **Cámara movible sin geolocation legítima** → `d935f49` + `687aebf`
+  desactivan auto-flyTo + auto-fit durante MVP demo.
+
+### Abiertos nuevos
+
+- **BUG-055 · Render cold-start latency 25-35 s** (🟧 mitigado vía
+  timeout en `123e317`, monitorizar).
+- **BUG-056 · `ANTHROPIC_API_KEY` en Render env por verificar** (🟧 ·
+  sin key, Echo card cae al fallback procedural).
+- **BUG-057 · Smoke navegacional mobile físico** (🟧 · pendiente iOS
+  Safari + Android Chrome con MVP close desplegado).
+- **BUG-058 · Lighthouse Mobile sobre URL pública post-MVP-close** (🟨).
+
+Ver `BUG_LIST.md` para el detalle completo.
+
+Reglas durante FREEZE (`FREEZE_v0.9_AXON_CORE.md §6`):
+- ✗ NO nuevas features.
+- ✗ NO nueva arquitectura.
+- ✓ SÍ bugs detectados en demo / productivo.
+- ✓ SÍ ajustes de copy.
+- ✓ SÍ Content Engine + Experience Core (decisión consciente).

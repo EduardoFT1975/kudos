@@ -1,74 +1,116 @@
-# KUDOS · Experience Core
+# KUDOS · Experience
 
-> Cinematic frontend layer (Next.js 15) sobre el backend Django `v0.9-axon-core`.
+Frontend Next.js 15 + React 18 · KUDOS · The Meaning Layer of Reality.
 
-**Estado:** P0 scaffolding · esperando Design System v1.0 para tokenizar.
-
-## Stack
-
-- Next.js 15 (App Router)
-- React 19
-- TypeScript 5.6 (strict)
-- Tailwind CSS 3.4
-- Framer Motion 11
-- Radix UI primitives (base de shadcn/ui)
-- Lucide Icons
-
-## Estructura
-
-```
-experience/
-├── app/                    Next.js App Router · layouts y rutas
-├── components/
-│   ├── ui/                 primitivas shadcn-style
-│   ├── shell/              AppShell, MainScene, FloatingDepth
-│   ├── sidebar/            navegación persistente
-│   └── atmosphere/         partículas, noise, gradients espaciales
-├── features/
-│   ├── explore/            entrypoint cinematográfico
-│   ├── timeline/           línea temporal (P1+)
-│   ├── mind/               3 prompts (consume /api/mind/ask/)
-│   ├── library/            cápsulas guardadas (P1+)
-│   └── saved/              colecciones (P1+)
-├── design-system/
-│   ├── tokens/             colors / spacing / radius / shadows / typography / motion
-│   └── primitives/         GlassPanel, CinematicCard, ImmersiveHero, ...
-├── motion/                 variants Framer + transition presets
-├── styles/                 globals + utilities CSS
-└── lib/
-    ├── api/                cliente Django (django.ts)
-    ├── mocks/              datos hardcoded para P0
-    └── utils/              cn, formatters, etc.
-```
-
-## Bridge al backend Django
-
-`next.config.ts` proxea:
-
-- `/api/django/*` → `${NEXT_PUBLIC_DJANGO_BACKEND}/api/*`
-- `/api/mind/*`   → `${NEXT_PUBLIC_DJANGO_BACKEND}/mind/*`
-
-Esto preserva el contrato del MVP (`/api/capsules/5d/`, `/api/capsules/<uid>/light/`,
-`/mind/ask/`) sin reimplementar backend.
-
-## Cómo correr en local (cuando esté completo)
+## Setup (primera vez)
 
 ```bash
 cd experience
-cp .env.example .env.local
-# Editar NEXT_PUBLIC_DJANGO_BACKEND si tu Django no está en localhost:8000
 npm install
 npm run dev
 ```
 
-## Reglas de oro
+El `npm install` descarga las dependencias nuevas:
+- `react-leaflet` + `leaflet` + `@types/leaflet` · mapa cartográfico real con OpenStreetMap.
 
-- **TODO tokenizado.** Cero estilos inline arbitrarios (excepto `app/page.tsx`
-  provisional que se reemplaza tras Design System v1.0).
-- **Mobile-first real.** Bottom navigation obligatoria.
-- **Motion calmado.** Sin bounce, sin elastic, sin flashy. Fade · float · blur.
-- **Cero Bootstrap. Cero Material UI.** Solo Radix + Tailwind.
-- **Performance first.** `optimizePackageImports`, `prefers-reduced-motion`,
-  imágenes AVIF/WebP, server components por defecto.
+## Acceso desde móvil (misma red WiFi)
 
-Detalles completos en `EXPERIENCE_FOUNDATION_PLAN.md` (raíz del repo).
+```bash
+# Encuentra tu IP en LAN
+# macOS:   ipconfig getifaddr en0
+# Linux:   hostname -I
+# Windows: ipconfig | findstr IPv4
+
+# Arranca Next.js escuchando 0.0.0.0
+npx next dev -H 0.0.0.0 -p 3000
+
+# En tu iPhone / Android abre:
+# http://<TU_IP>:3000
+```
+
+### Geolocalización en móvil
+
+`navigator.geolocation` solo funciona sobre HTTPS o `localhost`. Si accedes
+por IP de LAN (`http://192.168.x.x:3000`) desde el móvil, el navegador
+rechaza el permiso por contexto inseguro. KUDOS lo detecta y ofrece
+selector manual con O Grove, Pontevedra, Santiago, Madrid, Roma, etc.
+
+Para probar geolocalización real en móvil:
+- usa `ngrok http 3000` y abre la URL HTTPS que genera, o
+- usa el selector manual.
+
+## Rutas
+
+| Ruta | Contenido |
+|---|---|
+| `/inicio`         | Home cinematic · hero + featured + categorías + right rail timeline/impact |
+| `/mapa`           | Mapa Leaflet real · OpenStreetMap · pan/zoom/markers/popups · geo · bottom sheet |
+| `/aqui`           | Geolocalización real · reverse geocoding Nominatim · ecos cerca con distancia |
+| `/descubrir`      | Feed por categoría · 9 ecos con imágenes reales |
+| `/linea-tiempo`   | 5 eras · grid de ecos por época |
+| `/momentos`       | 12 momentos (audio/imagen/texto) · filtros |
+| `/studio`         | Editor de cápsula viral · score 0-100 · preview live |
+| `/mis-memorias`   | Feed personal · 3 grupos temporales · stats |
+| `/conexiones`     | 3 tabs · 8 personas con bios largas |
+| `/guardados`      | 4 colecciones · grid de ecos |
+| `/mind`           | Conversación · 3 turnos pre-cargados · citations · suggestions |
+| `/notificaciones` | 12 notificaciones · 3 filtros · 7 categorías |
+| `/ajustes`        | 5 secciones · toggles reales |
+| `/invitar`        | Link personal · share targets · stats |
+| `/capsules/[slug]` | Cápsula completa · hero + video + galería + tabs + quotes + sources + related |
+| `/echo/[id]`       | Igual que cápsula |
+| `/places/[slug]`   | Lugar con hero + ecos vinculados |
+| `/design-system`   | Referencia visual del DS v2 |
+| `/health`          | Diagnóstico backend |
+
+## Stack visible
+
+- Next.js 15 · React 18 · TypeScript estricto
+- Tailwind CSS · inline styles (DS tokens-driven)
+- Leaflet + react-leaflet · tiles de OpenStreetMap
+- Imágenes: Picsum (CDN público sin key)
+- Video: Google Cloud Storage sample videos
+- Geocoding: Nominatim (OpenStreetMap, sin key)
+
+## Dependencias clave
+
+Producción:
+- `next@15.0.0`, `react@18.2.0`, `react-dom@18.2.0`
+- `react-leaflet@^4.2.1`, `leaflet@^1.9.4`
+- `framer-motion@^11.11.0`, `lucide-react@^0.460.0`
+- `@radix-ui/*` (varios primitives)
+
+Dev:
+- `typescript@^5.6.3`
+- `@types/leaflet@^1.9.12`
+- `tailwindcss@^3.4.14`
+
+## TSC
+
+```bash
+npm run typecheck
+```
+
+Debe salir limpio · 0 errores.
+
+## Estructura
+
+```
+app/                     · 17 rutas Next 15 App Router
+components/
+  shell-v2/              · Sidebar, TopBar, BottomNav, BrandMark, Shell
+  dev/DevNavigator.tsx   · menu temporal con todas las rutas
+  screens/               · 15 pantallas reales
+  shared/                · atoms compartidos
+design-system/v2/        · tokens + 8 componentes reutilizables
+lib/
+  geo/                   · useGeolocation, reverseGeocode, distance, fallbackCities
+  mocks-v2/fixtures.ts   · single source de mock data
+  axon/                  · cliente API Django (preservado)
+types/leaflet-shim.d.ts  · type stubs (borrar tras npm install)
+```
+
+## Notas
+
+El Dev Navigator (botón violeta circular abajo-derecha) lista todas las
+rutas para inspección manual. Se elimina cuando el founder lo autorice.

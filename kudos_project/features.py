@@ -207,5 +207,6 @@ ALWAYS_ALLOWED_PREFIXES = (
     "/api/landmarks/viewport",
     "/api/local-capsules",
     "/api/echo/synthesize",
+    "/api/echo/share",        # Phase 3 viral share tracking
     "/api/debug/",
 )

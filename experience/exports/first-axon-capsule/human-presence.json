@@ -1,0 +1,51 @@
+{
+  "capsule_id": "galicia_pontevedra_drizzle",
+  "tier": "legend_atmospheric",
+  "forbidden_compositions": [
+    "subject_filling_frame",
+    "centered_hero_pose",
+    "shallow_dof_isolation",
+    "face_close_up_on_legend",
+    "performative_face",
+    "subject_staring_into_middle_distance",
+    "low_angle_heroic_score"
+  ],
+  "required_screen_share_max_pct": 14,
+  "required_indirect_humanity_count": 3,
+  "required_unconscious_motion_count": 4,
+  "required_camera_humility_score_0_1": 0.78,
+  "events": [
+    {
+      "shot_index": 0,
+      "at_s_within_shot": 0,
+      "kind": "umbrella_tip_offscreen",
+      "visibility_regime": "implied_by_object",
+      "screen_share_max_pct": 8,
+      "editorial_argument": "the holder is just out of frame · we know their height by the tilt"
+    },
+    {
+      "shot_index": 1,
+      "at_s_within_shot": 1.4,
+      "kind": "silhouette_crossing_rain",
+      "visibility_regime": "silhouette_only",
+      "screen_share_max_pct": 8,
+      "editorial_argument": "someone is going somewhere despite the weather · their plan does not pause for our frame"
+    },
+    {
+      "shot_index": 3,
+      "at_s_within_shot": 0,
+      "kind": "person_behind_steamed_window",
+      "visibility_regime": "obscured_by_glass",
+      "screen_share_max_pct": 12,
+      "editorial_argument": "domestic life happening · the warmth is on the other side of the glass"
+    },
+    {
+      "shot_index": 0,
+      "at_s_within_shot": 2.5,
+      "kind": "footsteps_audible_only",
+      "visibility_regime": "audible_only",
+      "screen_share_max_pct": 0,
+      "editorial_argument": "the body is offscreen · the footstep is the proof of weight"
+    }
+  ]
+}

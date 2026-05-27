@@ -1,0 +1,186 @@
+{
+  "execution_plan": {
+    "capsule_id": "galicia_pontevedra_drizzle",
+    "capsule_budget_cap_usd": 3,
+    "target_tactile_realism": 76,
+    "target_emotional_truth": 68,
+    "required_continuity_score": 0.85,
+    "cost_arbitration_policy": "preferred provider first; on physical_falsehood or human_falsehood, switch to fallback_provider_1; on second failure, fallback_provider_2; on third failure, downgrade to still-interpolation; never exceed per-shot budget; abandon shot if total capsule budget would be breached",
+    "shots": [
+      {
+        "shot_index": 0,
+        "clip_duration_s": 5,
+        "preferred_provider": "kling-2.1-master-pro",
+        "fallback_provider_1": "kling-2.1-master-std",
+        "fallback_provider_2": "luma-dream-machine",
+        "max_attempts": 3,
+        "per_shot_budget_usd": 0.8,
+        "required_axes": [
+          "weather_rendering",
+          "atmospheric_softness",
+          "texture_persistence"
+        ],
+        "minimum_axis_score": 0.78,
+        "visual_intent_prompt_hint": "wide observational view down arcaded medieval street · slate cobbles uniformly wet under drizzle · granite façades · iron balconies · no people in foreground · day grey · single umbrella visible far down the street · operator handheld observation 6m back from subject",
+        "negative_prompts": [
+          "no centered subject",
+          "no drone movement",
+          "no postcard wide",
+          "no people facing camera"
+        ]
+      },
+      {
+        "shot_index": 1,
+        "clip_duration_s": 4,
+        "preferred_provider": "runway-gen-4",
+        "fallback_provider_1": "kling-2.1-master-pro",
+        "fallback_provider_2": "minimax-hailuo-02",
+        "max_attempts": 3,
+        "per_shot_budget_usd": 0.85,
+        "required_axes": [
+          "camera_realism",
+          "human_subtlety",
+          "cloth_motion"
+        ],
+        "minimum_axis_score": 0.78,
+        "visual_intent_prompt_hint": "silhouette of a person with umbrella crosses frame right-to-left at 8m distance · we never see their face · unhurried pace · footsteps visible on wet slate · operator framing leaning_against_wall · slight horizon tilt 2°",
+        "negative_prompts": [
+          "no face visible",
+          "no slow-motion",
+          "no symbolic posing",
+          "no character close-up"
+        ]
+      },
+      {
+        "shot_index": 2,
+        "clip_duration_s": 4,
+        "preferred_provider": "kling-2.1-master-pro",
+        "fallback_provider_1": "luma-dream-machine",
+        "fallback_provider_2": "kling-2.1-master-std",
+        "max_attempts": 3,
+        "per_shot_budget_usd": 0.85,
+        "required_axes": [
+          "texture_persistence",
+          "atmospheric_softness",
+          "weather_rendering"
+        ],
+        "minimum_axis_score": 0.78,
+        "visual_intent_prompt_hint": "macro detail · iron balcony bracket bleeding rust streak vertically down granite façade · 40 years of weeping iron · drainpipe at right edge of frame · single rain drop visible falling · static framing · stone is wet · streak edges sharp · biological film below",
+        "negative_prompts": [
+          "no people",
+          "no movement except rain",
+          "no clean stone",
+          "no synthetic reflections"
+        ]
+      },
+      {
+        "shot_index": 3,
+        "clip_duration_s": 3,
+        "preferred_provider": "kling-2.1-master-std",
+        "fallback_provider_1": "pika-2.2",
+        "fallback_provider_2": "luma-dream-machine",
+        "max_attempts": 2,
+        "per_shot_budget_usd": 0.5,
+        "required_axes": [
+          "atmospheric_softness",
+          "weather_rendering"
+        ],
+        "minimum_axis_score": 0.72,
+        "visual_intent_prompt_hint": "static framing through café window from outside in the rain · window steamed from inside · interior amber light visible · person seated obscured by steam · we never enter · cut before the moment completes · operator tripod_locked_off",
+        "negative_prompts": [
+          "no entering the café",
+          "no face clear through steam",
+          "no warm music"
+        ]
+      }
+    ],
+    "global_negative_prompts": [
+      "no actors looking at camera",
+      "no music",
+      "no slow motion",
+      "no golden hour",
+      "no centred hero pose",
+      "no shallow depth-of-field isolation",
+      "no symbolic gestures",
+      "no postcard composition",
+      "no impossible camera movement",
+      "no synthetic clean surfaces",
+      "no over-saturated colour",
+      "no clean shadows from invisible sources"
+    ]
+  },
+  "execution_record": {
+    "outcome": "shipped",
+    "summary": "shipped · 4 shots · cost $0.60 of $3.00 budget",
+    "total_cost_usd": 0.6,
+    "shots": [
+      {
+        "shot_index": 0,
+        "outcome": "shipped",
+        "attempts": 1,
+        "cost_usd": 0.12,
+        "notes": "1 attempts · provider kling-2.1-master-pro · shipped"
+      },
+      {
+        "shot_index": 1,
+        "outcome": "shipped",
+        "attempts": 1,
+        "cost_usd": 0.3,
+        "notes": "1 attempts · provider runway-gen-4 · shipped"
+      },
+      {
+        "shot_index": 2,
+        "outcome": "shipped",
+        "attempts": 1,
+        "cost_usd": 0.12,
+        "notes": "1 attempts · provider kling-2.1-master-pro · shipped"
+      },
+      {
+        "shot_index": 3,
+        "outcome": "shipped",
+        "attempts": 1,
+        "cost_usd": 0.06,
+        "notes": "1 attempts · provider kling-2.1-master-std · shipped"
+      }
+    ]
+  },
+  "ffmpeg_argv": [
+    "-y",
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-i",
+    "/tmp/galicia_drizzle_shot0_final.mp4",
+    "-i",
+    "/tmp/galicia_drizzle_shot1_final.mp4",
+    "-i",
+    "/tmp/galicia_drizzle_shot2_final.mp4",
+    "-i",
+    "/tmp/galicia_drizzle_shot3_final.mp4",
+    "-i",
+    "/tmp/galicia_drizzle_room_tone_rain_diffusion.wav",
+    "-filter_complex",
+    "[0:v:0][1:v:0][2:v:0][3:v:0]concat=n=4:v=1:a=0[vconcat];[vconcat]tpad=stop_mode=add:stop_duration=4.80:color=black[vout];[4:a]aformat=sample_fmts=fltp:sample_rates=48000:channel_layouts=stereo,volume=0.0126[bed];[bed]loudnorm=I=-19:LRA=14:TP=-2,aresample=44100[aout]",
+    "-map",
+    "[vout]",
+    "-map",
+    "[aout]",
+    "-c:v",
+    "libx264",
+    "-preset",
+    "slow",
+    "-crf",
+    "20",
+    "-pix_fmt",
+    "yuv420p",
+    "-profile:v",
+    "high",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k",
+    "-movflags",
+    "+faststart",
+    "exports/first-axon-capsule/final.mp4"
+  ]
+}

@@ -1,0 +1,365 @@
+{
+  "microreality": {
+    "capsule_id": "galicia_pontevedra_drizzle",
+    "humidity_regime": "atlantic_drizzle_wet",
+    "weather_interaction": "atlantic_drizzle",
+    "residue_signatures": [
+      {
+        "kind": "oxidized_metal",
+        "density_0_1": 0.92,
+        "visual_signature": "iron balcony bleeding rust streaks down granite · 40+ years of weeping"
+      },
+      {
+        "kind": "salt_efflorescence",
+        "density_0_1": 0.78,
+        "visual_signature": "white bloom on lower brickwork · crystalline at mortar joints · sea proximity visible"
+      },
+      {
+        "kind": "biological_film",
+        "density_0_1": 0.62,
+        "visual_signature": "green-black film in shaded damp corners · north-facing walls darker"
+      },
+      {
+        "kind": "worn_paint",
+        "density_0_1": 0.6,
+        "visual_signature": "three colours visible through chips at hand-height · ochre under cream under sea-foam"
+      },
+      {
+        "kind": "water_stains",
+        "density_0_1": 0.85,
+        "visual_signature": "vertical streaks below leak points · widening at base · mineral residue"
+      }
+    ],
+    "material_fatigue_signatures": [
+      {
+        "kind": "warped_wood_humidity_cycle",
+        "temporal_scale": "decades",
+        "visual_signature": "old doors that no longer close cleanly · 3-8mm warps · seasonal"
+      },
+      {
+        "kind": "softened_edges_thresholds",
+        "temporal_scale": "decades",
+        "visual_signature": "sharp 90° corners rounded 5-15mm radii · centuries of shoulders"
+      },
+      {
+        "kind": "scratched_brass_hand_height",
+        "temporal_scale": "decades",
+        "visual_signature": "brass railing rubbed bright at hand-height · oxidised dark above and below"
+      },
+      {
+        "kind": "chipped_paint_high_traffic",
+        "temporal_scale": "years",
+        "visual_signature": "kerb-height bumpers chipped to primer · luggage and scooter pedals"
+      }
+    ],
+    "imperfect_light_sources": [
+      {
+        "kind": "humid_diffusion_bloom",
+        "intensity_0_1": 0.85
+      },
+      {
+        "kind": "weather_interference_overcast",
+        "intensity_0_1": 0.78
+      },
+      {
+        "kind": "reflected_spill_amber",
+        "intensity_0_1": 0.3
+      }
+    ],
+    "micro_motion_sources": [
+      {
+        "kind": "rain_interaction",
+        "period_s": 0.08,
+        "amplitude_px": 1,
+        "cause": "raindrops impacting surfaces · 12-15Hz"
+      },
+      {
+        "kind": "umbrella_flutter",
+        "period_s": 1.8,
+        "amplitude_px": 6,
+        "cause": "gusty drizzle · variable wind"
+      },
+      {
+        "kind": "wet_fabric_weight",
+        "period_s": 6.5,
+        "amplitude_px": 3,
+        "cause": "soaked fabric drifting under gravity · damped by moisture"
+      },
+      {
+        "kind": "loose_paper_movement",
+        "period_s": 1.2,
+        "amplitude_px": 8,
+        "cause": "loose taped poster · sun-bleached · in the wind"
+      },
+      {
+        "kind": "cable_vibration",
+        "period_s": 0.4,
+        "amplitude_px": 2,
+        "cause": "tram cable 1 block over · sympathetic vibration through wet air"
+      },
+      {
+        "kind": "distant_object_motion",
+        "period_s": 8,
+        "amplitude_px": 2,
+        "cause": "silhouette walking in the background of shot 1"
+      }
+    ],
+    "environmental_continuity_processes": [
+      {
+        "kind": "rain_persistence",
+        "period_s": 0.1,
+        "visible_across_cuts": true
+      },
+      {
+        "kind": "puddle_disturbance",
+        "period_s": 0.3,
+        "visible_across_cuts": false
+      },
+      {
+        "kind": "moving_reflections",
+        "period_s": 1.8,
+        "visible_across_cuts": false
+      },
+      {
+        "kind": "distant_traffic_changes",
+        "period_s": 12,
+        "visible_across_cuts": true
+      },
+      {
+        "kind": "smoke_chimney_continuous",
+        "period_s": 5,
+        "visible_across_cuts": true
+      },
+      {
+        "kind": "tide_at_water_edge",
+        "period_s": 6,
+        "visible_across_cuts": true
+      }
+    ],
+    "micro_vibration_sources": [
+      {
+        "kind": "rain_resonance_on_surfaces",
+        "frequency_hz": 12
+      },
+      {
+        "kind": "structural_trembling",
+        "frequency_hz": 1.2
+      },
+      {
+        "kind": "electrical_hum",
+        "frequency_hz": 60
+      },
+      {
+        "kind": "wind_loading",
+        "frequency_hz": 0.4
+      }
+    ],
+    "target_tactile_realism_0_100": 76,
+    "forbidden_physical_falsehoods": [
+      "ai_cleanliness",
+      "frictionless_surfaces",
+      "texture_repetition",
+      "sterile_weather",
+      "impossible_cloth_motion",
+      "synthetic_reflections",
+      "frozen_environments",
+      "physically_impossible_lighting",
+      "hyperperfect_environments"
+    ],
+    "notes": "Atlantic-coastal mid-density residue + decades-scale material fatigue · 6 continuous environmental processes · 4 micro-vibration sources · no music"
+  },
+  "memory_sound": {
+    "capsule_id": "galicia_pontevedra_drizzle",
+    "total_duration_s": 16,
+    "silence_texture": "rain_silence",
+    "reverb_profile": "atlantic_galicia_drizzle",
+    "spatial_mix": "axon_quiet_headphones_v1",
+    "target_lufs": -19,
+    "true_peak_max_db": -2,
+    "dynamic_range_min_db": 14,
+    "silence_floor_db_fs": -54,
+    "never_silent": true,
+    "music_present": false,
+    "layers": [
+      {
+        "kind": "room_tone_rain_diffusion",
+        "start_s": 0,
+        "end_s": 16,
+        "db_fs": -38,
+        "direction": "all",
+        "distance_m": 0,
+        "intent": "the dominant signal · rain on slate · continuous throughout",
+        "never_loops": false
+      },
+      {
+        "kind": "drainpipe_pulse",
+        "start_s": 0,
+        "end_s": 16,
+        "db_fs": -34,
+        "direction": "above",
+        "distance_m": 4,
+        "intent": "rhythmic micro-event · drop-on-metal-funnel · ~3.2s period",
+        "never_loops": false
+      },
+      {
+        "kind": "traffic_softened_by_rain",
+        "start_s": 0,
+        "end_s": 16,
+        "db_fs": -42,
+        "direction": "behind",
+        "distance_m": 200,
+        "intent": "the city continues somewhere · low-passed by intervening walls",
+        "never_loops": false
+      },
+      {
+        "kind": "footsteps_close_offscreen",
+        "start_s": 2,
+        "end_s": 4.5,
+        "db_fs": -36,
+        "direction": "right",
+        "distance_m": 6,
+        "intent": "wet shoes on slate · the person we don't see · 1.3s/step",
+        "never_loops": true
+      },
+      {
+        "kind": "footsteps_close_walking",
+        "start_s": 5,
+        "end_s": 9,
+        "db_fs": -34,
+        "direction": "front",
+        "distance_m": 8,
+        "intent": "the silhouette's footsteps · approaching then receding",
+        "never_loops": true
+      },
+      {
+        "kind": "drainpipe_pulse_close",
+        "start_s": 9,
+        "end_s": 13,
+        "db_fs": -28,
+        "direction": "above",
+        "distance_m": 1.5,
+        "intent": "drainpipe macro · drop-on-metal-funnel directly above the camera",
+        "never_loops": false
+      },
+      {
+        "kind": "kitchen_clatter_offscreen",
+        "start_s": 13,
+        "end_s": 16,
+        "db_fs": -38,
+        "direction": "left",
+        "distance_m": 6,
+        "intent": "interior · spoons against ceramic · we are outside the warmth",
+        "never_loops": true
+      },
+      {
+        "kind": "radio_through_thin_wall",
+        "start_s": 14,
+        "end_s": 16,
+        "db_fs": -42,
+        "direction": "left",
+        "distance_m": 8,
+        "intent": "tinny local broadcast · specific human · specific evening",
+        "never_loops": true
+      },
+      {
+        "kind": "harbor_horn_far",
+        "start_s": 11.5,
+        "end_s": 12.8,
+        "db_fs": -44,
+        "direction": "front",
+        "distance_m": 800,
+        "intent": "harbor horn distant · the sea is closer than the eye admits",
+        "never_loops": true
+      }
+    ],
+    "headline_events": [
+      {
+        "at_s": 10,
+        "kind": "church_bell_through_fog",
+        "db_fs": -36,
+        "intent": "single strike at t=10s · ritual time · we are inside a calendar"
+      }
+    ],
+    "forbidden_post_processing": [
+      "loudness_war_compression_for_thumbnail_play",
+      "auto_normalize_to_-14_LUFS_streaming_standard",
+      "bass_boost_default_on",
+      "transient_emphasizer_for_engagement",
+      "wide_synthetic_stereo_expansion",
+      "saturation_for_perceived_loudness",
+      "any_score_or_underscore_music"
+    ],
+    "notes": "9 layers · 1 headline · room tone never collapses · no music · drainpipe is the rhythm"
+  },
+  "physical_validation": {
+    "capsule_id": "galicia_pontevedra_drizzle",
+    "per_shot_axes_required": [
+      "humidity_continuity",
+      "reflection_logic",
+      "light_direction",
+      "cloth_physics",
+      "environmental_persistence",
+      "motion_inertia",
+      "weather_interaction",
+      "material_continuity"
+    ],
+    "cross_shot_continuity_axes": [
+      "humidity",
+      "weather",
+      "sound_bed",
+      "light_softness",
+      "environmental_persistence",
+      "tactile_density",
+      "room_tone",
+      "atmospheric_carryover"
+    ],
+    "max_reject_findings_per_shot": 1,
+    "max_major_continuity_drifts": 0,
+    "absolute_disqualifiers": [
+      "weather_changes_mid_capsule",
+      "ground_dry_in_drizzle",
+      "any_face_close_up_at_legend_tier",
+      "music_emotional_force_above_0_30",
+      "silence_floor_breach",
+      "centered_hero_pose_anywhere"
+    ],
+    "per_shot_targets": [
+      {
+        "shot_index": 0,
+        "tactile_target": 78,
+        "physical_axes": [
+          "weather_interaction",
+          "material_continuity",
+          "environmental_persistence"
+        ]
+      },
+      {
+        "shot_index": 1,
+        "tactile_target": 76,
+        "physical_axes": [
+          "cloth_physics",
+          "motion_inertia",
+          "humidity_continuity"
+        ]
+      },
+      {
+        "shot_index": 2,
+        "tactile_target": 80,
+        "physical_axes": [
+          "material_continuity",
+          "weather_interaction",
+          "humidity_continuity"
+        ]
+      },
+      {
+        "shot_index": 3,
+        "tactile_target": 74,
+        "physical_axes": [
+          "light_direction",
+          "reflection_logic",
+          "humidity_continuity"
+        ]
+      }
+    ]
+  }
+}

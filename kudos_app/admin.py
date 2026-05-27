@@ -265,6 +265,40 @@ class CryptoOperationAdmin(admin.ModelAdmin):
     list_filter = ('type', 'symbol')
 
 
+# ─── MVP Maquetas · Mérito + Mi Mundo (P32.04) ───
+from kudos_app.models import MeritEvent, Visit, Streak, Collection
+
+
+@admin.register(MeritEvent)
+class MeritEventAdmin(admin.ModelAdmin):
+    list_display = ('ts', 'user', 'pillar', 'points', 'label', 'place', 'capsule')
+    list_filter = ('pillar', 'ts')
+    search_fields = ('user__alias', 'label')
+    ordering = ('-ts',)
+
+
+@admin.register(Visit)
+class VisitAdmin(admin.ModelAdmin):
+    list_display = ('ts', 'user', 'place', 'lat', 'lon')
+    list_filter = ('ts',)
+    search_fields = ('user__alias', 'place__name', 'place__slug')
+    ordering = ('-ts',)
+
+
+@admin.register(Streak)
+class StreakAdmin(admin.ModelAdmin):
+    list_display = ('user', 'days', 'best_days', 'last_day', 'updated')
+    ordering = ('-days',)
+
+
+@admin.register(Collection)
+class CollectionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'user', 'kind', 'is_public', 'created', 'updated')
+    list_filter = ('kind', 'is_public')
+    search_fields = ('name', 'slug', 'user__alias')
+    filter_horizontal = ('capsules', 'places')
+
+
 admin.site.site_header = "Kudos Administration"
 admin.site.site_title = "Kudos Admin"
 admin.site.index_title = "Panel de Administración Kudos"
