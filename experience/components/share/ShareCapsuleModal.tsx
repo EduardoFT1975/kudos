@@ -289,13 +289,10 @@ function ShareCapsuleModal({ payload, onClose }: { payload: OpenPayload; onClose
 
           {/* ── Right column: tabs + actions ──────────────────────── */}
           <div style={RIGHT_COL}>
-            <div role="tablist" style={TABS_WRAP}>
-              <button role="tab" aria-selected={tab === "compartir"} type="button" onClick={() => setTab("compartir")} style={tab === "compartir" ? TAB_ACTIVE : TAB_IDLE}>Compartir</button>
-              <button role="tab" aria-selected={tab === "personalizar"} type="button" onClick={() => setTab("personalizar")} style={tab === "personalizar" ? TAB_ACTIVE : TAB_IDLE}>Personalizar</button>
-            </div>
-
-            {tab === "compartir" ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 22, marginTop: 18 }}>
+            {/* OPCION C: una sola pagina vertical. Quitamos las tabs porque
+                el usuario no las descubria. Compartir + Personalizar siempre
+                visibles, scroll hacia abajo. */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 22, marginTop: 4 }}>
                 <section>
                   <h3 style={SECTION_TITLE}>Comparte al instante</h3>
                   <div style={SOCIAL_GRID}>
@@ -350,8 +347,9 @@ function ShareCapsuleModal({ payload, onClose }: { payload: OpenPayload; onClose
                   </div>
                 </section>
               </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 18 }}>
+
+              {/* Personalizacion siempre visible debajo */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 8, paddingTop: 22, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
                 <h3 style={SECTION_TITLE}>Personaliza tu capsula</h3>
                 <p style={SECTION_DESC}>Elige que informacion quieres mostrar en tu publicacion.</p>
                 <ToggleRow icon="discover"  label="Titulo"            value={toggles.title}       onChange={(v) => setToggles({ ...toggles, title: v })} />
@@ -374,9 +372,8 @@ function ShareCapsuleModal({ payload, onClose }: { payload: OpenPayload; onClose
                   <span style={COMMENT_COUNT}>{comment.length}/120</span>
                 </div>
               </div>
-            )}
+            </div>
           </div>
-        </div>
 
         {/* Footer */}
         <footer style={FOOTER}>

@@ -45,11 +45,11 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
   formatDetection: { telephone: false },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "KUDOS" },
-  icons: {
-    icon: [{ url: "/brand/kudos-symbol.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/brand/kudos-symbol.svg" }],
-    shortcut: ["/brand/kudos-symbol.svg"],
-  },
+  // NOTA: icons removido a propósito. Next.js detecta automáticamente
+  // app/favicon.ico, app/icon.png y app/apple-icon.png que generamos a
+  // partir de public/brand/kudos-symbol.svg. Si declaramos icons: aquí,
+  // ESO prevalece sobre los archivos del filesystem y el navegador
+  // recibe el SVG (que algunos browsers no usan en la pestaña).
 };
 
 export const viewport: Viewport = {
