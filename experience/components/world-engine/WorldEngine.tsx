@@ -22,7 +22,7 @@ import {
   WORLD_TILE_MAX_ZOOM,
   WORLD_TILE_FILTER,
   TIER_MIN_ZOOM,
-  MAX_NODES_RENDERED,
+  maxNodesAtZoom,
   WorldNodeTier,
   WorldNodeCategory,
   inferCategory,
@@ -252,8 +252,9 @@ export function WorldEngine() {
       return da - db;
     });
 
-    // 3) Cap absoluto
-    const visible = candidates.slice(0, MAX_NODES_RENDERED);
+    // 3) Cap DINÁMICO según zoom · respira más en lejanía
+    const cap = maxNodesAtZoom(zoom);
+    const visible = candidates.slice(0, cap);
     const next = new Map<string, WorldPoi>(visible.map((n) => [n.id, n]));
 
     console.warn(
@@ -312,6 +313,19 @@ export function WorldEngine() {
       <div style={ZOOM_RAIL}>
         <button style={ZOOM_BTN} onClick={() => mapRef.current?.zoomIn()} aria-label="Acercar">+</button>
         <button style={ZOOM_BTN} onClick={() => mapRef.current?.zoomOut()} aria-label="Alejar">−</button>
+        <button
+          style={{ ...ZOOM_BTN, marginTop: 6 }}
+          onClick={() => {
+            centeredOnUserRef.current = false;
+            if (!geo.coords) {
+              geo.request();
+            } else if (mapRef.current) {
+              mapRef.current.flyTo([geo.coords.lat, geo.coords.lng], 11, { duration: 1.6 });
+            }
+          }}
+          aria-label="Centrar en mi ubicación"
+          title="Centrar en mi ubicación"
+        >◉</button>
       </div>
     </div>
   );

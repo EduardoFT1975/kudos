@@ -74,14 +74,21 @@ export const TIER_OPACITY: Record<WorldNodeTier, number> = {
 // "El mundo NO se muestra completamente. SE DESCUBRE."
 export const TIER_MIN_ZOOM: Record<WorldNodeTier, number> = {
   S: 3,    // visible desde nivel continental (mundo elegante · sólo iconos)
-  A: 7,    // visible desde nivel país/región
-  B: 12,   // visible sólo en zoom de ciudad (NO antes · respira)
-  C: 15,   // visible sólo en zoom de calle
+  A: 8,    // visible desde nivel país (subimos de 7 · era demasiado denso)
+  B: 13,   // visible sólo en zoom de barrio (era 12 · saturaba zoom 7-12)
+  C: 16,   // visible sólo en zoom de calle
 };
 
-// Cap absoluto · "densidad inteligente · el mapa debe respirar"
-// Aunque haya 50k POIs en bbox, NUNCA renderizamos más de N.
-// Prioridad: Tier S > A > B > C, después cercanía al centro.
+// Cap DINÁMICO por zoom · respira más en zoom alto, menos en lejano
+// "El mapa debe respirar · vacío elegante"
+export function maxNodesAtZoom(zoom: number): number {
+  if (zoom <= 5)  return 60;    // Mundo · sólo iconos legendarios
+  if (zoom <= 8)  return 150;   // Continente/país · selección curada
+  if (zoom <= 11) return 350;   // Región/ciudad · densidad moderada
+  return 600;                   // Barrio/calle · densidad máxima
+}
+
+// Cap absoluto · hard limit por si algo pasa
 export const MAX_NODES_RENDERED = 600;
 
 // Margen extra del viewport para precarga · evita popping al hacer pan
@@ -138,10 +145,8 @@ export const WORLD_TILE_FILTER =
 
 
 // ─── RITMO DE MOVIMIENTO ───────────────────────────────────────────────────
-// "respiración contextual · NO animaciones agresivas"
 
-export const RESPIRATION_DURATION_S = 5.4;   // duración del ciclo de respiración tier S/A
-export const RESPIRATION_OPACITY_MIN = 0.78; // pulso entre estos dos valores
+export const RESPIRATION_DURATION_S = 5.4;
+export const RESPIRATION_OPACITY_MIN = 0.78;
 export const RESPIRATION_OPACITY_MAX = 1.0;
-
-export const FOG_FADE_DURATION_MS = 600;     // cuánto tarda un nodo en aparecer/desaparecer
+export const FOG_FADE_DURATION_MS = 600;
