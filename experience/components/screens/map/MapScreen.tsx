@@ -75,8 +75,9 @@ export function MapScreen() {
   const [activeId, setActiveId] = React.useState<string | null>(focusId);
   const [sheetOpen, setSheetOpen] = React.useState<boolean>(focusId != null);
   const [category, setCategory] = React.useState<CategoryChoice>("all");
-  const [capasOpen, setCapasOpen] = React.useState(true);
-  const [filtrosOpen, setFiltrosOpen] = React.useState(true);
+  // Capas cerradas por defecto · evita tapar el mapa en móvil. El usuario las abre si quiere.
+  const [capasOpen, setCapasOpen] = React.useState(false);
+  const [filtrosOpen, setFiltrosOpen] = React.useState(false);
 
   // React to query param changes
   React.useEffect(() => {
@@ -276,10 +277,16 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
       const el = containerRef.current as any;
       if (el._leaflet_id != null) { try { delete el._leaflet_id; } catch {} }
       while (el.firstChild) el.removeChild(el.firstChild);
-      const initCenter: [number, number] = centerOn ? [centerOn.lat, centerOn.lng] : [41.9, 12.5];
+      // Centro inicial · prioridad: POI activo > geolocation usuario > Roma fallback.
+      const initCenter: [number, number] = centerOn
+        ? [centerOn.lat, centerOn.lng]
+        : userCoords
+          ? [userCoords.lat, userCoords.lng]
+          : [41.9, 12.5];
+      const initZoom = centerOn ? 14 : userCoords ? 12 : 5;
       const map = L.map(el, {
         center: initCenter,
-        zoom: centerOn ? 14 : 5,
+        zoom: initZoom,
         zoomControl: false,
         attributionControl: false,
         worldCopyJump: true,
@@ -360,6 +367,19 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
     if (!map || !centerOn) return;
     try { map.setView([centerOn.lat, centerOn.lng], 14, { animate: true }); } catch {}
   }, [centerOn]);
+
+  // Center on user location · primera vez que llegan las coords (si no hay POI activo).
+  // La geolocation puede tardar 1-2s tras el mount; este effect captura ese cambio
+  // y reencuadra el mapa una sola vez. Después el usuario controla.
+  const centeredOnUserRef = React.useRef(false);
+  React.useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !userCoords || centerOn || centeredOnUserRef.current) return;
+    try {
+      map.setView([userCoords.lat, userCoords.lng], 12, { animate: true });
+      centeredOnUserRef.current = true;
+    } catch {}
+  }, [userCoords?.lat, userCoords?.lng, centerOn]);
 
   // User marker
   React.useEffect(() => {
@@ -1016,18 +1036,6 @@ const SHEET_CTA: React.CSSProperties = {
   border: "1px solid var(--kudos-accent, #6C3CFF)",
   color: "#fff",
   boxShadow: "0 14px 28px -10px rgba(108,60,255,0.7)",
-};
-const SHEET_GHOST: React.CSSProperties = {
-  ...SHEET_BTN_BASE,
-  background: "transparent",
-  border: "1px solid rgba(255,255,255,0.16)",
-  color: "var(--kudos-ink)",
-  padding: "11px 14px",
-};
-
-const STAR: React.CSSProperties = {
-  color: "var(--kudos-accent-yellow, #FFD23F)",
-  lineHeight: 1,
 };
 
 const SHEET_DIVIDER: React.CSSProperties = {
