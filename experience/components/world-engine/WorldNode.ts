@@ -139,15 +139,15 @@ export const WORLD_NODE_CSS = `
     z-index: 99999 !important;
   }
 
-  /* Anillo externo · color categoría (Tier A) o dorado (Tier S) */
+  /* Anillo externo · color categoría (Tier A) o dorado (Tier S) · GRUESO */
   .kudos-chip-outer-ring {
     width: 100%; height: 100%;
     border-radius: 50%;
-    padding: 1.6px;                  /* GROSOR del anillo color (Tier A) */
+    padding: 3px;                    /* GROSOR del anillo color · CANTA */
     display: flex; align-items: center; justify-content: center;
   }
-  /* Tier S · anillo dorado más grueso */
-  .kudos-chip-s .kudos-chip-outer-ring { padding: 2.2px; }
+  /* Tier S · anillo dorado aún más grueso */
+  .kudos-chip-s .kudos-chip-outer-ring { padding: 4px; }
 
   /* Anillo blanco interno · aísla la foto del color outer */
   .kudos-chip-inner-ring {
@@ -178,6 +178,30 @@ export const WORLD_NODE_CSS = `
     50%      { opacity: ${RESPIRATION_OPACITY_MAX}; transform: scale(1.08); }
   }
 
+  /* Stagger entrance · cada chip aparece con fade-in + scale */
+  @keyframes kudos-chip-entrance {
+    from { opacity: 0; transform: scale(0.6) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .kudos-chip {
+    animation: kudos-chip-entrance 0.42s cubic-bezier(0.22,1,0.36,1) both;
+  }
+
+  /* Float sutil Tier S · respiración corporal · ±1.5px en 7s */
+  @keyframes kudos-chip-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-1.5px); }
+  }
+  .kudos-chip-s {
+    animation: kudos-chip-entrance 0.42s cubic-bezier(0.22,1,0.36,1) both,
+               kudos-chip-float 7s ease-in-out 0.5s infinite;
+  }
+
+  /* Hover lift · sombra más fuerte para sensación táctil */
+  .kudos-chip:hover .kudos-chip-outer-ring {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.2) !important;
+  }
+
   /* Dot simple Tier B/C */
   .kudos-chip-dot {
     width: 70%; height: 70%; border-radius: 50%;
@@ -186,7 +210,7 @@ export const WORLD_NODE_CSS = `
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .kudos-chip * { animation: none !important; }
+    .kudos-chip, .kudos-chip * { animation: none !important; }
     .kudos-chip:hover { transform: none !important; }
   }
 

@@ -301,8 +301,47 @@ export function WorldEngine() {
 
     // 3) Cap DINÁMICO según zoom · respira más en lejanía
     const cap = maxNodesAtZoom(zoom);
-    const visible = candidates.slice(0, cap);
+    const visible: WorldPoi[] = candidates.slice(0, cap);
     const next = new Map<string, WorldPoi>(visible.map((n) => [n.id, n]));
+
+    // 3.4) Spatial deduplication en pixel space
+    // Si dos chips colisionan >50% se oculta el de MENOR tier (S>A>B>C).
+    // Esto evita el clutter de Roma centro sin necesidad de clustering.
+    const chipBoxes: { x1: number; y1: number; x2: number; y2: number }[] = [];
+    const dedupVisible: typeof visible = [];
+    for (const n of visible) {
+      try {
+        const p = map.latLngToContainerPoint([n.lat, n.lng]);
+        const baseSize = n.tier === "S" ? 44 : n.tier === "A" ? 32 : n.tier === "B" ? 14 : 6;
+        const sz = baseSize * sizeFactorForZoom(zoom);
+        const box = {
+          x1: p.x - sz / 2,
+          y1: p.y - sz / 2,
+          x2: p.x + sz / 2,
+          y2: p.y + sz / 2,
+        };
+        // Comprobar solapamiento area-percent con ya colocados
+        let overlaps = false;
+        for (const b of chipBoxes) {
+          const ix = Math.max(0, Math.min(box.x2, b.x2) - Math.max(box.x1, b.x1));
+          const iy = Math.max(0, Math.min(box.y2, b.y2) - Math.max(box.y1, b.y1));
+          const interArea = ix * iy;
+          const boxArea = (box.x2 - box.x1) * (box.y2 - box.y1);
+          if (boxArea > 0 && interArea / boxArea > 0.5) {
+            overlaps = true; break;
+          }
+        }
+        if (!overlaps) {
+          chipBoxes.push(box);
+          dedupVisible.push(n);
+        }
+      } catch { dedupVisible.push(n); }   // si falla pixel proj, no descartamos
+    }
+    // Sustituir el set de visibles con la versión deduplicada
+    visible.length = 0;
+    visible.push(...dedupVisible);
+    next.clear();
+    visible.forEach((n) => next.set(n.id, n));
 
     // 3.5) Label collision detection greedy en pixel space
     // Sólo Tier S y A obtienen showLabel; los descartados por colisión
