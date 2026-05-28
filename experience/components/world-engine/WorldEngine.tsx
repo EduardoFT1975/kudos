@@ -422,3 +422,75 @@ const HUD_BRAND: React.CSSProperties = {
   alignItems: "baseline",
   gap: 8,
 };
+
+const HUD_BRAND_K: React.CSSProperties = {
+  fontFamily: '"Poppins", system-ui, sans-serif',
+  fontWeight: 700,
+  fontSize: 22,
+  letterSpacing: "0.18em",
+  color: WORLD_COLORS.legendary,
+  textShadow: "0 2px 12px rgba(0,0,0,0.6)",
+};
+
+const HUD_BRAND_DOT: React.CSSProperties = {
+  fontSize: 18,
+  color: WORLD_COLORS.inkSecondary,
+};
+
+const HUD_BRAND_LABEL: React.CSSProperties = {
+  fontFamily: '"Poppins", system-ui, sans-serif',
+  fontWeight: 500,
+  fontSize: 13,
+  letterSpacing: "0.32em",
+  color: WORLD_COLORS.inkPrimary,
+  opacity: 0.88,
+};
+
+const HUD_TAGLINE: React.CSSProperties = {
+  fontFamily: '"Poppins", system-ui, sans-serif',
+  fontSize: 9.5,
+  letterSpacing: "0.42em",
+  textTransform: "uppercase",
+  color: WORLD_COLORS.inkTertiary,
+  marginTop: 2,
+};
+
+const HUD_COUNTER: React.CSSProperties = {
+  position: "absolute",
+  bottom: 22,
+  left: 26,
+  zIndex: 1000,
+  fontFamily: '"Poppins", system-ui, sans-serif',
+  fontSize: 10.5,
+  letterSpacing: "0.18em",
+  color: WORLD_COLORS.inkSecondary,
+  pointerEvents: "none",
+};
+
+const ZOOM_RAIL: React.CSSProperties = {
+  position: "absolute",
+  bottom: 22,
+  right: 22,
+  zIndex: 1000,
+  display: "flex",
+  flexDirection: "column",
+  gap: 6,
+};
+
+const ZOOM_BTN: React.CSSProperties = {
+  width: 36,
+  height: 36,
+  borderRadius: 10,
+  background: "rgba(7,9,18,0.78)",
+  border: `1px solid ${WORLD_COLORS.earthEdge}`,
+  color: WORLD_COLORS.inkPrimary,
+  fontFamily: '"Poppins", system-ui, sans-serif',
+  fontSize: 16,
+  fontWeight: 500,
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  backdropFilter: "blur(8px)",
+  transition: "background 0.2s ease",
+};
