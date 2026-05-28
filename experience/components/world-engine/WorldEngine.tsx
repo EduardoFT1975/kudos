@@ -232,6 +232,8 @@ export function WorldEngine() {
   const [mapCenter, setMapCenter] = React.useState<{lat:number; lng:number} | null>(null);
   const [currentCity, setCurrentCity] = React.useState<string>("Explora el mundo");
   const blueDotRef = React.useRef<any>(null);
+  const [capsulesIndex, setCapsulesIndex] = React.useState<Record<string, { url: string; name: string; tier: string }>>({});
+  const [activeVideoUrl, setActiveVideoUrl] = React.useState<string | null>(null);
   const [toast, setToast] = React.useState<string | null>(null);
   const toastTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = React.useCallback((msg: string, durationMs: number = 2200) => {
@@ -304,6 +306,17 @@ export function WorldEngine() {
         }
       }, 600 + idx * 1500);  // primer país tras 600ms · resto cada 1.5s
     });
+  }, []);
+
+
+  // ── G1 · Cargar manifest de cápsulas disponibles ──
+  React.useEffect(() => {
+    fetch("/capsules/index.json", { cache: "no-store" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((j) => {
+        if (j && j.capsules) setCapsulesIndex(j.capsules);
+      })
+      .catch(() => { /* sin manifest · placeholder global */ });
   }, []);
 
   // ── Mount Leaflet UNA VEZ ──
@@ -597,9 +610,10 @@ export function WorldEngine() {
         // Tamaño dinámico · escala con zoom
         const baseSize = n.tier === "S" ? 44 : n.tier === "A" ? 32 : n.tier === "B" ? 14 : 6;
         const dynSize = Math.round(baseSize * sizeFactorForZoom(zoom));
+        const hasCapsule = !!capsulesIndex[id];
         const html = buildWorldNodeHTML({
           ...n, isActive, showLabel: showLabelIds.has(id), image: n.image,
-          sizeOverride: dynSize,
+          sizeOverride: dynSize, hasCapsule,
         });
         const size = dynSize;
         const icon = L.divIcon({
@@ -621,7 +635,7 @@ export function WorldEngine() {
       }
     });
     setVisibleCount(next.size);
-  }, [renderTick, zoom, mapReady, activeId, activeFilter]);
+  }, [renderTick, zoom, mapReady, activeId, activeFilter, capsulesIndex]);
 
   return (
     <div style={ROOT}>
@@ -709,9 +723,14 @@ export function WorldEngine() {
                     Guardar
                   </button>
                   <button style={SHEET_BTN_PRIMARY} onClick={() => {
-                    showToast("Cápsula en preparación · pronto disponible", 3200);
+                    const cap = capsulesIndex[poi.id];
+                    if (cap && cap.url) {
+                      setActiveVideoUrl(cap.url);
+                    } else {
+                      showToast("Cápsula en preparación · pronto disponible", 3200);
+                    }
                   }}>
-                    Descubrir
+                    {capsulesIndex[poi.id] ? "▶ Ver cápsula" : "Descubrir"}
                   </button>
                 </div>
               </div>
@@ -744,6 +763,24 @@ export function WorldEngine() {
           title="Centrar en mi ubicación"
         >◉</button>
       </div>
+      {/* G1 · Video Player modal · al pulsar "Ver cápsula" si existe */}
+      {activeVideoUrl && (
+        <div style={VIDEO_BACKDROP} onClick={() => setActiveVideoUrl(null)}>
+          <div style={VIDEO_FRAME} onClick={(ev) => ev.stopPropagation()}>
+            <button style={SHEET_CLOSE} onClick={() => setActiveVideoUrl(null)} aria-label="Cerrar">×</button>
+            <video
+              src={activeVideoUrl}
+              controls autoPlay playsInline
+              style={{ width: "100%", height: "auto", maxHeight: "85vh", display: "block", borderRadius: 16 }}
+              onError={() => {
+                showToast("No se pudo reproducir · intenta de nuevo", 2400);
+                setActiveVideoUrl(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       <AppBottomNavV4 />
     </div>
   );
@@ -1094,4 +1131,30 @@ const TOAST: React.CSSProperties = {
   boxShadow: "0 6px 24px rgba(0,0,0,0.35)",
   backdropFilter: "blur(8px)",
   border: "1px solid rgba(255,255,255,0.08)",
+};
+
+
+// ─── G1 · Video Player modal ─────────────────────────────────────────
+const VIDEO_BACKDROP: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(10,8,6,0.85)",
+  zIndex: 7000,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 16,
+  animation: "kudos-sheet-fade 0.25s ease both",
+  backdropFilter: "blur(6px)",
+};
+
+const VIDEO_FRAME: React.CSSProperties = {
+  width: "100%",
+  maxWidth: 420,
+  background: "#000",
+  borderRadius: 16,
+  overflow: "hidden",
+  position: "relative",
+  boxShadow: "0 16px 48px rgba(0,0,0,0.55)",
+  animation: "kudos-sheet-slide-up 0.32s cubic-bezier(0.22,1,0.36,1) both",
 };

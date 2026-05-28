@@ -1,0 +1,14 @@
+{
+  "capsules": {
+    "wd-Q421067": {
+      "status": "ok",
+      "tier": "S",
+      "name": "Acropolis Palaiokastro",
+      "url": "/capsules/wd-Q421067/capsule.mp4",
+      "meta_url": "/capsules/wd-Q421067/metadata.json",
+      "size_mb": 23.59,
+      "generated_at": "2026-05-28T23:12:24Z"
+    }
+  },
+  "updated_at": "2026-05-28T23:12:24Z"
+}

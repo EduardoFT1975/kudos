@@ -32,6 +32,7 @@ export interface WorldNodeInput {
   isActive?: boolean;
   showLabel?: boolean;
   sizeOverride?: number;
+  hasCapsule?: boolean;
 }
 
 
@@ -53,7 +54,7 @@ function pictogramFor(category: WorldNodeCategory): string {
 
 
 export function buildWorldNodeHTML(node: WorldNodeInput): string {
-  const { id, name, tier, category, image, isActive, showLabel, sizeOverride } = node;
+  const { id, name, tier, category, image, isActive, showLabel, sizeOverride, hasCapsule } = node;
   const color = nodeColorFor(category, tier);
   const baseSize = sizeOverride ?? TIER_SIZE[tier];
   const size = isActive ? Math.round(baseSize * 1.35) : baseSize;
@@ -75,7 +76,7 @@ export function buildWorldNodeHTML(node: WorldNodeInput): string {
   // Tier S · halo dorado + double-ring + imagen
   if (tier === "S") {
     return `
-      <div class="kudos-chip kudos-chip-s ${labelClass}" data-id="${id}" data-tier="S" data-name="${safeName}"
+      <div class="kudos-chip kudos-chip-s ${labelClass} ${hasCapsule ? "has-capsule" : ""}" data-id="${id}" data-tier="S" data-name="${safeName}"
            style="width:${size}px;height:${size}px;opacity:${opacity};">
         <div class="kudos-chip-halo"></div>
         <div class="kudos-chip-outer-ring"
@@ -93,7 +94,7 @@ export function buildWorldNodeHTML(node: WorldNodeInput): string {
   // Tier A · imagen real + double-ring color categoría
   if (tier === "A") {
     return `
-      <div class="kudos-chip kudos-chip-a ${labelClass}" data-id="${id}" data-tier="A" data-name="${safeName}"
+      <div class="kudos-chip kudos-chip-a ${labelClass} ${hasCapsule ? "has-capsule" : ""}" data-id="${id}" data-tier="A" data-name="${safeName}"
            style="width:${size}px;height:${size}px;opacity:${opacity};">
         <div class="kudos-chip-outer-ring"
              style="background:${color};
@@ -110,7 +111,7 @@ export function buildWorldNodeHTML(node: WorldNodeInput): string {
   // Tier B · POI NORMAL Apple-style · pictograma blanco sobre color categoría + label
   if (tier === "B") {
     return `
-      <div class="kudos-chip kudos-chip-b ${labelClass}" data-id="${id}" data-tier="B" data-name="${safeName}"
+      <div class="kudos-chip kudos-chip-b ${labelClass} ${hasCapsule ? "has-capsule" : ""}" data-id="${id}" data-tier="B" data-name="${safeName}"
            style="width:${size}px;height:${size}px;opacity:${opacity};">
         <div class="kudos-chip-pict-bg" style="background:${color};">
           <svg viewBox="0 0 24 24" width="${size * 0.6}" height="${size * 0.6}" aria-label="${safeName}" fill="white">
@@ -238,6 +239,24 @@ export const WORLD_NODE_CSS = `
   @media (prefers-reduced-motion: reduce) {
     .kudos-chip, .kudos-chip * { animation: none !important; }
     .kudos-chip:hover { transform: none !important; }
+  }
+
+
+  /* Badge ▶ sutil en chips con cápsula disponible · G1 */
+  .kudos-chip.has-capsule::before {
+    content: "▶";
+    position: absolute;
+    top: -3px; right: -3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #C9A961;
+    color: white;
+    font-size: 8px;
+    line-height: 16px;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(201,169,97,0.65);
+    z-index: 10;
+    pointer-events: none;
   }
 
   /* ─── LABELS · estilo APPLE MAPS · texto plano sin pill ────────────── */
