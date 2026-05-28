@@ -28,6 +28,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/design-system/v2";
+import { VideoCapsule } from "@/components/media/VideoCapsule";
 import {
   getPoiById,
   getCapsulesByPoi,
@@ -165,17 +166,18 @@ export function PoiScreen({ slug }: Props) {
           </div>
 
           <div className="kudos-poi-hero-right kudos-glass-strong kudos-elev-2" style={HERO_RIGHT}>
-            <button
-              type="button"
-              onClick={() => {/* in-page play . visual only */}}
-              aria-label="Reproducir capsula destacada"
-              style={PLAY_RING}
-              className="kudos-tap"
-            >
-              <span style={PLAY_INNER}>
-                <Icon name="play" size={28} />
-              </span>
-            </button>
+            {/* VideoCapsule REAL · reemplaza el boton decorativo previo que
+                tenia onClick vacio (`in-page play . visual only`). Ahora al
+                pulsar Play se reproduce el .mp4 de verdad. */}
+            <div style={{ width: "100%", borderRadius: 14, overflow: "hidden" }}>
+              <VideoCapsule
+                videoSrc={activeCap.clipSrc}
+                posterUrl={activeCap.poster}
+                aspectRatio="16 / 9"
+                duration={activeCap.duration ?? "0:15"}
+                rounded={14}
+              />
+            </div>
             <div style={FEATURED_META}>
               <span style={FEATURED_EYEBROW}>VER CAPSULA DESTACADA</span>
               <h3 style={FEATURED_TITLE}>{activeCap.title}</h3>
@@ -270,7 +272,14 @@ export function PoiScreen({ slug }: Props) {
       <style>{`
         @media (max-width: 1023.98px) {
           .kudos-poi-hero-overlay { grid-template-columns: 1fr !important; gap: 18px !important; }
-          .kudos-poi-info-card { display: none !important; }
+          /* Info card: en mobile se muestra debajo del hero como pictogramas
+             horizontales (no oculta como antes). Reordenar grid para que vaya
+             al final del overlay. */
+          .kudos-poi-info-card {
+            order: 99 !important;
+            margin-top: 16px !important;
+            padding: 14px !important;
+          }
         }
         @media (max-width: 640px) {
           .kudos-poi { padding-left: 16px !important; padding-right: 16px !important; }
