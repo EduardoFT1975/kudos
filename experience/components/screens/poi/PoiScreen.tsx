@@ -343,17 +343,7 @@ function ResumenPanel({ poi, echo, nearby }: { poi: Poi; echo?: MockEcho; nearby
         </Panel>
 
         <Panel title="Preguntale a KUDOS Mind" accent="mind">
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <MindChip text={`Que eventos importantes ocurrieron en ${poi.name}?`} />
-            <MindChip text={`Como era ${poi.name} en su epoca?`} />
-            <MindChip text={`Por que es importante ${poi.name}?`} />
-          </div>
-          <div style={MIND_INPUT_WRAP}>
-            <input type="text" placeholder="Escribe tu pregunta..." style={MIND_INPUT} aria-label="Pregunta KUDOS Mind" />
-            <button type="button" aria-label="Enviar" style={MIND_SEND}>
-              <Icon name="arrow-right" size={14} />
-            </button>
-          </div>
+          <KudosMindBody poi={poi} context={narrative.slice(0, 2).join(" ")} />
         </Panel>
       </div>
 
@@ -649,11 +639,104 @@ function Fact({ icon, label, value }: { icon: Parameters<typeof Icon>[0]["name"]
   );
 }
 
-function MindChip({ text }: { text: string }) {
+function MindChip({ text, onClick }: { text: string; onClick?: () => void }) {
   return (
-    <button type="button" style={MIND_CHIP}>
+    <button type="button" style={MIND_CHIP} onClick={onClick}>
       <span>{text}</span>
     </button>
+  );
+}
+
+// ─── KUDOS Mind · llamada real al backend /api/mind (Anthropic Claude) ──
+function KudosMindBody({ poi, context }: { poi: Poi; context?: string }) {
+  const [question, setQuestion] = React.useState("");
+  const [answer, setAnswer] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
+
+  const ask = React.useCallback(async (q: string) => {
+    const text = q.trim();
+    if (!text || loading) return;
+    setQuestion(text);
+    setLoading(true);
+    setError(null);
+    setAnswer(null);
+    try {
+      const r = await fetch("/api/mind", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          poi: { id: poi.id, name: poi.name, country: poi.country },
+          question: text,
+          context,
+        }),
+      });
+      const j = await r.json();
+      if (r.ok && j.answer) setAnswer(j.answer);
+      else setError(j.error || `Error HTTP ${r.status}`);
+    } catch (e) {
+      setError(`No pude contactar con KUDOS Mind: ${String(e)}`);
+    } finally {
+      setLoading(false);
+    }
+  }, [poi.id, poi.name, poi.country, context, loading]);
+
+  const suggestions = [
+    `Que eventos importantes ocurrieron en ${poi.name}?`,
+    `Como era ${poi.name} en su epoca?`,
+    `Por que es importante ${poi.name}?`,
+  ];
+
+  return (
+    <>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {suggestions.map((s) => (
+          <MindChip key={s} text={s} onClick={() => ask(s)} />
+        ))}
+      </div>
+
+      <form
+        style={MIND_INPUT_WRAP}
+        onSubmit={(e) => { e.preventDefault(); ask(question); }}
+      >
+        <input
+          type="text"
+          placeholder="Escribe tu pregunta..."
+          style={MIND_INPUT}
+          aria-label="Pregunta KUDOS Mind"
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          disabled={loading}
+        />
+        <button
+          type="submit"
+          aria-label="Enviar"
+          style={{ ...MIND_SEND, opacity: loading ? 0.5 : 1 }}
+          disabled={loading || !question.trim()}
+        >
+          <Icon name="arrow-right" size={14} />
+        </button>
+      </form>
+
+      {loading && (
+        <div style={{ marginTop: 12, padding: "10px 12px", borderRadius: 10, background: "rgba(108,60,255,0.10)", border: "1px solid rgba(108,60,255,0.25)", fontSize: 12.5, color: "rgba(242,242,247,0.78)" }}>
+          KUDOS Mind está pensando…
+        </div>
+      )}
+
+      {error && (
+        <div style={{ marginTop: 12, padding: "10px 12px", borderRadius: 10, background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.30)", fontSize: 12.5, color: "#fca5a5", whiteSpace: "pre-wrap" }}>
+          {error}
+        </div>
+      )}
+
+      {answer && !loading && (
+        <div style={{ marginTop: 12, padding: "12px 14px", borderRadius: 12, background: "rgba(20,15,40,0.6)", border: "1px solid rgba(108,60,255,0.35)", fontSize: 13, color: "var(--kudos-ink, #f2f2f7)", lineHeight: 1.55, whiteSpace: "pre-wrap" }}>
+          <div style={{ fontSize: 10.5, color: "rgba(108,60,255,0.9)", fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>✦ KUDOS MIND</div>
+          {answer}
+        </div>
+      )}
+    </>
   );
 }
 

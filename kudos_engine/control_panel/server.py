@@ -81,18 +81,35 @@ def proc_alive(name: str) -> bool:
 def proc_start(name: str, cmd: list[str], cwd: Optional[Path] = None) -> dict:
     if proc_alive(name):
         return {"ok": False, "error": f"'{name}' ya está corriendo (pid {_PROCS[name].pid})"}
-    # Garantiza que el proceso herede el PATH y env del usuario
+    # stderr+stdout → archivo de log para diagnóstico (antes iba a DEVNULL → invisible)
+    log_path = STATE_DIR / f"{name}.stderr.log"
     env = os.environ.copy()
-    p = subprocess.Popen(
-        cmd,
-        cwd=str(cwd or REPO_DIR),
-        env=env,
-        stdout=subprocess.DEVNULL,   # el worker ya escribe a su log.txt
-        stderr=subprocess.DEVNULL,
-        creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0),
-    )
-    _PROCS[name] = p
-    return {"ok": True, "pid": p.pid}
+    creationflags = 0
+    if os.name == "nt":
+        creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+    try:
+        log_f = open(log_path, "w", encoding="utf-8")
+        p = subprocess.Popen(
+            cmd,
+            cwd=str(cwd or REPO_DIR),
+            env=env,
+            stdout=log_f,
+            stderr=subprocess.STDOUT,
+            creationflags=creationflags,
+        )
+        _PROCS[name] = p
+        # Verificamos a los 1.2s si sigue vivo. Si murió, devolvemos el log
+        # como error útil para que el panel haga alert() con el detalle real.
+        time.sleep(1.2)
+        if p.poll() is not None:
+            try:
+                tail = log_path.read_text(encoding="utf-8", errors="ignore").strip()[-800:]
+            except Exception:
+                tail = "(sin log)"
+            return {"ok": False, "error": f"'{name}' murió en 1s (exit {p.returncode})\n\n{tail}"}
+        return {"ok": True, "pid": p.pid, "log": str(log_path)}
+    except Exception as e:
+        return {"ok": False, "error": f"No pude arrancar '{name}': {type(e).__name__}: {e}"}
 
 
 def proc_stop(name: str) -> dict:
@@ -509,8 +526,13 @@ const post = async (url, ok_msg) => {
   try {
     const r = await fetch(url, {method:'POST'});
     const j = await r.json();
-    if (j.ok === false) toast('❌ ' + (j.error || 'error'));
-    else toast('✅ ' + (ok_msg || 'OK'));
+    if (j.ok === false) {
+      console.error('POST error:', j.error);
+      toast('❌ ' + String(j.error || 'error').slice(0, 100));
+      if (j.error && String(j.error).includes('\n')) alert(j.error);
+    } else {
+      toast('✅ ' + (ok_msg || 'OK'));
+    }
     setTimeout(refresh, 600);
   } catch (e) { toast('❌ ' + e.message); }
 };
@@ -524,7 +546,13 @@ const importOSM = async () => {
       body: JSON.stringify({country, max_results}),
     });
     const j = await r.json();
-    toast(j.ok ? `📦 Importando ${country} en background (pid ${j.pid})…` : '❌ ' + j.error);
+    if (j.ok) {
+      toast(`📦 Importando ${country} (pid ${j.pid}) · tarda 1-3 min`);
+    } else {
+      console.error('Import OSM ERROR:', j.error);
+      toast('❌ Importar OSM falló · ver detalle');
+      alert('IMPORTAR OSM FALLÓ:\n\n' + j.error);
+    }
     setTimeout(refresh, 600);
   } catch (e) { toast('❌ ' + e.message); }
 };
