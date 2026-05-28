@@ -63,6 +63,27 @@ const CATEGORY_LABEL_ES: Record<WorldNodeCategory, string> = {
   mystery: "Misterio",
 };
 
+// Glyph sutil sin texto · solo icono · misterio controlado
+const CATEGORY_ICON_GLYPH: Record<WorldNodeCategory, string> = {
+  museum: "▣", castle: "♜", religious: "✚", megalith: "⫯",
+  park: "❀", plaza: "□", monument: "▲", archaeology: "⫯",
+  palace: "♔", mystery: "◇",
+};
+
+// Líneas evocadoras · NARRATIVA PRIMERO · una sola línea que invita
+const EVOCATIVE_LINES_ES: Record<WorldNodeCategory, string> = {
+  museum:       "Donde el tiempo se conserva en silencio.",
+  castle:       "Una piedra que vio caer reinos.",
+  religious:    "Un espacio donde el aire pesa distinto.",
+  megalith:     "Manos antiguas dejaron una huella aquí.",
+  park:         "El mundo respira sin pedir permiso.",
+  plaza:        "Aquí la ciudad se encuentra consigo misma.",
+  monument:     "Alguien quiso que esto durara más que él.",
+  archaeology:  "Capas de vida bajo tus pies.",
+  palace:       "Decisiones que cambiaron mapas se tomaron aquí.",
+  mystery:      "Algo que aún no entendemos del todo.",
+};
+
 const TIER_LABEL_ES: Record<WorldNodeTier, string> = {
   S: "Legendary",
   A: "Premium",
@@ -86,7 +107,7 @@ const LEGENDARY_IDS = new Set([
   "wd-Q12512",
   "wd-Q131013",
   "wd-Q132498",
-  "wd-Q1419",
+  "wd-Q180212",
   "wd-Q150586",
   "wd-Q160422",
   "wd-Q160933",
@@ -635,36 +656,34 @@ export function WorldEngine() {
         {totalLoaded.toLocaleString("es-ES")} nodos · {visibleCount} visibles · zoom {zoom}
       </div>
 
-      {/* Bottom Sheet · F3.5 · al click en chip · offline-first */}
+      {/* Bottom Sheet · F4 · narrativa primero · misterio controlado 70/30 */}
       {activeId && (() => {
         const poi = allNodesRef.current.find((p) => p.id === activeId);
         if (!poi) return null;
         const heroUrl = wikimediaHero(poi.image);
-        const catLabel = CATEGORY_LABEL_ES[poi.category];
-        const tierLabel = TIER_LABEL_ES[poi.tier];
-        const tierColor = poi.tier === "S" ? WORLD_COLORS.legendary
-                       : poi.tier === "A" ? "#7c5fb8"
-                       : "#5a8bb8";
+        const catIcon = CATEGORY_ICON_GLYPH[poi.category];
+        const tierShine = poi.tier === "S" ? "tier-s" : poi.tier === "A" ? "tier-a" : "";
+        const evocative = EVOCATIVE_LINES_ES[poi.category] || "Una pieza del mundo esperándote.";
         return (
           <div style={SHEET_BACKDROP} onClick={() => setActiveId(null)}>
-            <div style={SHEET} onClick={(e) => e.stopPropagation()}>
+            <div style={SHEET} className={`kudos-sheet ${tierShine}`} onClick={(ev) => ev.stopPropagation()}>
               <button style={SHEET_CLOSE} onClick={() => setActiveId(null)} aria-label="Cerrar">×</button>
               {heroUrl && (
                 <div style={SHEET_HERO_WRAP}>
                   <img src={heroUrl} alt={poi.name}
                        style={{width:"100%", height:"100%", objectFit:"cover", display:"block"}}
                        onError={(ev) => { (ev.target as HTMLImageElement).style.display = "none"; }} />
+                  {/* Icono categoría sutil esquina superior izquierda · sin texto */}
+                  <div style={SHEET_CAT_GLYPH} title={CATEGORY_LABEL_ES[poi.category]}>
+                    {catIcon}
+                  </div>
+                  {/* Halo dorado sutil solo Tier S · sin texto "LEGENDARY" */}
+                  {poi.tier === "S" && <div style={SHEET_TIER_S_DOT} title="Legendary" />}
                 </div>
               )}
               <div style={SHEET_BODY}>
-                <div style={SHEET_BADGES}>
-                  <span style={{...SHEET_BADGE, background: tierColor, color: "white"}}>{tierLabel}</span>
-                  <span style={SHEET_BADGE_LIGHT}>{catLabel}</span>
-                </div>
                 <h2 style={SHEET_TITLE}>{poi.name}</h2>
-                <p style={SHEET_DESC}>
-                  Cápsula contextual en preparación · próximamente narración cinematográfica.
-                </p>
+                <p style={SHEET_EVOCATIVE}>{evocative}</p>
                 <div style={SHEET_ACTIONS}>
                   <button style={SHEET_BTN_GHOST} onClick={() => {
                     try {
@@ -673,16 +692,18 @@ export function WorldEngine() {
                       if (!saves.includes(poi.id)) {
                         saves.push(poi.id);
                         localStorage.setItem(k, JSON.stringify(saves));
+                        showToast("Guardado en Mi Mundo");
+                      } else {
+                        showToast("Ya estaba en Mi Mundo");
                       }
-                      alert("Guardado en Mi Mundo");
-                    } catch {}
+                    } catch { showToast("No se pudo guardar"); }
                   }}>
-                    ◇ Guardar
+                    Guardar
                   </button>
                   <button style={SHEET_BTN_PRIMARY} onClick={() => {
-                    alert("Cápsula próximamente. Estamos generando narraciones para los 43k POIs.");
+                    showToast("Cápsula en preparación · pronto disponible", 3200);
                   }}>
-                    ▶ Ver cápsula
+                    Descubrir
                   </button>
                 </div>
               </div>
@@ -690,6 +711,13 @@ export function WorldEngine() {
           </div>
         );
       })()}
+
+      {/* Toast KUDOS inline · sustituye alert() nativo */}
+      {toast && (
+        <div style={TOAST_WRAP}>
+          <div style={TOAST}>{toast}</div>
+        </div>
+      )}
 
       <div style={ZOOM_RAIL}>
         <button style={ZOOM_BTN} onClick={() => mapRef.current?.zoomIn()} aria-label="Acercar">+</button>
@@ -738,6 +766,16 @@ function ensureCss() {
       @keyframes kudos-sheet-slide-up {
         from { transform: translateY(60px); opacity: 0; }
         to   { transform: translateY(0); opacity: 1; }
+      }
+      @keyframes kudos-toast-up {
+        from { transform: translate(-50%, 24px); opacity: 0; }
+        to   { transform: translate(-50%, 0); opacity: 1; }
+      }
+      /* F4 · halo dorado sutil cuando el sheet es Tier S */
+      .kudos-sheet.tier-s {
+        box-shadow: 0 -8px 32px rgba(0,0,0,0.25),
+                    0 0 0 1.5px rgba(201,169,97,0.55),
+                    0 0 28px rgba(201,169,97,0.32);
       }
     `;
     document.head.appendChild(style);

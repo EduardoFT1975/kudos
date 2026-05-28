@@ -34,7 +34,7 @@ LEGENDARY_IDS = {
     "wd-Q10285",   # Coliseo
     "wd-Q43332",   # Pompeya
     "wd-Q160422",   # Sagrada Familia
-    "wd-Q1419",   # Foro Romano
+    "wd-Q180212",   # Foro Romano (ID real)
     "wd-Q12512",   # Torre de Pisa
     "wd-Q160933",   # Venecia
     "wd-Q49093",   # Vaticano
