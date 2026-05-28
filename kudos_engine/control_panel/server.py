@@ -673,7 +673,7 @@ const post = async (url, ok_msg) => {
     if (j.ok === false) {
       console.error('POST error:', j.error);
       toast('❌ ' + String(j.error || 'error').slice(0, 100));
-      if (j.error && String(j.error).includes('\n')) alert(j.error);
+      if (j.error && String(j.error).length > 80) alert(j.error);
     } else {
       toast('✅ ' + (ok_msg || 'OK'));
     }
@@ -695,7 +695,7 @@ const importOSM = async () => {
     } else {
       console.error('Import OSM ERROR:', j.error);
       toast('❌ Importar OSM falló · ver detalle');
-      alert('IMPORTAR OSM FALLÓ:\n\n' + j.error);
+      alert('IMPORTAR OSM FALLÓ: - ' + j.error);
     }
     setTimeout(refresh, 600);
   } catch (e) { toast('❌ ' + e.message); }
@@ -837,7 +837,7 @@ async function importWikidata() {
       toast(`⬇ Importando Wikidata ${country} (pid ${j.pid}) · 3-5 min`);
     } else {
       toast('❌ ' + String(j.error || 'error').slice(0,80));
-      if (j.error && String(j.error).includes('\n')) alert(j.error);
+      if (j.error && String(j.error).length > 80) alert(j.error);
     }
   } catch (e) { toast('❌ ' + e.message); }
 }
@@ -860,7 +860,7 @@ async function autoPush() {
       toast('✅ JSONs subidos a GitHub · Render redesplegará');
     } else {
       toast('❌ ' + String(j.error || 'error').slice(0,80));
-      if (j.error) alert('AUTO-PUSH:\n\n' + j.error);
+      if (j.error) alert('AUTO-PUSH: - ' + j.error);
     }
     setTimeout(refresh, 800);
   } catch (e) { toast('❌ ' + e.message); }
@@ -884,10 +884,14 @@ def main(argv=None) -> int:
     args = p.parse_args(argv)
     print()
     print("=" * 60)
-    print("  KUDOS · Panel del Fundador")
+    print("  KUDOS . Panel del Fundador")
     print(f"  Abre en tu navegador: http://{args.host}:{args.port}")
     print("  Ctrl+C para parar")
     print("=" * 60)
     print()
     uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
     return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
