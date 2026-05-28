@@ -390,16 +390,18 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
       try {
         const isActive = id === activeId;
         const tier = tierOf(p);
-        // Mismo cálculo que buildBubbleHTML
-        const size = isActive ? 92 : tier === "S" ? 76 : tier === "A" ? 56 : 40;
-        // Label extra: S tiene label grande (28px), A label normal (24px), B sin label
-        const labelHeight = isActive ? 32 : tier === "S" ? 28 : tier === "A" ? 22 : 0;
+        // Tamaño actual del nuevo diseño Futurismo Humano (sincronizado con buildBubbleHTML)
+        const size = isActive ? 84 : tier === "S" ? 68 : tier === "A" ? 50 : 14;
+        // Tier S/A llevan label debajo · B es solo el dot
+        const labelHeight = isActive ? 30 : tier === "S" ? 30 : tier === "A" ? 24 : 0;
+        const totalW = tier === "B" ? 14 : Math.max(size, 140);
+        const totalH = size + labelHeight;
         const html = buildBubbleHTML(p, isActive);
         const icon = L.divIcon({
           className: "kudos-bubble",
           html,
-          iconSize: [Math.max(size, 120), size + labelHeight],
-          iconAnchor: [Math.max(size, 120) / 2, size / 2 + labelHeight / 2],
+          iconSize: [totalW, totalH],
+          iconAnchor: [totalW / 2, tier === "B" ? size / 2 : size / 2 + labelHeight / 2],
           popupAnchor: [0, -size / 2],
         });
         const existing = markersRef.current.get(id);
@@ -485,11 +487,16 @@ function leafletZoom(dir: "in" | "out") {
   try { dir === "in" ? map.zoomIn() : map.zoomOut(); } catch {}
 }
 
-// ─── Marker personality · tier (S/A/B) + categoría ─────────────────────
-// Los markers ya no son todos iguales. Cada POI tiene:
-//   - TIER S (icono mundial): 76px, anillo dorado-gradiente, pulso animado
-//   - TIER A (regional top):   56px, anillo violeta/categoría, label
-//   - TIER B (resto):          40px, dot color categoría, sin label
+// ─── Markers "Futurismo Humano" · brand book 5D KUDOS / TIMEWISDOM ──────
+// Paleta crítica:
+//   - DORADO #FFD700 → mérito eterno · token $TIME · valor que perdura (Tier S)
+//   - CÍAN     #00E5FF → Nexus · IA Mind · conectividad (Tier A)
+//   - NEGRO    #0A0A0A → archivo universal · profundidad (fondo de todos)
+//   - BLANCO   #F5F5F5 → texturas hardware
+//
+// Cero fotos placeholder. Símbolos geométricos vectoriales por categoría.
+// Glow tecnológico que respira. Forma única para Tier S (hexágono = núcleo
+// de la cápsula). Round limpio para Tier A. Dot para Tier B.
 
 const WORLD_ICON_IDS = new Set([
   "rome", "machu", "petra", "athens", "granada", "istanbul",
@@ -506,76 +513,95 @@ function tierOf(p: Poi): "S" | "A" | "B" {
   return "B";
 }
 
-function categoryColor(cat: string | undefined): { ring: string; glow: string; tint: string } {
+// SVG glyph minimalista por categoría · 24x24 viewBox
+function categoryGlyph(cat: string | undefined, fill: string): string {
+  const f = fill;
   switch (cat) {
-    case "museo":       return { ring: "#FF3CAC", glow: "rgba(255,60,172,0.55)",  tint: "rgba(255,60,172,0.18)" };
-    case "naturaleza":  return { ring: "#10B981", glow: "rgba(16,185,129,0.55)",  tint: "rgba(16,185,129,0.18)" };
-    case "gastronomia": return { ring: "#FF9A00", glow: "rgba(255,154,0,0.55)",   tint: "rgba(255,154,0,0.18)" };
-    case "evento":      return { ring: "#FFD23F", glow: "rgba(255,210,63,0.55)",  tint: "rgba(255,210,63,0.18)" };
-    case "historia":    return { ring: "#A78BFA", glow: "rgba(167,139,250,0.55)", tint: "rgba(167,139,250,0.18)" };
-    case "cultura":     return { ring: "#22D3EE", glow: "rgba(34,211,238,0.55)",  tint: "rgba(34,211,238,0.18)" };
-    case "misterio":    return { ring: "#F472B6", glow: "rgba(244,114,182,0.55)", tint: "rgba(244,114,182,0.18)" };
-    default:            return { ring: "#6C3CFF", glow: "rgba(108,60,255,0.55)",  tint: "rgba(108,60,255,0.18)" };
+    case "museo":
+      // Columna clásica (museos / arte)
+      return `<path d="M5 4h14v2H5zM5 19h14v2H5zM7 7h10v11H7zM9 8v9M12 8v9M15 8v9" stroke="${f}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+    case "naturaleza":
+      // Montaña + sol
+      return `<path d="M3 19h18L15 9l-3 4-2-2-7 8z" fill="${f}"/><circle cx="17" cy="6" r="2.2" fill="${f}"/>`;
+    case "gastronomia":
+      // Tenedor + cuchara
+      return `<path d="M8 3v8a2 2 0 0 0 2 2v8M16 3v18M14 3v6h4V3M12 3v6a2 2 0 0 1-4 0V3" stroke="${f}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+    case "evento":
+      // Estrella destacada
+      return `<path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z" fill="${f}"/>`;
+    case "historia":
+      // Reloj / cronos
+      return `<circle cx="12" cy="12" r="9" fill="none" stroke="${f}" stroke-width="1.8"/><path d="M12 6v6l4 2.5" stroke="${f}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+    case "cultura":
+      // Símbolo "play / discover"
+      return `<circle cx="12" cy="12" r="9" fill="none" stroke="${f}" stroke-width="1.8"/><path d="M10 8l6 4-6 4z" fill="${f}"/>`;
+    case "misterio":
+      // Ojo / portal
+      return `<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" fill="none" stroke="${f}" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="${f}"/>`;
+    default:
+      // Monumento (default) · triángulo + base
+      return `<path d="M12 3l9 16H3z" fill="${f}"/>`;
   }
 }
 
 function buildBubbleHTML(p: Poi, active: boolean): string {
   const tier = tierOf(p);
   const cat = p.categories?.[0];
-  const color = categoryColor(cat);
 
-  // Tamaños por tier (active sobreescribe a 92)
-  const baseSize = active ? 92 : tier === "S" ? 76 : tier === "A" ? 56 : 40;
-  const photo = escapeHTML(p.heroImage);
+  // Colores por tier según brand book futurista
+  const GOLD = "#FFD700";   // Mérito eterno · $TIME
+  const CYAN = "#00E5FF";   // Nexus · Mind IA
+  const NAVY = "#0A0A0A";   // Archivo universal
+  const ORG  = "#F5F5F5";   // Cerámica
 
-  // ANILLO · estilo distinto por tier
-  let ring: string;
+  // ─── Tier S · hexágono dorado + glyph blanco + pulso dorado-cyan ─────
   if (active || tier === "S") {
-    // Gradiente KUDOS oficial + sombra brillante
-    ring = `padding:3px;background:linear-gradient(135deg,#FF9A00 0%,#FF3CAC 50%,#6C3CFF 100%);box-shadow:0 0 0 2px rgba(10,6,18,0.6),0 12px 28px -8px ${color.glow},0 0 24px ${color.glow};`;
-  } else if (tier === "A") {
-    // Anillo del color de la categoría
-    ring = `padding:2px;background:${color.ring};box-shadow:0 6px 18px -6px ${color.glow},0 0 12px ${color.glow};`;
-  } else {
-    // Tier B · borde fino sin glow
-    ring = `padding:1px;background:rgba(255,255,255,0.20);box-shadow:0 4px 10px -4px rgba(0,0,0,0.55);`;
-  }
-
-  // PULSO animado solo para S (clase definida en LEAFLET_STYLE_ID)
-  const pulseClass = (active || tier === "S") ? "kudos-bubble-pulse" : "";
-
-  // LABEL · S y A muestran nombre · B no
-  let label = "";
-  if (active) {
-    label = `
-      <div style="margin-top:6px;display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(10,6,18,0.92);border:1px solid rgba(255,255,255,0.12);color:#F2F2F7;font-family:Poppins,system-ui,sans-serif;font-size:11.5px;font-weight:700;backdrop-filter:blur(8px);">
-        <span style="color:#FFD23F;font-size:11px;">★</span>
-        <span style="color:#FFD23F;">${p.rating.toFixed(1)}</span>
-        <span style="opacity:0.42;">·</span>
-        <span>${escapeHTML(p.name)}</span>
-      </div>
-    `;
-  } else if (tier === "S") {
-    label = `
-      <div style="margin-top:6px;padding:4px 10px;border-radius:999px;background:rgba(10,6,18,0.92);border:1px solid ${color.ring};color:#F2F2F7;font-family:Poppins,system-ui,sans-serif;font-size:11px;font-weight:700;white-space:nowrap;backdrop-filter:blur(6px);box-shadow:0 6px 18px -8px ${color.glow};">
-        <span style="color:#FFD23F;margin-right:5px;">★</span>${escapeHTML(p.name)}
-      </div>
-    `;
-  } else if (tier === "A") {
-    label = `
-      <div style="margin-top:5px;padding:3px 8px;border-radius:999px;background:rgba(10,6,18,0.85);color:#F2F2F7;font-family:Poppins,system-ui,sans-serif;font-size:10px;font-weight:600;white-space:nowrap;">
-        ${escapeHTML(p.name)}
+    const sz = active ? 84 : 68;
+    return `
+      <div class="kudos-bubble-wrap kudos-bubble-s" style="display:flex;flex-direction:column;align-items:center;pointer-events:auto;cursor:pointer;">
+        <div style="position:relative;width:${sz}px;height:${sz}px;display:flex;align-items:center;justify-content:center;">
+          <svg viewBox="0 0 100 100" width="${sz}" height="${sz}" style="position:absolute;inset:0;filter:drop-shadow(0 0 14px rgba(255,215,0,0.55)) drop-shadow(0 6px 16px rgba(0,0,0,0.6));">
+            <defs>
+              <linearGradient id="g${escapeHTML(p.id)}" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="${GOLD}"/>
+                <stop offset="100%" stop-color="#FFA500"/>
+              </linearGradient>
+            </defs>
+            <polygon points="50,4 92,27 92,73 50,96 8,73 8,27" fill="${NAVY}" stroke="url(#g${escapeHTML(p.id)})" stroke-width="3"/>
+            <polygon points="50,12 84,30 84,70 50,88 16,70 16,30" fill="rgba(255,215,0,0.06)"/>
+          </svg>
+          <svg viewBox="0 0 24 24" width="${Math.round(sz*0.42)}" height="${Math.round(sz*0.42)}" style="position:relative;z-index:1;">
+            ${categoryGlyph(cat, GOLD)}
+          </svg>
+        </div>
+        <div style="margin-top:8px;padding:5px 12px;border-radius:999px;background:rgba(10,10,10,0.92);border:1px solid ${GOLD};color:${ORG};font-family:Poppins,system-ui,sans-serif;font-size:11px;font-weight:700;white-space:nowrap;letter-spacing:0.3px;box-shadow:0 6px 20px -8px rgba(255,215,0,0.6);">
+          <span style="color:${GOLD};margin-right:6px;">◆</span>${escapeHTML(p.name)}
+        </div>
       </div>
     `;
   }
-  // tier B sin label · solo el dot
 
+  // ─── Tier A · círculo cyan elegante + glyph cyan + label ─────────────
+  if (tier === "A") {
+    const sz = 50;
+    return `
+      <div class="kudos-bubble-wrap kudos-bubble-a" style="display:flex;flex-direction:column;align-items:center;pointer-events:auto;cursor:pointer;">
+        <div style="position:relative;width:${sz}px;height:${sz}px;border-radius:50%;background:radial-gradient(circle at 30% 30%, rgba(0,229,255,0.15), ${NAVY} 70%);border:1.5px solid ${CYAN};display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(0,229,255,0.45),0 6px 14px -6px rgba(0,0,0,0.5);">
+          <svg viewBox="0 0 24 24" width="22" height="22">
+            ${categoryGlyph(cat, CYAN)}
+          </svg>
+        </div>
+        <div style="margin-top:6px;padding:3px 9px;border-radius:999px;background:rgba(10,10,10,0.78);color:${ORG};font-family:Poppins,system-ui,sans-serif;font-size:10px;font-weight:600;white-space:nowrap;letter-spacing:0.2px;border:1px solid rgba(0,229,255,0.25);">
+          ${escapeHTML(p.name)}
+        </div>
+      </div>
+    `;
+  }
+
+  // ─── Tier B · dot tenue · solo dot, sin label (mantiene mapa limpio) ─
   return `
-    <div class="kudos-bubble-wrap ${pulseClass}" style="display:flex;flex-direction:column;align-items:center;pointer-events:auto;cursor:pointer;">
-      <div style="width:${baseSize}px;height:${baseSize}px;border-radius:50%;${ring}transition:transform 0.18s ease;">
-        <div style="width:100%;height:100%;border-radius:50%;background-image:url('${photo}'),linear-gradient(135deg,${color.tint},${color.ring});background-size:cover;background-position:center;border:2px solid #1A1333;"></div>
-      </div>
-      ${label}
+    <div class="kudos-bubble-wrap kudos-bubble-b" style="display:flex;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer;" title="${escapeHTML(p.name)}">
+      <div style="width:14px;height:14px;border-radius:50%;background:${CYAN};opacity:0.55;box-shadow:0 0 8px rgba(0,229,255,0.5);border:1.5px solid rgba(10,10,10,0.7);"></div>
     </div>
   `;
 }
@@ -607,15 +633,21 @@ function ensureLeafletCSS() {
       .leaflet-tile { filter: hue-rotate(220deg) saturate(0.62) brightness(0.55) contrast(1.05); }
       .kudos-bubble { background:transparent !important; border:none !important; }
       .kudos-user   { background:transparent !important; border:none !important; }
-      .kudos-bubble-wrap:hover > div:first-child { transform: scale(1.08); }
-      @keyframes kudos-pulse-ring {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(255,210,63,0.55), 0 0 24px rgba(255,154,0,0.4); }
-        50%      { box-shadow: 0 0 0 14px rgba(255,210,63,0), 0 0 40px rgba(255,60,172,0.55); }
+      .kudos-bubble-wrap { transition: transform 0.18s ease; }
+      .kudos-bubble-wrap:hover { transform: scale(1.10); z-index: 1000 !important; }
+      @keyframes kudos-pulse-gold {
+        0%, 100% { filter: drop-shadow(0 0 6px rgba(255,215,0,0.4)) drop-shadow(0 6px 14px rgba(0,0,0,0.6)); }
+        50%      { filter: drop-shadow(0 0 22px rgba(255,215,0,0.9)) drop-shadow(0 0 36px rgba(0,229,255,0.4)) drop-shadow(0 6px 14px rgba(0,0,0,0.6)); }
       }
-      .kudos-bubble-pulse > div:first-child { animation: kudos-pulse-ring 2.6s ease-in-out infinite; }
+      .kudos-bubble-s svg:first-of-type { animation: kudos-pulse-gold 3s ease-in-out infinite; }
+      @keyframes kudos-pulse-cyan {
+        0%, 100% { box-shadow: 0 0 10px rgba(0,229,255,0.35), 0 4px 10px -4px rgba(0,0,0,0.5); }
+        50%      { box-shadow: 0 0 18px rgba(0,229,255,0.7),  0 4px 10px -4px rgba(0,0,0,0.5); }
+      }
+      .kudos-bubble-a > div:first-child { animation: kudos-pulse-cyan 4s ease-in-out infinite; }
       @media (prefers-reduced-motion: reduce) {
-        .kudos-bubble-pulse > div:first-child { animation: none; }
-        .kudos-bubble-wrap:hover > div:first-child { transform: none; }
+        .kudos-bubble-s svg:first-of-type, .kudos-bubble-a > div:first-child { animation: none; }
+        .kudos-bubble-wrap:hover { transform: none; }
       }
     `;
     document.head.appendChild(style);
