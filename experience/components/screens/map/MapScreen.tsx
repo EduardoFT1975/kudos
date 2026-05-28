@@ -295,6 +295,8 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
   // como dep del useEffect de markers para que se dispare cuando Leaflet
   // está listo (antes hacía early return y nunca se re-ejecutaba).
   const [mapReady, setMapReady] = React.useState(false);
+  // V5.4 · zoom actual · dispara re-render de markers cuando el usuario hace zoom
+  const [currentZoom, setCurrentZoom] = React.useState<number>(5);
   React.useEffect(() => { onPickRef.current = onPick; }, [onPick]);
 
   // Mount Leaflet once
@@ -334,6 +336,13 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
       mapRef.current = map;
       createdMap = map;
       LRef.current = L;
+      // V5.4 · listener zoom para refiltrar markers cuando el usuario hace zoom
+      setCurrentZoom(map.getZoom());
+      map.on("zoomend", () => {
+        const z = map.getZoom();
+        setCurrentZoom(z);
+        console.warn("[KUDOS-MAP] zoomend · z=", z);
+      });
       // P32-fix · disparar re-render del useEffect de markers · sin esto
       // los markers nunca se pintaban porque el effect [pois, activeId] se
       // ejecutaba antes que LRef estuviera disponible y hacía early return.
@@ -367,10 +376,11 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
     const L = LRef.current;
     const map = mapRef.current;
     if (!L || !map) return;
-    // P32-debug · log explícito · saber EXACTO cuántos POIs recibe el mapa
-    console.warn("[KUDOS-MAP] render markers · pois=", pois.length, "· activeId=", activeId);
-    const next = new Map<string, Poi>(pois.map((p) => [p.id, p]));
-    // Remove stale
+    // V5.4 · LoD · filtrar POIs visibles según zoom actual (Google Maps style)
+    const visibleByZoom = pois.filter((p) => currentZoom >= minZoomFor(p));
+    console.warn("[KUDOS-MAP] render markers · pois=", pois.length, "· visible@zoom", currentZoom, "=", visibleByZoom.length, "· activeId=", activeId);
+    const next = new Map<string, Poi>(visibleByZoom.map((p) => [p.id, p]));
+    // Remove stale (incluye POIs que se ocultaron al alejar zoom)
     markersRef.current.forEach((m, id) => {
       if (!next.has(id)) {
         try { m.remove(); } catch {}
@@ -389,19 +399,14 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
       }
       try {
         const isActive = id === activeId;
-        const tier = tierOf(p);
-        // Tamaño actual del nuevo diseño Futurismo Humano (sincronizado con buildBubbleHTML)
-        const size = isActive ? 84 : tier === "S" ? 68 : tier === "A" ? 50 : 14;
-        // Tier S/A llevan label debajo · B es solo el dot
-        const labelHeight = isActive ? 30 : tier === "S" ? 30 : tier === "A" ? 24 : 0;
-        const totalW = tier === "B" ? 14 : Math.max(size, 140);
-        const totalH = size + labelHeight;
+        // V5.3 · tamaño consistente Google Maps · sincronizado con buildBubbleHTML
+        const size = isActive ? 56 : 40;
         const html = buildBubbleHTML(p, isActive);
         const icon = L.divIcon({
           className: "kudos-bubble",
           html,
-          iconSize: [totalW, totalH],
-          iconAnchor: [totalW / 2, tier === "B" ? size / 2 : size / 2 + labelHeight / 2],
+          iconSize: [size, size],
+          iconAnchor: [size / 2, size / 2],
           popupAnchor: [0, -size / 2],
         });
         const existing = markersRef.current.get(id);
@@ -420,7 +425,7 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
       }
     });
     console.warn("[KUDOS-MAP] markers OK · added=", added, "· skipped=", skipped, "· total=", markersRef.current.size);
-  }, [pois, activeId, mapReady]);
+  }, [pois, activeId, mapReady, currentZoom]);
 
   // Center on active POI
   React.useEffect(() => {
@@ -513,95 +518,35 @@ function tierOf(p: Poi): "S" | "A" | "B" {
   return "B";
 }
 
-// SVG glyph minimalista por categoría · 24x24 viewBox
-function categoryGlyph(cat: string | undefined, fill: string): string {
-  const f = fill;
-  switch (cat) {
-    case "museo":
-      // Columna clásica (museos / arte)
-      return `<path d="M5 4h14v2H5zM5 19h14v2H5zM7 7h10v11H7zM9 8v9M12 8v9M15 8v9" stroke="${f}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
-    case "naturaleza":
-      // Montaña + sol
-      return `<path d="M3 19h18L15 9l-3 4-2-2-7 8z" fill="${f}"/><circle cx="17" cy="6" r="2.2" fill="${f}"/>`;
-    case "gastronomia":
-      // Tenedor + cuchara
-      return `<path d="M8 3v8a2 2 0 0 0 2 2v8M16 3v18M14 3v6h4V3M12 3v6a2 2 0 0 1-4 0V3" stroke="${f}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
-    case "evento":
-      // Estrella destacada
-      return `<path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z" fill="${f}"/>`;
-    case "historia":
-      // Reloj / cronos
-      return `<circle cx="12" cy="12" r="9" fill="none" stroke="${f}" stroke-width="1.8"/><path d="M12 6v6l4 2.5" stroke="${f}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
-    case "cultura":
-      // Símbolo "play / discover"
-      return `<circle cx="12" cy="12" r="9" fill="none" stroke="${f}" stroke-width="1.8"/><path d="M10 8l6 4-6 4z" fill="${f}"/>`;
-    case "misterio":
-      // Ojo / portal
-      return `<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" fill="none" stroke="${f}" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="${f}"/>`;
-    default:
-      // Monumento (default) · triángulo + base
-      return `<path d="M12 3l9 16H3z" fill="${f}"/>`;
-  }
+// Level of Detail (LoD) por tier · Google Maps style:
+//   - Tier S (iconos del mundo): visible a partir de zoom 3 (continente)
+//   - Tier A (regionales top):   visible a partir de zoom 6 (país)
+//   - Tier B (locales):          visible a partir de zoom 10 (ciudad)
+// En zoom mundo (1-2) NO se ve nada, dejando el mapa limpio como Google.
+// Al hacer zoom in, aparecen progresivamente los markers de menor importancia.
+const MIN_ZOOM_BY_TIER: Record<"S" | "A" | "B", number> = { S: 3, A: 6, B: 10 };
+
+function minZoomFor(p: Poi): number {
+  return MIN_ZOOM_BY_TIER[tierOf(p)];
 }
 
 function buildBubbleHTML(p: Poi, active: boolean): string {
   const tier = tierOf(p);
-  const cat = p.categories?.[0];
-
-  // Colores por tier según brand book futurista
-  const GOLD = "#FFD700";   // Mérito eterno · $TIME
-  const CYAN = "#00E5FF";   // Nexus · Mind IA
-  const NAVY = "#0A0A0A";   // Archivo universal
-  const ORG  = "#F5F5F5";   // Cerámica
-
-  // ─── Tier S · hexágono dorado + glyph blanco + pulso dorado-cyan ─────
-  if (active || tier === "S") {
-    const sz = active ? 84 : 68;
-    return `
-      <div class="kudos-bubble-wrap kudos-bubble-s" style="display:flex;flex-direction:column;align-items:center;pointer-events:auto;cursor:pointer;">
-        <div style="position:relative;width:${sz}px;height:${sz}px;display:flex;align-items:center;justify-content:center;">
-          <svg viewBox="0 0 100 100" width="${sz}" height="${sz}" style="position:absolute;inset:0;filter:drop-shadow(0 0 14px rgba(255,215,0,0.55)) drop-shadow(0 6px 16px rgba(0,0,0,0.6));">
-            <defs>
-              <linearGradient id="g${escapeHTML(p.id)}" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="${GOLD}"/>
-                <stop offset="100%" stop-color="#FFA500"/>
-              </linearGradient>
-            </defs>
-            <polygon points="50,4 92,27 92,73 50,96 8,73 8,27" fill="${NAVY}" stroke="url(#g${escapeHTML(p.id)})" stroke-width="3"/>
-            <polygon points="50,12 84,30 84,70 50,88 16,70 16,30" fill="rgba(255,215,0,0.06)"/>
-          </svg>
-          <svg viewBox="0 0 24 24" width="${Math.round(sz*0.42)}" height="${Math.round(sz*0.42)}" style="position:relative;z-index:1;">
-            ${categoryGlyph(cat, GOLD)}
-          </svg>
-        </div>
-        <div style="margin-top:8px;padding:5px 12px;border-radius:999px;background:rgba(10,10,10,0.92);border:1px solid ${GOLD};color:${ORG};font-family:Poppins,system-ui,sans-serif;font-size:11px;font-weight:700;white-space:nowrap;letter-spacing:0.3px;box-shadow:0 6px 20px -8px rgba(255,215,0,0.6);">
-          <span style="color:${GOLD};margin-right:6px;">◆</span>${escapeHTML(p.name)}
-        </div>
-      </div>
-    `;
-  }
-
-  // ─── Tier A · círculo cyan elegante + glyph cyan + label ─────────────
-  if (tier === "A") {
-    const sz = 50;
-    return `
-      <div class="kudos-bubble-wrap kudos-bubble-a" style="display:flex;flex-direction:column;align-items:center;pointer-events:auto;cursor:pointer;">
-        <div style="position:relative;width:${sz}px;height:${sz}px;border-radius:50%;background:radial-gradient(circle at 30% 30%, rgba(0,229,255,0.15), ${NAVY} 70%);border:1.5px solid ${CYAN};display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(0,229,255,0.45),0 6px 14px -6px rgba(0,0,0,0.5);">
-          <svg viewBox="0 0 24 24" width="22" height="22">
-            ${categoryGlyph(cat, CYAN)}
-          </svg>
-        </div>
-        <div style="margin-top:6px;padding:3px 9px;border-radius:999px;background:rgba(10,10,10,0.78);color:${ORG};font-family:Poppins,system-ui,sans-serif;font-size:10px;font-weight:600;white-space:nowrap;letter-spacing:0.2px;border:1px solid rgba(0,229,255,0.25);">
-          ${escapeHTML(p.name)}
-        </div>
-      </div>
-    `;
-  }
-
-  // ─── Tier B · dot tenue · solo dot, sin label (mantiene mapa limpio) ─
+  const photo = escapeHTML(p.heroImage || "/pois/_default.jpg");
+  // Tamaño consistente como Google Maps · solo el activo crece
+  const sz = active ? 56 : 40;
+  // Tier S · estrella dorada discreta en esquina superior derecha
+  const starBadge = tier === "S" ? `
+    <div style="position:absolute;top:-3px;right:-3px;width:18px;height:18px;border-radius:50%;background:#FFD700;display:flex;align-items:center;justify-content:center;font-size:11px;color:#0A0A0A;font-weight:900;box-shadow:0 2px 5px rgba(0,0,0,0.45);z-index:3;line-height:1;">★</div>
+  ` : "";
+  // Borde activo: aro fino dorado, no demasiado intrusivo
+  const borderStyle = active
+    ? "border:2.5px solid #FFD700;box-shadow:0 0 0 2px rgba(10,10,10,0.85),0 6px 18px rgba(255,215,0,0.5);"
+    : "border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.45),0 0 0 1px rgba(0,0,0,0.12);";
   return `
-    <div class="kudos-bubble-wrap kudos-bubble-b" style="display:flex;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer;" title="${escapeHTML(p.name)}">
-      <div style="width:14px;height:14px;border-radius:50%;background:${CYAN};opacity:0.55;box-shadow:0 0 8px rgba(0,229,255,0.5);border:1.5px solid rgba(10,10,10,0.7);"></div>
+    <div class="kudos-bubble-wrap" style="position:relative;width:${sz}px;height:${sz}px;cursor:pointer;" title="${escapeHTML(p.name)}">
+      <div style="width:100%;height:100%;border-radius:50%;background-image:url('${photo}');background-size:cover;background-position:center;background-color:#1A1333;${borderStyle}"></div>
+      ${starBadge}
     </div>
   `;
 }
@@ -634,19 +579,8 @@ function ensureLeafletCSS() {
       .kudos-bubble { background:transparent !important; border:none !important; }
       .kudos-user   { background:transparent !important; border:none !important; }
       .kudos-bubble-wrap { transition: transform 0.18s ease; }
-      .kudos-bubble-wrap:hover { transform: scale(1.10); z-index: 1000 !important; }
-      @keyframes kudos-pulse-gold {
-        0%, 100% { filter: drop-shadow(0 0 6px rgba(255,215,0,0.4)) drop-shadow(0 6px 14px rgba(0,0,0,0.6)); }
-        50%      { filter: drop-shadow(0 0 22px rgba(255,215,0,0.9)) drop-shadow(0 0 36px rgba(0,229,255,0.4)) drop-shadow(0 6px 14px rgba(0,0,0,0.6)); }
-      }
-      .kudos-bubble-s svg:first-of-type { animation: kudos-pulse-gold 3s ease-in-out infinite; }
-      @keyframes kudos-pulse-cyan {
-        0%, 100% { box-shadow: 0 0 10px rgba(0,229,255,0.35), 0 4px 10px -4px rgba(0,0,0,0.5); }
-        50%      { box-shadow: 0 0 18px rgba(0,229,255,0.7),  0 4px 10px -4px rgba(0,0,0,0.5); }
-      }
-      .kudos-bubble-a > div:first-child { animation: kudos-pulse-cyan 4s ease-in-out infinite; }
+      .kudos-bubble-wrap:hover { transform: scale(1.12); z-index: 1000 !important; }
       @media (prefers-reduced-motion: reduce) {
-        .kudos-bubble-s svg:first-of-type, .kudos-bubble-a > div:first-child { animation: none; }
         .kudos-bubble-wrap:hover { transform: none; }
       }
     `;
