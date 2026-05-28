@@ -35,6 +35,7 @@ import { WorldLogo } from "./WorldLogo";
 import { WorldSearch, type CityPreset } from "./WorldSearch";
 import { WorldWeather } from "./WorldWeather";
 import { WorldHud, FILTER_TO_CATEGORIES } from "./WorldHud";
+import { AppBottomNavV4 } from "@/components/shell-v4/AppBottomNavV4";
 
 
 interface WorldPoi {
@@ -743,6 +744,7 @@ export function WorldEngine() {
           title="Centrar en mi ubicación"
         >◉</button>
       </div>
+      <AppBottomNavV4 />
     </div>
   );
 }
@@ -852,7 +854,7 @@ const HUD_TAGLINE: React.CSSProperties = {
 
 const HUD_COUNTER: React.CSSProperties = {
   position: "absolute",
-  bottom: 16,
+  bottom: 88,
   left: 18,
   zIndex: 1000,
   fontFamily: '"Poppins", system-ui, sans-serif',
@@ -864,7 +866,7 @@ const HUD_COUNTER: React.CSSProperties = {
 
 const ZOOM_RAIL: React.CSSProperties = {
   position: "absolute",
-  bottom: 22,
+  bottom: 94,
   right: 22,
   zIndex: 1000,
   display: "flex",
@@ -1072,7 +1074,7 @@ const SHEET_TIER_S_DOT: React.CSSProperties = {
 
 const TOAST_WRAP: React.CSSProperties = {
   position: "fixed",
-  bottom: 28,
+  bottom: 100,
   left: "50%",
   transform: "translateX(-50%)",
   zIndex: 6000,
