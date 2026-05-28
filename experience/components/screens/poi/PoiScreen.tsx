@@ -449,6 +449,163 @@ function ResumenPanel({ poi, echo, nearby }: { poi: Poi; echo?: MockEcho; nearby
   );
 }
 
+
+// =====================================================================
+// Subsection panels (P32.24 . contenido real desde fixtures)
+// =====================================================================
+
+function HistoriaPanel({ echo, poi }: { echo?: MockEcho; poi: Poi }) {
+  const narrative = echo?.narrative ?? [poi.short];
+  const layers = echo?.layers ?? [];
+  const quotes = echo?.quotes ?? [];
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      <Panel title={`Historia de ${poi.name}`}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {narrative.map((p, i) => (
+            <p key={i} style={{ margin: 0, fontSize: 14, lineHeight: 1.65, color: "var(--kudos-ink)" }}>{p}</p>
+          ))}
+        </div>
+      </Panel>
+      {layers.length > 0 ? (
+        <Panel title="Capas de la historia">
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {layers.map((l) => (
+              <div key={l.id} style={{ paddingLeft: 12, borderLeft: "2px solid rgba(108,60,255,0.35)" }}>
+                <h4 style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 700, color: "var(--kudos-accent-bright, #8B6BFF)", textTransform: "uppercase", letterSpacing: 0.5 }}>{l.title}</h4>
+                <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.6, color: "rgba(242,242,247,0.78)" }}>{l.body}</p>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      ) : null}
+      {quotes.length > 0 ? (
+        <Panel title="Citas en el tiempo">
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {quotes.map((q, i) => (
+              <blockquote key={i} style={{ margin: 0, padding: "12px 16px", background: "rgba(255,255,255,0.04)", borderLeft: "3px solid var(--kudos-accent, #6C3CFF)", borderRadius: "0 8px 8px 0" }}>
+                <p style={{ margin: "0 0 6px", fontSize: 14, fontStyle: "italic", lineHeight: 1.55, color: "var(--kudos-ink)" }}>&laquo; {q.body} &raquo;</p>
+                <footer style={{ fontSize: 11.5, color: "rgba(242,242,247,0.55)" }}>&mdash; {q.attribution}{q.year ? ` (${q.year})` : ""}</footer>
+              </blockquote>
+            ))}
+          </div>
+        </Panel>
+      ) : null}
+    </div>
+  );
+}
+
+function TimelinePanel({ echo }: { echo?: MockEcho }) {
+  const timeline = echo?.timeline ?? [];
+  if (timeline.length === 0) {
+    return <div style={STUB_PANEL}><span style={STUB_GLYPH}>&#9670;</span><p style={STUB_TEXT}>Sin linea de tiempo registrada.</p></div>;
+  }
+  return (
+    <Panel title="Linea de tiempo completa">
+      <ol style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 16 }}>
+        {timeline.map((node, i) => (
+          <li key={i} style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: 14, alignItems: "flex-start" }}>
+            <div style={{ width: 90, textAlign: "right", paddingTop: 2 }}>
+              <span style={{ fontFamily: "var(--kudos-font-mono)", fontSize: 11.5, color: "var(--kudos-accent-bright, #8B6BFF)", fontWeight: 700 }}>{node.year}</span>
+            </div>
+            <div style={{ paddingLeft: 14, borderLeft: i === timeline.length - 1 ? "2px solid transparent" : "2px solid rgba(255,255,255,0.10)", position: "relative" }}>
+              <span style={{ position: "absolute", left: -7, top: 3, width: 12, height: 12, borderRadius: "50%", background: i === 0 ? "var(--kudos-accent, #6C3CFF)" : "rgba(255,255,255,0.18)", border: "2px solid var(--kudos-bg, #1A1333)" }} />
+              <h4 style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700, color: "var(--kudos-ink)" }}>{node.title}</h4>
+              <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.55, color: "rgba(242,242,247,0.7)" }}>{node.body}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </Panel>
+  );
+}
+
+function EpocasPanel({ echo }: { echo?: MockEcho }) {
+  const epochs = echo?.epochs ?? [];
+  if (epochs.length === 0) {
+    return <div style={STUB_PANEL}><span style={STUB_GLYPH}>&#9670;</span><p style={STUB_TEXT}>Sin epocas declaradas para este lugar.</p></div>;
+  }
+  return (
+    <Panel title={`Epocas . ${epochs.length} capas temporales`}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14 }}>
+        {epochs.map((ep) => (
+          <div key={ep.id} style={{ padding: 14, borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <span style={{ display: "inline-block", padding: "3px 9px", borderRadius: 999, background: "rgba(108,60,255,0.18)", color: "var(--kudos-accent-bright, #8B6BFF)", fontSize: 10.5, fontWeight: 700, letterSpacing: 0.4, marginBottom: 8 }}>{ep.pill}</span>
+            <h4 style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, color: "var(--kudos-ink)" }}>{ep.tagline}</h4>
+          </div>
+        ))}
+      </div>
+    </Panel>
+  );
+}
+
+function GaleriaPanel({ echo, poi }: { echo?: MockEcho; poi: Poi }) {
+  const gallery = echo?.gallery ?? [];
+  if (gallery.length === 0) {
+    return (
+      <Panel title="Galeria">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 }}>
+          <div style={{ aspectRatio: "4 / 3", borderRadius: 10, backgroundImage: `url("${poi.heroImage}")`, backgroundSize: "cover", backgroundPosition: "center" }} />
+        </div>
+      </Panel>
+    );
+  }
+  return (
+    <Panel title={`Galeria . ${gallery.length} imagenes`}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 }}>
+        {gallery.map((g, i) => (
+          <figure key={i} style={{ margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ aspectRatio: "4 / 3", borderRadius: 10, backgroundImage: `url("https://commons.wikimedia.org/wiki/Special:FilePath/${g.filename}?width=600")`, backgroundSize: "cover", backgroundPosition: "center", border: "1px solid rgba(255,255,255,0.08)" }} />
+            <figcaption style={{ fontSize: 11, color: "rgba(242,242,247,0.6)", lineHeight: 1.4 }}>{g.caption}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </Panel>
+  );
+}
+
+function CercaPanel({ nearby }: { nearby: ReadonlyArray<Poi> }) {
+  if (nearby.length === 0) {
+    return <div style={STUB_PANEL}><span style={STUB_GLYPH}>&#9670;</span><p style={STUB_TEXT}>No hay otros lugares cercanos registrados.</p></div>;
+  }
+  return (
+    <Panel title={`Cerca . ${nearby.length} lugares`}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12 }}>
+        {nearby.map((p) => (
+          <Link key={p.id} href={`/poi/${p.id}/`} style={{ textDecoration: "none", color: "inherit" }}>
+            <div style={{ padding: 12, borderRadius: 10, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", display: "flex", gap: 12, alignItems: "center" }}>
+              <div style={{ width: 56, height: 56, borderRadius: 8, backgroundImage: `url("${p.heroImage}")`, backgroundSize: "cover", backgroundPosition: "center", flexShrink: 0 }} />
+              <div style={{ minWidth: 0 }}>
+                <h4 style={{ margin: "0 0 2px", fontSize: 13.5, fontWeight: 700, color: "var(--kudos-ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</h4>
+                <p style={{ margin: 0, fontSize: 11.5, color: "rgba(242,242,247,0.55)" }}>{p.country} . {String(p.categories[0] ?? "")}</p>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </Panel>
+  );
+}
+
+function FuentesPanel({ echo }: { echo?: MockEcho }) {
+  const sources = echo?.sources ?? [];
+  if (sources.length === 0) {
+    return <div style={STUB_PANEL}><span style={STUB_GLYPH}>&#9670;</span><p style={STUB_TEXT}>Sin fuentes academicas registradas.</p></div>;
+  }
+  return (
+    <Panel title={`Fuentes . ${sources.length} referencias verificadas`}>
+      <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
+        {sources.map((s, i) => (
+          <li key={i} style={{ padding: "10px 14px", background: "rgba(255,255,255,0.03)", borderLeft: "3px solid var(--kudos-accent, #6C3CFF)", borderRadius: "0 8px 8px 0" }}>
+            <h4 style={{ margin: "0 0 3px", fontSize: 13, fontWeight: 700, color: "var(--kudos-ink)" }}>{s.title}</h4>
+            <p style={{ margin: 0, fontSize: 11.5, color: "rgba(242,242,247,0.6)" }}>{s.author}{s.year ? ` . ${s.year}` : ""}</p>
+          </li>
+        ))}
+      </ul>
+    </Panel>
+  );
+}
+
 // =====================================================================
 // Small reusable inline pieces (concrete to this file)
 // =====================================================================

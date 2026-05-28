@@ -87,6 +87,11 @@ export function MapScreen() {
   // Capas cerradas por defecto · evita tapar el mapa en móvil. El usuario las abre si quiere.
   const [capasOpen, setCapasOpen] = React.useState(false);
   const [filtrosOpen, setFiltrosOpen] = React.useState(false);
+  // Layers togglables (antes inmutables · ahora se pueden activar/desactivar)
+  const [layers, setLayers] = React.useState<ReadonlyArray<LayerDef>>(LAYERS);
+  const toggleLayer = React.useCallback((id: string) => {
+    setLayers((prev) => prev.map((l) => l.id === id ? { ...l, active: !l.active } : l));
+  }, []);
 
   // React to query param changes
   React.useEffect(() => {
@@ -161,8 +166,8 @@ export function MapScreen() {
             open={capasOpen}
             onToggle={() => setCapasOpen((v) => !v)}
           >
-            {LAYERS.map((l) => (
-              <LayerRow key={l.id} layer={l} />
+            {layers.map((l) => (
+              <LayerRow key={l.id} layer={l} onToggle={() => toggleLayer(l.id)} />
             ))}
           </PanelGroup>
 
@@ -517,16 +522,16 @@ function PanelGroup({ title, open, onToggle, children }: { title: string; open: 
   );
 }
 
-function LayerRow({ layer }: { layer: LayerDef }) {
+function LayerRow({ layer, onToggle }: { layer: LayerDef; onToggle?: () => void }) {
   const active = layer.active;
   return (
-    <div style={active ? LAYER_ROW_ACTIVE : LAYER_ROW}>
+    <button type="button" onClick={onToggle} style={{ ...(active ? LAYER_ROW_ACTIVE : LAYER_ROW), border: "none", textAlign: "left", cursor: "pointer", width: "100%" }} aria-pressed={active}>
       <span style={active ? LAYER_ICON_ACTIVE : LAYER_ICON}><Icon name={layer.icon} size={14} /></span>
       <span style={{ flex: 1, fontWeight: active ? 700 : 500, color: active ? "var(--kudos-accent-bright, #8B6BFF)" : "var(--kudos-ink)" }}>{layer.label}</span>
       <span style={active ? EYE_BTN_ACTIVE : EYE_BTN}>
         <Icon name={active ? "discover" : "discover"} size={12} />
       </span>
-    </div>
+    </button>
   );
 }
 
@@ -1082,4 +1087,10 @@ const SHEET_CTA_PLAY_BADGE: React.CSSProperties = {
   color: "#fff",
   marginRight: 4,
   flexShrink: 0,
+};
+
+const STAR: React.CSSProperties = {
+  color: "var(--kudos-accent-yellow, #FFD23F)",
+  fontSize: 13,
+  lineHeight: 1,
 };
