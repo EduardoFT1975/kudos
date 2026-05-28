@@ -39,6 +39,7 @@ interface WorldPoi {
   lng: number;
   tier: WorldNodeTier;
   category: WorldNodeCategory;
+  image?: string;
 }
 
 
@@ -75,6 +76,7 @@ export function WorldEngine() {
   const [mapReady, setMapReady] = React.useState(false);
   const [zoom, setZoom] = React.useState(3);
   const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = React.useState(0);
 
   const geo = useGeolocation();
   const centeredOnUserRef = React.useRef(false);
@@ -107,14 +109,23 @@ export function WorldEngine() {
             id: string; name: string; lat: number; lng: number;
             category: string; unesco?: boolean;
           }>;
-          const chunk: WorldPoi[] = items.map((p) => ({
-            id: p.id,
-            name: p.name,
-            lat: p.lat,
-            lng: p.lng,
-            tier: tierForPoi({ id: p.id, unesco: p.unesco }),
-            category: inferCategory(p.category),
-          }));
+          const chunk: WorldPoi[] = items.map((p: any) => {
+            // Fallback: si category genérico devuelve "monument", probar con name
+            let cat = inferCategory(p.type || p.category);
+            if (cat === "monument") cat = inferCategory(p.name);
+            const img = typeof p.image_url === "string"
+              ? p.image_url.replace(/^http:\/\//, "https://")
+              : undefined;
+            return {
+              id: p.id,
+              name: p.name,
+              lat: p.lat,
+              lng: p.lng,
+              tier: tierForPoi({ id: p.id, unesco: p.unesco }),
+              category: cat,
+              image: img,
+            };
+          });
           // Append al ref · NO setState con todo el array
           allNodesRef.current = allNodesRef.current.concat(chunk);
           setTotalLoaded(allNodesRef.current.length);
@@ -341,7 +352,7 @@ export function WorldEngine() {
       if (isNaN(n.lat) || isNaN(n.lng)) return;
       try {
         const isActive = id === activeId;
-        const html = buildWorldNodeHTML({ ...n, isActive, showLabel: showLabelIds.has(id) });
+        const html = buildWorldNodeHTML({ ...n, isActive, showLabel: showLabelIds.has(id), image: n.image });
         const size = n.tier === "S" ? 56 : n.tier === "A" ? 32 : n.tier === "B" ? 14 : 6;
         const icon = L.divIcon({
           className: "kudos-world-node",
@@ -361,6 +372,7 @@ export function WorldEngine() {
         // skip silencioso
       }
     });
+    setVisibleCount(next.size);
   }, [renderTick, zoom, mapReady, activeId]);
 
   return (
@@ -368,13 +380,12 @@ export function WorldEngine() {
       <div ref={containerRef} style={STAGE} className="kudos-world-stage" />
       <div style={HUD}>
         <div style={HUD_BRAND}>
-          <span style={HUD_BRAND_K}>KUDOS</span>
-          <span style={HUD_BRAND_DOT}>·</span>
-          <span style={HUD_BRAND_LABEL}>WORLD</span>
+          <span style={HUD_BRAND_K}>K</span>
+          <span style={HUD_BRAND_LABEL}>world</span>
         </div>
       </div>
       <div style={HUD_COUNTER}>
-        {totalLoaded.toLocaleString("es-ES")} nodos · {markersRef.current.size} visibles · zoom {zoom}
+        {totalLoaded.toLocaleString("es-ES")} nodos · {visibleCount} visibles · zoom {zoom}
       </div>
       <div style={ZOOM_RAIL}>
         <button style={ZOOM_BTN} onClick={() => mapRef.current?.zoomIn()} aria-label="Acercar">+</button>
@@ -456,11 +467,10 @@ const HUD_BRAND: React.CSSProperties = {
 
 const HUD_BRAND_K: React.CSSProperties = {
   fontFamily: '"Poppins", system-ui, sans-serif',
-  fontWeight: 700,
-  fontSize: 22,
-  letterSpacing: "0.18em",
+  fontWeight: 600,
+  fontSize: 16,
+  letterSpacing: "0.06em",
   color: WORLD_COLORS.legendary,
-  textShadow: "0 2px 12px rgba(0,0,0,0.6)",
 };
 
 const HUD_BRAND_DOT: React.CSSProperties = {
@@ -470,11 +480,11 @@ const HUD_BRAND_DOT: React.CSSProperties = {
 
 const HUD_BRAND_LABEL: React.CSSProperties = {
   fontFamily: '"Poppins", system-ui, sans-serif',
-  fontWeight: 500,
-  fontSize: 13,
-  letterSpacing: "0.32em",
-  color: WORLD_COLORS.inkPrimary,
-  opacity: 0.88,
+  fontWeight: 400,
+  fontSize: 10,
+  letterSpacing: "0.24em",
+  color: WORLD_COLORS.inkSecondary,
+  textTransform: "lowercase",
 };
 
 const HUD_TAGLINE: React.CSSProperties = {
@@ -488,13 +498,13 @@ const HUD_TAGLINE: React.CSSProperties = {
 
 const HUD_COUNTER: React.CSSProperties = {
   position: "absolute",
-  bottom: 22,
-  left: 26,
+  bottom: 16,
+  left: 18,
   zIndex: 1000,
   fontFamily: '"Poppins", system-ui, sans-serif',
-  fontSize: 10.5,
-  letterSpacing: "0.18em",
-  color: WORLD_COLORS.inkSecondary,
+  fontSize: 9,
+  letterSpacing: "0.14em",
+  color: WORLD_COLORS.inkTertiary,
   pointerEvents: "none",
 };
 
@@ -509,19 +519,19 @@ const ZOOM_RAIL: React.CSSProperties = {
 };
 
 const ZOOM_BTN: React.CSSProperties = {
-  width: 36,
-  height: 36,
+  width: 34,
+  height: 34,
   borderRadius: 10,
-  background: "rgba(7,9,18,0.78)",
-  border: `1px solid ${WORLD_COLORS.earthEdge}`,
+  background: "rgba(255,255,255,0.92)",
+  border: `1px solid rgba(0,0,0,0.08)`,
   color: WORLD_COLORS.inkPrimary,
   fontFamily: '"Poppins", system-ui, sans-serif',
-  fontSize: 16,
+  fontSize: 15,
   fontWeight: 500,
   cursor: "pointer",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  backdropFilter: "blur(8px)",
+  boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
   transition: "background 0.2s ease",
 };

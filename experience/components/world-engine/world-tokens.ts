@@ -1,47 +1,50 @@
 /**
  * KUDOS WORLD ENGINE · Design Tokens
  *
- * Paleta cinematográfica + categorías pictográficas estilo Apple Maps.
- * Color vivo pero NUNCA neón gamer. Cada categoría tiene
- * pictograma + tono propio que se reconoce de un vistazo.
+ * Modo LIGHT · estilo Apple Maps premium con identidad KUDOS:
+ *   - Tile cálido Carto Voyager (no Positron · más identidad)
+ *   - Chips circulares con imagen real del POI + anillo dorado Tier S
+ *   - Texto discreto · gris oscuro fino · sin pills oscuras invasivas
+ *
+ * "El mapa se siente como un guidebook elegante, no como utility."
  */
 
 // ─── COLORES BASE ─────────────────────────────────────────────────────────
 
 export const WORLD_COLORS = {
-  // Fondo · espacio profundo
-  voidDeep:      "#070912",
-  voidNavy:      "#0a0e1f",
-  voidElevated:  "#101428",
+  // Fondo del mapa · tonos cálidos claros (NO blanco puro)
+  voidDeep:      "#f4efe6",   // crema cálida · loading background
+  voidNavy:      "#f7f3ea",   // beige Apple-ish
+  voidElevated:  "#ffffff",
 
   // Terreno
-  earthBase:     "#1a1d2e",
-  earthEdge:     "#2a2d40",
+  earthBase:     "#ece4d3",
+  earthEdge:     "#d6cdb8",
 
-  // Tier S (universal legendary · siempre dorado)
+  // Tier S · sello KUDOS legendary
   legendary:     "#C9A961",
-  premium:       "#E8DBB0",
+  premium:       "#a78848",
 
-  // Categorías · vivas, NO neón
-  museum:        "#9F7BC9",   // lila profundo · museos, galerías, arte
-  castle:        "#D6963F",   // ámbar oscuro · castillos, fortalezas
-  religious:     "#6E94CC",   // azul cobalto suave · iglesias, monasterios
-  megalith:      "#88A28A",   // piedra musgo · dolmen, menhir, túmulo
-  park:          "#7BBF8F",   // verde bosque · parques, jardines, naturaleza
-  plaza:         "#E0B062",   // ámbar cálido · plazas, alamedas
-  monument:      "#E8DBB0",   // crema · monumentos, estatuas, fuentes
-  archaeology:   "#C28266",   // terracota · yacimientos, ruinas
-  palace:        "#D4B569",   // dorado real · palacios
-  mystery:       "#9F7BC9",   // alias museum para legacy
+  // Categorías · vivas pero LEGIBLES sobre fondo claro
+  museum:        "#7c5fb8",   // lila profundo · museos, galerías
+  castle:        "#b07028",   // ámbar oscuro · castillos, fortalezas
+  religious:     "#3d6aa3",   // cobalto · iglesias, monasterios
+  megalith:      "#5a7d6c",   // verde piedra · dolmen, megalitos
+  park:          "#3e8e54",   // verde bosque · parques, naturaleza
+  plaza:         "#c08838",   // ámbar cálido · plazas
+  monument:      "#8a7a52",   // dorado oscuro · monumentos
+  archaeology:   "#9c5333",   // terracota · arqueología
+  palace:        "#a8842c",   // dorado real · palacios
+  mystery:       "#7c5fb8",
 
-  // Texto
-  inkPrimary:    "#E8E4D5",
-  inkSecondary:  "rgba(232,228,213,0.55)",
-  inkTertiary:   "rgba(232,228,213,0.32)",
+  // Texto sobre fondo claro
+  inkPrimary:    "#262220",   // casi negro cálido
+  inkSecondary:  "rgba(38,34,32,0.55)",
+  inkTertiary:   "rgba(38,34,32,0.32)",
 
-  // Estados invisibles
-  fogVeil:       "rgba(7,9,18,0.78)",
+  // Brand discreto
   glowGold:      "rgba(201,169,97,0.32)",
+  fogVeil:       "rgba(247,243,234,0.78)",
 } as const;
 
 
@@ -50,63 +53,50 @@ export const WORLD_COLORS = {
 export type WorldNodeTier = "S" | "A" | "B" | "C";
 
 export type WorldNodeCategory =
-  | "museum"
-  | "castle"
-  | "religious"
-  | "megalith"
-  | "park"
-  | "plaza"
-  | "monument"
-  | "archaeology"
-  | "palace"
-  | "mystery";
+  | "museum" | "castle" | "religious" | "megalith" | "park"
+  | "plaza" | "monument" | "archaeology" | "palace" | "mystery";
 
 
 // ─── DIMENSIONES POR TIER ─────────────────────────────────────────────────
 
 export const TIER_SIZE: Record<WorldNodeTier, number> = {
-  S: 38,   // pictograma grande + label permanente
-  A: 26,   // pictograma medio + label permanente si cabe
-  B: 14,   // dot color · label sólo hover
-  C: 6,    // marca casi invisible
+  S: 44,
+  A: 32,
+  B: 14,
+  C: 6,
 };
 
 export const TIER_OPACITY: Record<WorldNodeTier, number> = {
   S: 1.0,
-  A: 0.95,
-  B: 0.55,
-  C: 0.3,
+  A: 0.98,
+  B: 0.65,
+  C: 0.35,
 };
 
-// Fog of discovery · zoom mínimo por tier (BRUTAL · respira mucho más)
 export const TIER_MIN_ZOOM: Record<WorldNodeTier, number> = {
   S: 5,
-  A: 10,    // antes 8 · ahora sólo desde región
-  B: 14,    // antes 13 · sólo en calle alta
-  C: 17,    // muy raramente visible
+  A: 10,
+  B: 14,
+  C: 17,
 };
 
-// Cap DINÁMICO · "menos es más" · estilo Apple Maps
+// Densidad estilo Apple Maps · menos es más
 export function maxNodesAtZoom(zoom: number): number {
-  if (zoom <= 5)  return 12;    // Mundo · puñado de Tier S
-  if (zoom <= 7)  return 20;    // Continente · selección extrema
-  if (zoom <= 9)  return 35;    // País/región · curado
-  if (zoom <= 11) return 55;    // Ciudad · densidad moderada
-  if (zoom <= 13) return 80;    // Distrito
-  return 120;                   // Barrio/calle · máximo
+  if (zoom <= 5)  return 12;
+  if (zoom <= 7)  return 20;
+  if (zoom <= 9)  return 35;
+  if (zoom <= 11) return 55;
+  if (zoom <= 13) return 80;
+  return 120;
 }
 
-// Cap absoluto · hard limit
 export const MAX_NODES_RENDERED = 120;
-
-// Padding de viewport para precarga
 export const VIEWPORT_PADDING_RATIO = 0.25;
 
 
 // ─── COLOR POR CATEGORÍA ──────────────────────────────────────────────────
 
 export function nodeColorFor(category: WorldNodeCategory, tier: WorldNodeTier): string {
-  // Tier S siempre dorado · "esto es legendary"
   if (tier === "S") return WORLD_COLORS.legendary;
   switch (category) {
     case "museum":       return WORLD_COLORS.museum;
@@ -123,74 +113,66 @@ export function nodeColorFor(category: WorldNodeCategory, tier: WorldNodeTier): 
 }
 
 
-// ─── DEDUCIR CATEGORÍA DESDE TAGS WIKIDATA/OSM REALES ─────────────────────
+// ─── inferCategory · regex sobre tags + name ──────────────────────────────
 
 export function inferCategory(tag: string | undefined): WorldNodeCategory {
   const t = (tag || "").toLowerCase();
 
-  // Religious primero · iglesia/catedral/monasterio son la mayoría en España
   if (/iglesia|church|basilic|catedral|cathedral|monasterio|monastery|abad[ií]a|abbey|ermita|capilla|chapel|convent|mosque|synagog|temple|sanctuar/.test(t))
     return "religious";
 
-  // Castillo/fortaleza
   if (/castillo|castle|fortaleza|fortress|alcazar|alc[áa]zar|tower|torre|fort|murall/.test(t))
     return "castle";
 
-  // Palacio
   if (/palacio|palace|palau|p[áa]ço/.test(t))
     return "palace";
 
-  // Megalitos
   if (/dolmen|menhir|m[áa]moa|mamoa|t[úu]mulo|tumulus|megalit|cromlech|cista|petr[óo]glifo|petroglyph/.test(t))
     return "megalith";
 
-  // Arqueología
   if (/yacimiento|ruina|ruin|archaeolog|arqueol[óo]g|villa romana|teatro romano|anfiteatro|roman|celtic|castro/.test(t))
     return "archaeology";
 
-  // Parque / naturaleza
   if (/parque|park|jard[íi]n|garden|nature|reserva|mountain|mount|monte|sierra|peak|laguna|lago|lake|cascad|waterfall|cueva|cave|playa|beach|mirador|viewpoint/.test(t))
     return "park";
 
-  // Plaza / espacio social
   if (/plaza|square|alameda|paseo|promenad|boulevard/.test(t))
     return "plaza";
 
-  // Museo / cultura
   if (/museo|museum|galer[íi]a|gallery|library|biblioteca|teatro|theatre|theater|auditori/.test(t))
     return "museum";
 
-  // Monumento (default cultural)
   if (/monumento|monument|estatua|statue|memorial|fuente|fountain|obelisc|cruceiro|cross/.test(t))
     return "monument";
 
-  // Fallback: monument neutro
   return "monument";
 }
 
 
-// ─── TILES BASE ───────────────────────────────────────────────────────────
+// ─── TILES BASE · Carto Voyager light (cálido · premium) ──────────────────
 
+// Voyager · más cálido que Positron · transmite "guidebook" no "utility"
 export const WORLD_TILE_URL =
-  "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png";
+  "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png";
 
 export const WORLD_LABELS_URL =
-  "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png";
+  "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png";
 
 export const WORLD_TILE_ATTRIB = "© OpenStreetMap · © CARTO";
 export const WORLD_TILE_SUBDOMAINS = ["a", "b", "c", "d"];
 export const WORLD_TILE_MAX_ZOOM = 19;
 
+// Filtros muy suaves · NO destrozar la legibilidad del tile light
 export const WORLD_TILE_FILTER =
-  "brightness(0.92) contrast(1.05) saturate(0.55) hue-rotate(-15deg)";
+  "saturate(0.85) contrast(1.02) brightness(1.0)";
 
 export const WORLD_LABELS_FILTER =
-  "brightness(1.1) saturate(0.4) opacity(0.65)";
+  "saturate(0.7) opacity(0.85)";
 
 
 // ─── RITMO DE MOVIMIENTO ──────────────────────────────────────────────────
 
 export const RESPIRATION_DURATION_S = 5.4;
-export const RESPIRATION_OPACITY_MIN = 0.78;
+export const RESPIRATION_OPACITY_MIN = 0.82;
 export const RESPIRATION_OPACITY_MAX = 1.0;
 export const FOG_FADE_DURATION_MS = 600;
