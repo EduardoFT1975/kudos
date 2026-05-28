@@ -75,7 +75,7 @@ export const TIER_OPACITY: Record<WorldNodeTier, number> = {
 export const TIER_MIN_ZOOM: Record<WorldNodeTier, number> = {
   S: 3,    // visible desde nivel continental (mundo elegante · sólo iconos)
   A: 8,    // visible desde nivel país (subimos de 7 · era demasiado denso)
-  B: 13,   // visible sólo en zoom de barrio (era 12 · saturaba zoom 7-12)
+  B: 15,   // sólo en zoom de calle muy alta · era 13, saturaba zoom 12-14
   C: 16,   // visible sólo en zoom de calle
 };
 
@@ -84,8 +84,9 @@ export const TIER_MIN_ZOOM: Record<WorldNodeTier, number> = {
 export function maxNodesAtZoom(zoom: number): number {
   if (zoom <= 5)  return 60;    // Mundo · sólo iconos legendarios
   if (zoom <= 8)  return 150;   // Continente/país · selección curada
-  if (zoom <= 11) return 350;   // Región/ciudad · densidad moderada
-  return 600;                   // Barrio/calle · densidad máxima
+  if (zoom <= 11) return 200;   // Región/ciudad · respira más
+  if (zoom <= 13) return 220;   // Distrito · respira más
+  return 250;                   // Barrio/calle · densidad máxima curada
 }
 
 // Cap absoluto · hard limit por si algo pasa

@@ -313,7 +313,7 @@ export function WorldEngine() {
         const size = n.tier === "S" ? 56 : n.tier === "A" ? 32 : n.tier === "B" ? 14 : 6;
         const icon = L.divIcon({
           className: "kudos-world-node",
-          html: `<div data-name="${(n.name || "").replace(/"/g, "&quot;")}" style="position:relative">${html}</div>`,
+          html: `<div style="position:relative">${html}</div>`,
           iconSize: [size, size],
           iconAnchor: [size / 2, size / 2],
         });
@@ -421,75 +421,4 @@ const HUD_BRAND: React.CSSProperties = {
   display: "flex",
   alignItems: "baseline",
   gap: 8,
-};
-
-const HUD_BRAND_K: React.CSSProperties = {
-  fontFamily: "Poppins, system-ui, sans-serif",
-  fontSize: 22,
-  fontWeight: 800,
-  letterSpacing: 0.5,
-  color: WORLD_COLORS.warmWhite,
-};
-
-const HUD_BRAND_DOT: React.CSSProperties = {
-  color: WORLD_COLORS.legendary,
-  fontSize: 18,
-};
-
-const HUD_BRAND_LABEL: React.CSSProperties = {
-  fontFamily: "Poppins, system-ui, sans-serif",
-  fontSize: 11,
-  fontWeight: 600,
-  letterSpacing: 3,
-  color: WORLD_COLORS.legendary,
-  textTransform: "uppercase",
-};
-
-const HUD_TAGLINE: React.CSSProperties = {
-  fontFamily: "Poppins, system-ui, sans-serif",
-  fontSize: 9.5,
-  fontWeight: 600,
-  letterSpacing: 2.5,
-  color: WORLD_COLORS.inkTertiary,
-  textTransform: "uppercase",
-};
-
-const HUD_COUNTER: React.CSSProperties = {
-  position: "absolute",
-  bottom: 22,
-  left: 26,
-  zIndex: 1000,
-  fontFamily: "Poppins, system-ui, sans-serif",
-  fontSize: 10.5,
-  fontWeight: 500,
-  color: WORLD_COLORS.inkTertiary,
-  letterSpacing: 1.2,
-  pointerEvents: "none",
-};
-
-const ZOOM_RAIL: React.CSSProperties = {
-  position: "absolute",
-  right: 22,
-  bottom: 22,
-  zIndex: 1000,
-  display: "flex",
-  flexDirection: "column",
-  gap: 6,
-};
-
-const ZOOM_BTN: React.CSSProperties = {
-  width: 36,
-  height: 36,
-  borderRadius: 10,
-  background: "rgba(16, 20, 40, 0.7)",
-  backdropFilter: "blur(10px)",
-  border: `1px solid ${WORLD_COLORS.earthEdge}`,
-  color: WORLD_COLORS.warmWhite,
-  fontFamily: "Poppins, system-ui, sans-serif",
-  fontSize: 16,
-  fontWeight: 600,
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
 };
