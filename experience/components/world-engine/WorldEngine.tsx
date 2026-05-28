@@ -31,6 +31,10 @@ import {
   inferCategory,
 } from "./world-tokens";
 import { buildWorldNodeHTML, WORLD_NODE_CSS } from "./WorldNode";
+import { WorldLogo } from "./WorldLogo";
+import { WorldSearch, type CityPreset } from "./WorldSearch";
+import { WorldWeather } from "./WorldWeather";
+import { WorldHud, FILTER_TO_CATEGORIES } from "./WorldHud";
 
 
 interface WorldPoi {
@@ -199,6 +203,13 @@ export function WorldEngine() {
   const [zoom, setZoom] = React.useState(3);
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [visibleCount, setVisibleCount] = React.useState(0);
+  const [activeLayers, setActiveLayers] = React.useState<Set<string>>(
+    new Set(["presente", "historia", "experiencia", "amigos"])
+  );
+  const [activeFilter, setActiveFilter] = React.useState<string>("todo");
+  const [mapCenter, setMapCenter] = React.useState<{lat:number; lng:number} | null>(null);
+  const [currentCity, setCurrentCity] = React.useState<string>("Explora el mundo");
+  const blueDotRef = React.useRef<any>(null);
 
   const geo = useGeolocation();
   const centeredOnUserRef = React.useRef(false);
@@ -313,11 +324,22 @@ export function WorldEngine() {
       createdMap = map;
       setZoom(map.getZoom());
 
-      // Debounced re-render on pan/zoom
+      // F3.4 · Escala Leaflet nativa · esquina inferior izquierda
+      try {
+        L.control.scale({ metric: true, imperial: false, position: "bottomleft" }).addTo(map);
+      } catch {}
+
+      // Inicializar mapCenter
+      const c0 = map.getCenter();
+      setMapCenter({ lat: c0.lat, lng: c0.lng });
+
+      // Debounced re-render on pan/zoom + tracking del centro para weather
       const onMove = () => {
         if (moveTimeoutRef.current) clearTimeout(moveTimeoutRef.current);
         moveTimeoutRef.current = setTimeout(() => {
           setZoom(map.getZoom());
+          const c = map.getCenter();
+          setMapCenter({ lat: c.lat, lng: c.lng });
           setRenderTick((t) => t + 1);
         }, 200);
       };
@@ -373,7 +395,33 @@ export function WorldEngine() {
   }, []);
 
   // ── Centrar en usuario UNA VEZ · prioriza geo navegador > IP ──
+  // ── Blue dot · F3.4 · circleMarker pulsante en la posición del usuario ──
   React.useEffect(() => {
+    const L = LRef.current;
+    const map = mapRef.current;
+    if (!L || !map || !mapReady) return;
+    const coords = geo.coords || ipCoords;
+    if (!coords) return;
+    try {
+      if (blueDotRef.current) {
+        blueDotRef.current.setLatLng([coords.lat, coords.lng]);
+      } else {
+        const dot = L.circleMarker([coords.lat, coords.lng], {
+          radius: 7,
+          color: "#fff",
+          weight: 3,
+          fillColor: "#3478f6",
+          fillOpacity: 1,
+          interactive: false,
+          pane: "overlayPane",
+        });
+        dot.addTo(map);
+        blueDotRef.current = dot;
+      }
+    } catch {}
+  }, [geo.coords, ipCoords, mapReady]);
+
+    React.useEffect(() => {
     if (centeredOnUserRef.current) return;
     const coords = geo.coords || ipCoords;
     if (!coords || !mapReady) return;
@@ -405,7 +453,8 @@ export function WorldEngine() {
     const east = bounds.getEast();
     const center = map.getCenter();
 
-    // 1) Filtrar por tier-zoom + bbox
+    // 1) Filtrar por tier-zoom + bbox + filtro de categoría activo
+    const allowedCats = FILTER_TO_CATEGORIES[activeFilter];   // null = todas
     const candidates: WorldPoi[] = [];
     const all = allNodesRef.current;
     for (let i = 0; i < all.length; i++) {
@@ -413,6 +462,7 @@ export function WorldEngine() {
       if (zoom < TIER_MIN_ZOOM[n.tier]) continue;
       if (n.lat < south || n.lat > north) continue;
       if (n.lng < west || n.lng > east) continue;
+      if (allowedCats && !allowedCats.has(n.category)) continue;
       candidates.push(n);
     }
 
@@ -542,17 +592,45 @@ export function WorldEngine() {
       }
     });
     setVisibleCount(next.size);
-  }, [renderTick, zoom, mapReady, activeId]);
+  }, [renderTick, zoom, mapReady, activeId, activeFilter]);
 
   return (
     <div style={ROOT}>
       <div ref={containerRef} style={STAGE} className="kudos-world-stage" />
-      <div style={HUD}>
-        <div style={HUD_BRAND}>
-          <span style={HUD_BRAND_K}>K</span>
-          <span style={HUD_BRAND_LABEL}>world</span>
-        </div>
+      {/* Logo KUDOS · F3.6 · arriba izquierda (junto al hamburger del HUD) */}
+      <div style={LOGO_WRAP}>
+        <WorldLogo size={26} variant="dark" />
       </div>
+
+      {/* Search bar + city picker · F3.2 */}
+      <WorldSearch
+        currentCity={currentCity}
+        onSelect={(c: CityPreset) => {
+          centeredOnUserRef.current = true;
+          setCurrentCity(c.name);
+          mapRef.current?.flyTo([c.lat, c.lng], c.zoom, { duration: 1.8 });
+        }}
+      />
+
+      {/* Weather widget · F3.3 */}
+      <WorldWeather lat={mapCenter?.lat} lng={mapCenter?.lng} />
+
+      {/* HUD lateral · Capas + Filtros · F3.1 */}
+      <WorldHud
+        activeLayers={activeLayers}
+        onToggleLayer={(id) => {
+          setActiveLayers((prev) => {
+            const next = new Set(prev);
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+          });
+        }}
+        activeFilter={activeFilter}
+        onSelectFilter={(id) => {
+          setActiveFilter(id);
+          setRenderTick((t) => t + 1);
+        }}
+      />
       <div style={HUD_COUNTER}>
         {totalLoaded.toLocaleString("es-ES")} nodos · {visibleCount} visibles · zoom {zoom}
       </div>
@@ -766,3 +844,148 @@ const ZOOM_BTN: React.CSSProperties = {
   boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
   transition: "background 0.2s ease",
 };
+
+
+// ─── Logo KUDOS arriba izquierda · debajo del hamburger ──────────────
+const LOGO_WRAP: React.CSSProperties = {
+  position: "absolute",
+  top: 18,
+  left: 64,           // hamburger ocupa los primeros 50px
+  zIndex: 1800,
+  pointerEvents: "none",
+};
+
+
+// ─── Bottom Sheet styles · F3.5 ──────────────────────────────────────
+const SHEET_BACKDROP: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(20, 18, 16, 0.45)",
+  zIndex: 5000,
+  display: "flex",
+  alignItems: "flex-end",
+  justifyContent: "center",
+  backdropFilter: "blur(2px)",
+  animation: "kudos-sheet-fade 0.25s ease both",
+};
+
+const SHEET: React.CSSProperties = {
+  width: "100%",
+  maxWidth: 520,
+  background: "#fff",
+  borderRadius: "20px 20px 0 0",
+  boxShadow: "0 -8px 32px rgba(0,0,0,0.25)",
+  overflow: "hidden",
+  position: "relative",
+  animation: "kudos-sheet-slide-up 0.32s cubic-bezier(0.22,1,0.36,1) both",
+  maxHeight: "82vh",
+  display: "flex",
+  flexDirection: "column",
+};
+
+const SHEET_CLOSE: React.CSSProperties = {
+  position: "absolute",
+  top: 10,
+  right: 12,
+  width: 30,
+  height: 30,
+  borderRadius: "50%",
+  border: "none",
+  background: "rgba(255,255,255,0.92)",
+  fontSize: 22,
+  lineHeight: 1,
+  cursor: "pointer",
+  zIndex: 10,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "#333",
+  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+};
+
+const SHEET_HERO_WRAP: React.CSSProperties = {
+  width: "100%",
+  height: 180,
+  background: "linear-gradient(135deg, #e8dbb0 0%, #c9a961 100%)",
+  flexShrink: 0,
+};
+
+const SHEET_BODY: React.CSSProperties = {
+  padding: "16px 20px 22px",
+  fontFamily: '"Poppins", system-ui, sans-serif',
+};
+
+const SHEET_BADGES: React.CSSProperties = {
+  display: "flex",
+  gap: 6,
+  marginBottom: 8,
+};
+
+const SHEET_BADGE: React.CSSProperties = {
+  fontSize: 10,
+  fontWeight: 600,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase" as const,
+  padding: "3px 10px",
+  borderRadius: 999,
+  background: WORLD_COLORS.legendary,
+  color: "white",
+};
+
+const SHEET_BADGE_LIGHT: React.CSSProperties = {
+  fontSize: 10,
+  fontWeight: 500,
+  letterSpacing: "0.04em",
+  padding: "3px 10px",
+  borderRadius: 999,
+  background: "#f0ebe0",
+  color: "#666",
+};
+
+const SHEET_TITLE: React.CSSProperties = {
+  margin: "4px 0 6px",
+  fontSize: 20,
+  fontWeight: 700,
+  color: "#1f1b18",
+  lineHeight: 1.25,
+};
+
+const SHEET_DESC: React.CSSProperties = {
+  margin: "0 0 14px",
+  fontSize: 13.5,
+  lineHeight: 1.45,
+  color: "#5a544d",
+};
+
+const SHEET_ACTIONS: React.CSSProperties = {
+  display: "flex",
+  gap: 8,
+};
+
+const SHEET_BTN_GHOST: React.CSSProperties = {
+  flex: 1,
+  padding: "11px 14px",
+  borderRadius: 12,
+  border: "1px solid rgba(0,0,0,0.1)",
+  background: "white",
+  fontFamily: '"Poppins", system-ui, sans-serif',
+  fontSize: 13,
+  fontWeight: 600,
+  cursor: "pointer",
+  color: "#1f1b18",
+};
+
+const SHEET_BTN_PRIMARY: React.CSSProperties = {
+  flex: 1.4,
+  padding: "11px 14px",
+  borderRadius: 12,
+  border: "none",
+  background: "linear-gradient(135deg, #c9a961 0%, #a78848 100%)",
+  fontFamily: '"Poppins", system-ui, sans-serif',
+  fontSize: 13,
+  fontWeight: 600,
+  cursor: "pointer",
+  color: "white",
+  boxShadow: "0 2px 8px rgba(201,169,97,0.45)",
+};
+
