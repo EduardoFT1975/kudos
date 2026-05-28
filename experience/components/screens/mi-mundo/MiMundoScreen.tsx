@@ -151,7 +151,7 @@ export function MiMundoScreen() {
       <div className="kudos-mimundo-grid" style={GRID}>
         <aside className="kudos-mimundo-side kudos-elev-1" style={SIDEBAR}>
           <SideNavItem icon="discover" label="Descubrir" href="/inicio" />
-          <SideNavItem icon="map"      label="Mapa"      href="/mapa" />
+          <SideNavItem icon="map"      label="Mapa"      href="/world" />
 
           <div style={SIDE_GROUP_HEAD}>
             <span style={SIDE_GROUP_ICON}><Icon name="heart" size={14} /></span>

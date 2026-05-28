@@ -146,7 +146,7 @@ export function HomeMapPanel({ pois, activeId, locationLabel }: Props) {
           <Icon name="here" size={14} />
         </button>
       </div>
-      <Link href="/mapa" style={CTA} className="kudos-tap">
+      <Link href="/world" style={CTA} className="kudos-tap">
         <Icon name="discover" size={16} />
         <span>Explorar esta &aacute;rea</span>
       </Link>

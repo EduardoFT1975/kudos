@@ -41,7 +41,7 @@ export function PlaceScreen({ slug }: PlaceScreenProps) {
 
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "20px 22px 0" }}>
         <div style={{ display: "flex", gap: 8, marginBottom: 22, flexWrap: "wrap" }}>
-          <PrimaryButton as="link" href="/mapa" iconLeft={<Icon name="map" size={14} />}>Ver en mapa</PrimaryButton>
+          <PrimaryButton as="link" href="/world" iconLeft={<Icon name="map" size={14} />}>Ver en mapa</PrimaryButton>
           <SecondaryButton iconLeft={<Icon name="saved" size={14} />}>Guardar lugar</SecondaryButton>
           <SecondaryButton iconLeft={<Icon name="share" size={14} />}>Compartir</SecondaryButton>
         </div>

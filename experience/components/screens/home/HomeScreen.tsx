@@ -120,7 +120,7 @@ export function HomeScreen() {
             <span>DESCUBRIR</span>
             <span aria-hidden style={PILL_UNDERLINE} />
           </button>
-          <button type="button" style={PILL_IDLE} onClick={() => router.push("/mapa")}>
+          <button type="button" style={PILL_IDLE} onClick={() => router.push("/world")}>
             <Icon name="map" size={14} />
             <span>MAPA</span>
           </button>
@@ -137,7 +137,7 @@ export function HomeScreen() {
                 <span aria-hidden style={EYEBROW_STAR} className="kudos-gradient-text">✦</span>
                 <h2 className="kudos-h-med" style={SECTION_TITLE}>Para ti</h2>
               </div>
-              <Link href="/mapa" style={SEE_ALL}>
+              <Link href="/world" style={SEE_ALL}>
                 <span>Ver todo</span>
                 <Icon name="chevron-right" size={14} />
               </Link>
@@ -298,7 +298,7 @@ export function HomeScreen() {
                 </span>
                 <h2 className="kudos-h-med" style={SECTION_TITLE}>Cerca de ti</h2>
               </div>
-              <Link href="/mapa" style={SEE_ALL}>
+              <Link href="/world" style={SEE_ALL}>
                 <span>Ver todo</span>
                 <Icon name="chevron-right" size={14} />
               </Link>
@@ -338,7 +338,7 @@ export function HomeScreen() {
                   <span aria-hidden style={EYEBROW_STAR} className="kudos-gradient-text">✦</span>
                   <h2 className="kudos-h-med" style={SECTION_TITLE}>Trending hoy</h2>
                 </div>
-                <Link href="/mapa" style={SEE_ALL}>
+                <Link href="/world" style={SEE_ALL}>
                   <span>Ver todo</span>
                   <Icon name="chevron-right" size={14} />
                 </Link>

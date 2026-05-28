@@ -23,7 +23,7 @@ interface Tab { href: string; label: string; icon: IconName; }
 
 const TABS_LEFT: ReadonlyArray<Tab> = [
   { href: "/inicio", label: "Inicio", icon: "discover" },
-  { href: "/mapa",   label: "Mapa",   icon: "map" },
+  { href: "/world",   label: "Mapa",   icon: "map" },
 ];
 const TABS_RIGHT: ReadonlyArray<Tab> = [
   { href: "/mi-mundo", label: "Mi Mundo", icon: "saved" },

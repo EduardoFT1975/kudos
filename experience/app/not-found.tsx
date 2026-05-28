@@ -90,7 +90,7 @@ export default function NotFound() {
             Volver al inicio
           </Link>
           <Link
-            href="/mapa"
+            href="/world"
             style={{
               display: "inline-flex",
               alignItems: "center",

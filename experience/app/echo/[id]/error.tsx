@@ -52,7 +52,7 @@ export default function EchoError({ error, reset }: ErrorProps) {
             fontFamily: "var(--kudos-font-body)", fontSize: 13,
             fontWeight: 600, cursor: "pointer",
           }}>Reintentar</button>
-          <a href="/mapa" style={{
+          <a href="/world" style={{
             padding: "10px 16px", borderRadius: 999,
             background: "transparent",
             border: "1px solid var(--kudos-border-hi)",

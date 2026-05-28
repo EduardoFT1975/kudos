@@ -67,7 +67,7 @@ export function TimeRomeScreen() {
             ))}
           </div>
           <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
-            <PrimaryButton as="link" href="/mapa" size="sm">Abrir en mapa</PrimaryButton>
+            <PrimaryButton as="link" href="/world" size="sm">Abrir en mapa</PrimaryButton>
             <PrimaryButton as="link" href="/studio" size="sm">Crear cápsula romana</PrimaryButton>
           </div>
         </GlassCard>

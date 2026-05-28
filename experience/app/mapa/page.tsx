@@ -1,12 +1,9 @@
-import type { Metadata } from "next";
-import { MapScreen } from "@/components/screens/map/MapScreen";
+/**
+ * /mapa · DEPRECATED · redirige a /world (KUDOS World Engine).
+ * Mantenemos la ruta solo por compatibilidad con enlaces externos antiguos.
+ */
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "Mapa",
-  description: "Explora lugares KUDOS en el mapa.",
-};
-
-export default function MapaPage() {
-  return <MapScreen />;
+export default function MapaPage(): never {
+  redirect("/world");
 }
