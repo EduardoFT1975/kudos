@@ -378,16 +378,29 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
   }, [centerOn]);
 
   // Center on user location · primera vez que llegan las coords (si no hay POI activo).
-  // La geolocation puede tardar 1-2s tras el mount; este effect captura ese cambio
-  // y reencuadra el mapa una sola vez. Después el usuario controla.
+  // La geolocation y la carga del map son async · pueden completarse en cualquier
+  // orden. Usamos un interval corto que comprueba ambos y centra UNA vez cuando
+  // los dos están listos. Después el usuario controla la cámara.
   const centeredOnUserRef = React.useRef(false);
   React.useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !userCoords || centerOn || centeredOnUserRef.current) return;
-    try {
-      map.setView([userCoords.lat, userCoords.lng], 12, { animate: true });
-      centeredOnUserRef.current = true;
-    } catch {}
+    if (centerOn || centeredOnUserRef.current) return;
+    if (!userCoords) return;
+    let tries = 0;
+    const t = setInterval(() => {
+      tries += 1;
+      const map = mapRef.current;
+      if (map) {
+        try {
+          map.setView([userCoords.lat, userCoords.lng], 12, { animate: true });
+          centeredOnUserRef.current = true;
+        } catch {}
+        clearInterval(t);
+      } else if (tries > 40) {
+        // ~4s · si tras 40 intentos no hay map, abandona (algo grave pasa).
+        clearInterval(t);
+      }
+    }, 100);
+    return () => clearInterval(t);
   }, [userCoords?.lat, userCoords?.lng, centerOn]);
 
   // User marker
