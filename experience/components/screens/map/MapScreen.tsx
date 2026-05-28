@@ -1006,6 +1006,18 @@ const SHEET_RATING: React.CSSProperties = {
 const SHEET_DOT: React.CSSProperties = {
   color: "rgba(242,242,247,0.42)",
 };
+const SHEET_GHOST: React.CSSProperties = {
+  appearance: "none",
+  background: "rgba(255,255,255,0.06)",
+  border: "1px solid rgba(255,255,255,0.12)",
+  color: "rgba(242,242,247,0.92)",
+  padding: "8px 12px",
+  borderRadius: 12,
+  fontSize: 12.5,
+  fontWeight: 600,
+  cursor: "pointer",
+  letterSpacing: 0.2,
+};
 const SHEET_CAT: React.CSSProperties = {
   color: "rgba(242,242,247,0.72)",
 };
@@ -1085,10 +1097,9 @@ const SHEET_CTA_PLAY_BADGE: React.CSSProperties = {
   background: "rgba(255,255,255,0.22)",
   display: "inline-flex", alignItems: "center", justifyContent: "center",
   color: "#fff",
-  marginRight: 4,
-  flexShrink: 0,
+  fontSize: 11,
+  fontWeight: 700,
 };
-
 const STAR: React.CSSProperties = {
   color: "var(--kudos-accent-yellow, #FFD23F)",
   fontSize: 13,

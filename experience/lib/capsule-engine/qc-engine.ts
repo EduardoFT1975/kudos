@@ -314,7 +314,6 @@ export const defaultHeuristicRunner: HeuristicRunner = async (input) => {
     duration_s,
   };
 };
-};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // LAYER 3 · Claude vision (post-render · frame sampling)

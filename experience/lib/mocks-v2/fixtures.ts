@@ -10,6 +10,8 @@
  */
 import { wikimediaUrl } from "./wikimedia";
 
+import { PLACES_GLOBAL, ECHOES_GLOBAL } from "./places-global";
+
 export type EraId = "roman" | "medieval" | "renaissance" | "modern" | "today";
 export type LayerId = "real" | "historical" | "cultural" | "hidden";
 export type EchoTone = "accent" | "warn" | "ok" | "default";
@@ -123,7 +125,7 @@ export interface MockMindMessage {
 }
 
 
-export const PLACES: ReadonlyArray<MockPlace> = [
+const PLACES_CORE: ReadonlyArray<MockPlace> = [
   { id: "ogrove",      name: "O Grove",                country: "España (Galicia)", lat: 42.4994, lng: -8.8665, era: "roman" },
   { id: "pontevedra",  name: "Pontevedra",             country: "España (Galicia)", lat: 42.4310, lng: -8.6444, era: "medieval" },
   { id: "santiago",    name: "Santiago de Compostela", country: "España (Galicia)", lat: 42.8782, lng: -8.5448, era: "medieval" },
@@ -141,7 +143,7 @@ export const PLACES: ReadonlyArray<MockPlace> = [
   { id: "cusco",       name: "Cusco",                   country: "Perú",              lat: -13.53,  lng: -71.97,  era: "renaissance" },
 ];
 
-export const ECHOES: ReadonlyArray<MockEcho> = ([
+const ECHOES_CORE: ReadonlyArray<MockEcho> = ([
   // ─── GALICIA ────────────────────────────────────────────────────────────
   {
     id: "areoso", slug: "areoso",
@@ -723,7 +725,7 @@ export const LAYERS: Readonly<Record<LayerId, { label: string; tint: string; des
 // Mutates objects in place at module load.
 // ---------------------------------------------------------------------------
 // ─── P12 · NEW ECHOES (content density expansion) ────────────────────────
-(ECHOES as MockEcho[]).push(...([
+(ECHOES_CORE as MockEcho[]).push(...([
   {
     id: "sagrada-familia", slug: "sagrada-familia",
     title: "La Sagrada Familia",
@@ -991,7 +993,7 @@ export const LAYERS: Readonly<Record<LayerId, { label: string; tint: string; des
 ] as unknown as MockEcho[]));
 
 (function resolveWikimediaUrls() {
-  for (const echo of ECHOES) {
+  for (const echo of ECHOES_CORE) {
     (echo as { heroImage: string }).heroImage = wikimediaUrl(echo.heroFilename, 1600);
     for (const g of echo.gallery) {
       (g as { src: string }).src = wikimediaUrl(g.filename, 1200);
@@ -1011,7 +1013,7 @@ export const LAYERS: Readonly<Record<LayerId, { label: string; tint: string; des
 import { ECHO_EPOCHS } from "./epochs";
 
 (function attachEpochs() {
-  for (const echo of ECHOES) {
+  for (const echo of ECHOES_CORE) {
     const epochs = ECHO_EPOCHS[echo.id];
     if (epochs && epochs.length > 0) {
       for (const ep of epochs) {
@@ -1047,7 +1049,7 @@ const VIRAL_HOOKS: Record<string, string> = {
 };
 
 (function attachHooks() {
-  for (const echo of ECHOES) {
+  for (const echo of ECHOES_CORE) {
     const h = VIRAL_HOOKS[echo.id];
     if (h) (echo as { viralHook?: string }).viralHook = h;
   }
@@ -1065,3 +1067,8 @@ export function relatedEchoes(echo: MockEcho): ReadonlyArray<MockEcho> {
 
 // (kept) Re-export helper for components
 export { wikimediaUrl } from "./wikimedia";
+
+
+// ─── Concatenación con POIs globales · Wave 1 ────────────────────────────
+export const PLACES: ReadonlyArray<MockPlace> = [...PLACES_CORE, ...PLACES_GLOBAL];
+export const ECHOES: ReadonlyArray<MockEcho> = [...ECHOES_CORE, ...ECHOES_GLOBAL];
