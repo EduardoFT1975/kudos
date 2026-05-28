@@ -135,26 +135,15 @@ function writeJson(key: string, value: unknown): void {
   try { window.localStorage.setItem(key, JSON.stringify(value)); } catch { /* quota */ }
 }
 
-// ─── Demo video clips (P11.8) · local MP4 assets in /public/capsules/ ─────
-// Strict 1:1 mapping · every echo plays its own MP4 (P13.5).
-// All clips share an identical ffmpeg pipeline (ken-burns over a brand-gradient
-// still · no baked text · React overlays carry POI metadata).
+// P32-fix · todos los .mp4 antiguos en /capsules/ son placeholders de <30KB
+// con fondo plano (causan el bug visual "solo fondo morado/azul" reportado
+// por Eduardo el 28-may-2026). Hasta que kudos_engine los regenere uno por
+// uno, solo dejamos como clipSrc el vídeo REAL del Coliseo (coliseo-final.mp4
+// · 366KB · 15s · cinematográfico). El resto cae a undefined → VideoCapsule
+// muestra solo el poster real (foto del POI). Se irán reactivando a medida
+// que kudos_engine produzca el .mp4 real para cada echo.
 const CLIP_SRC_BY_ECHO: Record<string, string | undefined> = {
-  coliseo:               "/capsules/coliseo.mp4",
-  machu:                 "/capsules/machu.mp4",
-  athens:                "/capsules/athens.mp4",
-  notre:                 "/capsules/notre.mp4",
-  mlk:                   "/capsules/mlk.mp4",
-  areoso:                "/capsules/areoso.mp4",
-  "pontevedra-medieval": "/capsules/pontevedra-medieval.mp4",
-  santiagomateo:         "/capsules/santiagomateo.mp4",
-  "tokyo-showa":         "/capsules/tokyo-showa.mp4",
-  "sagrada-familia":     "/capsules/sagrada-familia.mp4",
-  alhambra:              "/capsules/alhambra.mp4",
-  petra:                 "/capsules/petra.mp4",
-  "hagia-sofia":         "/capsules/hagia-sofia.mp4",
-  "torre-eiffel":        "/capsules/torre-eiffel.mp4",
-  sacsayhuaman:          "/capsules/sacsayhuaman.mp4",
+  coliseo: "/capsules/coliseo-final.mp4",
 };
 
 // ─── Local poster assets (P12.6) · bundled JPGs in /public/pois/ ─────────
