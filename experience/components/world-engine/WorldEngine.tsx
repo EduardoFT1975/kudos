@@ -55,11 +55,54 @@ const LEGENDARY_IDS = new Set([
 
 const TIER_PRIORITY: Record<WorldNodeTier, number> = { S: 0, A: 1, B: 2, C: 3 };
 
-function tierForPoi(p: { id: string; rating?: number; unesco?: boolean }): WorldNodeTier {
+// ─── Keywords para "Selecta KUDOS" · POI relevante por el name ──────────
+const KEYWORDS_S = /catedral|palacio real|alc[áa]zar|abad[íi]a|acr[óo]polis|templo de|baz[íi]lica de san pedro|gran mezquita|reichstag|colis(eum|eo)|pir[áa]mide|sagrada familia|machu picchu/i;
+const KEYWORDS_A = /catedral|palacio|real |nacional|mayor|princess|royal|imperial|fortress|abad[íi]a|monasterio|alc[áa]zar|alh[áa]mbra|teatro romano|villa romana|gran |grande/i;
+const PREMIUM_CATEGORIES = new Set(["castle", "palace", "religious", "museum", "archaeology", "megalith"]);
+
+function tierForPoi(p: {
+  id: string;
+  rating?: number;
+  unesco?: boolean;
+  name?: string;
+  category?: string;
+  image_url?: string;
+  type?: string;
+}): WorldNodeTier {
+  // Tier S · LEGENDARY hardcoded o UNESCO con keyword icónica
   if (LEGENDARY_IDS.has(p.id)) return "S";
+  const nm = p.name || "";
+  if (p.unesco && KEYWORDS_S.test(nm)) return "S";
+
+  // Globals curados (g-*) siempre Tier A
   if (p.id.startsWith("g-")) return "A";
-  if (p.unesco || (p.rating ?? 0) >= 9.3) return "A";
-  return "B";
+
+  // Tier A · UNESCO con foto · o categoría premium con foto + keyword premium
+  const hasImage = !!p.image_url;
+  if (p.unesco && hasImage) return "A";
+  if (hasImage && KEYWORDS_A.test(nm)) return "A";
+
+  // Score por rating legacy
+  if ((p.rating ?? 0) >= 9.3) return "A";
+
+  // Tier B · pictograma Apple-style · REQUIERE imagen + categoría reconocible
+  // Si Wikidata no tiene foto, probablemente el POI no es relevante.
+  if (hasImage && PREMIUM_CATEGORIES.has(inferCategoryShort(p.category, p.type, nm))) return "B";
+
+  // Resto · Tier C invisible salvo zoom 17+
+  return "C";
+}
+
+// Helper local · saber si la categoría inferida es de las "premium"
+function inferCategoryShort(category?: string, type?: string, name?: string): string {
+  const t = `${type || ""} ${category || ""} ${name || ""}`.toLowerCase();
+  if (/iglesia|church|basilic|catedral|cathedral|monasterio|monastery|abad[ií]a|abbey|ermita|capilla|chapel|mosque|synagog|temple|sanctuar/.test(t)) return "religious";
+  if (/castillo|castle|fortaleza|fortress|alcazar|alc[áa]zar|tower|torre|fort|murall/.test(t)) return "castle";
+  if (/palacio|palace|palau/.test(t)) return "palace";
+  if (/dolmen|menhir|m[áa]moa|t[úu]mulo|megalit|cromlech|petr[óo]glifo/.test(t)) return "megalith";
+  if (/yacimiento|ruina|ruin|archaeolog|arqueol|villa romana|teatro romano|anfiteatro/.test(t)) return "archaeology";
+  if (/museo|museum|galer[íi]a|gallery/.test(t)) return "museum";
+  return "";   // no premium
 }
 
 
@@ -108,7 +151,8 @@ export function WorldEngine() {
           const data = await r.json();
           const items = (data?.pois ?? []) as Array<{
             id: string; name: string; lat: number; lng: number;
-            category: string; unesco?: boolean;
+            category?: string; type?: string; unesco?: boolean;
+            image_url?: string;
           }>;
           const chunk: WorldPoi[] = items.map((p: any) => {
             // Fallback: si category genérico devuelve "monument", probar con name
@@ -122,7 +166,10 @@ export function WorldEngine() {
               name: p.name,
               lat: p.lat,
               lng: p.lng,
-              tier: tierForPoi({ id: p.id, unesco: p.unesco }),
+              tier: tierForPoi({
+              id: p.id, unesco: p.unesco,
+              name: p.name, category: p.category, type: p.type, image_url: p.image_url,
+            }),
               category: cat,
               image: img,
             };
@@ -304,40 +351,31 @@ export function WorldEngine() {
     const visible: WorldPoi[] = candidates.slice(0, cap);
     const next = new Map<string, WorldPoi>(visible.map((n) => [n.id, n]));
 
-    // 3.4) Spatial deduplication en pixel space
-    // Si dos chips colisionan >50% se oculta el de MENOR tier (S>A>B>C).
-    // Esto evita el clutter de Roma centro sin necesidad de clustering.
-    const chipBoxes: { x1: number; y1: number; x2: number; y2: number }[] = [];
+    // 3.4) Spatial deduplication · distancia centro-a-centro Apple-style.
+    // Si dos chips están a menos de (sz_a + sz_b)/2 × 1.10, ocultamos el
+    // de menor tier (orden de candidates ya garantiza prioridad S>A>B>C).
+    // "Los chips no pueden tocarse · debe haber 10% de aire entre ellos".
+    const chipCenters: { cx: number; cy: number; sz: number }[] = [];
     const dedupVisible: typeof visible = [];
     for (const n of visible) {
       try {
         const p = map.latLngToContainerPoint([n.lat, n.lng]);
         const baseSize = n.tier === "S" ? 44 : n.tier === "A" ? 32 : n.tier === "B" ? 14 : 6;
         const sz = baseSize * sizeFactorForZoom(zoom);
-        const box = {
-          x1: p.x - sz / 2,
-          y1: p.y - sz / 2,
-          x2: p.x + sz / 2,
-          y2: p.y + sz / 2,
-        };
-        // Comprobar solapamiento area-percent con ya colocados
         let overlaps = false;
-        for (const b of chipBoxes) {
-          const ix = Math.max(0, Math.min(box.x2, b.x2) - Math.max(box.x1, b.x1));
-          const iy = Math.max(0, Math.min(box.y2, b.y2) - Math.max(box.y1, b.y1));
-          const interArea = ix * iy;
-          const boxArea = (box.x2 - box.x1) * (box.y2 - box.y1);
-          if (boxArea > 0 && interArea / boxArea > 0.5) {
-            overlaps = true; break;
-          }
+        for (const c of chipCenters) {
+          const dx = p.x - c.cx;
+          const dy = p.y - c.cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const minDist = (sz + c.sz) / 2 * 1.10;
+          if (dist < minDist) { overlaps = true; break; }
         }
         if (!overlaps) {
-          chipBoxes.push(box);
+          chipCenters.push({ cx: p.x, cy: p.y, sz });
           dedupVisible.push(n);
         }
-      } catch { dedupVisible.push(n); }   // si falla pixel proj, no descartamos
+      } catch { dedupVisible.push(n); }
     }
-    // Sustituir el set de visibles con la versión deduplicada
     visible.length = 0;
     visible.push(...dedupVisible);
     next.clear();
@@ -349,7 +387,7 @@ export function WorldEngine() {
     const showLabelIds = new Set<string>();
     const placedBoxes: { x1: number; y1: number; x2: number; y2: number }[] = [];
     for (const n of visible) {
-      if (n.tier !== "S" && n.tier !== "A") continue;
+      if (n.tier === "C") continue;   // Tier C no muestra label · sólo S, A, B (Apple-style)
       try {
         const p = map.latLngToContainerPoint([n.lat, n.lng]);
         const labelText = n.name || "";
