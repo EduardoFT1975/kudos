@@ -170,7 +170,7 @@ const EXCLUDED_AS_POI = new Set([
 const TIER_PRIORITY: Record<WorldNodeTier, number> = { S: 0, A: 1, B: 2, C: 3 };
 
 // ─── Keywords para "Selecta KUDOS" · estrictas (post-recompute) ─────────
-const KEYWORDS_S = /alh[áa]mbra|sagrada familia|machu picchu|acr[óo]polis|gran pir[áa]mide|notre-dame de paris|reichstag|templo de karnak|baz[íi]lica de san pedro|gran mezquita de c[óo]rdoba/i;
+const KEYWORDS_S = /^(la )?alh[áa]mbra$|^(la )?sagrada familia$|^templo expiatorio de la sagrada familia$|^machu picchu$|^acr[óo]polis( de atenas)?$|^gran pir[áa]mide( de giza)?$|^notre[- ]dame( de paris| de par[íi]s)?$|^reichstag$|^templo de karnak$|^bas[íi]lica de san pedro( del vaticano)?$|^(la )?mezquita[- ]catedral de c[óo]rdoba$/i;
 const KEYWORDS_A = /catedral de |cathedral of |alc[áa]zar de |abad[íi]a de |abbey of |monasterio del |monasterio de san |monasterio de santa |palacio real de |palacio nacional de |teatro romano de |villa romana de |anfiteatro romano de |museo nacional de |biblioteca nacional de |plaza mayor de /i;
 const KEYWORDS_B = /bas[íi]lica|catedral|cathedral|monasterio|abad[íi]a|abbey|alc[áa]zar|alh[áa]mbra|santuario|castillo|castle|fortaleza|fortress|murall|alcazaba|teatro romano|villa romana|anfiteatro|yacimiento arqueol[óo]gico|parque nacional|jard[íi]n bot[áa]nico|reserva natural|dolmen|menhir|m[áa]moa|t[úu]mulo|petr[óo]glifo|museo de arte|museo arqueol[óo]gico|pinacoteca/i;
 

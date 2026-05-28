@@ -1,0 +1,26 @@
+{
+  "acropolis": [
+    {
+      "id": "wd-Q131013",
+      "name": "Acrópolis de Atenas",
+      "canonical": true
+    },
+    {
+      "id": "wd-Q421067",
+      "name": "Acropolis Palaiokastro",
+      "canonical": false
+    }
+  ],
+  "alhambra": [
+    {
+      "id": "wd-Q47476",
+      "name": "Alhambra",
+      "canonical": true
+    },
+    {
+      "id": "wd-Q5757059",
+      "name": "Castillo de Alhambra",
+      "canonical": false
+    }
+  ]
+}

@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q421067",
+    "name": "Acropolis Palaiokastro",
+    "lat": 37.586667,
+    "lng": 23.349444,
+    "country_code": "GR",
+    "category": "monumento",
+    "type": "yacimiento arqueológico",
+    "wikidata": "Q421067",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Acropolis%20Palaiokastro%2015.JPG",
+    "unesco": true,
+    "tier": "S",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Acrópolis Palaiokastro",
+    "subtitle": "Fortaleza de piedra donde el tiempo se detiene",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "En las alturas de Grecia, una ciudadela antigua emerge del silencio. Palaiokastro: testimonio pétreo de imperios olvidados.",
+        "direction": "in",
+        "search_hint": "Palaiokastro acropolis Greece ancient fortress",
+        "duration": 5.5
+      },
+      {
+        "title": "Murallas",
+        "narration": "Sus muros defensivos se alzan sin concesión. Cada piedra cuenta una estrategia de supervivencia milenaria.",
+        "direction": "right",
+        "search_hint": "Palaiokastro walls fortification masonry",
+        "duration": 5.5
+      },
+      {
+        "title": "Arquitectura",
+        "narration": "La ingeniería ciclopea desafía la gravedad. Bloques colosales ensamblados sin argamasa permanecen unidos.",
+        "direction": "up",
+        "search_hint": "Palaiokastro cyclopean walls ancient construction",
+        "duration": 5.5
+      },
+      {
+        "title": "Panorámica",
+        "narration": "Desde esta atalaya, generales antiguos vigilaban valles y caminos. El dominio visual era poder absoluto.",
+        "direction": "out",
+        "search_hint": "Palaiokastro viewpoint landscape vista",
+        "duration": 5.5
+      },
+      {
+        "title": "Ocupación",
+        "narration": "Micénicos, dóricos, romanos: capas de civilizaciones sedimentadas en esta roca.",
+        "direction": "left",
+        "search_hint": "Palaiokastro Mycenaean Dorian Roman period",
+        "duration": 5.0
+      },
+      {
+        "title": "Detalles",
+        "narration": "Las ruinas revelan puertas, escalones, cisternas. Vida cotidiana petrificada en el tiempo.",
+        "direction": "down",
+        "search_hint": "Palaiokastro ruins architectural details",
+        "duration": 4.5
+      },
+      {
+        "title": "Soledad",
+        "narration": "Hoy, la soledad reina donde antaño resonaban voces de comerciantes y soldados.",
+        "direction": "in",
+        "search_hint": "Palaiokastro abandoned ruins silent",
+        "duration": 4.5
+      },
+      {
+        "title": "Cierre",
+        "narration": "Palaiokastro persiste: monumento silencioso a la fragilidad del poder humano.",
+        "direction": "out",
+        "search_hint": "Palaiokastro legacy heritage monument",
+        "duration": 4.5
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acropolis-palaiokastro\\00_33e2ca20.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/db/Acropolis_Palaiokastro_1.JPG",
+      "title": "File:Acropolis Palaiokastro 1.JPG",
+      "author": "Schuppi",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1278
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acropolis-palaiokastro\\01_2f448bc5.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/fb/Acropolis_Palaiokastro_10.JPG",
+      "title": "File:Acropolis Palaiokastro 10.JPG",
+      "author": "Schuppi",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1278
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acropolis-palaiokastro\\02_50f1d73f.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Acropolis_Palaiokastro_11.JPG",
+      "title": "File:Acropolis Palaiokastro 11.JPG",
+      "author": "Schuppi",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1278
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acropolis-palaiokastro\\03_1fac9881.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/69/Acropolis_Palaiokastro_12.JPG",
+      "title": "File:Acropolis Palaiokastro 12.JPG",
+      "author": "Schuppi",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1278
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acropolis-palaiokastro\\04_e9b089ba.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/cc/Acropolis_Palaiokastro_13.JPG",
+      "title": "File:Acropolis Palaiokastro 13.JPG",
+      "author": "Schuppi",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1278
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acropolis-palaiokastro\\05_c72dd6a3.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/8e/Acropolis_Palaiokastro_14.JPG",
+      "title": "File:Acropolis Palaiokastro 14.JPG",
+      "author": "Schuppi",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1278
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acropolis-palaiokastro\\06_cd2eef50.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Acropolis_Palaiokastro_15.JPG",
+      "title": "File:Acropolis Palaiokastro 15.JPG",
+      "author": "Schuppi",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1278
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acropolis-palaiokastro\\07_f5ac6acf.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/90/Acropolis_Palaiokastro_16.JPG",
+      "title": "File:Acropolis Palaiokastro 16.JPG",
+      "author": "Schuppi",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1278
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acropolis-palaiokastro\\08_e9d580c9.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/49/Acropolis_Palaiokastro_17.JPG",
+      "title": "File:Acropolis Palaiokastro 17.JPG",
+      "author": "Schuppi",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1278
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acropolis-palaiokastro\\09_312c666a.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/26/Acropolis_Palaiokastro_18.JPG",
+      "title": "File:Acropolis Palaiokastro 18.JPG",
+      "author": "Schuppi",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1278
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acropolis-palaiokastro\\10_8177dec3.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/10/Acropolis_Palaiokastro_19.JPG",
+      "title": "File:Acropolis Palaiokastro 19.JPG",
+      "author": "Schuppi",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1278
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acropolis-palaiokastro\\11_8e9c5fc2.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/77/Acropolis_Palaiokastro_2.JPG",
+      "title": "File:Acropolis Palaiokastro 2.JPG",
+      "author": "Schuppi",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1278
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:Acropolis Palaiokastro 1.JPG — Schuppi — CC BY-SA 3.0"
+}

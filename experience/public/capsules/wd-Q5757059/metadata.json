@@ -1,0 +1,142 @@
+{
+  "poi": {
+    "id": "wd-Q5757059",
+    "name": "Castillo de Alhambra",
+    "lat": 38.89735,
+    "lng": -3.0478,
+    "country_code": "ES",
+    "category": "monumento",
+    "type": "castillo",
+    "wikidata": "Q5757059",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Restos%20del%20castillo%20de%20Alhambra%20en%20Ciudad%20Real%20%2845704261232%29.jpg",
+    "unesco": true,
+    "tier": "S",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Alhambra: Fortaleza del Tiempo",
+    "subtitle": "Donde la geometría islámica desafía los siglos",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "En lo alto de Granada, la Alhambra se alza como un testimonio de precisión y belleza. Construida en el siglo XIV, fue el último reino musulmán en Al-Ándalus.",
+        "direction": "in",
+        "search_hint": "Alhambra Granada fortress aerial view",
+        "duration": 5.5
+      },
+      {
+        "title": "Patio de los Leones",
+        "narration": "Sus patios revelan una arquitectura donde el agua, la luz y la geometría convergen en perfecta armonía. Cada fuente cuenta historias de dinastías perdidas.",
+        "direction": "right",
+        "search_hint": "Court of Lions Alhambra water features",
+        "duration": 5.5
+      },
+      {
+        "title": "Ornamentación",
+        "narration": "Los azulejos y yeserías cubren cada superficie con patrones que el ojo humano apenas puede seguir. Son cálculos matemáticos convertidos en arte.",
+        "direction": "down",
+        "search_hint": "Alhambra tilework calligraphy detail",
+        "duration": 5.5
+      },
+      {
+        "title": "Torre de Comares",
+        "narration": "Desde la Torre de Comares, los sultanes gobernaban un imperio que se extendía hasta el Atlántico. Sus ventanas ofrecen vistas que aún cautivan.",
+        "direction": "up",
+        "search_hint": "Tower of Comares Alhambra palace",
+        "duration": 5.0
+      },
+      {
+        "title": "Baños Árabes",
+        "narration": "Los baños públicos conservan la esencia de una civilización que dominaba la ingeniería térmica. Cúpulas perforadas proyectaban luz como estrellas.",
+        "direction": "left",
+        "search_hint": "Alhambra baths hammam architecture",
+        "duration": 5.0
+      },
+      {
+        "title": "Jardines Generife",
+        "narration": "El Generalife, palacio de verano, despliega sus jardines en terrazas donde el agua es el verdadero constructor. Canales y escaleras crean sinfónías visuales.",
+        "direction": "out",
+        "search_hint": "Generalife gardens fountains terraces",
+        "duration": 5.5
+      },
+      {
+        "title": "Transición Imperial",
+        "narration": "Cuando los Reyes Católicos conquistaron Granada en 1492, la Alhambra pasó a manos cristianas pero su espíritu andalusí permanece intacto.",
+        "direction": "in",
+        "search_hint": "Alhambra Catholic conquest 1492 history",
+        "duration": 5.0
+      },
+      {
+        "title": "Legado Eterno",
+        "narration": "Hoy, la Alhambra es patrimonio de la humanidad. Cada piedra susurra historias de encuentros culturales que transformaron civilizaciones.",
+        "direction": "out",
+        "search_hint": "Alhambra UNESCO world heritage legacy",
+        "duration": 2.5
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\castillo-de-alhambra\\00_6b444185.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/06/Alhambra_con_su_castillo._%2843936855210%29.jpg",
+      "title": "File:Alhambra con su castillo. (43936855210).jpg",
+      "author": "Miguel Angel Masegosa Martínez",
+      "license": "CC BY 2.0",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\castillo-de-alhambra\\01_666a52c6.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Campo_Montiel_CREAL.JPG",
+      "title": "File:Campo Montiel CREAL.JPG",
+      "author": "Desconocido",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1437
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\castillo-de-alhambra\\02_ec872baf.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/35/Castillo_de_Alhambra%2C_vista_cenital.jpg",
+      "title": "File:Castillo de Alhambra, vista cenital.jpg",
+      "author": "Juan Angel Ruiz Sabina",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\castillo-de-alhambra\\03_fe4f9771.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/0a/Castillo_de_Alhambra_y_pueblo.jpg",
+      "title": "File:Castillo de Alhambra y pueblo.jpg",
+      "author": "Juan Angel Ruiz Sabina",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1439
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\castillo-de-alhambra\\04_dee8ae18.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/81/Restos_del_castillo_de_Alhambra_en_Ciudad_Real_%2845704261232%29.jpg",
+      "title": "File:Restos del castillo de Alhambra en Ciudad Real (45704261232).jpg",
+      "author": "Miguel Angel Masegosa Martínez",
+      "license": "CC BY 2.0",
+      "width": 1920,
+      "height": 1200
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:Alhambra con su castillo. (43936855210).jpg — Miguel Angel Masegosa Martínez — CC BY 2.0\n  · File:Campo Montiel CREAL.JPG — Desconocido — CC BY-SA 3.0\n  · File:Castillo de Alhambra, vista cenital.jpg — Juan Angel Ruiz Sabina — CC BY-SA 4.0"
+}

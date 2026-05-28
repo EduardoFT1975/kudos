@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q66815979",
+    "name": "Capela da Sagrada Familia e Quinta do Descanso",
+    "lat": 32.6562,
+    "lng": -16.908096,
+    "country_code": "PT",
+    "category": "monumento",
+    "type": "palacio",
+    "wikidata": "Q66815979",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Capela%20da%20Sagrada%20Familia%20e%20Quinta%20do%20Descanso%2C%20Funchal%2C%20Madeira%20-%20IMG%206410.jpg",
+    "unesco": true,
+    "tier": "S",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Capela da Sagrada Familia e Quinta do Descanso",
+    "subtitle": "Santuario de piedra y silencio en tierras portuguesas",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "En el corazón rural de Portugal existe un lugar donde la fe y la naturaleza convergen en armonía absoluta.",
+        "direction": "in",
+        "search_hint": "Capela Sagrada Familia Portugal rural chapel",
+        "duration": 5.5
+      },
+      {
+        "title": "Arquitectura",
+        "narration": "La Capela da Sagrada Familia emerge entre colinas, su arquitectura sencilla testigo de siglos de devoción popular.",
+        "direction": "right",
+        "search_hint": "Sagrada Familia chapel architecture stone Portuguese",
+        "duration": 5.5
+      },
+      {
+        "title": "Detalles Sagrados",
+        "narration": "Cada piedra cuenta historias de peregrinos que buscaban paz en estos muros ancestrales.",
+        "direction": "up",
+        "search_hint": "Portuguese chapel stone religious pilgrimage sacred",
+        "duration": 5.0
+      },
+      {
+        "title": "Quinta do Descanso",
+        "narration": "Contigua al templo, la Quinta del Descanso preserva tradiciones agrícolas y espirituales del Portugal profundo.",
+        "direction": "left",
+        "search_hint": "Quinta Descanso Portuguese estate farming tradition",
+        "duration": 5.5
+      },
+      {
+        "title": "Armonía Vegetal",
+        "narration": "Sus terrenos cultivados abrazan la capilla en un diálogo entre lo sagrado y lo telúrico.",
+        "direction": "down",
+        "search_hint": "rural Portuguese quinta agricultural sacred landscape",
+        "duration": 5.0
+      },
+      {
+        "title": "Luz y Sombra",
+        "narration": "Cuando la luz dorada toca sus muros, el lugar exhala una tranquilidad casi palpable.",
+        "direction": "in",
+        "search_hint": "chapel golden light landscape Portugal sacred",
+        "duration": 5.0
+      },
+      {
+        "title": "Comunidad",
+        "narration": "Este santuario sigue siendo refugio espiritual para comunidades que honran sus ancestros en silencio.",
+        "direction": "out",
+        "search_hint": "Portuguese chapel community spiritual heritage religious",
+        "duration": 5.5
+      },
+      {
+        "title": "Legado",
+        "narration": "Capela da Sagrada Familia permanece como puente entre el ayer y el hoy, inmutable y luminoso.",
+        "direction": "out",
+        "search_hint": "chapel heritage Portugal timeless spiritual legacy",
+        "duration": 5.5
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\capela-da-sagrada-familia-e-quinta-do-descanso\\00_a042dd2a.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/da/Capela_da_Sagrada_Familia_e_Quinta_do_Descanso%2C_Funchal%2C_Madeira_-_IMG_6409.jpg",
+      "title": "File:Capela da Sagrada Familia e Quinta do Descanso, Funchal, Madeira - IMG 6409.jpg",
+      "author": "PESP/ Wikimedia",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\capela-da-sagrada-familia-e-quinta-do-descanso\\01_cc08496c.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f9/Capela_da_Sagrada_Familia_e_Quinta_do_Descanso%2C_Funchal%2C_Madeira_-_IMG_6410.jpg",
+      "title": "File:Capela da Sagrada Familia e Quinta do Descanso, Funchal, Madeira - IMG 6410.jpg",
+      "author": "PESP/ Wikimedia",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\capela-da-sagrada-familia-e-quinta-do-descanso\\02_4d789d3d.png",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/ee/Funchal%2C_from_the_sea%2C_Madeira_%281880%29_-_Reverend_J_N_Dalton_%28c%29.png",
+      "title": "File:Funchal, from the sea, Madeira (1880) - Reverend J N Dalton (c).png",
+      "author": "File:Funchal, from the sea, Madeira (1880) - Reverend J N Dalton.png: Reverend J N Dalton (1839-1931)\nderivative work: DarwIn",
+      "license": "Public domain",
+      "width": 1920,
+      "height": 1309
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\capela-da-sagrada-familia-e-quinta-do-descanso\\03_6eed541b.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/33/Quinta_do_Descanso%2C_Santa_Luzia%2C_Funchal_-_29_Jan_2012_-_SDC15731.JPG",
+      "title": "File:Quinta do Descanso, Santa Luzia, Funchal - 29 Jan 2012 - SDC15731.JPG",
+      "author": "PESP/ Wikimedia",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\capela-da-sagrada-familia-e-quinta-do-descanso\\04_24472300.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Quinta_do_Descanso%2C_Santa_Luzia%2C_Funchal_-_29_Jan_2012_-_SDC15732.JPG",
+      "title": "File:Quinta do Descanso, Santa Luzia, Funchal - 29 Jan 2012 - SDC15732.JPG",
+      "author": "PESP/ Wikimedia",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\capela-da-sagrada-familia-e-quinta-do-descanso\\05_324aa2ea.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/1e/Quinta_do_Descanso%2C_Santa_Luzia%2C_Funchal_-_29_Jan_2012_-_SDC15734.JPG",
+      "title": "File:Quinta do Descanso, Santa Luzia, Funchal - 29 Jan 2012 - SDC15734.JPG",
+      "author": "PESP/ Wikimedia",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 2560
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\capela-da-sagrada-familia-e-quinta-do-descanso\\06_cb65207a.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Quinta_do_Descanso%2C_Santa_Luzia%2C_Funchal_-_29_Jan_2012_-_SDC15735.JPG",
+      "title": "File:Quinta do Descanso, Santa Luzia, Funchal - 29 Jan 2012 - SDC15735.JPG",
+      "author": "PESP/ Wikimedia",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 2560
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\capela-da-sagrada-familia-e-quinta-do-descanso\\07_cf85c16c.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/78/Quinta_do_Descanso%2C_Santa_Luzia%2C_Funchal_-_29_Jan_2012_-_SDC15737.JPG",
+      "title": "File:Quinta do Descanso, Santa Luzia, Funchal - 29 Jan 2012 - SDC15737.JPG",
+      "author": "PESP/ Wikimedia",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\capela-da-sagrada-familia-e-quinta-do-descanso\\08_19f0fbdb.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/87/Quinta_do_Descanso%2C_Santa_Luzia%2C_Funchal_-_29_Jan_2012_-_SDC15770.JPG",
+      "title": "File:Quinta do Descanso, Santa Luzia, Funchal - 29 Jan 2012 - SDC15770.JPG",
+      "author": "PESP/ Wikimedia",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\capela-da-sagrada-familia-e-quinta-do-descanso\\09_787965f6.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Quinta_do_Descanso%2C_Santa_Luzia%2C_Funchal_-_29_Jan_2012_-_SDC15771.JPG",
+      "title": "File:Quinta do Descanso, Santa Luzia, Funchal - 29 Jan 2012 - SDC15771.JPG",
+      "author": "PESP/ Wikimedia",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\capela-da-sagrada-familia-e-quinta-do-descanso\\10_cde7c360.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b9/Quinta_do_Descanso%2C_Santa_Luzia%2C_Funchal_-_29_Jan_2012_-_SDC15772.JPG",
+      "title": "File:Quinta do Descanso, Santa Luzia, Funchal - 29 Jan 2012 - SDC15772.JPG",
+      "author": "PESP/ Wikimedia",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 2560
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\capela-da-sagrada-familia-e-quinta-do-descanso\\11_309780d9.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/ca/Quinta_do_Descanso%2C_Santa_Luzia%2C_Funchal_-_29_Jan_2012_-_SDC15773.JPG",
+      "title": "File:Quinta do Descanso, Santa Luzia, Funchal - 29 Jan 2012 - SDC15773.JPG",
+      "author": "PESP/ Wikimedia",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 2560
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:Capela da Sagrada Familia e Quinta do Descanso, Funchal, Madeira - IMG 6409.jpg — PESP/ Wikimedia — CC BY-SA 4.0\n  · File:Funchal, from the sea, Madeira (1880) - Reverend J N Dalton (c).png — File:Funchal, from the sea, Madeira (1880) - Reverend J N Dalton.png: Reverend J N Dalton (1839-1931)\nderivative work: DarwIn — Public domain\n  · File:Quinta do Descanso, Santa Luzia, Funchal - 29 Jan 2012 - SDC15731.JPG — PESP/ Wikimedia — CC BY-SA 3.0"
+}

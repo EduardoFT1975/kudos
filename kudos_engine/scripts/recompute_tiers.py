@@ -80,7 +80,20 @@ EXCLUDED_AS_POI = {
     "wd-Q1741",
 }
 
-KEYWORDS_S = re.compile(r"alh[áa]mbra|sagrada familia|machu picchu|acr[óo]polis|gran pir[áa]mide|notre-dame de paris|reichstag|templo de karnak|baz[íi]lica de san pedro|gran mezquita de c[óo]rdoba", re.IGNORECASE)
+KEYWORDS_S = re.compile(
+    r"^(la )?alh[áa]mbra$|"
+    r"^(la )?sagrada familia$|"
+    r"^templo expiatorio de la sagrada familia$|"
+    r"^machu picchu$|"
+    r"^acr[óo]polis( de atenas)?$|"
+    r"^gran pir[áa]mide( de giza)?$|"
+    r"^notre[- ]dame( de paris| de par[íi]s)?$|"
+    r"^reichstag$|"
+    r"^templo de karnak$|"
+    r"^bas[íi]lica de san pedro( del vaticano)?$|"
+    r"^(la )?mezquita[- ]catedral de c[óo]rdoba$",
+    re.IGNORECASE,
+)
 KEYWORDS_A = re.compile(r"catedral de |cathedral of |alc[áa]zar de |abad[íi]a de |abbey of |monasterio del |monasterio de san |monasterio de santa |palacio real de |palacio nacional de |teatro romano de |villa romana de |anfiteatro romano de |museo nacional de |biblioteca nacional de |plaza mayor de ", re.IGNORECASE)
 KEYWORDS_B = re.compile(r"bas[íi]lica|catedral|cathedral|monasterio|abad[íi]a|abbey|alc[áa]zar|alh[áa]mbra|santuario|castillo|castle|fortaleza|fortress|murall|alcazaba|teatro romano|villa romana|anfiteatro|yacimiento arqueol[óo]gico|parque nacional|jard[íi]n bot[áa]nico|reserva natural|dolmen|menhir|m[áa]moa|t[úu]mulo|petr[óo]glifo|museo de arte|museo arqueol[óo]gico|pinacoteca", re.IGNORECASE)
 

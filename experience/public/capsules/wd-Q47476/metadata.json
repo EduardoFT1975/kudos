@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q47476",
+    "name": "Alhambra",
+    "lat": 37.17634,
+    "lng": -3.58821,
+    "country_code": "ES",
+    "category": "monumento",
+    "type": "atracción turística",
+    "wikidata": "Q47476",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Alhambra%20detail.jpg",
+    "unesco": true,
+    "tier": "S",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 100,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Reconocido como icono del planeta · Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Alhambra",
+    "subtitle": "Donde el arte islámico desafió la eternidad",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "En lo alto de Granada, entre montañas nevadas, existe un palacio que susurra historias de ocho siglos. La Alhambra no es solo arquitectura, es el último aliento de una civilización.",
+        "direction": "in",
+        "search_hint": "Alhambra Granada palace overview",
+        "duration": 6
+      },
+      {
+        "title": "Los Palacios Nasríes",
+        "narration": "Sus muros contienen jardines cerrados donde el agua y la luz bailan en armonía perfecta. Cada azulejo cuenta una verdad que las palabras jamás alcanzarán.",
+        "direction": "right",
+        "search_hint": "Nasrid Palaces Alhambra interior",
+        "duration": 5.5
+      },
+      {
+        "title": "Geometría Sagrada",
+        "narration": "Los artesanos islámicos transformaron matemáticas en belleza. Patrones infinitos cubren cada superficie, reflejando el universo en miniatura.",
+        "direction": "up",
+        "search_hint": "Islamic geometric patterns Alhambra tiles",
+        "duration": 5
+      },
+      {
+        "title": "El Patio de los Leones",
+        "narration": "Ciento veinticuatro columnas sostienen un templo de mármol. Doce leones guardan una fuente que representa las aguas del paraíso.",
+        "direction": "down",
+        "search_hint": "Court of Lions Alhambra fountain",
+        "duration": 5.5
+      },
+      {
+        "title": "Los Jardines Generales",
+        "narration": "Afuera, la naturaleza respira en terrazas cuidadosamente diseñadas. Cipreses y fuentes trazan el mapa de un mundo idealizado.",
+        "direction": "left",
+        "search_hint": "Generalife gardens Alhambra landscape",
+        "duration": 5
+      },
+      {
+        "title": "Luz y Sombra",
+        "narration": "La arquitectura responde al movimiento del sol. Cada ventana, cada arco, domina la luz para crear un templo donde habita el tiempo.",
+        "direction": "out",
+        "search_hint": "Alhambra light architecture photography",
+        "duration": 5
+      },
+      {
+        "title": "Legado Milenario",
+        "narration": "Cuando Granada cayó, los conquistadores no destruyeron estos muros. Reconocieron que cierta belleza trasciende la política y la fe.",
+        "direction": "in",
+        "search_hint": "Alhambra UNESCO heritage history",
+        "duration": 5
+      },
+      {
+        "title": "Cierre",
+        "narration": "La Alhambra permanece. Testimonio silencioso de que la belleza es el único idioma que nunca envejece.",
+        "direction": "out",
+        "search_hint": "Alhambra Granada sunset panorama",
+        "duration": 2.5
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\alhambra\\00_da27f39f.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/ec/%22Ein_Meisterwerk_maurischer_Kunst_und_Architektur%22._01.jpg",
+      "title": "File:\"Ein Meisterwerk maurischer Kunst und Architektur\". 01.jpg",
+      "author": "Holger Uwe Schmitt",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2507
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\alhambra\\01_e0469ad6.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/%22Ein_Meisterwerk_maurischer_Kunst_und_Architektur%22._06.jpg",
+      "title": "File:\"Ein Meisterwerk maurischer Kunst und Architektur\". 06.jpg",
+      "author": "Holger Uwe Schmitt",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1986
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\alhambra\\02_015b80a9.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/9d/%22Ein_Meisterwerk_maurischer_Kunst_und_Architektur%22._07.jpg",
+      "title": "File:\"Ein Meisterwerk maurischer Kunst und Architektur\". 07.jpg",
+      "author": "Holger Uwe Schmitt",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1281
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\alhambra\\03_4fd9802c.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/77/%22Ein_Meisterwerk_maurischer_Kunst_und_Architektur%22._08.jpg",
+      "title": "File:\"Ein Meisterwerk maurischer Kunst und Architektur\". 08.jpg",
+      "author": "Holger Uwe Schmitt",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1305
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\alhambra\\04_8adec978.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/9d/%22Ein_Meisterwerk_maurischer_Kunst_und_Architektur%22._09.jpg",
+      "title": "File:\"Ein Meisterwerk maurischer Kunst und Architektur\". 09.jpg",
+      "author": "Holger Uwe Schmitt",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1274
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\alhambra\\05_edf71a09.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f8/%22Ein_Meisterwerk_maurischer_Kunst_und_Architektur%22._10.jpg",
+      "title": "File:\"Ein Meisterwerk maurischer Kunst und Architektur\". 10.jpg",
+      "author": "Holger Uwe Schmitt",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 3175
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\alhambra\\06_34b1d604.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/8e/%22Ein_Meisterwerk_maurischer_Kunst_und_Architektur%22._11.jpg",
+      "title": "File:\"Ein Meisterwerk maurischer Kunst und Architektur\". 11.jpg",
+      "author": "Holger Uwe Schmitt",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 3390
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\alhambra\\07_22f0dc8a.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/56/%22Ein_Meisterwerk_maurischer_Kunst_und_Architektur%22._12.jpg",
+      "title": "File:\"Ein Meisterwerk maurischer Kunst und Architektur\". 12.jpg",
+      "author": "Holger Uwe Schmitt",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 3037
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\alhambra\\08_55e7e16f.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/ce/%22Ein_Meisterwerk_maurischer_Kunst_und_Architektur%22._13.jpg",
+      "title": "File:\"Ein Meisterwerk maurischer Kunst und Architektur\". 13.jpg",
+      "author": "Holger Uwe Schmitt",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1675
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\alhambra\\09_49424041.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/9a/%22Ein_Meisterwerk_maurischer_Kunst_und_Architektur%22._14.jpg",
+      "title": "File:\"Ein Meisterwerk maurischer Kunst und Architektur\". 14.jpg",
+      "author": "Holger Uwe Schmitt",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 3049
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\alhambra\\10_2217ef37.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/8b/%22Ein_Meisterwerk_maurischer_Kunst_und_Architektur%22._15.jpg",
+      "title": "File:\"Ein Meisterwerk maurischer Kunst und Architektur\". 15.jpg",
+      "author": "Holger Uwe Schmitt",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1258
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\alhambra\\11_bc4c6215.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b6/%22Ein_Meisterwerk_maurischer_Kunst_und_Architektur%22._16.jpg",
+      "title": "File:\"Ein Meisterwerk maurischer Kunst und Architektur\". 16.jpg",
+      "author": "Holger Uwe Schmitt",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1206
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:\"Ein Meisterwerk maurischer Kunst und Architektur\". 01.jpg — Holger Uwe Schmitt — CC BY-SA 4.0"
+}

@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q131013",
+    "name": "Acrópolis de Atenas",
+    "lat": 37.971667,
+    "lng": 23.726111,
+    "country_code": "GR",
+    "category": "monumento",
+    "type": "atracción turística",
+    "wikidata": "Q131013",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Attica%2006-13%20Athens%2050%20View%20from%20Philopappos%20-%20Acropolis%20Hill.jpg",
+    "unesco": true,
+    "tier": "S",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 100,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Reconocido como icono del planeta · Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Acrópolis de Atenas",
+    "subtitle": "Donde la piedra susurra la historia de Occidente",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "Sobre la roca más sagrada de Occidente se alzan templos que desafiaron veintiseis siglos. La Acrópolis de Atenas no es solo arquitectura: es el latido pétreo de la civilización.",
+        "direction": "in",
+        "search_hint": "Acropolis Athens ancient temple",
+        "duration": 6
+      },
+      {
+        "title": "El Pártenon",
+        "narration": "El Pártenon emerge como una sinfonía de mármol blanco. Dedicado a Atenea, su precisión geométrica sigue desafiando los límites de lo posible en piedra.",
+        "direction": "up",
+        "search_hint": "Parthenon marble columns Doric",
+        "duration": 5.5
+      },
+      {
+        "title": "Propileos",
+        "narration": "La puerta monumental de los Propileos fue el umbral que franqueaban los peregrinos. Columnas jónicas sostienen el camino hacia lo divino.",
+        "direction": "right",
+        "search_hint": "Propylaea Athens entrance gateway",
+        "duration": 5
+      },
+      {
+        "title": "El Erecteión",
+        "narration": "Aquí confluyeron los mitos. El Erecteión albergó la tumba del primer rey de Atenas y el olivo sagrado de la diosa.",
+        "direction": "left",
+        "search_hint": "Erechtheion Porch Caryatids Athens",
+        "duration": 4.5
+      },
+      {
+        "title": "Las Cariátides",
+        "narration": "Seis doncellas de piedra sostienen un entablamento. Las Cariátides no son columnas: son testigos silenciosos de siglos de transformación.",
+        "direction": "down",
+        "search_hint": "Caryatids female figures Greek sculpture",
+        "duration": 5
+      },
+      {
+        "title": "La Ciudad Abajo",
+        "narration": "Desde la roca, Atenas se despliega como un mapa vivo de su propia historia. Templos antiguos conviven con la metrópolis moderna.",
+        "direction": "out",
+        "search_hint": "Athens city view Acropolis landscape",
+        "duration": 5
+      },
+      {
+        "title": "Piedra Sagrada",
+        "narration": "Cada mármol aquí lleva grabada una creencia: que la razón, la belleza y la democracia pueden esculpirse en lo eterno.",
+        "direction": "in",
+        "search_hint": "Acropolis marble stone ancient construction",
+        "duration": 5.5
+      },
+      {
+        "title": "Clausura",
+        "narration": "La Acrópolis permanece. No como ruina, sino como promesa: que lo que construimos con convicción trasciende al polvo.",
+        "direction": "up",
+        "search_hint": "Acropolis sunset archaeological site heritage",
+        "duration": 5.5
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acrópolis-de-atenas\\00_0da35765.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/eb/%22Am_Abend_ist_der_Blick_auf_die_Akropolis_in_Athen_besonders_beeindruckend%22_04.jpg",
+      "title": "File:\"Am Abend ist der Blick auf die Akropolis in Athen besonders beeindruckend\" 04.jpg",
+      "author": "Holger Uwe Schmitt",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acrópolis-de-atenas\\01_1ba42948.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/2c/1029_Acropolis_of_Athens_in_Greece_at_night_Photo_by_Giles_Laurent.jpg",
+      "title": "File:1029 Acropolis of Athens in Greece at night Photo by Giles Laurent.jpg",
+      "author": "Giles Laurent",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acrópolis-de-atenas\\02_2bbabbff.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/c7/2016-08-03_Greece%2C_Athens%2C_Acropolis_DSC_9908_DxO_1.jpg",
+      "title": "File:2016-08-03 Greece, Athens, Acropolis DSC 9908 DxO 1.jpg",
+      "author": "Laurens R. Krol",
+      "license": "CC BY 4.0",
+      "width": 1920,
+      "height": 2891
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acrópolis-de-atenas\\03_aa5dbc91.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/18/Acropoclipse.jpg",
+      "title": "File:Acropoclipse.jpg",
+      "author": "Elias Politis ( http://www.auhopu.com/ )",
+      "license": "CC BY-SA 3.0",
+      "width": 1740,
+      "height": 1158
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acrópolis-de-atenas\\04_37891119.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/40/Acropolis_August_2019.jpg",
+      "title": "File:Acropolis August 2019.jpg",
+      "author": "EricMathew",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acrópolis-de-atenas\\05_d96536ec.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/70/Acropolis_By_Night.jpg",
+      "title": "File:Acropolis By Night.jpg",
+      "author": "George Giannitsanos",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acrópolis-de-atenas\\06_1f9f1067.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/a0/Acropolis_by_day_03.jpg",
+      "title": "File:Acropolis by day 03.jpg",
+      "author": "Andreas Koulopoulos",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acrópolis-de-atenas\\07_129500b1.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/ff/Akropolis_fra_Pnyx_2017_%281%29.jpg",
+      "title": "File:Akropolis fra Pnyx 2017 (1).jpg",
+      "author": "Peulle",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1272
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acrópolis-de-atenas\\08_2b3ad1e3.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Athen_BW_2017-10-09_13-46-33.jpg",
+      "title": "File:Athen BW 2017-10-09 13-46-33.jpg",
+      "author": "Berthold Werner",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1382
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acrópolis-de-atenas\\09_25327340.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/c6/Attica_06-13_Athens_50_View_from_Philopappos_-_Acropolis_Hill.jpg",
+      "title": "File:Attica 06-13 Athens 50 View from Philopappos - Acropolis Hill.jpg",
+      "author": "A.Savin",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acrópolis-de-atenas\\10_a06d0974.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/09/B_Klitis_Acropolis_DSC_0383-1_s.jpg",
+      "title": "File:B Klitis Acropolis DSC 0383-1 s.jpg",
+      "author": "Kritheus",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\acrópolis-de-atenas\\11_d9c6d6d5.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d5/Inscribed_base_for_a_monumental_statue_dedicated_to_Athena_by_a_potter_named_Pelkon_vowing_to_give_10_percent_of_his_profits%2C_Acropolis_of_Athens%2C_510-500_BCE%2C_Epgraphical_Museum_Athens.jpg",
+      "title": "File:Inscribed base for a monumental statue dedicated to Athena by a potter named Pelkon vowing to give 10 percent of his profits, Acropolis of Athens, 510-500 BCE, Epgraphical Museum Athens.jpg",
+      "author": "Mary Harrsch",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1440
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:\"Am Abend ist der Blick auf die Akropolis in Athen besonders beeindruckend\" 04.jpg — Holger Uwe Schmitt — CC BY-SA 4.0\n  · File:1029 Acropolis of Athens in Greece at night Photo by Giles Laurent.jpg — Giles Laurent — CC BY-SA 4.0\n  · File:2016-08-03 Greece, Athens, Acropolis DSC 9908 DxO 1.jpg — Laurens R. Krol — CC BY 4.0\n  · File:Acropoclipse.jpg — Elias Politis ( http://www.auhopu.com/ ) — CC BY-SA 3.0\n  · File:Acropolis August 2019.jpg — EricMathew — CC BY-SA 4.0\n  · File:Acropolis By Night.jpg — George Giannitsanos — CC BY-SA 4.0\n  · File:Acropolis by day 03.jpg — Andreas Koulopoulos — CC BY-SA 4.0\n  · File:Akropolis fra Pnyx 2017 (1).jpg — Peulle — CC BY-SA 4.0\n  · File:Athen BW 2017-10-09 13-46-33.jpg — Berthold Werner — CC BY-SA 3.0\n  · File:Attica 06-13 Athens 50 View from Philopappos - Acropolis Hill.jpg — A.Savin — CC BY-SA 3.0\n  · File:B Klitis Acropolis DSC 0383-1 s.jpg — Kritheus — CC BY-SA 4.0\n  · File:Inscribed base for a monumental statue dedicated to Athena by a potter named Pelkon vowing to give 10 percent of his profits, Acropolis of Athens, 510-500 BCE, Epgraphical Museum Athens.jpg — Mary Harrsch — CC BY-SA 4.0"
+}

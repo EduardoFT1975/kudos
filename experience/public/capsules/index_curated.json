@@ -1,14 +1,5 @@
 {
   "capsules": {
-    "wd-Q421067": {
-      "status": "ok",
-      "tier": "S",
-      "name": "Acropolis Palaiokastro",
-      "url": "/capsules/wd-Q421067/capsule.mp4",
-      "meta_url": "/capsules/wd-Q421067/metadata.json",
-      "size_mb": 23.59,
-      "generated_at": "2026-05-28T23:12:24Z"
-    },
     "wd-Q131013": {
       "status": "ok",
       "tier": "S",
@@ -35,25 +26,7 @@
       "meta_url": "/capsules/wd-Q66815979/metadata.json",
       "size_mb": 21.98,
       "generated_at": "2026-05-28T23:25:29Z"
-    },
-    "wd-Q5757059": {
-      "status": "ok",
-      "tier": "S",
-      "name": "Castillo de Alhambra",
-      "url": "/capsules/wd-Q5757059/capsule.mp4",
-      "meta_url": "/capsules/wd-Q5757059/metadata.json",
-      "size_mb": 21.39,
-      "generated_at": "2026-05-28T23:29:37Z"
-    },
-    "wd-Q10285": {
-      "status": "ok",
-      "tier": "S",
-      "name": "Coliseo",
-      "url": "/capsules/wd-Q10285/capsule.mp4",
-      "meta_url": "/capsules/wd-Q10285/metadata.json",
-      "size_mb": 29.91,
-      "generated_at": "2026-05-28T23:34:03Z"
     }
   },
-  "updated_at": "2026-05-28T23:34:03Z"
+  "updated_at": "2026-05-28T23:29:37Z"
 }

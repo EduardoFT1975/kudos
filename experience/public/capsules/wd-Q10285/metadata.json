@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q10285",
+    "name": "Coliseo",
+    "lat": 41.890278,
+    "lng": 12.492222,
+    "country_code": "IT",
+    "category": "monumento",
+    "type": "atracción turística",
+    "wikidata": "Q10285",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Colosseo%202020.jpg",
+    "unesco": true,
+    "tier": "S",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Coliseo",
+    "subtitle": "La arena donde Roma demostró su poder",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "Hace casi dos mil años, Roma construyó un monumento a su gloria. El Coliseo se alzaba como símbolo del imperio más poderoso del mundo antiguo.",
+        "direction": "in",
+        "search_hint": "Colosseum Rome aerial view",
+        "duration": 6
+      },
+      {
+        "title": "Arquitectura exterior",
+        "narration": "Sus muros de travertino se elevaban setenta y dos metros. Cuatro pisos de arcos y columnas que aún desafían el tiempo.",
+        "direction": "right",
+        "search_hint": "Colosseum facade architecture",
+        "duration": 5
+      },
+      {
+        "title": "Interior de la arena",
+        "narration": "La arena central podía albergar ochenta mil espectadores. Allí ocurrían combates de gladiadores que cautivaban a las masas romanas.",
+        "direction": "down",
+        "search_hint": "Colosseum arena floor interior",
+        "duration": 5
+      },
+      {
+        "title": "Ingenio subterráneo",
+        "narration": "Bajo la arena existía un complejo laberinto de túneles y jaulas. Máquinas y poleas elevaban bestias salvajes hacia la luz.",
+        "direction": "down",
+        "search_hint": "Colosseum hypogeum underground",
+        "duration": 5
+      },
+      {
+        "title": "Espectáculos",
+        "narration": "Batallas navales fueron recreadas inundando toda la arena. Ejecuciones, peleas de fieras y dramas épicos entretenían al pueblo romano.",
+        "direction": "left",
+        "search_hint": "Colosseum ancient spectacles fights",
+        "duration": 5
+      },
+      {
+        "title": "Ruinas persistentes",
+        "narration": "El tiempo y los terremotos destruyeron buena parte de su estructura. Sin embargo, sus arcos permanecen como testigos silenciosos de la historia.",
+        "direction": "up",
+        "search_hint": "Colosseum ruins damaged structure",
+        "duration": 5
+      },
+      {
+        "title": "Patrimonio eterno",
+        "narration": "Hoy es símbolo de la antigüedad clásica y patrimonio de la humanidad. Millones visitan este anfiteatro para entender lo que Roma fue.",
+        "direction": "out",
+        "search_hint": "Colosseum Rome tourists heritage",
+        "duration": 5
+      },
+      {
+        "title": "Cierre",
+        "narration": "El Coliseo permanece. Un monumento que grita historias de imperio, poder y la fugacidad de toda gloria humana.",
+        "direction": "out",
+        "search_hint": "Colosseum Rome eternal monument",
+        "duration": 3
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\coliseo\\00_796e9db1.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/44/20160425_125_Roma_-_Colosseum_%2826120178914%29.jpg",
+      "title": "File:20160425 125 Roma - Colosseum (26120178914).jpg",
+      "author": "Sjaak Kempe from Groningen, The Netherlands",
+      "license": "CC BY 2.0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\coliseo\\01_365aabfe.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/e1/COLOSSEUM%2C_ROMA%2C_ITALY_%28COLISEO%2C_ROMA%2C_ITALIA%29.jpg",
+      "title": "File:COLOSSEUM, ROMA, ITALY (COLISEO, ROMA, ITALIA).jpg",
+      "author": "Pau Cantamisa",
+      "license": "CC0",
+      "width": 1125,
+      "height": 2000
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\coliseo\\02_9cd22c9e.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/02/Colosseo23.JPG",
+      "title": "File:Colosseo23.JPG",
+      "author": "Shardan",
+      "license": "CC BY-SA 3.0",
+      "width": 1064,
+      "height": 1418
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\coliseo\\03_d3961ac2.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/de/Colosseo_2020.jpg",
+      "title": "File:Colosseo 2020.jpg",
+      "author": "FeaturedPics",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1345
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\coliseo\\04_6f4c05cb.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/6e/Colosseo_Roma.jpg",
+      "title": "File:Colosseo Roma.jpg",
+      "author": "Gaiuss12",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2560
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\coliseo\\05_669d1713.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Colosseo_di_Roma_panoramic.jpg",
+      "title": "File:Colosseo di Roma panoramic.jpg",
+      "author": "Paolo Costa Baldi",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1009
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\coliseo\\06_87d9c915.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/94/Colosseum%2C_Rome%2C_Italy_%28Ank_Kumar%29_10.jpg",
+      "title": "File:Colosseum, Rome, Italy (Ank Kumar) 10.jpg",
+      "author": "Ank Kumar",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\coliseo\\07_7f93a378.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/78/Colosseum%2C_Rome_%2832546832088%29.jpg",
+      "title": "File:Colosseum, Rome (32546832088).jpg",
+      "author": "Deb Nystrom from Ann Arbor, Michigan, USA",
+      "license": "CC BY 2.0",
+      "width": 1920,
+      "height": 2880
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\coliseo\\08_08b18972.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/19/Colosseum_%2846202668295%29.jpg",
+      "title": "File:Colosseum (46202668295).jpg",
+      "author": "Peter  Leth",
+      "license": "CC BY 2.0",
+      "width": 1920,
+      "height": 960
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\coliseo\\09_d1af0a29.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/89/Colosseum_%2848412835856%29.jpg",
+      "title": "File:Colosseum (48412835856).jpg",
+      "author": "Gary Todd from Xinzheng, China",
+      "license": "Public domain",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\coliseo\\10_af36e855.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Colosseum_%2848416089336%29.jpg",
+      "title": "File:Colosseum (48416089336).jpg",
+      "author": "Gary Todd from Xinzheng, China",
+      "license": "Public domain",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\coliseo\\11_4b3a70e1.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/53/Colosseum_in_Rome%2C_Italy_-_April_2007.jpg",
+      "title": "File:Colosseum in Rome, Italy - April 2007.jpg",
+      "author": "Diliff",
+      "license": "CC BY-SA 2.5",
+      "width": 1920,
+      "height": 1127
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:20160425 125 Roma - Colosseum (26120178914).jpg — Sjaak Kempe from Groningen, The Netherlands — CC BY 2.0\n  · File:COLOSSEUM, ROMA, ITALY (COLISEO, ROMA, ITALIA).jpg — Pau Cantamisa — CC0\n  · File:Colosseo23.JPG — Shardan — CC BY-SA 3.0\n  · File:Colosseo 2020.jpg — FeaturedPics — CC BY-SA 4.0\n  · File:Colosseo Roma.jpg — Gaiuss12 — CC BY-SA 4.0\n  · File:Colosseo di Roma panoramic.jpg — Paolo Costa Baldi — CC BY-SA 3.0\n  · File:Colosseum, Rome, Italy (Ank Kumar) 10.jpg — Ank Kumar — CC BY-SA 4.0\n  · File:Colosseum, Rome (32546832088).jpg — Deb Nystrom from Ann Arbor, Michigan, USA — CC BY 2.0\n  · File:Colosseum (46202668295).jpg — Peter  Leth — CC BY 2.0\n  · File:Colosseum (48412835856).jpg — Gary Todd from Xinzheng, China — Public domain\n  · File:Colosseum in Rome, Italy - April 2007.jpg — Diliff — CC BY-SA 2.5"
+}
