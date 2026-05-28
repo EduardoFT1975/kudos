@@ -72,6 +72,15 @@ export function MapScreen() {
   const { has, toggle } = useSaved();
   const geo = useGeolocation();
 
+  // Auto-solicitar geolocation al montar el mapa · sin esto el navegador
+  // nunca pide permiso y geo.coords se queda null para siempre.
+  React.useEffect(() => {
+    if (!geo.coords && geo.status !== "asking" && geo.status !== "denied") {
+      geo.request();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [activeId, setActiveId] = React.useState<string | null>(focusId);
   const [sheetOpen, setSheetOpen] = React.useState<boolean>(focusId != null);
   const [category, setCategory] = React.useState<CategoryChoice>("all");
