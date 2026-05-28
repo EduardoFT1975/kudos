@@ -127,21 +127,29 @@ export function inferCategory(tag: string | undefined): WorldNodeCategory {
 
 
 // ─── TILES BASE ────────────────────────────────────────────────────────────
-// Carto "dark_nolabels" · gratis sin API key · cinematográfico
-
+// 2 capas como Apple Maps minimalista: base oscura SIN labels + overlay
+// SOLO labels finos · usuario puede situarse pero los labels NO compiten
+// con los World Nodes.
+//
+// Base · Carto Dark Matter (sin labels) · cinematográfica
 export const WORLD_TILE_URL =
   "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png";
 
-export const WORLD_TILE_ATTRIB =
-  "© OpenStreetMap · © CARTO";
+// Overlay · SOLO labels (ciudades, países, regiones) · transparente
+export const WORLD_LABELS_URL =
+  "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png";
 
+export const WORLD_TILE_ATTRIB = "© OpenStreetMap · © CARTO";
 export const WORLD_TILE_SUBDOMAINS = ["a", "b", "c", "d"];
-
 export const WORLD_TILE_MAX_ZOOM = 19;
 
-// Filtro CSS extra para inclinar la base hacia navy KUDOS sin perder detalle
+// Filtro CSS para inclinar base hacia navy KUDOS
 export const WORLD_TILE_FILTER =
-  "brightness(0.95) contrast(1.05) saturate(0.55) hue-rotate(-15deg)";
+  "brightness(0.92) contrast(1.05) saturate(0.55) hue-rotate(-15deg)";
+
+// Labels más tenues · NO competir con nodos
+export const WORLD_LABELS_FILTER =
+  "brightness(1.1) saturate(0.4) opacity(0.65)";
 
 
 // ─── RITMO DE MOVIMIENTO ───────────────────────────────────────────────────

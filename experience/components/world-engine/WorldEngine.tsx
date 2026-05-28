@@ -17,10 +17,12 @@ import { useGeolocation } from "@/lib/geo/useGeolocation";
 import {
   WORLD_COLORS,
   WORLD_TILE_URL,
+  WORLD_LABELS_URL,
   WORLD_TILE_ATTRIB,
   WORLD_TILE_SUBDOMAINS,
   WORLD_TILE_MAX_ZOOM,
   WORLD_TILE_FILTER,
+  WORLD_LABELS_FILTER,
   TIER_MIN_ZOOM,
   maxNodesAtZoom,
   WorldNodeTier,
@@ -92,10 +94,10 @@ export function WorldEngine() {
     setTotalLoaded(core.length);
     setRenderTick((t) => t + 1);
 
-    // Wikidata · async, carga en chunks por país sin bloquear
+    // Wikidata · stagger MUY generoso · UI siempre responsive
+    // Cada país tarda ~300ms en parsear · 1.5s entre fetches da margen
     const COUNTRIES = ["es", "it", "fr", "gr", "pt", "de", "gb", "jp"];
     COUNTRIES.forEach((cc, idx) => {
-      // Stagger 200ms entre países · UI nunca bloquea
       setTimeout(async () => {
         try {
           const r = await fetch(`/data/wikidata/${cc}.json`);
@@ -121,7 +123,7 @@ export function WorldEngine() {
         } catch (e) {
           console.warn(`[WORLD] no se pudo cargar ${cc}.json`, e);
         }
-      }, idx * 200);
+      }, 600 + idx * 1500);  // primer país tras 600ms · resto cada 1.5s
     });
   }, []);
 
@@ -151,10 +153,20 @@ export function WorldEngine() {
         inertia: true,
         inertiaDeceleration: 2200,
       });
+      // Base oscura cinematográfica
       L.tileLayer(WORLD_TILE_URL, {
         subdomains: WORLD_TILE_SUBDOMAINS,
         attribution: WORLD_TILE_ATTRIB,
         maxZoom: WORLD_TILE_MAX_ZOOM,
+        className: "kudos-tile-base",
+      }).addTo(map);
+      // Overlay · SOLO labels (ciudades, países) · permite situarse
+      // sin que compita con los World Nodes
+      L.tileLayer(WORLD_LABELS_URL, {
+        subdomains: WORLD_TILE_SUBDOMAINS,
+        maxZoom: WORLD_TILE_MAX_ZOOM,
+        className: "kudos-tile-labels",
+        pane: "shadowPane",  // por encima de la base, por debajo de markers
       }).addTo(map);
 
       mapRef.current = map;
@@ -200,23 +212,46 @@ export function WorldEngine() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Centrar en usuario UNA VEZ · trigger combinado coords + map listo ──
+  // ── IP geolocation fallback · si el navegador rechaza o tarda >4s ──
+  const [ipCoords, setIpCoords] = React.useState<{ lat: number; lng: number } | null>(null);
+  React.useEffect(() => {
+    const t = setTimeout(async () => {
+      if (geo.coords || centeredOnUserRef.current) return;
+      try {
+        const r = await fetch("https://ipapi.co/json/");
+        if (!r.ok) return;
+        const j = await r.json();
+        if (typeof j.latitude === "number" && typeof j.longitude === "number") {
+          setIpCoords({ lat: j.latitude, lng: j.longitude });
+          console.warn("[WORLD] IP geolocation fallback:", j.latitude, j.longitude, j.city, j.country_name);
+        }
+      } catch (e) {
+        console.warn("[WORLD] IP fallback falló", e);
+      }
+    }, 4000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Centrar en usuario UNA VEZ · prioriza geo navegador > IP ──
   React.useEffect(() => {
     if (centeredOnUserRef.current) return;
-    if (!geo.coords || !mapReady) return;
+    const coords = geo.coords || ipCoords;
+    if (!coords || !mapReady) return;
     const map = mapRef.current;
     if (!map) return;
     try {
-      map.flyTo([geo.coords.lat, geo.coords.lng], 9, {
-        duration: 2.2,
+      // Zoom 11 · ciudad · "veo mi entorno con detalle"
+      map.flyTo([coords.lat, coords.lng], 11, {
+        duration: 2.4,
         easeLinearity: 0.18,
       });
       centeredOnUserRef.current = true;
-      console.warn("[WORLD] centrado en usuario:", geo.coords);
+      console.warn("[WORLD] centrado en:", coords, "(precisión:", geo.coords ? "GPS" : "IP", ")");
     } catch (e) {
       console.warn("[WORLD] flyTo falló", e);
     }
-  }, [geo.coords, mapReady]);
+  }, [geo.coords, ipCoords, mapReady]);
 
   // ── VIEWPORT CULLING · render sólo nodos visibles + cap absoluto ──
   React.useEffect(() => {
