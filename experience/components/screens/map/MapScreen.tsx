@@ -389,13 +389,17 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
       }
       try {
         const isActive = id === activeId;
-        const size = isActive ? 92 : 56;
+        const tier = tierOf(p);
+        // Mismo cálculo que buildBubbleHTML
+        const size = isActive ? 92 : tier === "S" ? 76 : tier === "A" ? 56 : 40;
+        // Label extra: S tiene label grande (28px), A label normal (24px), B sin label
+        const labelHeight = isActive ? 32 : tier === "S" ? 28 : tier === "A" ? 22 : 0;
         const html = buildBubbleHTML(p, isActive);
         const icon = L.divIcon({
           className: "kudos-bubble",
           html,
-          iconSize: [size, size + 28],
-          iconAnchor: [size / 2, size / 2 + 14],
+          iconSize: [Math.max(size, 120), size + labelHeight],
+          iconAnchor: [Math.max(size, 120) / 2, size / 2 + labelHeight / 2],
           popupAnchor: [0, -size / 2],
         });
         const existing = markersRef.current.get(id);
@@ -481,31 +485,95 @@ function leafletZoom(dir: "in" | "out") {
   try { dir === "in" ? map.zoomIn() : map.zoomOut(); } catch {}
 }
 
+// ─── Marker personality · tier (S/A/B) + categoría ─────────────────────
+// Los markers ya no son todos iguales. Cada POI tiene:
+//   - TIER S (icono mundial): 76px, anillo dorado-gradiente, pulso animado
+//   - TIER A (regional top):   56px, anillo violeta/categoría, label
+//   - TIER B (resto):          40px, dot color categoría, sin label
+
+const WORLD_ICON_IDS = new Set([
+  "rome", "machu", "petra", "athens", "granada", "istanbul",
+  "g-eiffel", "g-taj", "g-greatwall", "g-giza", "g-chichen",
+  "g-cristored", "g-angkor", "g-stonehenge", "g-sagrada",
+  "g-libertad", "g-notredame", "g-sphinx", "g-vatican",
+  "g-bigben", "g-empire", "g-opera", "g-forbidden",
+  "g-cordoba", "g-bluemosque", "g-rapa",
+]);
+
+function tierOf(p: Poi): "S" | "A" | "B" {
+  if (WORLD_ICON_IDS.has(p.id)) return "S";
+  if (p.id.startsWith("g-")) return "A";
+  return "B";
+}
+
+function categoryColor(cat: string | undefined): { ring: string; glow: string; tint: string } {
+  switch (cat) {
+    case "museo":       return { ring: "#FF3CAC", glow: "rgba(255,60,172,0.55)",  tint: "rgba(255,60,172,0.18)" };
+    case "naturaleza":  return { ring: "#10B981", glow: "rgba(16,185,129,0.55)",  tint: "rgba(16,185,129,0.18)" };
+    case "gastronomia": return { ring: "#FF9A00", glow: "rgba(255,154,0,0.55)",   tint: "rgba(255,154,0,0.18)" };
+    case "evento":      return { ring: "#FFD23F", glow: "rgba(255,210,63,0.55)",  tint: "rgba(255,210,63,0.18)" };
+    case "historia":    return { ring: "#A78BFA", glow: "rgba(167,139,250,0.55)", tint: "rgba(167,139,250,0.18)" };
+    case "cultura":     return { ring: "#22D3EE", glow: "rgba(34,211,238,0.55)",  tint: "rgba(34,211,238,0.18)" };
+    case "misterio":    return { ring: "#F472B6", glow: "rgba(244,114,182,0.55)", tint: "rgba(244,114,182,0.18)" };
+    default:            return { ring: "#6C3CFF", glow: "rgba(108,60,255,0.55)",  tint: "rgba(108,60,255,0.18)" };
+  }
+}
+
 function buildBubbleHTML(p: Poi, active: boolean): string {
-  const size = active ? 92 : 56;
+  const tier = tierOf(p);
+  const cat = p.categories?.[0];
+  const color = categoryColor(cat);
+
+  // Tamaños por tier (active sobreescribe a 92)
+  const baseSize = active ? 92 : tier === "S" ? 76 : tier === "A" ? 56 : 40;
   const photo = escapeHTML(p.heroImage);
-  const ring = active
-    ? `padding:3px;background:linear-gradient(135deg,#FF9A00 0%,#FF3CAC 50%,#6C3CFF 100%);`
-    : `padding:2px;background:rgba(255,255,255,0.16);`;
-  const labelBg = active ? "rgba(10,6,18,0.92)" : "rgba(10,6,18,0.85)";
-  const label = active
-    ? `
-      <div style="margin-top:6px;display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:${labelBg};border:1px solid rgba(255,255,255,0.10);color:#F2F2F7;font-family:Poppins,system-ui,sans-serif;font-size:11.5px;font-weight:700;">
+
+  // ANILLO · estilo distinto por tier
+  let ring: string;
+  if (active || tier === "S") {
+    // Gradiente KUDOS oficial + sombra brillante
+    ring = `padding:3px;background:linear-gradient(135deg,#FF9A00 0%,#FF3CAC 50%,#6C3CFF 100%);box-shadow:0 0 0 2px rgba(10,6,18,0.6),0 12px 28px -8px ${color.glow},0 0 24px ${color.glow};`;
+  } else if (tier === "A") {
+    // Anillo del color de la categoría
+    ring = `padding:2px;background:${color.ring};box-shadow:0 6px 18px -6px ${color.glow},0 0 12px ${color.glow};`;
+  } else {
+    // Tier B · borde fino sin glow
+    ring = `padding:1px;background:rgba(255,255,255,0.20);box-shadow:0 4px 10px -4px rgba(0,0,0,0.55);`;
+  }
+
+  // PULSO animado solo para S (clase definida en LEAFLET_STYLE_ID)
+  const pulseClass = (active || tier === "S") ? "kudos-bubble-pulse" : "";
+
+  // LABEL · S y A muestran nombre · B no
+  let label = "";
+  if (active) {
+    label = `
+      <div style="margin-top:6px;display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(10,6,18,0.92);border:1px solid rgba(255,255,255,0.12);color:#F2F2F7;font-family:Poppins,system-ui,sans-serif;font-size:11.5px;font-weight:700;backdrop-filter:blur(8px);">
         <span style="color:#FFD23F;font-size:11px;">★</span>
         <span style="color:#FFD23F;">${p.rating.toFixed(1)}</span>
         <span style="opacity:0.42;">·</span>
         <span>${escapeHTML(p.name)}</span>
       </div>
-    `
-    : `
-      <div style="margin-top:5px;padding:3px 8px;border-radius:999px;background:${labelBg};color:#F2F2F7;font-family:Poppins,system-ui,sans-serif;font-size:10px;font-weight:600;white-space:nowrap;">
+    `;
+  } else if (tier === "S") {
+    label = `
+      <div style="margin-top:6px;padding:4px 10px;border-radius:999px;background:rgba(10,6,18,0.92);border:1px solid ${color.ring};color:#F2F2F7;font-family:Poppins,system-ui,sans-serif;font-size:11px;font-weight:700;white-space:nowrap;backdrop-filter:blur(6px);box-shadow:0 6px 18px -8px ${color.glow};">
+        <span style="color:#FFD23F;margin-right:5px;">★</span>${escapeHTML(p.name)}
+      </div>
+    `;
+  } else if (tier === "A") {
+    label = `
+      <div style="margin-top:5px;padding:3px 8px;border-radius:999px;background:rgba(10,6,18,0.85);color:#F2F2F7;font-family:Poppins,system-ui,sans-serif;font-size:10px;font-weight:600;white-space:nowrap;">
         ${escapeHTML(p.name)}
       </div>
     `;
+  }
+  // tier B sin label · solo el dot
+
   return `
-    <div style="display:flex;flex-direction:column;align-items:center;pointer-events:auto;">
-      <div style="width:${size}px;height:${size}px;border-radius:50%;${ring}box-shadow:0 8px 22px -6px rgba(0,0,0,0.55);">
-        <div style="width:100%;height:100%;border-radius:50%;background-image:url('${photo}');background-size:cover;background-position:center;border:2px solid #1A1333;"></div>
+    <div class="kudos-bubble-wrap ${pulseClass}" style="display:flex;flex-direction:column;align-items:center;pointer-events:auto;cursor:pointer;">
+      <div style="width:${baseSize}px;height:${baseSize}px;border-radius:50%;${ring}transition:transform 0.18s ease;">
+        <div style="width:100%;height:100%;border-radius:50%;background-image:url('${photo}'),linear-gradient(135deg,${color.tint},${color.ring});background-size:cover;background-position:center;border:2px solid #1A1333;"></div>
       </div>
       ${label}
     </div>
@@ -539,6 +607,16 @@ function ensureLeafletCSS() {
       .leaflet-tile { filter: hue-rotate(220deg) saturate(0.62) brightness(0.55) contrast(1.05); }
       .kudos-bubble { background:transparent !important; border:none !important; }
       .kudos-user   { background:transparent !important; border:none !important; }
+      .kudos-bubble-wrap:hover > div:first-child { transform: scale(1.08); }
+      @keyframes kudos-pulse-ring {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(255,210,63,0.55), 0 0 24px rgba(255,154,0,0.4); }
+        50%      { box-shadow: 0 0 0 14px rgba(255,210,63,0), 0 0 40px rgba(255,60,172,0.55); }
+      }
+      .kudos-bubble-pulse > div:first-child { animation: kudos-pulse-ring 2.6s ease-in-out infinite; }
+      @media (prefers-reduced-motion: reduce) {
+        .kudos-bubble-pulse > div:first-child { animation: none; }
+        .kudos-bubble-wrap:hover > div:first-child { transform: none; }
+      }
     `;
     document.head.appendChild(style);
   }
