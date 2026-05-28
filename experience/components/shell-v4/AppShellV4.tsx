@@ -14,6 +14,7 @@
  *       GlobalShareModal    (listens kudos:share-capsule:open globally)
  *       MeritToast          (listens kudos:merit:change globally . microfeedback)
  *
+ * /world · cinematográfico sin top bar pero CON bottom nav (integración app).
  * Backdrop intentionally omitted . mockups use flat --kudos-bg.
  */
 import * as React from "react";
@@ -30,8 +31,7 @@ import { MeritToast } from "@/components/share/MeritToast";
 
 interface Props { children: React.ReactNode; }
 
-// Rutas que NO usan el chrome de la app (top bar + bottom nav).
-// El World Engine necesita pantalla completa cinematográfica.
+// Rutas que NO usan top bar (pero SÍ bottom nav).
 const FULLSCREEN_ROUTES = ["/world"];
 
 export function AppShellV4({ children }: Props) {
@@ -39,10 +39,15 @@ export function AppShellV4({ children }: Props) {
   const isFullscreen = FULLSCREEN_ROUTES.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
   if (isFullscreen) {
+    // /world · cinematográfico SIN top bar · pero CON bottom nav
+    // para no aislar la pantalla del resto de la app.
     return (
       <MobileSafeAreaProvider>
         <FatalRecoveryLayer>
           {children}
+          <AppBottomNavV4 />
+          <GlobalShareModal />
+          <MeritToast />
         </FatalRecoveryLayer>
       </MobileSafeAreaProvider>
     );

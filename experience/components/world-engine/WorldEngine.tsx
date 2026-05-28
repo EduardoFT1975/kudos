@@ -35,7 +35,6 @@ import { WorldLogo } from "./WorldLogo";
 import { WorldSearch, type CityPreset } from "./WorldSearch";
 import { WorldWeather } from "./WorldWeather";
 import { WorldHud, FILTER_TO_CATEGORIES } from "./WorldHud";
-import { AppBottomNavV4 } from "@/components/shell-v4/AppBottomNavV4";
 
 
 interface WorldPoi {
@@ -781,7 +780,6 @@ export function WorldEngine() {
         </div>
       )}
 
-      <AppBottomNavV4 />
     </div>
   );
 }
