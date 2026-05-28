@@ -263,6 +263,59 @@ function buildSeed(): { pois: ReadonlyArray<Poi>; capsules: ReadonlyArray<Capsul
     }
   }
 
+  // ── Coliseo · 6 capsulas tematicas adicionales (spec maestro Eduardo) ──
+  // Un POI = nodo con capsula principal + N secundarias. El Coliseo es la
+  // pieza ancla del MVP. Hasta que se generen videos individuales, todas
+  // apuntan al mismo coliseo-final.mp4 (el mas cinematico actual).
+  const colosseumExtras: Capsule[] = [
+    { id: "cap-coliseo-gladiadores", poiId: "rome",
+      title: "Asi luchaban los gladiadores",
+      tagline: "Combates legendarios en la arena. Metal, sangre y rugido del publico.",
+      hook: "Aqui se celebraban combates legendarios.",
+      poster: "/pois/coliseo.jpg", clipSrc: "/capsules/coliseo-final.mp4",
+      duration: "0:15", category: "historia" },
+    { id: "cap-coliseo-construccion", poiId: "rome",
+      title: "Como se construyo",
+      tagline: "8 anos, 60.000 esclavos, piedra travertina del Imperio.",
+      hook: "Construido entre los anos 72 y 80 d.C.",
+      poster: "/pois/coliseo.jpg", clipSrc: "/capsules/coliseo-final.mp4",
+      duration: "0:15", category: "arquitectura" },
+    { id: "cap-coliseo-oscuro", poiId: "rome",
+      title: "El lado oscuro",
+      tagline: "400.000 muertos en su arena. El precio del entretenimiento.",
+      hook: "No era solo entretenimiento. Era poder, cultura y control.",
+      poster: "/pois/coliseo.jpg", clipSrc: "/capsules/coliseo-final.mp4",
+      duration: "0:15", category: "misterio" },
+    { id: "cap-coliseo-esplendor", poiId: "rome",
+      title: "En su maximo esplendor",
+      tagline: "80.000 espectadores, 100 dias seguidos de juegos inaugurales.",
+      hook: "Hasta 80.000 personas asistian a los espectaculos.",
+      poster: "/pois/coliseo.jpg", clipSrc: "/capsules/coliseo-final.mp4",
+      duration: "0:15", category: "historia" },
+    { id: "cap-coliseo-eventos", poiId: "rome",
+      title: "Que ocurrio exactamente aqui",
+      tagline: "Naumaquias, cacerias, ejecuciones publicas. El imperio en directo.",
+      hook: "El mundo acaba de volverse vivo.",
+      poster: "/pois/coliseo.jpg", clipSrc: "/capsules/coliseo-final.mp4",
+      duration: "0:15", category: "historia" },
+    { id: "cap-coliseo-secretos", poiId: "rome",
+      title: "Secretos escondidos",
+      tagline: "Los hipogeos: dos niveles subterraneos con ascensores de madera.",
+      hook: "2000 anos despues, sigue fascinando al mundo.",
+      poster: "/pois/coliseo.jpg", clipSrc: "/capsules/coliseo-final.mp4",
+      duration: "0:15", category: "misterio" },
+  ];
+  capsules.push(...colosseumExtras);
+
+  // Anadir los ids al POI rome para que aparezcan en "Mas capsulas de este lugar".
+  const romeIdx = pois.findIndex((p) => p.id === "rome");
+  if (romeIdx >= 0) {
+    pois[romeIdx] = {
+      ...pois[romeIdx],
+      capsuleIds: [...pois[romeIdx].capsuleIds, ...colosseumExtras.map((c) => c.id)],
+    };
+  }
+
   return { pois, capsules };
 }
 
