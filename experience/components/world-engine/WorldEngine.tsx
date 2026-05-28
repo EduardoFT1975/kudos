@@ -55,10 +55,10 @@ const LEGENDARY_IDS = new Set([
 
 const TIER_PRIORITY: Record<WorldNodeTier, number> = { S: 0, A: 1, B: 2, C: 3 };
 
-// ─── Keywords para "Selecta KUDOS" · POI relevante por el name ──────────
-const KEYWORDS_S = /catedral|palacio real|alc[áa]zar|abad[íi]a|acr[óo]polis|templo de|baz[íi]lica de san pedro|gran mezquita|reichstag|colis(eum|eo)|pir[áa]mide|sagrada familia|machu picchu/i;
-const KEYWORDS_A = /catedral|palacio|real |nacional|mayor|princess|royal|imperial|fortress|abad[íi]a|monasterio|alc[áa]zar|alh[áa]mbra|teatro romano|villa romana|gran |grande/i;
-const PREMIUM_CATEGORIES = new Set(["castle", "palace", "religious", "museum", "archaeology", "megalith"]);
+// ─── Keywords para "Selecta KUDOS" · estrictas (post-recompute) ─────────
+const KEYWORDS_S = /alh[áa]mbra|sagrada familia|machu picchu|coliseo|colosseum|acr[óo]polis|gran pir[áa]mide|notre-dame de paris|reichstag|templo de karnak|baz[íi]lica de san pedro|gran mezquita de c[óo]rdoba/i;
+const KEYWORDS_A = /catedral de |cathedral of |alc[áa]zar de |abad[íi]a de |abbey of |monasterio del |monasterio de san |monasterio de santa |palacio real de |palacio nacional de |teatro romano de |villa romana de |anfiteatro romano de |museo nacional de |biblioteca nacional de |plaza mayor de /i;
+const KEYWORDS_B = /bas[íi]lica|catedral|cathedral|monasterio|abad[íi]a|abbey|alc[áa]zar|alh[áa]mbra|santuario|castillo|castle|fortaleza|fortress|murall|alcazaba|teatro romano|villa romana|anfiteatro|yacimiento arqueol[óo]gico|parque nacional|jard[íi]n bot[áa]nico|reserva natural|dolmen|menhir|m[áa]moa|t[úu]mulo|petr[óo]glifo|museo de arte|museo arqueol[óo]gico|pinacoteca/i;
 
 function tierForPoi(p: {
   id: string;
@@ -69,40 +69,26 @@ function tierForPoi(p: {
   image_url?: string;
   type?: string;
 }): WorldNodeTier {
-  // Tier S · LEGENDARY hardcoded o UNESCO con keyword icónica
+  // Tier S hardcoded o keyword top
   if (LEGENDARY_IDS.has(p.id)) return "S";
   const nm = p.name || "";
-  if (p.unesco && KEYWORDS_S.test(nm)) return "S";
+  if (KEYWORDS_S.test(nm)) return "S";
 
-  // Globals curados (g-*) siempre Tier A
+  // Globals curados siempre Tier A
   if (p.id.startsWith("g-")) return "A";
 
-  // Tier A · UNESCO con foto · o categoría premium con foto + keyword premium
   const hasImage = !!p.image_url;
-  if (p.unesco && hasImage) return "A";
+
+  // Tier A · ICÓNICO · foto + keyword premium
   if (hasImage && KEYWORDS_A.test(nm)) return "A";
 
-  // Score por rating legacy
+  // Tier B · foto + (UNESCO o keyword secundaria)
+  if (hasImage && (p.unesco || KEYWORDS_B.test(nm))) return "B";
+
+  // Score legacy
   if ((p.rating ?? 0) >= 9.3) return "A";
 
-  // Tier B · pictograma Apple-style · REQUIERE imagen + categoría reconocible
-  // Si Wikidata no tiene foto, probablemente el POI no es relevante.
-  if (hasImage && PREMIUM_CATEGORIES.has(inferCategoryShort(p.category, p.type, nm))) return "B";
-
-  // Resto · Tier C invisible salvo zoom 17+
   return "C";
-}
-
-// Helper local · saber si la categoría inferida es de las "premium"
-function inferCategoryShort(category?: string, type?: string, name?: string): string {
-  const t = `${type || ""} ${category || ""} ${name || ""}`.toLowerCase();
-  if (/iglesia|church|basilic|catedral|cathedral|monasterio|monastery|abad[ií]a|abbey|ermita|capilla|chapel|mosque|synagog|temple|sanctuar/.test(t)) return "religious";
-  if (/castillo|castle|fortaleza|fortress|alcazar|alc[áa]zar|tower|torre|fort|murall/.test(t)) return "castle";
-  if (/palacio|palace|palau/.test(t)) return "palace";
-  if (/dolmen|menhir|m[áa]moa|t[úu]mulo|megalit|cromlech|petr[óo]glifo/.test(t)) return "megalith";
-  if (/yacimiento|ruina|ruin|archaeolog|arqueol|villa romana|teatro romano|anfiteatro/.test(t)) return "archaeology";
-  if (/museo|museum|galer[íi]a|gallery/.test(t)) return "museum";
-  return "";   // no premium
 }
 
 
@@ -153,6 +139,7 @@ export function WorldEngine() {
             id: string; name: string; lat: number; lng: number;
             category?: string; type?: string; unesco?: boolean;
             image_url?: string;
+            tier?: "S" | "A" | "B" | "C";   // pre-computado por recompute_tiers.py
           }>;
           const chunk: WorldPoi[] = items.map((p: any) => {
             // Fallback: si category genérico devuelve "monument", probar con name
@@ -166,10 +153,11 @@ export function WorldEngine() {
               name: p.name,
               lat: p.lat,
               lng: p.lng,
-              tier: tierForPoi({
-              id: p.id, unesco: p.unesco,
-              name: p.name, category: p.category, type: p.type, image_url: p.image_url,
-            }),
+              // Pre-computado por scripts/recompute_tiers.py · fallback JS por si falta
+              tier: (p.tier as WorldNodeTier | undefined) ?? tierForPoi({
+                id: p.id, unesco: p.unesco,
+                name: p.name, category: p.category, type: p.type, image_url: p.image_url,
+              }),
               category: cat,
               image: img,
             };

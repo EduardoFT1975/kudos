@@ -1,9 +1,5 @@
 """
-KUDOS Capsule Engine v2 · POI service.
-
-Business logic. Routers (FastAPI) hablan sólo con services,
-no con repository directamente. Cualquier validación/derivación
-vive aquí.
+KUDOS Capsule Engine v2 · POI service · i18n-aware.
 """
 from __future__ import annotations
 
@@ -12,12 +8,15 @@ import uuid
 from datetime import datetime
 from typing import List, Optional
 
+from kudos_engine.apps.core.i18n import get_localized
 from kudos_engine.apps.pois import repository as repo
 from kudos_engine.apps.pois.models import POI, POICreate, POIUpdate, POIRelationship
 
 
-def _slugify(text: str) -> str:
-    t = re.sub(r"[^a-z0-9]+", "-", text.lower())
+def _slugify(text) -> str:
+    # Si llega LocalizedString, sacar el español o el primero disponible
+    s = get_localized(text, "es") if not isinstance(text, str) else text
+    t = re.sub(r"[^a-z0-9]+", "-", s.lower())
     return t.strip("-")[:80] or uuid.uuid4().hex[:8]
 
 
@@ -70,8 +69,6 @@ def delete_poi(poi_id: str) -> bool:
 def count_pois() -> int:
     return repo.count_pois()
 
-
-# ─── Relationships ───────────────────────────────────────────────────
 
 def link_pois(poi_a_id: str, poi_b_id: str, rel_type: str,
               weight: float = 1.0, description: Optional[str] = None) -> POIRelationship:
