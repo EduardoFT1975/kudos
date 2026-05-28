@@ -58,25 +58,30 @@ export type WorldNodeCategory =
 
 export const TIER_SIZE: Record<WorldNodeTier, number> = {
   S: 44,   // grande pero elegante · doble anillo + respiración
-  A: 26,   // medio · anillo simple + pulso lento
-  B: 12,   // pequeño · dot transparente
-  C: 4,    // invisible casi · aparece sólo con zoom o búsqueda
+  A: 24,   // medio · anillo simple + pulso lento
+  B: 6,    // muy pequeño · dot tenue · NO saturar
+  C: 3,    // invisible casi · aparece sólo con zoom muy alto
 };
 
 export const TIER_OPACITY: Record<WorldNodeTier, number> = {
   S: 1.0,
-  A: 0.95,
-  B: 0.62,
-  C: 0.32,
+  A: 0.92,
+  B: 0.45,  // más transparente · "casi inexistente"
+  C: 0.25,
 };
 
-// Zoom mínimo de aparición (fog of discovery)
+// Fog of discovery · zoom mínimo por tier
+// "El mundo NO se muestra completamente. SE DESCUBRE."
 export const TIER_MIN_ZOOM: Record<WorldNodeTier, number> = {
-  S: 3,    // visible desde nivel continental
-  A: 6,    // visible desde nivel país
-  B: 9,    // visible desde nivel ciudad
-  C: 12,   // visible sólo en zoom alto
+  S: 3,    // visible desde nivel continental (mundo elegante)
+  A: 7,    // visible desde nivel país/región
+  B: 11,   // visible sólo en zoom de ciudad
+  C: 14,   // visible sólo en zoom de barrio
 };
+
+// Cap absoluto · no renderizar más de N markers a la vez
+// (Leaflet se ahoga con > 1500)
+export const MAX_NODES_RENDERED = 1200;
 
 
 // ─── COLOR POR CATEGORÍA ───────────────────────────────────────────────────

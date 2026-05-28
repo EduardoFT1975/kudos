@@ -20,6 +20,7 @@
 
 import * as React from "react";
 import { getAllPois, type Poi } from "@/lib/kudos/store";
+import { useGeolocation } from "@/lib/geo/useGeolocation";
 import {
   WORLD_COLORS,
   WORLD_TILE_URL,
@@ -78,6 +79,30 @@ export function WorldEngine() {
   const [zoom, setZoom] = React.useState(3);
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [center, setCenter] = React.useState<{ lat: number; lng: number }>({ lat: 30, lng: 10 });
+  const geo = useGeolocation();
+  const centeredOnUserRef = React.useRef(false);
+
+  // Auto-request geolocation al montar
+  React.useEffect(() => {
+    if (!geo.coords && geo.status !== "asking" && geo.status !== "denied") {
+      geo.request();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Cuando llegan las coords + el map está listo, centrar UNA VEZ con zoom cinematográfico
+  React.useEffect(() => {
+    if (centeredOnUserRef.current || !geo.coords) return;
+    const map = mapRef.current;
+    if (!map) return;
+    try {
+      map.flyTo([geo.coords.lat, geo.coords.lng], 9, {
+        duration: 2.2,
+        easeLinearity: 0.18,
+      });
+      centeredOnUserRef.current = true;
+    } catch {}
+  }, [geo.coords]);
 
   // ── Cargar POIs core + Wikidata dinámicamente ──
   React.useEffect(() => {

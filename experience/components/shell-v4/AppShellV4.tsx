@@ -17,6 +17,7 @@
  * Backdrop intentionally omitted . mockups use flat --kudos-bg.
  */
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import { FatalRecoveryLayer } from "@/features/launch-closure/FatalRecoveryLayer";
 import { MobileSafeAreaProvider } from "@/features/mobile-hardening/MobileSafeAreaProvider";
 import { KeyboardViewportGuard } from "@/features/mobile-hardening/KeyboardViewportGuard";
@@ -29,7 +30,24 @@ import { MeritToast } from "@/components/share/MeritToast";
 
 interface Props { children: React.ReactNode; }
 
+// Rutas que NO usan el chrome de la app (top bar + bottom nav).
+// El World Engine necesita pantalla completa cinematográfica.
+const FULLSCREEN_ROUTES = ["/world"];
+
 export function AppShellV4({ children }: Props) {
+  const pathname = usePathname() || "";
+  const isFullscreen = FULLSCREEN_ROUTES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+
+  if (isFullscreen) {
+    return (
+      <MobileSafeAreaProvider>
+        <FatalRecoveryLayer>
+          {children}
+        </FatalRecoveryLayer>
+      </MobileSafeAreaProvider>
+    );
+  }
+
   return (
     <MobileSafeAreaProvider>
       <KeyboardViewportGuard />
