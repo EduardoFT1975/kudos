@@ -241,6 +241,69 @@ def api_pois_import_osm(body: ImportOsmBody) -> dict:
     )
 
 
+# V8 · Importador Wikidata · más fiable que OSM, devuelve foto+UNESCO
+class ImportWikidataBody(BaseModel):
+    country: str = "ES"
+    max_per_type: int = 800
+
+
+@app.post("/api/pois/import_wikidata")
+def api_pois_import_wikidata(body: ImportWikidataBody) -> dict:
+    name = f"import_wd_{body.country.lower()}"
+    return proc_start(
+        name,
+        [sys.executable, "-m", "kudos_engine.scripts.import_wikidata",
+         "--country", body.country.upper(),
+         "--max", str(body.max_per_type)],
+    )
+
+
+@app.post("/api/pois/import_wikidata_all")
+def api_pois_import_wikidata_all() -> dict:
+    """Lanza Wikidata para los 14 países top mundo en BACKGROUND, uno tras otro."""
+    name = "import_wd_all"
+    return proc_start(
+        name,
+        [sys.executable, "-m", "kudos_engine.scripts.import_wikidata", "--all"],
+    )
+
+
+@app.get("/api/pois/wikidata_status")
+def api_pois_wikidata_status() -> dict:
+    """Lista los JSON de Wikidata ya descargados con totales."""
+    wd_dir = REPO_DIR / "experience" / "public" / "data" / "wikidata"
+    items = []
+    total = 0
+    if wd_dir.exists():
+        for f in sorted(wd_dir.glob("*.json")):
+            try:
+                data = json.loads(f.read_text(encoding="utf-8"))
+                n = int(data.get("count", 0))
+                total += n
+                items.append({"country": data.get("country", f.stem.upper()),
+                              "count": n,
+                              "size_kb": f.stat().st_size // 1024})
+            except Exception:
+                pass
+    return {"total_pois": total, "files": items}
+
+
+@app.post("/api/git/auto_push")
+def api_git_auto_push() -> dict:
+    """git add experience/public/data + commit + push · útil tras importar."""
+    rc1, out1 = _git(["add", "experience/public/data"])
+    if rc1 != 0:
+        return {"ok": False, "error": f"git add falló: {out1}"}
+    rc2, out2 = _git(["-c", "user.email=eduardo@kudos.world", "-c", "user.name=Eduardo",
+                       "commit", "-m", "Wikidata · datos nuevos importados desde el Panel"])
+    if rc2 != 0 and "nothing to commit" not in out2.lower():
+        return {"ok": False, "error": f"git commit falló: {out2}"}
+    rc3, out3 = _git(["push", "origin", "HEAD"])
+    if rc3 != 0:
+        return {"ok": False, "error": f"git push falló: {out3}"}
+    return {"ok": True, "output": f"{out1}\n{out2}\n{out3}"[-400:]}
+
+
 # ═══════════════════════ CAPSULES ═════════════════════════════════════════
 
 @app.get("/api/capsules")
@@ -516,6 +579,29 @@ INDEX_HTML = """<!doctype html>
       </select>
       <input type=number id=osm-max value=2000 min=100 max=10000 style="width:90px;">
       <button onclick="importOSM()">📦 Importar OSM</button>
+    </div>
+    <div style="margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06)">
+      <div style="font-size:11px; color:var(--mute); letter-spacing:1px; margin-bottom:8px; text-transform:uppercase">🌐 Wikidata (recomendado · foto + UNESCO)</div>
+      <select id=wd-country style="width:auto">
+        <option value=ES>España</option>
+        <option value=IT>Italia</option>
+        <option value=FR>Francia</option>
+        <option value=GR>Grecia</option>
+        <option value=PT>Portugal</option>
+        <option value=DE>Alemania</option>
+        <option value=GB>Reino Unido</option>
+        <option value=JP>Japón</option>
+        <option value=EG>Egipto</option>
+        <option value=MX>México</option>
+        <option value=PE>Perú</option>
+        <option value=TR>Turquía</option>
+        <option value=US>EE.UU.</option>
+        <option value=MA>Marruecos</option>
+      </select>
+      <button onclick="importWikidata()">⬇ Importar Wikidata</button>
+      <button onclick="importWikidataAll()">🌍 Top mundo (14 paises)</button>
+      <button class=ghost onclick="autoPush()">⬆ Auto-push JSONs</button>
+      <div id=wd-status style="margin-top:8px; font-size:11px; color:var(--mute)">cargando…</div>
     </div>
   </div>
 

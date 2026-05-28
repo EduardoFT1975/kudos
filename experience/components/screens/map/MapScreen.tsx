@@ -639,11 +639,16 @@ function tierOf(p: Poi): "S" | "A" | "B" {
 
 // Level of Detail (LoD) por tier · Google Maps style:
 //   - Tier S (iconos del mundo): visible a partir de zoom 3 (continente)
-//   - Tier A (regionales top):   visible a partir de zoom 6 (país)
-//   - Tier B (locales):          visible a partir de zoom 10 (ciudad)
+//   - Tier A (regionales top):   visible a partir de zoom 5 (país/región)
+//   - Tier B (locales):          visible a partir de zoom 8 (ciudad grande)
 // En zoom mundo (1-2) NO se ve nada, dejando el mapa limpio como Google.
 // Al hacer zoom in, aparecen progresivamente los markers de menor importancia.
-const MIN_ZOOM_BY_TIER: Record<"S" | "A" | "B", number> = { S: 3, A: 6, B: 10 };
+// V7-fix: bajamos B de 10→8 porque con miles de POIs Wikidata, zoom 10 era
+// demasiado restrictivo para zoom de país. Ahora se ven al zoom regional.
+const MIN_ZOOM_BY_TIER: Record<"S" | "A" | "B", number> = { S: 3, A: 5, B: 8 };
+
+// Cap absoluto de markers renderizados a la vez (Leaflet se ahoga con >2000)
+const MAX_MARKERS_RENDERED = 1200;
 
 function minZoomFor(p: Poi): number {
   return MIN_ZOOM_BY_TIER[tierOf(p)];
