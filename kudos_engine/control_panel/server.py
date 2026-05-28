@@ -386,13 +386,34 @@ INDEX_HTML = """<!doctype html>
 <html lang=es>
 <head>
 <meta charset=utf-8>
-<title>KUDOS · Panel Fundador</title>
+<title>KUDOS · Panel del Fundador</title>
 <meta name=viewport content="width=device-width,initial-scale=1">
+<link rel=preconnect href="https://fonts.googleapis.com">
+<link rel=preconnect href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel=stylesheet>
 <style>
+  :root {
+    --navy:#1A1333; --navy2:#14112a; --navy3:#0a0612;
+    --violet:#6C3CFF; --pink:#FF3CAC; --orange:#FF9A00; --yellow:#FFD23F;
+    --white:#F2F2F7; --mute:#8b8b95; --border:#2a2548;
+    --gradh:linear-gradient(90deg,#FF9A00 0%,#FF3CAC 50%,#6C3CFF 100%);
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; background: #0a0612; color: #f2f2f7; padding: 24px; line-height: 1.5; }
-  h1 { font-size: 24px; font-weight: 800; margin-bottom: 4px; background: linear-gradient(90deg,#FF9A00,#FF3CAC,#6C3CFF); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .subtitle { color: #8b8b95; font-size: 13px; margin-bottom: 20px; }
+  body { font-family:"Poppins",-apple-system,"Segoe UI",system-ui,sans-serif; background:radial-gradient(ellipse at top left,rgba(108,60,255,0.10) 0%,transparent 50%),radial-gradient(ellipse at top right,rgba(255,60,172,0.08) 0%,transparent 50%),var(--navy3); color:var(--white); padding:28px; line-height:1.5; min-height:100vh; }
+  .hero { display:grid; grid-template-columns:auto 1fr auto; gap:22px; align-items:center; margin-bottom:24px; padding-bottom:22px; border-bottom:1px solid var(--border); }
+  .hero-logo { width:60px; height:60px; flex-shrink:0; }
+  .hero-text h1 { font-size:26px; font-weight:800; letter-spacing:-0.5px; color:var(--white); display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .hero-text h1 .mark { background:var(--gradh); -webkit-background-clip:text; background-clip:text; color:transparent; font-size:18px; font-weight:600; }
+  .hero-tagline { font-size:11px; font-weight:700; letter-spacing:3px; color:var(--mute); text-transform:uppercase; margin-top:6px; }
+  .hero-quote { text-align:right; max-width:320px; font-size:12px; color:var(--mute); font-style:italic; line-height:1.4; }
+  .hero-quote b { display:block; color:var(--white); font-style:normal; font-weight:700; font-size:13px; margin-bottom:2px; letter-spacing:0.5px; }
+  .hero-quote small { display:block; margin-top:4px; font-style:normal; font-size:10px; letter-spacing:1.5px; color:var(--violet); font-weight:700; text-transform:uppercase; }
+  .pillars { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
+  .pillar { background:rgba(108,60,255,0.06); border:1px solid rgba(108,60,255,0.18); border-radius:12px; padding:14px 16px; text-align:center; }
+  .pillar-icon { font-size:22px; margin-bottom:6px; line-height:1; }
+  .pillar-name { font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--violet); }
+  .pillar-desc { font-size:10.5px; color:var(--mute); margin-top:3px; line-height:1.35; }
+  @media (max-width:720px){ .pillars{grid-template-columns:repeat(2,1fr);} }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; }
   .card { background: #14112a; border: 1px solid #2a2548; border-radius: 14px; padding: 18px; }
   .card h2 { font-size: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #b8b8c5; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
@@ -422,8 +443,37 @@ INDEX_HTML = """<!doctype html>
 </head>
 <body>
 
-<h1>✦ KUDOS · Panel del Fundador</h1>
-<p class="subtitle">Local · localhost:3001 · refresca cada 5s automáticamente</p>
+<header class=hero>
+  <svg class=hero-logo viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" aria-label="KUDOS">
+    <defs>
+      <linearGradient id="kHero" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#6C3CFF"/>
+        <stop offset="38%" stop-color="#FF3CAC"/>
+        <stop offset="72%" stop-color="#FF9A00"/>
+        <stop offset="100%" stop-color="#FFD23F"/>
+      </linearGradient>
+    </defs>
+    <rect width="96" height="96" rx="22" fill="#1A1333"/>
+    <circle cx="48" cy="48" r="32" fill="none" stroke="url(#kHero)" stroke-width="6"/>
+    <path d="M 48 28 L 51 45 L 68 48 L 51 51 L 48 68 L 45 51 L 28 48 L 45 45 Z" fill="url(#kHero)"/>
+  </svg>
+  <div class=hero-text>
+    <h1>KUDOS <span class=mark>· Panel del Fundador</span></h1>
+    <div class=hero-tagline>MÉRITO · DESCUBRIMIENTO · MEMORIA</div>
+  </div>
+  <div class=hero-quote>
+    <b>Eduardo F.</b>
+    "Construimos tecnología con propósito para dejar huella en el mundo."
+    <small>Fundador & CEO</small>
+  </div>
+</header>
+
+<section class=pillars>
+  <div class=pillar><div class=pillar-icon>✦</div><div class=pillar-name>DESCUBRE</div><div class=pillar-desc>Lugares que merecen ser conocidos</div></div>
+  <div class=pillar><div class=pillar-icon>🔖</div><div class=pillar-name>GUARDA</div><div class=pillar-desc>Tu mapa personal de inspiración</div></div>
+  <div class=pillar><div class=pillar-icon>↗</div><div class=pillar-name>COMPARTE</div><div class=pillar-desc>Inspira a otros con cápsulas únicas</div></div>
+  <div class=pillar><div class=pillar-icon>♡</div><div class=pillar-name>DEJA HUELLA</div><div class=pillar-desc>El legado del futuro</div></div>
+</section>
 
 <div class="grid">
 
