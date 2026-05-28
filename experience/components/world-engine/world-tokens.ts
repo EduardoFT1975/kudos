@@ -1,142 +1,179 @@
 /**
  * KUDOS WORLD ENGINE · Design Tokens
  *
- * Paleta fundacional según brand book ADN 1000M:
- *   "premium · elegante · calmado · cinematográfico"
- *   "nunca neón excesivo · nunca colores gamer · nunca UI infantil"
- *
- * NO usar fuera de /world. Lo viejo (#6C3CFF/#FF3CAC/etc.) queda en
- * el panel del fundador y en /mapa como demo; /world es categoría nueva.
+ * Paleta cinematográfica + categorías pictográficas estilo Apple Maps.
+ * Color vivo pero NUNCA neón gamer. Cada categoría tiene
+ * pictograma + tono propio que se reconoce de un vistazo.
  */
 
-// ─── COLORES BASE (máximo 6-7 dominantes) ──────────────────────────────────
+// ─── COLORES BASE ─────────────────────────────────────────────────────────
 
 export const WORLD_COLORS = {
-  // Fondo · espacio profundo donde respira el planeta
-  voidDeep:      "#070912",  // negro azulado · espacio
-  voidNavy:      "#0a0e1f",  // navy profundo · base del mapa
-  voidElevated:  "#101428",  // navy elevado · cards y paneles
+  // Fondo · espacio profundo
+  voidDeep:      "#070912",
+  voidNavy:      "#0a0e1f",
+  voidElevated:  "#101428",
 
-  // Terreno · gris cálido (NO competitivo con nodos)
-  earthBase:     "#1a1d2e",  // tile dark cinematográfico
-  earthEdge:     "#2a2d40",  // bordes muy sutiles
+  // Terreno
+  earthBase:     "#1a1d2e",
+  earthEdge:     "#2a2d40",
 
-  // Acentos significantes · UNO por tipo
-  legendary:     "#C9A961",  // dorado suave · Tier S · "esto importa"
-  history:       "#5A8BB8",  // azul profundo desaturado · historia/cultura
-  nature:        "#6BA888",  // verde oscuro orgánico · naturaleza
-  tragedy:       "#A85858",  // rojo desaturado · tragedia/conflicto
-  mystery:       "#7A6BA8",  // morado profundo · misterio/anomalía
-  warmWhite:     "#F5E8C7",  // blanco cálido · información universal
-  premium:       "#E8DBB0",  // crema · highlights premium
+  // Tier S (universal legendary · siempre dorado)
+  legendary:     "#C9A961",
+  premium:       "#E8DBB0",
+
+  // Categorías · vivas, NO neón
+  museum:        "#9F7BC9",   // lila profundo · museos, galerías, arte
+  castle:        "#D6963F",   // ámbar oscuro · castillos, fortalezas
+  religious:     "#6E94CC",   // azul cobalto suave · iglesias, monasterios
+  megalith:      "#88A28A",   // piedra musgo · dolmen, menhir, túmulo
+  park:          "#7BBF8F",   // verde bosque · parques, jardines, naturaleza
+  plaza:         "#E0B062",   // ámbar cálido · plazas, alamedas
+  monument:      "#E8DBB0",   // crema · monumentos, estatuas, fuentes
+  archaeology:   "#C28266",   // terracota · yacimientos, ruinas
+  palace:        "#D4B569",   // dorado real · palacios
+  mystery:       "#9F7BC9",   // alias museum para legacy
 
   // Texto
-  inkPrimary:    "#E8E4D5",  // blanco hueso para legibilidad calmada
+  inkPrimary:    "#E8E4D5",
   inkSecondary:  "rgba(232,228,213,0.55)",
   inkTertiary:   "rgba(232,228,213,0.32)",
 
   // Estados invisibles
-  fogVeil:       "rgba(7,9,18,0.78)",  // velo sobre zonas no descubiertas
+  fogVeil:       "rgba(7,9,18,0.78)",
   glowGold:      "rgba(201,169,97,0.32)",
 } as const;
 
 
-// ─── TIPOS DE WORLD NODE ───────────────────────────────────────────────────
+// ─── TIPOS ────────────────────────────────────────────────────────────────
 
 export type WorldNodeTier = "S" | "A" | "B" | "C";
 
 export type WorldNodeCategory =
-  | "history"     // círculo perfecto
-  | "nature"      // orgánico
-  | "event"       // hexágono suave (eventos/tragedia)
-  | "mystery"     // rombo suave
-  | "science"     // nodo geométrico (octágono)
-  | "social";     // orbital
+  | "museum"
+  | "castle"
+  | "religious"
+  | "megalith"
+  | "park"
+  | "plaza"
+  | "monument"
+  | "archaeology"
+  | "palace"
+  | "mystery";
 
 
-// ─── DIMENSIONES POR TIER ──────────────────────────────────────────────────
+// ─── DIMENSIONES POR TIER ─────────────────────────────────────────────────
 
 export const TIER_SIZE: Record<WorldNodeTier, number> = {
-  S: 44,   // grande pero elegante · doble anillo + respiración
-  A: 24,   // medio · anillo simple + pulso lento
-  B: 6,    // muy pequeño · dot tenue · NO saturar
-  C: 3,    // invisible casi · aparece sólo con zoom muy alto
+  S: 38,   // pictograma grande + label permanente
+  A: 26,   // pictograma medio + label permanente si cabe
+  B: 14,   // dot color · label sólo hover
+  C: 6,    // marca casi invisible
 };
 
 export const TIER_OPACITY: Record<WorldNodeTier, number> = {
   S: 1.0,
-  A: 0.92,
-  B: 0.45,  // más transparente · "casi inexistente"
-  C: 0.25,
+  A: 0.95,
+  B: 0.55,
+  C: 0.3,
 };
 
-// Fog of discovery · zoom mínimo por tier
-// "El mundo NO se muestra completamente. SE DESCUBRE."
+// Fog of discovery · zoom mínimo por tier (BRUTAL · respira mucho más)
 export const TIER_MIN_ZOOM: Record<WorldNodeTier, number> = {
-  S: 3,    // visible desde nivel continental (mundo elegante · sólo iconos)
-  A: 8,    // visible desde nivel país (subimos de 7 · era demasiado denso)
-  B: 15,   // sólo en zoom de calle muy alta · era 13, saturaba zoom 12-14
-  C: 16,   // visible sólo en zoom de calle
+  S: 5,
+  A: 10,    // antes 8 · ahora sólo desde región
+  B: 14,    // antes 13 · sólo en calle alta
+  C: 17,    // muy raramente visible
 };
 
-// Cap DINÁMICO por zoom · respira más en zoom alto, menos en lejano
-// "El mapa debe respirar · vacío elegante"
+// Cap DINÁMICO · "menos es más" · estilo Apple Maps
 export function maxNodesAtZoom(zoom: number): number {
-  if (zoom <= 5)  return 60;    // Mundo · sólo iconos legendarios
-  if (zoom <= 8)  return 150;   // Continente/país · selección curada
-  if (zoom <= 11) return 200;   // Región/ciudad · respira más
-  if (zoom <= 13) return 220;   // Distrito · respira más
-  return 250;                   // Barrio/calle · densidad máxima curada
+  if (zoom <= 5)  return 12;    // Mundo · puñado de Tier S
+  if (zoom <= 7)  return 20;    // Continente · selección extrema
+  if (zoom <= 9)  return 35;    // País/región · curado
+  if (zoom <= 11) return 55;    // Ciudad · densidad moderada
+  if (zoom <= 13) return 80;    // Distrito
+  return 120;                   // Barrio/calle · máximo
 }
 
-// Cap absoluto · hard limit por si algo pasa
-export const MAX_NODES_RENDERED = 600;
+// Cap absoluto · hard limit
+export const MAX_NODES_RENDERED = 120;
 
-// Margen extra del viewport para precarga · evita popping al hacer pan
-export const VIEWPORT_PADDING_RATIO = 0.3;  // 30% extra alrededor
+// Padding de viewport para precarga
+export const VIEWPORT_PADDING_RATIO = 0.25;
 
 
-// ─── COLOR POR CATEGORÍA ───────────────────────────────────────────────────
+// ─── COLOR POR CATEGORÍA ──────────────────────────────────────────────────
 
 export function nodeColorFor(category: WorldNodeCategory, tier: WorldNodeTier): string {
   // Tier S siempre dorado · "esto es legendary"
   if (tier === "S") return WORLD_COLORS.legendary;
-  // Resto · color contextual de la categoría
   switch (category) {
-    case "history":  return WORLD_COLORS.history;
-    case "nature":   return WORLD_COLORS.nature;
-    case "event":    return WORLD_COLORS.tragedy;
-    case "mystery":  return WORLD_COLORS.mystery;
-    case "science":  return WORLD_COLORS.warmWhite;
-    case "social":   return WORLD_COLORS.premium;
+    case "museum":       return WORLD_COLORS.museum;
+    case "castle":       return WORLD_COLORS.castle;
+    case "religious":    return WORLD_COLORS.religious;
+    case "megalith":     return WORLD_COLORS.megalith;
+    case "park":         return WORLD_COLORS.park;
+    case "plaza":        return WORLD_COLORS.plaza;
+    case "monument":     return WORLD_COLORS.monument;
+    case "archaeology":  return WORLD_COLORS.archaeology;
+    case "palace":       return WORLD_COLORS.palace;
+    case "mystery":      return WORLD_COLORS.mystery;
   }
 }
 
 
-// ─── DEDUCIR CATEGORÍA DESDE TAGS LEGACY ───────────────────────────────────
-// Mientras el dataset usa categorías viejas ("monumento", "museo"…)
+// ─── DEDUCIR CATEGORÍA DESDE TAGS WIKIDATA/OSM REALES ─────────────────────
 
 export function inferCategory(tag: string | undefined): WorldNodeCategory {
   const t = (tag || "").toLowerCase();
-  if (t.includes("natural") || t.includes("park") || t.includes("mount") || t.includes("water")) return "nature";
-  if (t.includes("museo") || t.includes("museum") || t.includes("ciencia") || t.includes("library")) return "science";
-  if (t.includes("evento") || t.includes("event") || t.includes("battle") || t.includes("trage")) return "event";
-  if (t.includes("misterio") || t.includes("mystery")) return "mystery";
-  if (t.includes("social") || t.includes("plaza") || t.includes("square")) return "social";
-  return "history";  // default · la mayoría son históricos
+
+  // Religious primero · iglesia/catedral/monasterio son la mayoría en España
+  if (/iglesia|church|basilic|catedral|cathedral|monasterio|monastery|abad[ií]a|abbey|ermita|capilla|chapel|convent|mosque|synagog|temple|sanctuar/.test(t))
+    return "religious";
+
+  // Castillo/fortaleza
+  if (/castillo|castle|fortaleza|fortress|alcazar|alc[áa]zar|tower|torre|fort|murall/.test(t))
+    return "castle";
+
+  // Palacio
+  if (/palacio|palace|palau|p[áa]ço/.test(t))
+    return "palace";
+
+  // Megalitos
+  if (/dolmen|menhir|m[áa]moa|mamoa|t[úu]mulo|tumulus|megalit|cromlech|cista|petr[óo]glifo|petroglyph/.test(t))
+    return "megalith";
+
+  // Arqueología
+  if (/yacimiento|ruina|ruin|archaeolog|arqueol[óo]g|villa romana|teatro romano|anfiteatro|roman|celtic|castro/.test(t))
+    return "archaeology";
+
+  // Parque / naturaleza
+  if (/parque|park|jard[íi]n|garden|nature|reserva|mountain|mount|monte|sierra|peak|laguna|lago|lake|cascad|waterfall|cueva|cave|playa|beach|mirador|viewpoint/.test(t))
+    return "park";
+
+  // Plaza / espacio social
+  if (/plaza|square|alameda|paseo|promenad|boulevard/.test(t))
+    return "plaza";
+
+  // Museo / cultura
+  if (/museo|museum|galer[íi]a|gallery|library|biblioteca|teatro|theatre|theater|auditori/.test(t))
+    return "museum";
+
+  // Monumento (default cultural)
+  if (/monumento|monument|estatua|statue|memorial|fuente|fountain|obelisc|cruceiro|cross/.test(t))
+    return "monument";
+
+  // Fallback: monument neutro
+  return "monument";
 }
 
 
-// ─── TILES BASE ────────────────────────────────────────────────────────────
-// 2 capas como Apple Maps minimalista: base oscura SIN labels + overlay
-// SOLO labels finos · usuario puede situarse pero los labels NO compiten
-// con los World Nodes.
-//
-// Base · Carto Dark Matter (sin labels) · cinematográfica
+// ─── TILES BASE ───────────────────────────────────────────────────────────
+
 export const WORLD_TILE_URL =
   "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png";
 
-// Overlay · SOLO labels (ciudades, países, regiones) · transparente
 export const WORLD_LABELS_URL =
   "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png";
 
@@ -144,16 +181,14 @@ export const WORLD_TILE_ATTRIB = "© OpenStreetMap · © CARTO";
 export const WORLD_TILE_SUBDOMAINS = ["a", "b", "c", "d"];
 export const WORLD_TILE_MAX_ZOOM = 19;
 
-// Filtro CSS para inclinar base hacia navy KUDOS
 export const WORLD_TILE_FILTER =
   "brightness(0.92) contrast(1.05) saturate(0.55) hue-rotate(-15deg)";
 
-// Labels más tenues · NO competir con nodos
 export const WORLD_LABELS_FILTER =
   "brightness(1.1) saturate(0.4) opacity(0.65)";
 
 
-// ─── RITMO DE MOVIMIENTO ───────────────────────────────────────────────────
+// ─── RITMO DE MOVIMIENTO ──────────────────────────────────────────────────
 
 export const RESPIRATION_DURATION_S = 5.4;
 export const RESPIRATION_OPACITY_MIN = 0.78;

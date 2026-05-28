@@ -292,6 +292,38 @@ export function WorldEngine() {
     const visible = candidates.slice(0, cap);
     const next = new Map<string, WorldPoi>(visible.map((n) => [n.id, n]));
 
+    // 3.5) Label collision detection greedy en pixel space
+    // Sólo Tier S y A obtienen showLabel; los descartados por colisión
+    // siguen visibles como chip pero sin label permanente.
+    const showLabelIds = new Set<string>();
+    const placedBoxes: { x1: number; y1: number; x2: number; y2: number }[] = [];
+    for (const n of visible) {
+      if (n.tier !== "S" && n.tier !== "A") continue;
+      try {
+        const p = map.latLngToContainerPoint([n.lat, n.lng]);
+        const labelText = n.name || "";
+        // Estimación ancho · 6.4px por char + 22px padding · max 200
+        const w = Math.min(200, labelText.length * 6.4 + 22);
+        const h = 20;
+        // Label aparece debajo del chip · offset 30 = chip + gap
+        const box = {
+          x1: p.x - w / 2,
+          y1: p.y + 22,
+          x2: p.x + w / 2,
+          y2: p.y + 22 + h,
+        };
+        // ¿Colisiona con algún ya colocado?
+        const collides = placedBoxes.some(
+          (b) => !(box.x2 < b.x1 || box.x1 > b.x2 || box.y2 < b.y1 || box.y1 > b.y2)
+        );
+        if (!collides) {
+          placedBoxes.push(box);
+          showLabelIds.add(n.id);
+        }
+      } catch { /* skip */ }
+    }
+
+
     console.warn(
       `[WORLD] viewport · candidatos=${candidates.length} · render=${visible.length} · zoom=${zoom}`
     );
@@ -309,7 +341,7 @@ export function WorldEngine() {
       if (isNaN(n.lat) || isNaN(n.lng)) return;
       try {
         const isActive = id === activeId;
-        const html = buildWorldNodeHTML({ ...n, isActive });
+        const html = buildWorldNodeHTML({ ...n, isActive, showLabel: showLabelIds.has(id) });
         const size = n.tier === "S" ? 56 : n.tier === "A" ? 32 : n.tier === "B" ? 14 : 6;
         const icon = L.divIcon({
           className: "kudos-world-node",
@@ -340,7 +372,6 @@ export function WorldEngine() {
           <span style={HUD_BRAND_DOT}>·</span>
           <span style={HUD_BRAND_LABEL}>WORLD</span>
         </div>
-        <div style={HUD_TAGLINE}>Mérito · Descubrimiento · Memoria</div>
       </div>
       <div style={HUD_COUNTER}>
         {totalLoaded.toLocaleString("es-ES")} nodos · {markersRef.current.size} visibles · zoom {zoom}
