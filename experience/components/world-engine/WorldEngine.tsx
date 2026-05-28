@@ -41,22 +41,111 @@ interface WorldPoi {
   tier: WorldNodeTier;
   category: WorldNodeCategory;
   image?: string;
+  imageHero?: string;
+}
+
+
+// ─── Helpers UI ──────────────────────────────────────────────────────
+const CATEGORY_LABEL_ES: Record<WorldNodeCategory, string> = {
+  museum: "Museo",
+  castle: "Castillo",
+  religious: "Edificio religioso",
+  megalith: "Megalito",
+  park: "Naturaleza",
+  plaza: "Plaza",
+  monument: "Monumento",
+  archaeology: "Yacimiento",
+  palace: "Palacio",
+  mystery: "Misterio",
+};
+
+const TIER_LABEL_ES: Record<WorldNodeTier, string> = {
+  S: "Legendary",
+  A: "Premium",
+  B: "Descubrible",
+  C: "Long tail",
+};
+
+// Convertir Wikimedia URL a hero (1024)
+function wikimediaHero(url?: string): string | undefined {
+  if (!url) return undefined;
+  if (url.includes("Special:FilePath")) {
+    return url.replace(/\?width=\d+/, "") + "?width=1024";
+  }
+  return url;
 }
 
 
 const LEGENDARY_IDS = new Set([
-  "rome", "machu", "petra", "athens", "granada", "istanbul",
-  "g-eiffel", "g-taj", "g-greatwall", "g-giza", "g-chichen",
-  "g-cristored", "g-angkor", "g-stonehenge", "g-sagrada",
-  "g-libertad", "g-notredame", "g-sphinx", "g-vatican",
-  "g-bigben", "g-empire", "g-opera", "g-forbidden",
-  "g-cordoba", "g-bluemosque", "g-rapa",
+  "wd-Q10285",
+  "wd-Q12511",
+  "wd-Q12512",
+  "wd-Q131013",
+  "wd-Q132498",
+  "wd-Q1419",
+  "wd-Q150586",
+  "wd-Q160422",
+  "wd-Q160933",
+  "wd-Q165498",
+  "wd-Q179195",
+  "wd-Q189814",
+  "wd-Q19660",
+  "wd-Q19675",
+  "wd-Q207659",
+  "wd-Q210298",
+  "wd-Q22247",
+  "wd-Q23306",
+  "wd-Q243",
+  "wd-Q26013",
+  "wd-Q2981",
+  "wd-Q4233734",
+  "wd-Q4250",
+  "wd-Q43332",
+  "wd-Q43473",
+  "wd-Q4360",
+  "wd-Q47672",
+  "wd-Q49093",
+  "wd-Q4915",
+  "wd-Q62378",
+  "wd-Q9141",
+  "wd-Q9259",
+  "rome",
+  "machu",
+  "petra",
+  "athens",
+  "granada",
+  "istanbul",
+  "g-eiffel",
+  "g-taj",
+  "g-greatwall",
+  "g-giza",
+  "g-chichen",
+  "g-cristored",
+  "g-angkor",
+  "g-stonehenge",
+  "g-sagrada",
+  "g-libertad",
+  "g-notredame",
+  "g-sphinx",
+  "g-vatican",
+  "g-bigben",
+  "g-empire",
+  "g-opera",
+  "g-forbidden",
+  "g-cordoba",
+  "g-bluemosque",
+  "g-rapa",
+]);
+
+// POIs a excluir (ciudades como puntos)
+const EXCLUDED_AS_POI = new Set([
+  "wd-Q12892","wd-Q18287233","wd-Q1492","wd-Q1490","wd-Q2807","wd-Q641","wd-Q1085","wd-Q90","wd-Q220","wd-Q84","wd-Q1741",
 ]);
 
 const TIER_PRIORITY: Record<WorldNodeTier, number> = { S: 0, A: 1, B: 2, C: 3 };
 
 // ─── Keywords para "Selecta KUDOS" · estrictas (post-recompute) ─────────
-const KEYWORDS_S = /alh[áa]mbra|sagrada familia|machu picchu|coliseo|colosseum|acr[óo]polis|gran pir[áa]mide|notre-dame de paris|reichstag|templo de karnak|baz[íi]lica de san pedro|gran mezquita de c[óo]rdoba/i;
+const KEYWORDS_S = /alh[áa]mbra|sagrada familia|machu picchu|acr[óo]polis|gran pir[áa]mide|notre-dame de paris|reichstag|templo de karnak|baz[íi]lica de san pedro|gran mezquita de c[óo]rdoba/i;
 const KEYWORDS_A = /catedral de |cathedral of |alc[áa]zar de |abad[íi]a de |abbey of |monasterio del |monasterio de san |monasterio de santa |palacio real de |palacio nacional de |teatro romano de |villa romana de |anfiteatro romano de |museo nacional de |biblioteca nacional de |plaza mayor de /i;
 const KEYWORDS_B = /bas[íi]lica|catedral|cathedral|monasterio|abad[íi]a|abbey|alc[áa]zar|alh[áa]mbra|santuario|castillo|castle|fortaleza|fortress|murall|alcazaba|teatro romano|villa romana|anfiteatro|yacimiento arqueol[óo]gico|parque nacional|jard[íi]n bot[áa]nico|reserva natural|dolmen|menhir|m[áa]moa|t[úu]mulo|petr[óo]glifo|museo de arte|museo arqueol[óo]gico|pinacoteca/i;
 
@@ -69,9 +158,12 @@ function tierForPoi(p: {
   image_url?: string;
   type?: string;
 }): WorldNodeTier {
-  // Tier S hardcoded o keyword top
+  // Excluir ciudades como puntos
+  if (EXCLUDED_AS_POI.has(p.id)) return "C";
+  // Tier S · LEGENDARY hardcoded (wd-IDs canónicos)
   if (LEGENDARY_IDS.has(p.id)) return "S";
   const nm = p.name || "";
+  // Tier S débil · keyword icónica
   if (KEYWORDS_S.test(nm)) return "S";
 
   // Globals curados siempre Tier A
@@ -329,6 +421,11 @@ export function WorldEngine() {
       const pa = TIER_PRIORITY[a.tier];
       const pb = TIER_PRIORITY[b.tier];
       if (pa !== pb) return pa - pb;
+      // Sub-prioridad dentro de Tier S · LEGENDARY hardcoded gana
+      const la = LEGENDARY_IDS.has(a.id) ? 0 : 1;
+      const lb = LEGENDARY_IDS.has(b.id) ? 0 : 1;
+      if (la !== lb) return la - lb;
+      // Después por cercanía al centro del viewport
       const da = (a.lat - center.lat) ** 2 + (a.lng - center.lng) ** 2;
       const db = (b.lat - center.lat) ** 2 + (b.lng - center.lng) ** 2;
       return da - db;
@@ -459,6 +556,63 @@ export function WorldEngine() {
       <div style={HUD_COUNTER}>
         {totalLoaded.toLocaleString("es-ES")} nodos · {visibleCount} visibles · zoom {zoom}
       </div>
+
+      {/* Bottom Sheet · F3.5 · al click en chip · offline-first */}
+      {activeId && (() => {
+        const poi = allNodesRef.current.find((p) => p.id === activeId);
+        if (!poi) return null;
+        const heroUrl = wikimediaHero(poi.image);
+        const catLabel = CATEGORY_LABEL_ES[poi.category];
+        const tierLabel = TIER_LABEL_ES[poi.tier];
+        const tierColor = poi.tier === "S" ? WORLD_COLORS.legendary
+                       : poi.tier === "A" ? "#7c5fb8"
+                       : "#5a8bb8";
+        return (
+          <div style={SHEET_BACKDROP} onClick={() => setActiveId(null)}>
+            <div style={SHEET} onClick={(e) => e.stopPropagation()}>
+              <button style={SHEET_CLOSE} onClick={() => setActiveId(null)} aria-label="Cerrar">×</button>
+              {heroUrl && (
+                <div style={SHEET_HERO_WRAP}>
+                  <img src={heroUrl} alt={poi.name}
+                       style={{width:"100%", height:"100%", objectFit:"cover", display:"block"}}
+                       onError={(ev) => { (ev.target as HTMLImageElement).style.display = "none"; }} />
+                </div>
+              )}
+              <div style={SHEET_BODY}>
+                <div style={SHEET_BADGES}>
+                  <span style={{...SHEET_BADGE, background: tierColor, color: "white"}}>{tierLabel}</span>
+                  <span style={SHEET_BADGE_LIGHT}>{catLabel}</span>
+                </div>
+                <h2 style={SHEET_TITLE}>{poi.name}</h2>
+                <p style={SHEET_DESC}>
+                  Cápsula contextual en preparación · próximamente narración cinematográfica.
+                </p>
+                <div style={SHEET_ACTIONS}>
+                  <button style={SHEET_BTN_GHOST} onClick={() => {
+                    try {
+                      const k = "kudos:saves";
+                      const saves = JSON.parse(localStorage.getItem(k) || "[]");
+                      if (!saves.includes(poi.id)) {
+                        saves.push(poi.id);
+                        localStorage.setItem(k, JSON.stringify(saves));
+                      }
+                      alert("Guardado en Mi Mundo");
+                    } catch {}
+                  }}>
+                    ◇ Guardar
+                  </button>
+                  <button style={SHEET_BTN_PRIMARY} onClick={() => {
+                    alert("Cápsula próximamente. Estamos generando narraciones para los 43k POIs.");
+                  }}>
+                    ▶ Ver cápsula
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       <div style={ZOOM_RAIL}>
         <button style={ZOOM_BTN} onClick={() => mapRef.current?.zoomIn()} aria-label="Acercar">+</button>
         <button style={ZOOM_BTN} onClick={() => mapRef.current?.zoomOut()} aria-label="Alejar">−</button>
@@ -502,6 +656,11 @@ function ensureCss() {
       .kudos-world-stage .leaflet-tile { filter: ${WORLD_TILE_FILTER}; }
       .kudos-world-node { background: transparent !important; border: none !important; }
       ${WORLD_NODE_CSS}
+      @keyframes kudos-sheet-fade { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes kudos-sheet-slide-up {
+        from { transform: translateY(60px); opacity: 0; }
+        to   { transform: translateY(0); opacity: 1; }
+      }
     `;
     document.head.appendChild(style);
   }

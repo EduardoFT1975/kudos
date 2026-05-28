@@ -31,28 +31,56 @@ WIKIDATA_DIR = ROOT / "experience" / "public" / "data" / "wikidata"
 
 # ─── Algoritmo Selecta KUDOS (mismo que frontend WorldEngine.tsx) ────
 LEGENDARY_IDS = {
-    "wd-Q10285",        # Coliseo Roma
-    "wd-Q43332",        # Sagrada Familia
-    "wd-Q39054",        # Machu Picchu
-    "wd-Q5788",         # Petra
-    "wd-Q5788",
-    "wd-Q243",          # Acropolis Athens
-    "wd-Q43483",        # Alhambra Granada
-    "wd-Q39054",
-    "wd-Q9202",         # Hagia Sophia Istanbul
-    "wd-Q156628",       # Eiffel Tower
-    "wd-Q43473",        # Taj Mahal
-    "wd-Q12501",        # Great Wall China
-    "wd-Q37200",        # Pyramids of Giza
-    "wd-Q12506",        # Chichen Itza
-    "wd-Q9438",         # Cristo Redentor
-    "wd-Q43473",
-    "wd-Q43332",
-    "wd-Q9279",         # Notre Dame Paris
-    "wd-Q9438",
+    "wd-Q10285",   # Coliseo
+    "wd-Q43332",   # Pompeya
+    "wd-Q160422",   # Sagrada Familia
+    "wd-Q1419",   # Foro Romano
+    "wd-Q12512",   # Torre de Pisa
+    "wd-Q160933",   # Venecia
+    "wd-Q49093",   # Vaticano
+    "wd-Q150586",   # Capilla Sixtina
+    "wd-Q26013",   # Pompeya
+    "wd-Q43473",   # Alhambra
+    "wd-Q12511",   # Mezquita-Catedral Cordoba
+    "wd-Q4233734",   # Park Güell
+    "wd-Q243",   # Torre Eiffel
+    "wd-Q2981",   # Notre Dame Paris
+    "wd-Q19675",   # Versailles
+    "wd-Q19660",   # Louvre
+    "wd-Q165498",   # Mont Saint-Michel
+    "wd-Q131013",   # Acropolis Athens
+    "wd-Q132498",   # Partenón
+    "wd-Q189814",   # Meteora
+    "wd-Q9141",   # Stonehenge
+    "wd-Q23306",   # Big Ben
+    "wd-Q62378",   # Tower of London
+    "wd-Q9259",   # British Museum
+    "wd-Q22247",   # Westminster Abbey
+    "wd-Q4360",   # Brandenburger Tor
+    "wd-Q4250",   # Reichstag
+    "wd-Q4915",   # Neuschwanstein
+    "wd-Q207659",   # Torre de Belém
+    "wd-Q210298",   # Monasterio Jerónimos
+    "wd-Q47672",   # Fuji
+    "wd-Q179195",   # Templo Kinkaku-ji
 }
 
-KEYWORDS_S = re.compile(r"alh[áa]mbra|sagrada familia|machu picchu|coliseo|colosseum|acr[óo]polis|gran pir[áa]mide|notre-dame de paris|reichstag|templo de karnak|baz[íi]lica de san pedro|gran mezquita de c[óo]rdoba", re.IGNORECASE)
+# POIs a EXCLUIR (ciudades como punto)
+EXCLUDED_AS_POI = {
+    "wd-Q12892",
+    "wd-Q18287233",
+    "wd-Q1492",
+    "wd-Q1490",
+    "wd-Q2807",
+    "wd-Q641",
+    "wd-Q1085",
+    "wd-Q90",
+    "wd-Q220",
+    "wd-Q84",
+    "wd-Q1741",
+}
+
+KEYWORDS_S = re.compile(r"alh[áa]mbra|sagrada familia|machu picchu|acr[óo]polis|gran pir[áa]mide|notre-dame de paris|reichstag|templo de karnak|baz[íi]lica de san pedro|gran mezquita de c[óo]rdoba", re.IGNORECASE)
 KEYWORDS_A = re.compile(r"catedral de |cathedral of |alc[áa]zar de |abad[íi]a de |abbey of |monasterio del |monasterio de san |monasterio de santa |palacio real de |palacio nacional de |teatro romano de |villa romana de |anfiteatro romano de |museo nacional de |biblioteca nacional de |plaza mayor de ", re.IGNORECASE)
 KEYWORDS_B = re.compile(r"bas[íi]lica|catedral|cathedral|monasterio|abad[íi]a|abbey|alc[áa]zar|alh[áa]mbra|santuario|castillo|castle|fortaleza|fortress|murall|alcazaba|teatro romano|villa romana|anfiteatro|yacimiento arqueol[óo]gico|parque nacional|jard[íi]n bot[áa]nico|reserva natural|dolmen|menhir|m[áa]moa|t[úu]mulo|petr[óo]glifo|museo de arte|museo arqueol[óo]gico|pinacoteca", re.IGNORECASE)
 
@@ -75,18 +103,24 @@ def infer_category_short(category: str | None, type_: str | None, name: str | No
 
 
 def tier_for(p: dict) -> str:
-    if p.get("id") in LEGENDARY_IDS: return "S"
+    pid = p.get("id", "")
+    # Excluir ciudades como puntos (Roma/París/Madrid... son contenedores no POIs)
+    if pid in EXCLUDED_AS_POI: return "C"
+
+    # Tier S · LEGENDARY canónico (wd-IDs hardcoded · top mundiales)
+    if pid in LEGENDARY_IDS: return "S"
+
     name = p.get("name") or ""
     unesco = bool(p.get("unesco"))
     has_image = bool(p.get("image_url"))
 
-    # Tier S · LEGENDARY o keyword icónica top
+    # Tier S débil · keyword icónica top (sólo si no es legendary)
     if KEYWORDS_S.search(name): return "S"
 
-    # Tier A · debe ser ICÓNICO · foto + keyword premium (UNESCO solo no basta)
+    # Tier A · foto + keyword premium
     if has_image and KEYWORDS_A.search(name): return "A"
 
-    # Tier B · POI de calidad · foto + (UNESCO o keyword secundaria)
+    # Tier B · foto + (UNESCO o keyword secundaria)
     if has_image and (unesco or KEYWORDS_B.search(name)): return "B"
 
     return "C"

@@ -62,21 +62,21 @@ export type WorldNodeCategory =
 export const TIER_SIZE: Record<WorldNodeTier, number> = {
   S: 44,
   A: 32,
-  B: 14,
+  B: 22,    // suficiente para pictograma + label permanente
   C: 6,
 };
 
 export const TIER_OPACITY: Record<WorldNodeTier, number> = {
   S: 1.0,
   A: 0.98,
-  B: 0.65,
+  B: 0.92,    // antes 0.65 · ahora full POI Apple-style
   C: 0.35,
 };
 
 export const TIER_MIN_ZOOM: Record<WorldNodeTier, number> = {
   S: 5,
   A: 10,
-  B: 14,
+  B: 12,    // antes 14 · ahora aparece en zoom de ciudad-distrito (Apple-style)
   C: 17,
 };
 
