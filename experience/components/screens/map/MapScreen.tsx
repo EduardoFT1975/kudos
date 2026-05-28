@@ -68,7 +68,58 @@ export function MapScreen() {
   const searchParams = useSearchParams();
   const focusId = searchParams?.get("focus") ?? null;
 
-  const allPois = React.useMemo(() => getAllPois(), []);
+  const corePois = React.useMemo(() => getAllPois(), []);
+  // V7 · POIs Wikidata cargados dinámicamente desde /data/wikidata/*.json
+  const [wikidataPois, setWikidataPois] = React.useState<ReadonlyArray<Poi>>([]);
+  const allPois = React.useMemo<ReadonlyArray<Poi>>(
+    () => [...corePois, ...wikidataPois],
+    [corePois, wikidataPois],
+  );
+
+  // Cargar POIs masivos de Wikidata · paralelo + tolerante a fallos
+  React.useEffect(() => {
+    const COUNTRIES = ["es", "it", "fr", "gr", "pt", "de", "gb", "jp", "eg", "mx", "pe", "tr", "us", "ma"];
+    (async () => {
+      const all: Poi[] = [];
+      await Promise.all(COUNTRIES.map(async (cc) => {
+        try {
+          const r = await fetch(`/data/wikidata/${cc}.json`);
+          if (!r.ok) return;
+          const data = await r.json();
+          const pois = (data?.pois ?? []) as Array<{
+            id: string; name: string; lat: number; lng: number;
+            country_code: string; category: string; type?: string;
+            image_url?: string; unesco?: boolean;
+          }>;
+          for (const p of pois) {
+            all.push({
+              id: p.id,
+              name: p.name,
+              country: p.country_code,
+              lat: p.lat,
+              lng: p.lng,
+              era: "today",
+              heroImage: p.image_url || "/pois/_default.jpg",
+              silhouette: "city" as const,
+              gradientFrom: "#6C3CFF",
+              gradientTo: "#0A0612",
+              categories: [(p.category || "monumento") as never],
+              short: p.type || "",
+              rating: p.unesco ? 9.5 : 8.5,
+              ratingCount: p.unesco ? 5000 : 200,
+              featuredCapsuleId: "",
+              capsuleIds: [],
+            });
+          }
+        } catch (e) {
+          console.warn(`[KUDOS-MAP] no se pudo cargar ${cc}.json:`, e);
+        }
+      }));
+      console.warn(`[KUDOS-MAP] Wikidata cargado · ${all.length} POIs extra de ${COUNTRIES.length} países`);
+      setWikidataPois(all);
+    })();
+  }, []);
+
   const { has, toggle } = useSaved();
   const geo = useGeolocation();
 
@@ -284,9 +335,44 @@ interface StageProps {
   onPick: (id: string) => void;
 }
 
+// V6.1 · Capas de mapa disponibles (todas GRATIS, sin API key)
+type MapLayerKey = "map" | "satellite" | "relief";
+const MAP_LAYERS: Record<MapLayerKey, { name: string; icon: string; url: string; subdomains?: string[]; attribution: string; maxZoom: number; darkFilter: boolean }> = {
+  map: {
+    name: "Mapa",
+    icon: "🗺",
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    subdomains: ["a", "b", "c"],
+    attribution: "© OpenStreetMap",
+    maxZoom: 19,
+    darkFilter: true,
+  },
+  satellite: {
+    name: "Satélite",
+    icon: "🛰",
+    // Esri World Imagery · gratis, sin key, satélite excelente cobertura global
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    attribution: "© Esri, Maxar, Earthstar Geographics",
+    maxZoom: 19,
+    darkFilter: false,  // satélite ya es oscuro/saturado, sin filtro
+  },
+  relief: {
+    name: "Relieve",
+    icon: "🏔",
+    // OpenTopoMap · gratis, mapa topográfico con curvas de nivel
+    url: "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+    subdomains: ["a", "b", "c"],
+    attribution: "© OpenStreetMap, SRTM | © OpenTopoMap",
+    maxZoom: 17,
+    darkFilter: false,
+  },
+};
+
+
 function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StageProps) {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const mapRef = React.useRef<any>(null);
+  const tileLayerRef = React.useRef<any>(null);
   const markersRef = React.useRef<Map<string, any>>(new Map());
   const LRef = React.useRef<any>(null);
   const userMarkerRef = React.useRef<any>(null);
@@ -297,6 +383,8 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
   const [mapReady, setMapReady] = React.useState(false);
   // V5.4 · zoom actual · dispara re-render de markers cuando el usuario hace zoom
   const [currentZoom, setCurrentZoom] = React.useState<number>(5);
+  // V6.1 · capa activa (mapa / satélite / relieve)
+  const [mapLayer, setMapLayer] = React.useState<MapLayerKey>("map");
   React.useEffect(() => { onPickRef.current = onPick; }, [onPick]);
 
   // Mount Leaflet once
@@ -327,10 +415,17 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
         scrollWheelZoom: true,
         preferCanvas: false,
       });
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 18,
-        subdomains: ["a", "b", "c"],
-      }).addTo(map);
+      // V6.1 · tile layer inicial según mapLayer state
+      const layerCfg = MAP_LAYERS[mapLayer];
+      const tile = L.tileLayer(layerCfg.url, {
+        maxZoom: layerCfg.maxZoom,
+        subdomains: layerCfg.subdomains,
+        attribution: layerCfg.attribution,
+      });
+      tile.addTo(map);
+      tileLayerRef.current = tile;
+      // Aplica/quita el dark filter al contenedor según capa
+      el.classList.toggle("kudos-tiles-dark", layerCfg.darkFilter);
       // Stash for global zoom button access
       (window as any).__kudosMap = map;
       mapRef.current = map;
@@ -370,6 +465,28 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // V6.1 · Cambiar tile layer cuando el usuario selecciona otra capa
+  React.useEffect(() => {
+    const L = LRef.current;
+    const map = mapRef.current;
+    const container = containerRef.current;
+    if (!L || !map || !container || !mapReady) return;
+    // Remove old tile layer
+    if (tileLayerRef.current) {
+      try { map.removeLayer(tileLayerRef.current); } catch {}
+    }
+    const cfg = MAP_LAYERS[mapLayer];
+    const tile = L.tileLayer(cfg.url, {
+      maxZoom: cfg.maxZoom,
+      subdomains: cfg.subdomains,
+      attribution: cfg.attribution,
+    });
+    tile.addTo(map);
+    tileLayerRef.current = tile;
+    container.classList.toggle("kudos-tiles-dark", cfg.darkFilter);
+    console.warn("[KUDOS-MAP] capa cambiada a:", cfg.name);
+  }, [mapLayer, mapReady]);
 
   // Render photo-bubble markers
   React.useEffect(() => {
@@ -515,6 +632,8 @@ const WORLD_ICON_IDS = new Set([
 function tierOf(p: Poi): "S" | "A" | "B" {
   if (WORLD_ICON_IDS.has(p.id)) return "S";
   if (p.id.startsWith("g-")) return "A";
+  // V7 · POIs Wikidata: UNESCO/patrimonio → A (rating>=9), resto → B
+  if (p.id.startsWith("wd-") && p.rating >= 9) return "A";
   return "B";
 }
 
@@ -575,7 +694,8 @@ function ensureLeafletCSS() {
     style.id = LEAFLET_STYLE_ID;
     style.textContent = `
       .leaflet-container { background:#1A1333 !important; outline:none; font-family:Poppins, system-ui, sans-serif; }
-      .leaflet-tile { filter: hue-rotate(220deg) saturate(0.62) brightness(0.55) contrast(1.05); }
+      /* V6.1 · dark filter solo aplica cuando la capa "Mapa" está activa */
+      .kudos-tiles-dark .leaflet-tile { filter: hue-rotate(220deg) saturate(0.62) brightness(0.55) contrast(1.05); }
       .kudos-bubble { background:transparent !important; border:none !important; }
       .kudos-user   { background:transparent !important; border:none !important; }
       .kudos-bubble-wrap { transition: transform 0.18s ease; }
