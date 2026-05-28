@@ -231,6 +231,13 @@ export function WorldEngine() {
   const [mapCenter, setMapCenter] = React.useState<{lat:number; lng:number} | null>(null);
   const [currentCity, setCurrentCity] = React.useState<string>("Explora el mundo");
   const blueDotRef = React.useRef<any>(null);
+  const [toast, setToast] = React.useState<string | null>(null);
+  const toastTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showToast = React.useCallback((msg: string, durationMs: number = 2200) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast(msg);
+    toastTimerRef.current = setTimeout(() => setToast(null), durationMs);
+  }, []);
 
   const geo = useGeolocation();
   const centeredOnUserRef = React.useRef(false);
@@ -1027,3 +1034,62 @@ const SHEET_BTN_PRIMARY: React.CSSProperties = {
   boxShadow: "0 2px 8px rgba(201,169,97,0.45)",
 };
 
+
+// ─── F4 · narrativa primero · estilos nuevos ─────────────────────────
+const SHEET_EVOCATIVE: React.CSSProperties = {
+  margin: "6px 0 18px",
+  fontSize: 15,
+  lineHeight: 1.4,
+  color: "#3d3833",
+  fontStyle: "italic" as const,
+  fontWeight: 400,
+  letterSpacing: "0.005em",
+};
+
+const SHEET_CAT_GLYPH: React.CSSProperties = {
+  position: "absolute",
+  top: 12, left: 14,
+  width: 30, height: 30,
+  borderRadius: "50%",
+  background: "rgba(255,255,255,0.92)",
+  color: "#5a544d",
+  fontSize: 14,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
+  backdropFilter: "blur(6px)",
+};
+
+const SHEET_TIER_S_DOT: React.CSSProperties = {
+  position: "absolute",
+  top: 14, right: 50,
+  width: 10, height: 10,
+  borderRadius: "50%",
+  background: "#C9A961",
+  boxShadow: "0 0 12px rgba(201,169,97,0.85), 0 0 4px rgba(201,169,97,1)",
+};
+
+const TOAST_WRAP: React.CSSProperties = {
+  position: "fixed",
+  bottom: 28,
+  left: "50%",
+  transform: "translateX(-50%)",
+  zIndex: 6000,
+  pointerEvents: "none",
+  animation: "kudos-toast-up 0.3s cubic-bezier(0.22,1,0.36,1) both",
+};
+
+const TOAST: React.CSSProperties = {
+  background: "rgba(20,18,16,0.92)",
+  color: "#f0ebe0",
+  padding: "11px 22px",
+  borderRadius: 999,
+  fontFamily: '"Poppins", system-ui, sans-serif',
+  fontSize: 13,
+  fontWeight: 500,
+  letterSpacing: "0.01em",
+  boxShadow: "0 6px 24px rgba(0,0,0,0.35)",
+  backdropFilter: "blur(8px)",
+  border: "1px solid rgba(255,255,255,0.08)",
+};
