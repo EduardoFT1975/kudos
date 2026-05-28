@@ -72,6 +72,20 @@ export function MapScreen() {
   const { has, toggle } = useSaved();
   const geo = useGeolocation();
 
+  // P32-DEBUG · siempre visible · expone también window.__KUDOS_DEBUG para inspección
+  React.useEffect(() => {
+    console.warn("[KUDOS-MAP-DEBUG] allPois.length =", allPois.length);
+    if (typeof window !== "undefined") {
+      // @ts-expect-error · global debug helper
+      window.__KUDOS_DEBUG = {
+        allPois_length: allPois.length,
+        first_3: allPois.slice(0, 3).map(p => ({ id: p.id, name: p.name, lat: p.lat, lng: p.lng })),
+        last_3: allPois.slice(-3).map(p => ({ id: p.id, name: p.name, lat: p.lat, lng: p.lng })),
+      };
+      console.warn("[KUDOS-MAP-DEBUG] window.__KUDOS_DEBUG poblado · escribe en consola: window.__KUDOS_DEBUG");
+    }
+  }, [allPois]);
+
   // Auto-solicitar geolocation al montar el mapa · sin esto el navegador
   // nunca pide permiso y geo.coords se queda null para siempre.
   React.useEffect(() => {
@@ -345,7 +359,7 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
     const map = mapRef.current;
     if (!L || !map) return;
     // P32-debug · log explícito · saber EXACTO cuántos POIs recibe el mapa
-    console.info("[KUDOS-MAP] render markers · pois=", pois.length, "· activeId=", activeId);
+    console.warn("[KUDOS-MAP] render markers · pois=", pois.length, "· activeId=", activeId);
     const next = new Map<string, Poi>(pois.map((p) => [p.id, p]));
     // Remove stale
     markersRef.current.forEach((m, id) => {
@@ -390,7 +404,7 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
         skipped++;
       }
     });
-    console.info("[KUDOS-MAP] markers OK · added=", added, "· skipped=", skipped, "· total=", markersRef.current.size);
+    console.warn("[KUDOS-MAP] markers OK · added=", added, "· skipped=", skipped, "· total=", markersRef.current.size);
   }, [pois, activeId]);
 
   // Center on active POI
