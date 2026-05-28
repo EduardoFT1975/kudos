@@ -73,15 +73,19 @@ export const TIER_OPACITY: Record<WorldNodeTier, number> = {
 // Fog of discovery · zoom mínimo por tier
 // "El mundo NO se muestra completamente. SE DESCUBRE."
 export const TIER_MIN_ZOOM: Record<WorldNodeTier, number> = {
-  S: 3,    // visible desde nivel continental (mundo elegante)
+  S: 3,    // visible desde nivel continental (mundo elegante · sólo iconos)
   A: 7,    // visible desde nivel país/región
-  B: 11,   // visible sólo en zoom de ciudad
-  C: 14,   // visible sólo en zoom de barrio
+  B: 12,   // visible sólo en zoom de ciudad (NO antes · respira)
+  C: 15,   // visible sólo en zoom de calle
 };
 
-// Cap absoluto · no renderizar más de N markers a la vez
-// (Leaflet se ahoga con > 1500)
-export const MAX_NODES_RENDERED = 1200;
+// Cap absoluto · "densidad inteligente · el mapa debe respirar"
+// Aunque haya 50k POIs en bbox, NUNCA renderizamos más de N.
+// Prioridad: Tier S > A > B > C, después cercanía al centro.
+export const MAX_NODES_RENDERED = 600;
+
+// Margen extra del viewport para precarga · evita popping al hacer pan
+export const VIEWPORT_PADDING_RATIO = 0.3;  // 30% extra alrededor
 
 
 // ─── COLOR POR CATEGORÍA ───────────────────────────────────────────────────

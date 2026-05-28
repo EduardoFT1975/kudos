@@ -1,25 +1,18 @@
 "use client";
 
 /**
- * KUDOS WORLD ENGINE · componente principal del mapa /world
+ * KUDOS WORLD ENGINE · /world
  *
- * Filosofía (brand book ADN 1000M):
- *   "KUDOS NO utiliza un mapa. KUDOS CONVIERTE EL MUNDO EN INTERFAZ."
- *
- * Características:
- *   - World Surface · tile Carto Dark cinematográfico
- *   - Paleta limitada 5-6 colores
- *   - World Nodes Tier S/A/B/C visualmente diferenciados
- *   - Fog of discovery · zoom revela densidad progresivamente
- *   - Respiración sutil (Tier S/A)
- *   - Carga dinámica · core POIs + Wikidata 43k
- *   - NO labels saturando · sólo al hover
- *
- * Esta es la pantalla nueva. /mapa queda como demo.
+ * Refactor v2 · escalable a millones de POIs:
+ *   - allNodesRef (ref) · NO entra en React state · evita re-render masivo
+ *   - viewport culling · sólo iteramos POIs dentro del bbox visible
+ *   - cap MAX_NODES_RENDERED · prioridad S > A > B > C
+ *   - debounce moveend/zoomend para no spammear
+ *   - geolocation: trigger combinado mapReady + coords
  */
 
 import * as React from "react";
-import { getAllPois, type Poi } from "@/lib/kudos/store";
+import { getAllPois } from "@/lib/kudos/store";
 import { useGeolocation } from "@/lib/geo/useGeolocation";
 import {
   WORLD_COLORS,
@@ -29,14 +22,13 @@ import {
   WORLD_TILE_MAX_ZOOM,
   WORLD_TILE_FILTER,
   TIER_MIN_ZOOM,
+  MAX_NODES_RENDERED,
   WorldNodeTier,
   WorldNodeCategory,
   inferCategory,
 } from "./world-tokens";
 import { buildWorldNodeHTML, WORLD_NODE_CSS } from "./WorldNode";
 
-
-// ─── Datos · POI normalizado para World Engine ─────────────────────────────
 
 interface WorldPoi {
   id: string;
@@ -48,7 +40,6 @@ interface WorldPoi {
 }
 
 
-// IDs hardcodeados de iconos del planeta · Tier S garantizado
 const LEGENDARY_IDS = new Set([
   "rome", "machu", "petra", "athens", "granada", "istanbul",
   "g-eiffel", "g-taj", "g-greatwall", "g-giza", "g-chichen",
@@ -58,16 +49,15 @@ const LEGENDARY_IDS = new Set([
   "g-cordoba", "g-bluemosque", "g-rapa",
 ]);
 
+const TIER_PRIORITY: Record<WorldNodeTier, number> = { S: 0, A: 1, B: 2, C: 3 };
+
 function tierForPoi(p: { id: string; rating?: number; unesco?: boolean }): WorldNodeTier {
   if (LEGENDARY_IDS.has(p.id)) return "S";
   if (p.id.startsWith("g-")) return "A";
   if (p.unesco || (p.rating ?? 0) >= 9.3) return "A";
-  if (p.id.startsWith("wd-")) return "B";
   return "B";
 }
 
-
-// ─── Componente ────────────────────────────────────────────────────────────
 
 export function WorldEngine() {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -75,38 +65,22 @@ export function WorldEngine() {
   const LRef = React.useRef<any>(null);
   const markersRef = React.useRef<Map<string, any>>(new Map());
 
-  const [allNodes, setAllNodes] = React.useState<WorldPoi[]>([]);
+  // ALL nodes viven en ref · NO en React state (evita re-render con 43k)
+  const allNodesRef = React.useRef<WorldPoi[]>([]);
+  // Nodos visibles · sólo subset que cabe en pantalla
+  const [renderTick, setRenderTick] = React.useState(0);
+  const [totalLoaded, setTotalLoaded] = React.useState(0);
+  const [mapReady, setMapReady] = React.useState(false);
   const [zoom, setZoom] = React.useState(3);
   const [activeId, setActiveId] = React.useState<string | null>(null);
-  const [center, setCenter] = React.useState<{ lat: number; lng: number }>({ lat: 30, lng: 10 });
+
   const geo = useGeolocation();
   const centeredOnUserRef = React.useRef(false);
+  const moveTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Auto-request geolocation al montar
+  // ── Cargar core POIs sincronos ──
   React.useEffect(() => {
-    if (!geo.coords && geo.status !== "asking" && geo.status !== "denied") {
-      geo.request();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Cuando llegan las coords + el map está listo, centrar UNA VEZ con zoom cinematográfico
-  React.useEffect(() => {
-    if (centeredOnUserRef.current || !geo.coords) return;
-    const map = mapRef.current;
-    if (!map) return;
-    try {
-      map.flyTo([geo.coords.lat, geo.coords.lng], 9, {
-        duration: 2.2,
-        easeLinearity: 0.18,
-      });
-      centeredOnUserRef.current = true;
-    } catch {}
-  }, [geo.coords]);
-
-  // ── Cargar POIs core + Wikidata dinámicamente ──
-  React.useEffect(() => {
-    const coreNodes: WorldPoi[] = getAllPois().map((p) => ({
+    const core: WorldPoi[] = getAllPois().map((p) => ({
       id: p.id,
       name: p.name,
       lat: p.lat,
@@ -114,13 +88,15 @@ export function WorldEngine() {
       tier: tierForPoi({ id: p.id, rating: p.rating }),
       category: inferCategory(p.categories?.[0]),
     }));
-    setAllNodes(coreNodes);
+    allNodesRef.current = core;
+    setTotalLoaded(core.length);
+    setRenderTick((t) => t + 1);
 
-    // Wikidata · async, no bloquea
+    // Wikidata · async, carga en chunks por país sin bloquear
     const COUNTRIES = ["es", "it", "fr", "gr", "pt", "de", "gb", "jp"];
-    (async () => {
-      const wd: WorldPoi[] = [];
-      await Promise.all(COUNTRIES.map(async (cc) => {
+    COUNTRIES.forEach((cc, idx) => {
+      // Stagger 200ms entre países · UI nunca bloquea
+      setTimeout(async () => {
         try {
           const r = await fetch(`/data/wikidata/${cc}.json`);
           if (!r.ok) return;
@@ -129,26 +105,27 @@ export function WorldEngine() {
             id: string; name: string; lat: number; lng: number;
             category: string; unesco?: boolean;
           }>;
-          for (const p of items) {
-            wd.push({
-              id: p.id,
-              name: p.name,
-              lat: p.lat,
-              lng: p.lng,
-              tier: tierForPoi({ id: p.id, unesco: p.unesco }),
-              category: inferCategory(p.category),
-            });
-          }
+          const chunk: WorldPoi[] = items.map((p) => ({
+            id: p.id,
+            name: p.name,
+            lat: p.lat,
+            lng: p.lng,
+            tier: tierForPoi({ id: p.id, unesco: p.unesco }),
+            category: inferCategory(p.category),
+          }));
+          // Append al ref · NO setState con todo el array
+          allNodesRef.current = allNodesRef.current.concat(chunk);
+          setTotalLoaded(allNodesRef.current.length);
+          setRenderTick((t) => t + 1);
+          console.warn(`[WORLD] +${chunk.length} ${cc} · total ${allNodesRef.current.length}`);
         } catch (e) {
-          console.warn(`[WORLD] no se pudo cargar ${cc}.json`);
+          console.warn(`[WORLD] no se pudo cargar ${cc}.json`, e);
         }
-      }));
-      console.warn(`[WORLD] Wikidata cargado · ${wd.length} POIs extra`);
-      setAllNodes((prev) => [...prev, ...wd]);
-    })();
+      }, idx * 200);
+    });
   }, []);
 
-  // ── Mount Leaflet ──
+  // ── Mount Leaflet UNA VEZ ──
   React.useEffect(() => {
     let cancelled = false;
     let createdMap: any = null;
@@ -160,8 +137,9 @@ export function WorldEngine() {
       const el = containerRef.current as any;
       if (el._leaflet_id != null) { try { delete el._leaflet_id; } catch {} }
       while (el.firstChild) el.removeChild(el.firstChild);
+
       const map = L.map(el, {
-        center: [center.lat, center.lng],
+        center: [30, 10],
         zoom: 3,
         minZoom: 2,
         maxZoom: WORLD_TILE_MAX_ZOOM,
@@ -170,6 +148,8 @@ export function WorldEngine() {
         worldCopyJump: true,
         scrollWheelZoom: true,
         preferCanvas: false,
+        inertia: true,
+        inertiaDeceleration: 2200,
       });
       L.tileLayer(WORLD_TILE_URL, {
         subdomains: WORLD_TILE_SUBDOMAINS,
@@ -181,12 +161,25 @@ export function WorldEngine() {
       LRef.current = L;
       createdMap = map;
       setZoom(map.getZoom());
-      map.on("zoomend", () => setZoom(map.getZoom()));
+
+      // Debounced re-render on pan/zoom
+      const onMove = () => {
+        if (moveTimeoutRef.current) clearTimeout(moveTimeoutRef.current);
+        moveTimeoutRef.current = setTimeout(() => {
+          setZoom(map.getZoom());
+          setRenderTick((t) => t + 1);
+        }, 200);
+      };
+      map.on("moveend", onMove);
+      map.on("zoomend", onMove);
+
+      setMapReady(true);
       console.warn("[WORLD] Leaflet listo");
       setTimeout(() => { try { map.invalidateSize(); } catch {} }, 100);
     })();
     return () => {
       cancelled = true;
+      if (moveTimeoutRef.current) clearTimeout(moveTimeoutRef.current);
       if (createdMap) { try { createdMap.remove(); } catch {} }
       mapRef.current = null;
       markersRef.current.clear();
@@ -199,16 +192,75 @@ export function WorldEngine() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Renderizar nodos filtrados por fog of discovery (zoom) ──
+  // ── Auto-geolocation request al montar ──
+  React.useEffect(() => {
+    if (!geo.coords && geo.status !== "asking" && geo.status !== "denied") {
+      geo.request();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Centrar en usuario UNA VEZ · trigger combinado coords + map listo ──
+  React.useEffect(() => {
+    if (centeredOnUserRef.current) return;
+    if (!geo.coords || !mapReady) return;
+    const map = mapRef.current;
+    if (!map) return;
+    try {
+      map.flyTo([geo.coords.lat, geo.coords.lng], 9, {
+        duration: 2.2,
+        easeLinearity: 0.18,
+      });
+      centeredOnUserRef.current = true;
+      console.warn("[WORLD] centrado en usuario:", geo.coords);
+    } catch (e) {
+      console.warn("[WORLD] flyTo falló", e);
+    }
+  }, [geo.coords, mapReady]);
+
+  // ── VIEWPORT CULLING · render sólo nodos visibles + cap absoluto ──
   React.useEffect(() => {
     const L = LRef.current;
     const map = mapRef.current;
-    if (!L || !map) return;
+    if (!L || !map || !mapReady) return;
 
-    const visible = allNodes.filter((n) => zoom >= TIER_MIN_ZOOM[n.tier]);
+    const bounds = map.getBounds();
+    const south = bounds.getSouth();
+    const north = bounds.getNorth();
+    const west = bounds.getWest();
+    const east = bounds.getEast();
+    const center = map.getCenter();
+
+    // 1) Filtrar por tier-zoom + bbox
+    const candidates: WorldPoi[] = [];
+    const all = allNodesRef.current;
+    for (let i = 0; i < all.length; i++) {
+      const n = all[i];
+      if (zoom < TIER_MIN_ZOOM[n.tier]) continue;
+      if (n.lat < south || n.lat > north) continue;
+      if (n.lng < west || n.lng > east) continue;
+      candidates.push(n);
+    }
+
+    // 2) Ordenar por prioridad tier + cercanía al centro
+    candidates.sort((a, b) => {
+      const pa = TIER_PRIORITY[a.tier];
+      const pb = TIER_PRIORITY[b.tier];
+      if (pa !== pb) return pa - pb;
+      const da = (a.lat - center.lat) ** 2 + (a.lng - center.lng) ** 2;
+      const db = (b.lat - center.lat) ** 2 + (b.lng - center.lng) ** 2;
+      return da - db;
+    });
+
+    // 3) Cap absoluto
+    const visible = candidates.slice(0, MAX_NODES_RENDERED);
     const next = new Map<string, WorldPoi>(visible.map((n) => [n.id, n]));
 
-    // Remove stale
+    console.warn(
+      `[WORLD] viewport · candidatos=${candidates.length} · render=${visible.length} · zoom=${zoom}`
+    );
+
+    // 4) Remove stale
     markersRef.current.forEach((m, id) => {
       if (!next.has(id)) {
         try { m.remove(); } catch {}
@@ -216,14 +268,13 @@ export function WorldEngine() {
       }
     });
 
-    // Add/update
-    let added = 0;
+    // 5) Add/update visibles
     next.forEach((n, id) => {
-      if (typeof n.lat !== "number" || typeof n.lng !== "number" || isNaN(n.lat) || isNaN(n.lng)) return;
+      if (isNaN(n.lat) || isNaN(n.lng)) return;
       try {
         const isActive = id === activeId;
         const html = buildWorldNodeHTML({ ...n, isActive });
-        const size = n.tier === "S" ? 56 : n.tier === "A" ? 32 : n.tier === "B" ? 18 : 8;
+        const size = n.tier === "S" ? 56 : n.tier === "A" ? 32 : n.tier === "B" ? 14 : 6;
         const icon = L.divIcon({
           className: "kudos-world-node",
           html: `<div data-name="${(n.name || "").replace(/"/g, "&quot;")}" style="position:relative">${html}</div>`,
@@ -233,28 +284,20 @@ export function WorldEngine() {
         const existing = markersRef.current.get(id);
         if (existing) {
           existing.setIcon(icon);
-          existing.setLatLng([n.lat, n.lng]);
         } else {
           const m = L.marker([n.lat, n.lng], { icon }).addTo(map);
           m.on("click", () => setActiveId(id));
           markersRef.current.set(id, m);
-          added++;
         }
       } catch (err) {
-        console.warn("[WORLD] skip nodo con error:", id, err);
+        // skip silencioso
       }
     });
+  }, [renderTick, zoom, mapReady, activeId]);
 
-    console.warn(
-      `[WORLD] zoom=${zoom} · visibles=${visible.length} · added=${added} · total=${markersRef.current.size}`
-    );
-  }, [allNodes, zoom, activeId]);
-
-  // ── UI ──
   return (
     <div style={ROOT}>
-      <div ref={containerRef} style={STAGE} />
-      {/* HUD minimalista superior */}
+      <div ref={containerRef} style={STAGE} className="kudos-world-stage" />
       <div style={HUD}>
         <div style={HUD_BRAND}>
           <span style={HUD_BRAND_K}>KUDOS</span>
@@ -263,11 +306,9 @@ export function WorldEngine() {
         </div>
         <div style={HUD_TAGLINE}>Mérito · Descubrimiento · Memoria</div>
       </div>
-      {/* Contador discreto · sensación de profundidad */}
       <div style={HUD_COUNTER}>
-        {allNodes.length.toLocaleString("es-ES")} nodos en el grafo · zoom {zoom}
+        {totalLoaded.toLocaleString("es-ES")} nodos · {markersRef.current.size} visibles · zoom {zoom}
       </div>
-      {/* Control de zoom propio · minimal */}
       <div style={ZOOM_RAIL}>
         <button style={ZOOM_BTN} onClick={() => mapRef.current?.zoomIn()} aria-label="Acercar">+</button>
         <button style={ZOOM_BTN} onClick={() => mapRef.current?.zoomOut()} aria-label="Alejar">−</button>
@@ -276,8 +317,6 @@ export function WorldEngine() {
   );
 }
 
-
-// ─── CSS global del world surface ──────────────────────────────────────────
 
 function ensureCss() {
   if (typeof document === "undefined") return;
@@ -297,9 +336,7 @@ function ensureCss() {
         font-family: "Poppins", system-ui, sans-serif;
         outline: none;
       }
-      .kudos-world-stage .leaflet-tile {
-        filter: ${WORLD_TILE_FILTER};
-      }
+      .kudos-world-stage .leaflet-tile { filter: ${WORLD_TILE_FILTER}; }
       .kudos-world-node { background: transparent !important; border: none !important; }
       ${WORLD_NODE_CSS}
     `;
@@ -307,8 +344,6 @@ function ensureCss() {
   }
 }
 
-
-// ─── Estilos ───────────────────────────────────────────────────────────────
 
 const ROOT: React.CSSProperties = {
   position: "fixed",
