@@ -1,0 +1,17 @@
+# Cache de fotos descargadas (se regeneran)
+cache/
+
+# Salida generada (los MP4 son grandes; conservas solo lo que decidas en experience/public/capsules/)
+output/
+!output/demo/
+!output/demo/coliseo_demo_sandbox.mp4
+
+# Python
+__pycache__/
+*.pyc
+
+# Música opcional (privada de cada usuario)
+assets/music/
+
+# Variables locales
+.env

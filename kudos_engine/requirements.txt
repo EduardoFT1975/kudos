@@ -1,0 +1,17 @@
+# KUDOS Engine — dependencias Python
+# Instalar con:  pip install -r kudos_engine/requirements.txt
+
+# Núcleo
+requests>=2.31.0          # HTTP para Wikimedia y APIs
+pyyaml>=6.0               # Lectura de configuración tier
+Pillow>=10.0.0            # Procesamiento de imágenes (resize, crop)
+
+# Voz gratis — Edge-TTS de Microsoft
+edge-tts>=6.1.0           # Narración en español, infinita, gratis
+
+# Anthropic Claude (guion)
+anthropic>=0.40.0         # Cliente oficial Claude
+
+# OPCIONALES (sólo si quieres usar motores premium)
+# elevenlabs>=1.0.0       # Voces ElevenLabs (no necesario para el modo gratis)
+# openai>=1.50.0          # Cliente Sora (no necesario para el modo gratis)
