@@ -291,6 +291,10 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
   const LRef = React.useRef<any>(null);
   const userMarkerRef = React.useRef<any>(null);
   const onPickRef = React.useRef(onPick);
+  // P32-fix · state que se settea cuando Leaflet termina de cargar. Lo usamos
+  // como dep del useEffect de markers para que se dispare cuando Leaflet
+  // está listo (antes hacía early return y nunca se re-ejecutaba).
+  const [mapReady, setMapReady] = React.useState(false);
   React.useEffect(() => { onPickRef.current = onPick; }, [onPick]);
 
   // Mount Leaflet once
@@ -330,6 +334,11 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
       mapRef.current = map;
       createdMap = map;
       LRef.current = L;
+      // P32-fix · disparar re-render del useEffect de markers · sin esto
+      // los markers nunca se pintaban porque el effect [pois, activeId] se
+      // ejecutaba antes que LRef estuviera disponible y hacía early return.
+      setMapReady(true);
+      console.warn("[KUDOS-MAP] Leaflet listo · setMapReady(true) · pois pendientes de pintar:", pois.length);
       setTimeout(() => { try { map.invalidateSize(); } catch {} }, 100);
       setTimeout(() => { try { map.invalidateSize(); } catch {} }, 400);
     })();
@@ -405,7 +414,7 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
       }
     });
     console.warn("[KUDOS-MAP] markers OK · added=", added, "· skipped=", skipped, "· total=", markersRef.current.size);
-  }, [pois, activeId]);
+  }, [pois, activeId, mapReady]);
 
   // Center on active POI
   React.useEffect(() => {
