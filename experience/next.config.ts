@@ -38,6 +38,37 @@ const nextConfig: NextConfig = {
       { source: "/api/:path*", destination: `${DJANGO_BACKEND}/api/:path*/` },
     ];
   },
+
+  // CSP explícita y permisiva. Render/Brave bloqueaban 'eval' por defecto
+  // → Leaflet no podía montar los markers del mapa (silencioso, sin log)
+  // y el resultado era "mapa cargado pero sin POIs". Esta cabecera la
+  // sobreescribe permitiendo unsafe-eval + unsafe-inline + CDNs externos.
+  // P32-fix-csp · 28 may 2026.
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://plausible.io",
+              "style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com",
+              "font-src 'self' data: https://fonts.gstatic.com",
+              "img-src 'self' data: blob: https:",
+              "media-src 'self' blob: https:",
+              "connect-src 'self' https: wss: blob:",
+              "frame-src 'self' https:",
+              "worker-src 'self' blob:",
+              "object-src 'none'",
+              "base-uri 'self'",
+            ].join("; "),
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -119,19 +119,20 @@ COUNTRY_BBOX = {
 }
 
 
-def _build_query(bbox: tuple[float, float, float, float], max_results: int = 5000) -> str:
-    """Construye una query Overpass QL para descargar POIs interesantes en bbox."""
+def _build_query_for_tag(bbox: tuple[float, float, float, float],
+                          tag_key: str, values: list[str],
+                          max_results: int = 2000) -> str:
+    """Construye una query Overpass QL pequeña para UN solo tag_key."""
     s, w, n, e = bbox
     bbox_str = f"({s},{w},{n},{e})"
-    filters = []
-    for tag_key, values in INTERESTING_TAGS.items():
-        for v in values:
-            # Solo nodos/ways con nombre — descartamos los anónimos
-            filters.append(f'node["{tag_key}"="{v}"]["name"]{bbox_str};')
-            filters.append(f'way["{tag_key}"="{v}"]["name"]{bbox_str};')
-    body = "\n  ".join(filters)
+    parts = []
+    for v in values:
+        # Solo nodos/ways con nombre — descartamos los anónimos
+        parts.append(f'node["{tag_key}"="{v}"]["name"]{bbox_str};')
+        parts.append(f'way["{tag_key}"="{v}"]["name"]{bbox_str};')
+    body = "\n  ".join(parts)
     return (
-        f'[out:json][timeout:120];\n'
+        f'[out:json][timeout:180];\n'
         f'(\n  {body}\n);\n'
         f'out center {max_results};\n'
     )
@@ -139,15 +140,27 @@ def _build_query(bbox: tuple[float, float, float, float], max_results: int = 500
 
 def _run_overpass(query: str) -> Optional[dict]:
     """Ejecuta la query contra el primer endpoint que responda."""
+    last_err = None
     for url in OVERPASS_URLS:
         try:
-            r = requests.post(url, data={"data": query}, headers=HEADERS, timeout=180)
+            print(f"[overpass] POST {url} (query {len(query)} bytes)...")
+            r = requests.post(url, data={"data": query}, headers=HEADERS, timeout=300)
+            print(f"[overpass]   → HTTP {r.status_code}, {len(r.content)} bytes")
             if r.status_code == 200:
-                return r.json()
-            print(f"[overpass] {url} → HTTP {r.status_code}")
+                try:
+                    data = r.json()
+                    return data
+                except Exception as e:
+                    print(f"[overpass]   → JSON parse error: {e}")
+                    last_err = e
+            else:
+                print(f"[overpass]   → body: {r.text[:300]}")
+                last_err = RuntimeError(f"HTTP {r.status_code}")
         except Exception as e:
-            print(f"[overpass] {url} → {type(e).__name__}: {e}")
-        time.sleep(2)
+            print(f"[overpass]   → {type(e).__name__}: {e}")
+            last_err = e
+        time.sleep(3)
+    print(f"[overpass] TODOS los endpoints fallaron · último error: {last_err}")
     return None
 
 
@@ -204,23 +217,34 @@ def _normalize(elem: dict, country_code: str) -> Optional[dict]:
 
 
 def import_country(country_code: str, max_results: int = 5000) -> Path:
-    """Descarga, normaliza y guarda los POIs de un país."""
+    """
+    Descarga, normaliza y guarda los POIs de un país.
+    Hace UNA query por cada tag_key (tourism, historic, amenity, leisure, natural,
+    place) para evitar el timeout que ocurría al pedir todo de golpe.
+    """
     bbox = COUNTRY_BBOX.get(country_code.upper())
     if not bbox:
         raise ValueError(f"País no soportado: {country_code}. Añádelo a COUNTRY_BBOX.")
 
-    print(f"[osm] descargando {country_code} bbox={bbox} max={max_results}...")
-    query = _build_query(bbox, max_results)
-    data = _run_overpass(query)
-    if not data:
-        raise RuntimeError("Overpass no respondió en ningún endpoint")
+    print(f"[osm] === {country_code} === bbox={bbox} max/tag={max_results}")
+    all_elements: list[dict] = []
+    for tag_key, values in INTERESTING_TAGS.items():
+        print(f"[osm] tag '{tag_key}' ({len(values)} valores)...")
+        query = _build_query_for_tag(bbox, tag_key, values, max_results)
+        data = _run_overpass(query)
+        if not data:
+            print(f"[osm] tag '{tag_key}' FALLÓ · sigo con el siguiente")
+            continue
+        elems = data.get("elements", [])
+        print(f"[osm] tag '{tag_key}' → {len(elems)} elementos")
+        all_elements.extend(elems)
+        time.sleep(2)  # cortesía Overpass
 
-    elements = data.get("elements", [])
-    print(f"[osm] {len(elements)} elementos crudos")
+    print(f"[osm] TOTAL elementos crudos: {len(all_elements)}")
 
     pois = []
     seen_ids = set()
-    for el in elements:
+    for el in all_elements:
         p = _normalize(el, country_code.upper())
         if p and p["id"] not in seen_ids:
             seen_ids.add(p["id"])

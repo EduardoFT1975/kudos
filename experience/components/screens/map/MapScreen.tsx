@@ -344,6 +344,8 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
     const L = LRef.current;
     const map = mapRef.current;
     if (!L || !map) return;
+    // P32-debug · log explícito · saber EXACTO cuántos POIs recibe el mapa
+    console.info("[KUDOS-MAP] render markers · pois=", pois.length, "· activeId=", activeId);
     const next = new Map<string, Poi>(pois.map((p) => [p.id, p]));
     // Remove stale
     markersRef.current.forEach((m, id) => {
@@ -353,26 +355,42 @@ function LeafletStage({ pois, activeId, centerOn, userCoords, onPick }: StagePro
       }
     });
     // Add/update
+    let added = 0, skipped = 0;
     next.forEach((p, id) => {
-      const isActive = id === activeId;
-      const size = isActive ? 92 : 56;
-      const html = buildBubbleHTML(p, isActive);
-      const icon = L.divIcon({
-        className: "kudos-bubble",
-        html,
-        iconSize: [size, size + 28],
-        iconAnchor: [size / 2, size / 2 + 14],
-        popupAnchor: [0, -size / 2],
-      });
-      const existing = markersRef.current.get(id);
-      if (existing) {
-        try { existing.setIcon(icon); existing.setLatLng([p.lat, p.lng]); } catch {}
-      } else {
-        const m = L.marker([p.lat, p.lng], { icon }).addTo(map);
-        m.on("click", () => onPickRef.current(id));
-        markersRef.current.set(id, m);
+      // Skip POIs con coords inválidas (causa de crash silencioso al render)
+      if (typeof p.lat !== "number" || typeof p.lng !== "number" ||
+          isNaN(p.lat) || isNaN(p.lng)) {
+        console.warn("[KUDOS-MAP] skip POI con coords inválidas:", id, p.lat, p.lng);
+        skipped++;
+        return;
+      }
+      try {
+        const isActive = id === activeId;
+        const size = isActive ? 92 : 56;
+        const html = buildBubbleHTML(p, isActive);
+        const icon = L.divIcon({
+          className: "kudos-bubble",
+          html,
+          iconSize: [size, size + 28],
+          iconAnchor: [size / 2, size / 2 + 14],
+          popupAnchor: [0, -size / 2],
+        });
+        const existing = markersRef.current.get(id);
+        if (existing) {
+          existing.setIcon(icon);
+          existing.setLatLng([p.lat, p.lng]);
+        } else {
+          const m = L.marker([p.lat, p.lng], { icon }).addTo(map);
+          m.on("click", () => onPickRef.current(id));
+          markersRef.current.set(id, m);
+          added++;
+        }
+      } catch (err) {
+        console.warn("[KUDOS-MAP] skip POI con error:", id, err);
+        skipped++;
       }
     });
+    console.info("[KUDOS-MAP] markers OK · added=", added, "· skipped=", skipped, "· total=", markersRef.current.size);
   }, [pois, activeId]);
 
   // Center on active POI
