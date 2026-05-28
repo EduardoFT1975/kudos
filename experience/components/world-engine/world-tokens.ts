@@ -94,6 +94,20 @@ export const MAX_NODES_RENDERED = 120;
 export const VIEWPORT_PADDING_RATIO = 0.25;
 
 
+// ─── TAMAÑO DEL CHIP ESCALA CON EL ZOOM ───────────────────────────────────
+// Apple-style · cuanto más cerca estás, más grande se ve el POI porque
+// no compite con otros (la densidad ya está acotada por maxNodesAtZoom).
+// baseSize × factor = size final.
+export function sizeFactorForZoom(zoom: number): number {
+  if (zoom <= 7)  return 0.78;
+  if (zoom <= 9)  return 0.90;
+  if (zoom <= 11) return 1.00;
+  if (zoom <= 13) return 1.15;
+  if (zoom <= 15) return 1.30;
+  return 1.45;                  // zoom 16-19 · vista calle/edificio
+}
+
+
 // ─── COLOR POR CATEGORÍA ──────────────────────────────────────────────────
 
 export function nodeColorFor(category: WorldNodeCategory, tier: WorldNodeTier): string {

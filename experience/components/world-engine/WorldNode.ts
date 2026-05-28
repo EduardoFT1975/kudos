@@ -1,11 +1,11 @@
 /**
  * KUDOS WORLD ENGINE · WorldNode SVG builder
  *
- * EL BORDE ES EL LENGUAJE.
- * - Si hay imagen real del POI → círculo con imagen + border color categoría
- * - Si no hay imagen          → círculo color plano + border categoría
- * Tier S lleva además anillo dorado externo con halo respirando.
- * Pictogramas eliminados (eran redundantes con la imagen real).
+ * EL BORDE ES EL LENGUAJE · double-ring estilo póker chip:
+ *   - Anillo blanco interno · aísla la foto del fondo del mapa
+ *   - Anillo color categoría externo · 3.5-4px · DESTACA
+ * Tier S lleva además halo dorado externo respirando.
+ * El tamaño llega como sizeOverride (escalado por zoom desde WorldEngine).
  */
 
 import {
@@ -29,65 +29,70 @@ export interface WorldNodeInput {
   image?: string;
   isActive?: boolean;
   showLabel?: boolean;
+  sizeOverride?: number;       // si llega, sobrescribe TIER_SIZE
 }
 
 
 /**
- * Construye un chip · imagen real (si hay) o círculo color plano.
- * El BORDE comunica la categoría.
+ * Construye un chip · imagen real o color plano · double-ring para que el color CANTE.
  */
 export function buildWorldNodeHTML(node: WorldNodeInput): string {
-  const { id, name, tier, category, image, isActive, showLabel } = node;
+  const { id, name, tier, category, image, isActive, showLabel, sizeOverride } = node;
   const color = nodeColorFor(category, tier);
-  const baseSize = TIER_SIZE[tier];
-  const size = isActive ? Math.round(baseSize * 1.4) : baseSize;
+  const baseSize = sizeOverride ?? TIER_SIZE[tier];
+  const size = isActive ? Math.round(baseSize * 1.35) : baseSize;
   const opacity = isActive ? 1.0 : TIER_OPACITY[tier];
   const safeName = escapeXml(name);
   const labelClass = showLabel ? "with-label" : "";
   const safeImage = image ? escapeXml(image) : "";
 
-  // Wikimedia FilePath → redimensión a 120px (rápida)
+  // Wikimedia FilePath redimensionado para no descargar 5MB por POI
   const hasImage = !!safeImage && tier !== "B" && tier !== "C";
   const imgUrl = hasImage && safeImage.includes("Special:FilePath")
-    ? `${safeImage}?width=120`
+    ? `${safeImage}?width=140`
     : safeImage;
-
   const innerImg = hasImage
     ? `<img src="${imgUrl}" alt="${safeName}" loading="lazy"
             onerror="this.parentElement.classList.add('img-failed')"
             style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;" />`
     : "";
 
-  // Tier S · anillo dorado externo + imagen o color plano · halo
+  // Tier S · DOBLE anillo dorado + halo · double-ring (gold outer + white inner)
   if (tier === "S") {
     return `
       <div class="kudos-chip kudos-chip-s ${labelClass}" data-id="${id}" data-tier="S" data-name="${safeName}"
            style="width:${size}px;height:${size}px;opacity:${opacity};">
         <div class="kudos-chip-halo"></div>
-        <div class="kudos-chip-body"
-             style="background:${hasImage ? '#fff' : color};
-                    border:2.5px solid ${WORLD_COLORS.legendary};
-                    box-shadow:0 2px 10px rgba(201,169,97,0.45), 0 1px 3px rgba(0,0,0,0.15);">
-          ${innerImg}
+        <div class="kudos-chip-outer-ring"
+             style="background:${WORLD_COLORS.legendary};
+                    box-shadow:0 2px 12px rgba(201,169,97,0.55), 0 1px 3px rgba(0,0,0,0.18);">
+          <div class="kudos-chip-inner-ring" style="background:#ffffff;">
+            <div class="kudos-chip-body" style="background:${hasImage ? '#fff' : color};">
+              ${innerImg}
+            </div>
+          </div>
         </div>
       </div>`;
   }
 
-  // Tier A · imagen o color plano + border color categoría
+  // Tier A · double-ring · outer color categoría + inner blanco
   if (tier === "A") {
     return `
       <div class="kudos-chip kudos-chip-a ${labelClass}" data-id="${id}" data-tier="A" data-name="${safeName}"
            style="width:${size}px;height:${size}px;opacity:${opacity};">
-        <div class="kudos-chip-body"
-             style="background:${hasImage ? '#fff' : color};
-                    border:2.2px solid ${color};
-                    box-shadow:0 1px 6px rgba(0,0,0,0.18);">
-          ${innerImg}
+        <div class="kudos-chip-outer-ring"
+             style="background:${color};
+                    box-shadow:0 1px 6px rgba(0,0,0,0.22);">
+          <div class="kudos-chip-inner-ring" style="background:#ffffff;">
+            <div class="kudos-chip-body" style="background:${hasImage ? '#fff' : color};">
+              ${innerImg}
+            </div>
+          </div>
         </div>
       </div>`;
   }
 
-  // Tier B · dot color · sin imagen (rápido)
+  // Tier B · dot color · sin imagen · sin double-ring (no merece la pena a este tamaño)
   if (tier === "B") {
     return `
       <div class="kudos-chip kudos-chip-b" data-id="${id}" data-tier="B" data-name="${safeName}"
@@ -116,8 +121,7 @@ function escapeXml(s: string): string {
 
 
 /**
- * CSS global · chips claros, labels ultra-discretos.
- * Cuando la imagen falla, .img-failed cambia el fondo a color categoría.
+ * CSS · double-ring nested · labels ultra-discretos.
  */
 export const WORLD_NODE_CSS = `
   .kudos-chip {
@@ -126,19 +130,43 @@ export const WORLD_NODE_CSS = `
     pointer-events: auto; cursor: pointer;
     transition: opacity 0.4s ease, transform 0.22s cubic-bezier(0.22,1,0.36,1);
   }
-  .kudos-chip:hover { transform: scale(1.15); z-index: 1000 !important; }
+  .kudos-chip:hover { transform: scale(1.15); z-index: 99999 !important; }
 
+  /* CRÍTICO · Leaflet asigna z-index al marker container según lat/lng.
+     Sin esto, el label del chip hovereado queda detrás de chips vecinos
+     que están más al sur (z-index Leaflet más alto que el norte). */
+  .leaflet-marker-icon.kudos-world-node:hover {
+    z-index: 99999 !important;
+  }
+
+  /* Anillo externo · color categoría (Tier A) o dorado (Tier S) */
+  .kudos-chip-outer-ring {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    padding: 1.6px;                  /* GROSOR del anillo color (Tier A) */
+    display: flex; align-items: center; justify-content: center;
+  }
+  /* Tier S · anillo dorado más grueso */
+  .kudos-chip-s .kudos-chip-outer-ring { padding: 2.2px; }
+
+  /* Anillo blanco interno · aísla la foto del color outer */
+  .kudos-chip-inner-ring {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    padding: 1.5px;                  /* GROSOR del anillo blanco aislador */
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Body · contiene la imagen */
   .kudos-chip-body {
     width: 100%; height: 100%;
     border-radius: 50%;
     overflow: hidden;
     display: flex; align-items: center; justify-content: center;
   }
-  /* Si la <img> falla · el body queda con el color de la categoría
-     (ya fijado inline) · cubre todo el círculo */
   .kudos-chip-body.img-failed > img { display: none !important; }
 
-  /* Halo respirando Tier S */
+  /* Halo respirando Tier S · sólo Tier S */
   .kudos-chip-halo {
     position: absolute; inset: -50%; border-radius: 50%;
     z-index: -1;
@@ -185,8 +213,6 @@ export const WORLD_NODE_CSS = `
     max-width: 180px;
     overflow: hidden; text-overflow: ellipsis;
   }
-
-  /* Tier S · label permanente · dorado discreto */
   .kudos-chip.with-label[data-tier="S"]::after {
     opacity: 1;
     font-size: 11px;
@@ -194,12 +220,10 @@ export const WORLD_NODE_CSS = `
     color: ${WORLD_COLORS.premium};
     border-color: rgba(201, 169, 97, 0.35);
   }
-  /* Tier A · label permanente · gris oscuro fino */
   .kudos-chip.with-label[data-tier="A"]::after {
     opacity: 0.94;
     font-size: 10px;
   }
-  /* B/C · sólo hover · fino */
   .kudos-chip:hover::after {
     opacity: 1;
     font-size: 10.5px;

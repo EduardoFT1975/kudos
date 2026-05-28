@@ -25,6 +25,7 @@ import {
   WORLD_LABELS_FILTER,
   TIER_MIN_ZOOM,
   maxNodesAtZoom,
+  sizeFactorForZoom,
   WorldNodeTier,
   WorldNodeCategory,
   inferCategory,
@@ -352,8 +353,14 @@ export function WorldEngine() {
       if (isNaN(n.lat) || isNaN(n.lng)) return;
       try {
         const isActive = id === activeId;
-        const html = buildWorldNodeHTML({ ...n, isActive, showLabel: showLabelIds.has(id), image: n.image });
-        const size = n.tier === "S" ? 56 : n.tier === "A" ? 32 : n.tier === "B" ? 14 : 6;
+        // Tamaño dinámico · escala con zoom
+        const baseSize = n.tier === "S" ? 44 : n.tier === "A" ? 32 : n.tier === "B" ? 14 : 6;
+        const dynSize = Math.round(baseSize * sizeFactorForZoom(zoom));
+        const html = buildWorldNodeHTML({
+          ...n, isActive, showLabel: showLabelIds.has(id), image: n.image,
+          sizeOverride: dynSize,
+        });
+        const size = dynSize;
         const icon = L.divIcon({
           className: "kudos-world-node",
           html: `<div style="position:relative">${html}</div>`,
