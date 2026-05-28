@@ -352,13 +352,13 @@ function ShareCapsuleModal({ payload, onClose }: { payload: OpenPayload; onClose
               <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 8, paddingTop: 22, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
                 <h3 style={SECTION_TITLE}>Personaliza tu capsula</h3>
                 <p style={SECTION_DESC}>Elige que informacion quieres mostrar en tu publicacion.</p>
-                <ToggleRow icon="discover"  label="Titulo"            value={toggles.title}       onChange={(v) => setToggles({ ...toggles, title: v })} />
-                <ToggleRow icon="more"      label="Descripcion"        value={toggles.description} onChange={(v) => setToggles({ ...toggles, description: v })} />
-                <ToggleRow icon="place"     label="Ubicacion"          value={toggles.location}    onChange={(v) => setToggles({ ...toggles, location: v })} />
-                <ToggleRow icon="founder"   label="Valoracion"         value={toggles.rating}      onChange={(v) => setToggles({ ...toggles, rating: v })} />
-                <ToggleRow icon="play"      label="Clip de video"      value={toggles.clip}        onChange={(v) => setToggles({ ...toggles, clip: v })} />
-                <ToggleRow icon="share"     label="Tu comentario (opcional)" value={toggles.comment} onChange={(v) => setToggles({ ...toggles, comment: v })} />
-                <ToggleRow icon="moments"   label="Hashtags"           value={toggles.hashtags}    onChange={(v) => setToggles({ ...toggles, hashtags: v })} />
+                <ToggleRow icon="discover"  label="Titulo"            preview={capsule.title}                                                                          value={toggles.title}       onChange={(v) => setToggles({ ...toggles, title: v })} />
+                <ToggleRow icon="more"      label="Descripcion"        preview={capsule.hook ?? capsule.tagline ?? poi.short}                                            value={toggles.description} onChange={(v) => setToggles({ ...toggles, description: v })} />
+                <ToggleRow icon="place"     label="Ubicacion"          preview={`${poi.name}, ${poi.country}`}                                                            value={toggles.location}    onChange={(v) => setToggles({ ...toggles, location: v })} />
+                <ToggleRow icon="founder"   label="Valoracion"         preview={`★ ${poi.rating.toFixed(1)} · ${poi.ratingCount.toLocaleString("es-ES")} ratings`}        value={toggles.rating}      onChange={(v) => setToggles({ ...toggles, rating: v })} />
+                <ToggleRow icon="play"      label="Clip de video"      preview={capsule.clipSrc ? `Incluye clip · ${capsule.duration ?? "0:15"}` : "Sin clip (solo poster)"} value={toggles.clip}        onChange={(v) => setToggles({ ...toggles, clip: v })} />
+                <ToggleRow icon="share"     label="Tu comentario"      preview={comment ? `"${comment.slice(0, 40)}${comment.length > 40 ? "…" : ""}"` : "Anade un toque personal abajo"} value={toggles.comment} onChange={(v) => setToggles({ ...toggles, comment: v })} />
+                <ToggleRow icon="moments"   label="Hashtags"           preview={`#${poi.id.replace(/-/g, "")} #KUDOS #${(poi.categories[0] ?? "lugar").replace(/-/g, "")}`} value={toggles.hashtags}    onChange={(v) => setToggles({ ...toggles, hashtags: v })} />
 
                 <div style={COMMENT_WRAP}>
                   <input
@@ -576,11 +576,18 @@ function BrandGlyph({ brand }: { brand: BrandKey }) {
   }
 }
 
-function ToggleRow({ icon, label, value, onChange }: { icon: Parameters<typeof Icon>[0]["name"]; label: string; value: boolean; onChange: (v: boolean) => void }) {
+function ToggleRow({ icon, label, value, onChange, preview }: { icon: Parameters<typeof Icon>[0]["name"]; label: string; value: boolean; onChange: (v: boolean) => void; preview?: string }) {
   return (
     <div style={TOGGLE_ROW}>
       <span style={TOGGLE_ICON}><Icon name={icon} size={14} /></span>
-      <span style={{ flex: 1, fontSize: 13.5, color: "var(--kudos-ink)" }}>{label}</span>
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+        <span style={{ fontSize: 13.5, fontWeight: 600, color: "var(--kudos-ink)" }}>{label}</span>
+        {preview ? (
+          <span style={{ fontSize: 11.5, color: "rgba(242,242,247,0.62)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {preview}
+          </span>
+        ) : null}
+      </div>
       <button type="button" role="switch" aria-checked={value} onClick={() => onChange(!value)} style={value ? CHECK_ACTIVE : CHECK_IDLE}>
         {value ? <Icon name="discover" size={11} /> : null}
       </button>
@@ -1186,42 +1193,46 @@ const FOOTER: React.CSSProperties = {
   flexDirection: "column",
   gap: 8,
   borderTop: "1px solid rgba(255,255,255,0.06)",
+  background: "rgba(10,6,18,0.96)",
 };
+
 const CTA_PRIMARY: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
   gap: 8,
-  padding: "16px 22px",
-  borderRadius: 16,
-  background: "var(--kudos-gradient-cta)",
+  padding: "12px 18px",
+  borderRadius: 14,
   border: "none",
+  background: "linear-gradient(90deg, #FF9A00, #FF3CAC, #6C3CFF)",
   color: "#fff",
-  fontFamily: "var(--kudos-font-body)",
-  fontSize: 15,
-  fontWeight: 700,
+  fontSize: 14,
+  fontWeight: 800,
+  letterSpacing: 0.2,
   cursor: "pointer",
-  letterSpacing: "0.01em",
-  boxShadow: "0 18px 36px -10px rgba(255,60,172,0.55), 0 8px 20px -10px rgba(108,60,255,0.55)",
+  width: "100%",
+  boxShadow: "0 16px 36px -16px rgba(108,60,255,0.75)",
 };
+
 const CTA_GHOST: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  gap: 6,
-  padding: "12px 22px",
-  borderRadius: 14,
+  gap: 8,
+  padding: "10px 16px",
+  borderRadius: 12,
   background: "transparent",
-  border: "1px solid rgba(255,255,255,0.18)",
+  border: "1px solid rgba(255,255,255,0.16)",
   color: "var(--kudos-ink)",
-  fontFamily: "var(--kudos-font-body)",
   fontSize: 13,
   fontWeight: 600,
   cursor: "pointer",
+  width: "100%",
 };
+
 const CTA_GHOST_ACTIVE: React.CSSProperties = {
   ...CTA_GHOST,
-  background: "rgba(108,60,255,0.22)",
-  border: "1px solid rgba(108,60,255,0.55)",
-  color: "var(--kudos-accent-bright, #8B6BFF)",
+  background: "rgba(108,60,255,0.16)",
+  borderColor: "rgba(108,60,255,0.45)",
+  color: "var(--kudos-accent, #6C3CFF)",
 };
