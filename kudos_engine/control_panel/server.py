@@ -395,8 +395,16 @@ def api_git_push() -> dict:
 # ═══════════════════════ FRONTEND (single page) ══════════════════════════
 
 @app.get("/", response_class=HTMLResponse)
-def index() -> str:
-    return INDEX_HTML
+def index() -> HTMLResponse:
+    # No-cache · evita que Chrome sirva HTML viejo tras editar el panel
+    return HTMLResponse(
+        content=INDEX_HTML,
+        headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
+    )
 
 
 # ═══════════════════════ Helpers ══════════════════════════════════════════
@@ -802,9 +810,60 @@ async function refresh() {
       <div class=stat><span>Archivos OSM</span><b>${s.osm.files.length}</b></div>
       <div class=stat><span>Último HEAD</span><b>${s.git.head}</b></div>
     `;
+
+    // V8 · Wikidata status
+    try {
+      const wd = await fetch('/api/pois/wikidata_status').then(r => r.json());
+      const txt = wd.total_pois > 0
+        ? `${wd.total_pois.toLocaleString('es-ES')} POIs · ${wd.files.length} países (${wd.files.map(f => f.country).join(' · ')})`
+        : 'Sin datos aún · pulsa Importar Wikidata';
+      document.getElementById('wd-status').textContent = txt;
+    } catch (e) { /* opcional */ }
   } catch (e) {
-    console.error(e);
+    console.error('refresh ERROR:', e);
   }
+}
+
+// V8 · handlers Wikidata
+async function importWikidata() {
+  const country = document.getElementById('wd-country').value;
+  try {
+    const r = await fetch('/api/pois/import_wikidata', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({country, max_per_type: 800}),
+    });
+    const j = await r.json();
+    if (j.ok) {
+      toast(`⬇ Importando Wikidata ${country} (pid ${j.pid}) · 3-5 min`);
+    } else {
+      toast('❌ ' + String(j.error || 'error').slice(0,80));
+      if (j.error && String(j.error).includes('\n')) alert(j.error);
+    }
+  } catch (e) { toast('❌ ' + e.message); }
+}
+
+async function importWikidataAll() {
+  if (!confirm('Importar Wikidata para 14 países top mundo en background?\nTarda ~40-60 min. Mientras corre puedes seguir usando el panel.')) return;
+  try {
+    const r = await fetch('/api/pois/import_wikidata_all', {method:'POST'});
+    const j = await r.json();
+    toast(j.ok ? '🌍 Importando 14 países en background · ~40-60 min' : '❌ ' + j.error);
+  } catch (e) { toast('❌ ' + e.message); }
+}
+
+async function autoPush() {
+  toast('⬆ Pushing...');
+  try {
+    const r = await fetch('/api/git/auto_push', {method:'POST'});
+    const j = await r.json();
+    if (j.ok) {
+      toast('✅ JSONs subidos a GitHub · Render redesplegará');
+    } else {
+      toast('❌ ' + String(j.error || 'error').slice(0,80));
+      if (j.error) alert('AUTO-PUSH:\n\n' + j.error);
+    }
+    setTimeout(refresh, 800);
+  } catch (e) { toast('❌ ' + e.message); }
 }
 
 refresh();
@@ -823,14 +882,12 @@ def main(argv=None) -> int:
     p.add_argument("--port", type=int, default=3001)
     p.add_argument("--host", default="127.0.0.1")
     args = p.parse_args(argv)
-
     print()
     print("=" * 60)
-    print(f"  KUDOS · Panel del Fundador")
+    print("  KUDOS · Panel del Fundador")
     print(f"  Abre en tu navegador: http://{args.host}:{args.port}")
-    print(f"  Ctrl+C para parar")
+    print("  Ctrl+C para parar")
     print("=" * 60)
     print()
-
     uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
     return 0

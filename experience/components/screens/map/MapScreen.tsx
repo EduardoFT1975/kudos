@@ -149,6 +149,21 @@ export function MapScreen() {
   const [activeId, setActiveId] = React.useState<string | null>(focusId);
   const [sheetOpen, setSheetOpen] = React.useState<boolean>(focusId != null);
   const [category, setCategory] = React.useState<CategoryChoice>("all");
+  // V6.3 · vista 3D (perspectiva inclinada CSS) togglable desde botón "3D"
+  const [is3D, setIs3D] = React.useState<boolean>(false);
+  React.useEffect(() => {
+    const el = document.querySelector(".leaflet-container") as HTMLElement | null;
+    if (!el) return;
+    if (is3D) {
+      el.style.transform = "perspective(1200px) rotateX(40deg)";
+      el.style.transformOrigin = "center bottom";
+      el.style.transition = "transform 480ms cubic-bezier(0.22,1,0.36,1)";
+    } else {
+      el.style.transform = "";
+      el.style.transformOrigin = "";
+      el.style.transition = "transform 480ms cubic-bezier(0.22,1,0.36,1)";
+    }
+  }, [is3D]);
   // Capas cerradas por defecto · evita tapar el mapa en móvil. El usuario las abre si quiere.
   const [capasOpen, setCapasOpen] = React.useState(false);
   const [filtrosOpen, setFiltrosOpen] = React.useState(false);
@@ -274,8 +289,29 @@ export function MapScreen() {
             <span aria-hidden style={COMPASS_NEEDLE} />
           </div>
 
-          <button type="button" style={CTRL_BTN_SQ} className="kudos-tap kudos-elev-1">3D</button>
-          <button type="button" style={CTRL_BTN_SQ} className="kudos-tap kudos-elev-1" aria-label="Centrar">
+          <button
+            type="button"
+            style={{ ...CTRL_BTN_SQ, ...(is3D ? { background: "var(--kudos-accent, #6C3CFF)", color: "#fff" } : {}) }}
+            className="kudos-tap kudos-elev-1"
+            onClick={() => setIs3D((v) => !v)}
+            aria-pressed={is3D}
+            title={is3D ? "Volver a 2D" : "Vista 3D inclinada"}
+          >3D</button>
+          <button
+            type="button"
+            style={CTRL_BTN_SQ}
+            className="kudos-tap kudos-elev-1"
+            aria-label="Centrar en mi ubicación"
+            title="Centrar en mi ubicación"
+            onClick={() => {
+              const m = (window as { __kudosMap?: { setView: (c: [number, number], z: number, opts?: object) => void } }).__kudosMap;
+              if (m && geo.coords) {
+                m.setView([geo.coords.lat, geo.coords.lng], 13, { animate: true });
+              } else if (!geo.coords) {
+                geo.request();
+              }
+            }}
+          >
             <Icon name="here" size={14} />
           </button>
         </div>
