@@ -195,11 +195,30 @@ def main() -> int:
             print(f"  [{i+1:>3}/{len(pois)}] SKIP {wd_id} (ya existe)")
             continue
 
+        # Retry exterior · si falla por red (DNS, timeout, etc.), reintentar 2 veces
+        info = None
+        last_err = None
+        for attempt in range(3):
+            try:
+                info = process_poi(poi, args.no_anthropic, args.voice)
+                break
+            except (ConnectionError, OSError) as e:
+                last_err = e
+                if attempt < 2:
+                    wait = 5 * (attempt + 1)
+                    print(f"  [retry] red falló · esperando {wait}s · intento {attempt+2}/3")
+                    time.sleep(wait)
+            except Exception as e:
+                # Errores no de red · no reintentar
+                raise
+        if info is None:
+            failed += 1
+            print(f"  ERROR red persistente {wd_id}: {last_err}")
+            continue
         try:
-            info = process_poi(poi, args.no_anthropic, args.voice)
             if info.get("status") == "ok":
                 manifest["capsules"][wd_id] = info
-                save_manifest(manifest)     # persistir tras cada cápsula
+                save_manifest(manifest)
                 ok += 1
             else:
                 failed += 1

@@ -24,6 +24,7 @@ import { AppBottomNavV4 } from "./AppBottomNavV4";
 import { AppCanvasV4 } from "./AppCanvasV4";
 import { ShareCapsuleModalV5 } from "@/components/share/ShareCapsuleModalV5";
 import { MeritToast } from "@/components/share/MeritToast";
+import { FirstTimeOnboarding } from "@/components/discovery/FirstTimeOnboarding";
 
 interface Props { children: React.ReactNode; }
 
@@ -44,6 +45,7 @@ export function AppShellV4({ children }: Props) {
           <AppBottomNavV4 />
           <ShareCapsuleModalV5 />
           <MeritToast />
+          <FirstTimeOnboarding />
         </FatalRecoveryLayer>
       </MobileSafeAreaProvider>
     );
