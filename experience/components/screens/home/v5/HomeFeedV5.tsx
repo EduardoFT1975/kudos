@@ -54,16 +54,31 @@ export function HomeFeedV5() {
   const router = useRouter();
   const [data, setData] = React.useState<DiscoverPayload | null>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    if (typeof window === "undefined" || !API) {
-      setError("API no configurada");
+    if (typeof window === "undefined") return;
+    if (!API) {
+      setError("NEXT_PUBLIC_KUDOS_API_URL no inyectada en build. Verifica env vars de Render frontend y haz Manual Deploy.");
+      setLoading(false);
       return;
     }
     fetch(`${API}/api/discover/`, { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((j) => setData(j))
-      .catch((e) => setError(String(e?.message || e)));
+      .then(async (r) => {
+        if (!r.ok) {
+          const body = await r.text().catch(() => "");
+          throw new Error(`HTTP ${r.status} · ${body.slice(0, 120)}`);
+        }
+        return r.json();
+      })
+      .then((j) => {
+        setData(j);
+        setLoading(false);
+      })
+      .catch((e) => {
+        setError(`Fetch ${API}/api/discover/ falló: ${String(e?.message || e)}`);
+        setLoading(false);
+      });
   }, []);
 
   const goLocate = () => router.push("/world");
@@ -72,9 +87,20 @@ export function HomeFeedV5() {
     <div style={ROOT}>
       <DiscoverHero onLocate={goLocate} />
 
+      {loading && (
+        <div style={LOAD_BOX}>Cargando descubrimientos…</div>
+      )}
+
       {error && (
         <div style={ERR_BOX}>
-          No hemos podido cargar el feed. Reintenta en un momento.
+          <strong>No se pudo cargar el feed.</strong><br/>
+          <code style={{ fontSize: 11, color: "rgba(255,255,255,0.65)" }}>{error}</code>
+        </div>
+      )}
+
+      {!loading && !error && !data?.featured && (
+        <div style={ERR_BOX}>
+          La API respondió OK pero sin datos. Verifica /api/discover/ desde el navegador.
         </div>
       )}
 
@@ -131,6 +157,18 @@ const ERR_BOX: React.CSSProperties = {
   borderRadius: 10,
   color: "rgba(255,255,255,0.85)",
   fontSize: 13,
+  lineHeight: 1.5,
+  wordBreak: "break-word" as const,
+};
+const LOAD_BOX: React.CSSProperties = {
+  margin: "18px 16px",
+  padding: "12px 14px",
+  background: "rgba(139,107,255,0.08)",
+  border: "1px solid rgba(139,107,255,0.18)",
+  borderRadius: 10,
+  color: "rgba(255,255,255,0.7)",
+  fontSize: 13,
+  textAlign: "center" as const,
 };
 const FOOTER: React.CSSProperties = {
   textAlign: "center" as const,
