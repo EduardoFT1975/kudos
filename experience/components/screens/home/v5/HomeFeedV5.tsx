@@ -2,19 +2,11 @@
 /**
  * KUDOS - HomeFeedV5 - PROMPT 2/6 Discover MVP (rectificado segun maqueta real).
  *
- * Bloques (en orden, alineados a maqueta):
- *   1. DiscoverHero       (mundo nocturno + titulo multi-slide + locate btn)
- *   2. FeaturedCapsule    (full-image hero "DESTACADO")
- *   3. Para ti, hoy       (rail horizontal con ForYouCard)
- *   4. Historias que conectan epocas (rail horizontal TimelineEpochCard)
- *
- * NO contiene (CONGELADO, archivos preservados):
- *   - CoreDelDia.tsx
- *   - HumanQuestionCard.tsx
- *   - DiscoveryChain.tsx
- *   - MemoryPrompt
- *
- * Datos: GET /api/discover/
+ * Bloques (en orden):
+ *   1. DiscoverHero
+ *   2. FeaturedCapsule
+ *   3. Para ti, hoy (rail horizontal)
+ *   4. Historias que conectan epocas (rail horizontal)
  */
 import * as React from "react";
 import { useRouter } from "next/navigation";
@@ -67,7 +59,7 @@ export function HomeFeedV5() {
       .then(async (r) => {
         if (!r.ok) {
           const body = await r.text().catch(() => "");
-          throw new Error(`HTTP ${r.status} · ${body.slice(0, 120)}`);
+          throw new Error(`HTTP ${r.status} ${body.slice(0, 120)}`);
         }
         return r.json();
       })
@@ -76,7 +68,7 @@ export function HomeFeedV5() {
         setLoading(false);
       })
       .catch((e) => {
-        setError(`Fetch ${API}/api/discover/ falló: ${String(e?.message || e)}`);
+        setError(`Fetch ${API}/api/discover/ fallo: ${String(e?.message || e)}`);
         setLoading(false);
       });
   }, []);
@@ -88,19 +80,20 @@ export function HomeFeedV5() {
       <DiscoverHero onLocate={goLocate} />
 
       {loading && (
-        <div style={LOAD_BOX}>Cargando descubrimientos…</div>
+        <div style={LOAD_BOX}>Cargando descubrimientos...</div>
       )}
 
       {error && (
         <div style={ERR_BOX}>
-          <strong>No se pudo cargar el feed.</strong><br/>
+          <strong>No se pudo cargar el feed.</strong>
+          <br />
           <code style={{ fontSize: 11, color: "rgba(255,255,255,0.65)" }}>{error}</code>
         </div>
       )}
 
       {!loading && !error && !data?.featured && (
         <div style={ERR_BOX}>
-          La API respondió OK pero sin datos. Verifica /api/discover/ desde el navegador.
+          La API respondio OK pero sin datos. Verifica /api/discover/ desde el navegador.
         </div>
       )}
 
@@ -158,7 +151,7 @@ const ERR_BOX: React.CSSProperties = {
   color: "rgba(255,255,255,0.85)",
   fontSize: 13,
   lineHeight: 1.5,
-  wordBreak: "break-word" as const,
+  overflowWrap: "break-word",
 };
 const LOAD_BOX: React.CSSProperties = {
   margin: "18px 16px",
