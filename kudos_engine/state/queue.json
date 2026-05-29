@@ -1,0 +1,852 @@
+[
+  {
+    "id": "rome",
+    "name": "Coliseo de Roma",
+    "country": "Italia",
+    "unesco": true,
+    "annual_visitors": 7600000,
+    "wikipedia_languages": 130,
+    "anthropic_confidence": 0.95,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-eiffel",
+    "name": "Torre Eiffel",
+    "country": "Francia",
+    "unesco": false,
+    "annual_visitors": 7000000,
+    "wikipedia_languages": 120,
+    "anthropic_confidence": 0.95,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-taj",
+    "name": "Taj Mahal",
+    "country": "India",
+    "unesco": true,
+    "annual_visitors": 8000000,
+    "wikipedia_languages": 110,
+    "anthropic_confidence": 0.95,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-giza",
+    "name": "Pirámides de Giza",
+    "country": "Egipto",
+    "unesco": true,
+    "annual_visitors": 4500000,
+    "wikipedia_languages": 100,
+    "anthropic_confidence": 0.95,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-greatwall",
+    "name": "Gran Muralla China",
+    "country": "China",
+    "unesco": true,
+    "annual_visitors": 10000000,
+    "wikipedia_languages": 130,
+    "anthropic_confidence": 0.95,
+    "tier_hint": "S"
+  },
+  {
+    "id": "machu",
+    "name": "Machu Picchu",
+    "country": "Perú",
+    "unesco": true,
+    "annual_visitors": 1500000,
+    "wikipedia_languages": 100,
+    "anthropic_confidence": 0.95,
+    "tier_hint": "S"
+  },
+  {
+    "id": "petra",
+    "name": "Petra",
+    "country": "Jordania",
+    "unesco": true,
+    "annual_visitors": 800000,
+    "wikipedia_languages": 90,
+    "anthropic_confidence": 0.93,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-chichen",
+    "name": "Chichén Itzá",
+    "country": "México",
+    "unesco": true,
+    "annual_visitors": 2500000,
+    "wikipedia_languages": 85,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-cristored",
+    "name": "Cristo Redentor",
+    "country": "Brasil",
+    "unesco": false,
+    "annual_visitors": 2000000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.93,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-angkor",
+    "name": "Angkor Wat",
+    "country": "Camboya",
+    "unesco": true,
+    "annual_visitors": 2500000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.93,
+    "tier_hint": "S"
+  },
+  {
+    "id": "athens",
+    "name": "Acrópolis de Atenas",
+    "country": "Grecia",
+    "unesco": true,
+    "annual_visitors": 3000000,
+    "wikipedia_languages": 90,
+    "anthropic_confidence": 0.94,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-stonehenge",
+    "name": "Stonehenge",
+    "country": "Reino Unido",
+    "unesco": true,
+    "annual_visitors": 1500000,
+    "wikipedia_languages": 90,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-sagrada",
+    "name": "Sagrada Familia",
+    "country": "España",
+    "unesco": true,
+    "annual_visitors": 4700000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.93,
+    "tier_hint": "S"
+  },
+  {
+    "id": "granada",
+    "name": "Alhambra",
+    "country": "España",
+    "unesco": true,
+    "annual_visitors": 2800000,
+    "wikipedia_languages": 90,
+    "anthropic_confidence": 0.93,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-libertad",
+    "name": "Estatua de la Libertad",
+    "country": "EE.UU.",
+    "unesco": true,
+    "annual_visitors": 4500000,
+    "wikipedia_languages": 100,
+    "anthropic_confidence": 0.93,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-notredame",
+    "name": "Notre-Dame de París",
+    "country": "Francia",
+    "unesco": true,
+    "annual_visitors": 12000000,
+    "wikipedia_languages": 100,
+    "anthropic_confidence": 0.94,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-sphinx",
+    "name": "Esfinge de Giza",
+    "country": "Egipto",
+    "unesco": true,
+    "annual_visitors": 4000000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-vatican",
+    "name": "Capilla Sixtina",
+    "country": "Vaticano",
+    "unesco": true,
+    "annual_visitors": 6000000,
+    "wikipedia_languages": 70,
+    "anthropic_confidence": 0.93,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-bigben",
+    "name": "Big Ben",
+    "country": "Reino Unido",
+    "unesco": true,
+    "annual_visitors": 2000000,
+    "wikipedia_languages": 90,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-empire",
+    "name": "Empire State Building",
+    "country": "EE.UU.",
+    "unesco": false,
+    "annual_visitors": 4000000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-opera",
+    "name": "Ópera de Sídney",
+    "country": "Australia",
+    "unesco": true,
+    "annual_visitors": 8000000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.93,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-forbidden",
+    "name": "Ciudad Prohibida",
+    "country": "China",
+    "unesco": true,
+    "annual_visitors": 14000000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.93,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-cordoba",
+    "name": "Mezquita de Córdoba",
+    "country": "España",
+    "unesco": true,
+    "annual_visitors": 1900000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-bluemosque",
+    "name": "Mezquita Azul",
+    "country": "Turquía",
+    "unesco": true,
+    "annual_visitors": 5000000,
+    "wikipedia_languages": 70,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-rapa",
+    "name": "Isla de Pascua",
+    "country": "Chile",
+    "unesco": true,
+    "annual_visitors": 100000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "S"
+  },
+  {
+    "id": "g-louvre",
+    "name": "Museo del Louvre",
+    "country": "Francia",
+    "unesco": true,
+    "annual_visitors": 9000000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.93,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-versailles",
+    "name": "Versalles",
+    "country": "Francia",
+    "unesco": true,
+    "annual_visitors": 8000000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-msm",
+    "name": "Mont Saint-Michel",
+    "country": "Francia",
+    "unesco": true,
+    "annual_visitors": 2500000,
+    "wikipedia_languages": 70,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-neuschwan",
+    "name": "Neuschwanstein",
+    "country": "Alemania",
+    "unesco": false,
+    "annual_visitors": 1400000,
+    "wikipedia_languages": 70,
+    "anthropic_confidence": 0.9,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-brandenburg",
+    "name": "Puerta de Brandeburgo",
+    "country": "Alemania",
+    "unesco": false,
+    "annual_visitors": 5000000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-pisa",
+    "name": "Torre de Pisa",
+    "country": "Italia",
+    "unesco": true,
+    "annual_visitors": 5000000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-florencia",
+    "name": "Catedral de Florencia",
+    "country": "Italia",
+    "unesco": true,
+    "annual_visitors": 4500000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.9,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-venice",
+    "name": "Plaza de San Marcos",
+    "country": "Italia",
+    "unesco": true,
+    "annual_visitors": 8000000,
+    "wikipedia_languages": 70,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-pompeya",
+    "name": "Pompeya",
+    "country": "Italia",
+    "unesco": true,
+    "annual_visitors": 4000000,
+    "wikipedia_languages": 90,
+    "anthropic_confidence": 0.93,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-sevilla",
+    "name": "Catedral de Sevilla",
+    "country": "España",
+    "unesco": true,
+    "annual_visitors": 1500000,
+    "wikipedia_languages": 50,
+    "anthropic_confidence": 0.9,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-burgos",
+    "name": "Catedral de Burgos",
+    "country": "España",
+    "unesco": true,
+    "annual_visitors": 500000,
+    "wikipedia_languages": 40,
+    "anthropic_confidence": 0.88,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-toledo",
+    "name": "Toledo",
+    "country": "España",
+    "unesco": true,
+    "annual_visitors": 2300000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.9,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-escorial",
+    "name": "El Escorial",
+    "country": "España",
+    "unesco": true,
+    "annual_visitors": 700000,
+    "wikipedia_languages": 40,
+    "anthropic_confidence": 0.88,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-prado",
+    "name": "Museo del Prado",
+    "country": "España",
+    "unesco": false,
+    "annual_visitors": 3500000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-bilbao",
+    "name": "Guggenheim Bilbao",
+    "country": "España",
+    "unesco": false,
+    "annual_visitors": 1200000,
+    "wikipedia_languages": 50,
+    "anthropic_confidence": 0.9,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-portoabey",
+    "name": "Torre de Belém",
+    "country": "Portugal",
+    "unesco": true,
+    "annual_visitors": 1000000,
+    "wikipedia_languages": 40,
+    "anthropic_confidence": 0.88,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-lisbon",
+    "name": "Tranvía 28 Lisboa",
+    "country": "Portugal",
+    "unesco": false,
+    "annual_visitors": 5000000,
+    "wikipedia_languages": 30,
+    "anthropic_confidence": 0.85,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-redsq",
+    "name": "Plaza Roja Moscú",
+    "country": "Rusia",
+    "unesco": true,
+    "annual_visitors": 3000000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-amsterdam",
+    "name": "Canales de Ámsterdam",
+    "country": "Países Bajos",
+    "unesco": true,
+    "annual_visitors": 10000000,
+    "wikipedia_languages": 50,
+    "anthropic_confidence": 0.9,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-copenhagen",
+    "name": "Nyhavn Copenhague",
+    "country": "Dinamarca",
+    "unesco": false,
+    "annual_visitors": 8000000,
+    "wikipedia_languages": 40,
+    "anthropic_confidence": 0.88,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-edinburgh",
+    "name": "Castillo de Edimburgo",
+    "country": "Reino Unido",
+    "unesco": true,
+    "annual_visitors": 2000000,
+    "wikipedia_languages": 50,
+    "anthropic_confidence": 0.89,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-dubrovnik",
+    "name": "Dubrovnik",
+    "country": "Croacia",
+    "unesco": true,
+    "annual_visitors": 1300000,
+    "wikipedia_languages": 50,
+    "anthropic_confidence": 0.89,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-praga",
+    "name": "Castillo de Praga",
+    "country": "Rep. Checa",
+    "unesco": true,
+    "annual_visitors": 2000000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.9,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-terracota",
+    "name": "Guerreros de Xi'an",
+    "country": "China",
+    "unesco": true,
+    "annual_visitors": 8000000,
+    "wikipedia_languages": 70,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-bagan",
+    "name": "Bagan",
+    "country": "Myanmar",
+    "unesco": true,
+    "annual_visitors": 300000,
+    "wikipedia_languages": 40,
+    "anthropic_confidence": 0.88,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-borobudur",
+    "name": "Borobudur",
+    "country": "Indonesia",
+    "unesco": true,
+    "annual_visitors": 4000000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-petronas",
+    "name": "Torres Petronas",
+    "country": "Malasia",
+    "unesco": false,
+    "annual_visitors": 2000000,
+    "wikipedia_languages": 70,
+    "anthropic_confidence": 0.9,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-kyoto",
+    "name": "Kinkaku-ji",
+    "country": "Japón",
+    "unesco": true,
+    "annual_visitors": 5000000,
+    "wikipedia_languages": 50,
+    "anthropic_confidence": 0.9,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-mtfuji",
+    "name": "Monte Fuji",
+    "country": "Japón",
+    "unesco": true,
+    "annual_visitors": 300000,
+    "wikipedia_languages": 90,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-fushimi",
+    "name": "Fushimi Inari",
+    "country": "Japón",
+    "unesco": false,
+    "annual_visitors": 10000000,
+    "wikipedia_languages": 40,
+    "anthropic_confidence": 0.89,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-burj",
+    "name": "Burj Khalifa",
+    "country": "EAU",
+    "unesco": false,
+    "annual_visitors": 1900000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-jerusalem",
+    "name": "Muro de las Lamentaciones",
+    "country": "Israel",
+    "unesco": true,
+    "annual_visitors": 5000000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-persepolis",
+    "name": "Persépolis",
+    "country": "Irán",
+    "unesco": true,
+    "annual_visitors": 300000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-samarkand",
+    "name": "Samarcanda",
+    "country": "Uzbekistán",
+    "unesco": true,
+    "annual_visitors": 200000,
+    "wikipedia_languages": 50,
+    "anthropic_confidence": 0.89,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-goldengate",
+    "name": "Golden Gate",
+    "country": "EE.UU.",
+    "unesco": false,
+    "annual_visitors": 10000000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-grand",
+    "name": "Gran Cañón",
+    "country": "EE.UU.",
+    "unesco": true,
+    "annual_visitors": 5900000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-niagara",
+    "name": "Cataratas del Niágara",
+    "country": "Canadá",
+    "unesco": false,
+    "annual_visitors": 14000000,
+    "wikipedia_languages": 70,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-cn",
+    "name": "Torre CN",
+    "country": "Canadá",
+    "unesco": false,
+    "annual_visitors": 1500000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.89,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-teotihuacan",
+    "name": "Teotihuacán",
+    "country": "México",
+    "unesco": true,
+    "annual_visitors": 4000000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-iguazu",
+    "name": "Cataratas del Iguazú",
+    "country": "Argentina",
+    "unesco": true,
+    "annual_visitors": 1500000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-perito",
+    "name": "Perito Moreno",
+    "country": "Argentina",
+    "unesco": true,
+    "annual_visitors": 600000,
+    "wikipedia_languages": 50,
+    "anthropic_confidence": 0.9,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-tikal",
+    "name": "Tikal",
+    "country": "Guatemala",
+    "unesco": true,
+    "annual_visitors": 200000,
+    "wikipedia_languages": 50,
+    "anthropic_confidence": 0.89,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-galapagos",
+    "name": "Islas Galápagos",
+    "country": "Ecuador",
+    "unesco": true,
+    "annual_visitors": 250000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "A"
+  },
+  {
+    "id": "cusco",
+    "name": "Cusco",
+    "country": "Perú",
+    "unesco": true,
+    "annual_visitors": 1200000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.9,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-luxor",
+    "name": "Karnak Luxor",
+    "country": "Egipto",
+    "unesco": true,
+    "annual_visitors": 1000000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-marrakech",
+    "name": "Plaza Jemaa el-Fna",
+    "country": "Marruecos",
+    "unesco": true,
+    "annual_visitors": 1500000,
+    "wikipedia_languages": 40,
+    "anthropic_confidence": 0.89,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-lalibela",
+    "name": "Lalibela",
+    "country": "Etiopía",
+    "unesco": true,
+    "annual_visitors": 100000,
+    "wikipedia_languages": 40,
+    "anthropic_confidence": 0.88,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-kilimanjaro",
+    "name": "Kilimanjaro",
+    "country": "Tanzania",
+    "unesco": true,
+    "annual_visitors": 50000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-victoria",
+    "name": "Cataratas Victoria",
+    "country": "Zambia",
+    "unesco": true,
+    "annual_visitors": 300000,
+    "wikipedia_languages": 50,
+    "anthropic_confidence": 0.9,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-table",
+    "name": "Table Mountain",
+    "country": "Sudáfrica",
+    "unesco": true,
+    "annual_visitors": 1000000,
+    "wikipedia_languages": 40,
+    "anthropic_confidence": 0.89,
+    "tier_hint": "A"
+  },
+  {
+    "id": "g-uluru",
+    "name": "Uluru",
+    "country": "Australia",
+    "unesco": true,
+    "annual_visitors": 300000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.9,
+    "tier_hint": "A"
+  },
+  {
+    "id": "istanbul",
+    "name": "Hagia Sofia",
+    "country": "Turquía",
+    "unesco": true,
+    "annual_visitors": 3700000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "S"
+  },
+  {
+    "id": "ogrove",
+    "name": "O Grove · Castros Areoso",
+    "country": "España",
+    "unesco": false,
+    "annual_visitors": 20000,
+    "wikipedia_languages": 8,
+    "anthropic_confidence": 0.8,
+    "tier_hint": "B"
+  },
+  {
+    "id": "pontevedra",
+    "name": "Pontevedra medieval",
+    "country": "España",
+    "unesco": false,
+    "annual_visitors": 100000,
+    "wikipedia_languages": 10,
+    "anthropic_confidence": 0.82,
+    "tier_hint": "B"
+  },
+  {
+    "id": "santiago",
+    "name": "Santiago de Compostela",
+    "country": "España",
+    "unesco": true,
+    "annual_visitors": 350000,
+    "wikipedia_languages": 50,
+    "anthropic_confidence": 0.9,
+    "tier_hint": "A"
+  },
+  {
+    "id": "paris",
+    "name": "París · Belle Époque",
+    "country": "Francia",
+    "unesco": true,
+    "annual_visitors": 12000000,
+    "wikipedia_languages": 100,
+    "anthropic_confidence": 0.92,
+    "tier_hint": "S"
+  },
+  {
+    "id": "tokyo",
+    "name": "Tokio · Shōwa",
+    "country": "Japón",
+    "unesco": false,
+    "annual_visitors": 10000000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "washington",
+    "name": "Washington · National Mall",
+    "country": "EE.UU.",
+    "unesco": true,
+    "annual_visitors": 35000000,
+    "wikipedia_languages": 60,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  },
+  {
+    "id": "salamanca",
+    "name": "Salamanca · Universidad",
+    "country": "España",
+    "unesco": true,
+    "annual_visitors": 200000,
+    "wikipedia_languages": 30,
+    "anthropic_confidence": 0.85,
+    "tier_hint": "A"
+  },
+  {
+    "id": "barcelona",
+    "name": "Barcelona · Las Ramblas",
+    "country": "España",
+    "unesco": false,
+    "annual_visitors": 12000000,
+    "wikipedia_languages": 80,
+    "anthropic_confidence": 0.91,
+    "tier_hint": "A"
+  }
+]

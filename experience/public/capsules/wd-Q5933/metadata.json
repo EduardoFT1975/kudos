@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q5933",
+    "name": "Abadía de Westminster",
+    "lat": 51.4994,
+    "lng": -0.127367,
+    "country_code": "GB",
+    "category": "monumento",
+    "type": "atracción turística",
+    "wikidata": "Q5933",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Westminster-Abbey.JPG",
+    "unesco": true,
+    "tier": "A",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Abadía de Westminster",
+    "subtitle": "Un lugar que merece ser recordado",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "Existe un lugar donde el tiempo se detuvo: Abadía de Westminster.",
+        "direction": "in",
+        "search_hint": "Abadía de Westminster",
+        "duration": 5.62
+      },
+      {
+        "title": "Contexto",
+        "narration": "Su historia atraviesa siglos.",
+        "direction": "right",
+        "search_hint": "Abadía de Westminster",
+        "duration": 5.62
+      },
+      {
+        "title": "Escala",
+        "narration": "Sus dimensiones desafían lo posible.",
+        "direction": "out",
+        "search_hint": "Abadía de Westminster",
+        "duration": 5.62
+      },
+      {
+        "title": "Detalle",
+        "narration": "Cada piedra guarda una memoria.",
+        "direction": "left",
+        "search_hint": "Abadía de Westminster",
+        "duration": 5.62
+      },
+      {
+        "title": "Significado",
+        "narration": "Aquí cambió el curso de la civilización.",
+        "direction": "in",
+        "search_hint": "Abadía de Westminster",
+        "duration": 5.62
+      },
+      {
+        "title": "Legado",
+        "narration": "Hoy sigue inspirando al mundo.",
+        "direction": "up",
+        "search_hint": "Abadía de Westminster",
+        "duration": 5.62
+      },
+      {
+        "title": "KUDOS",
+        "narration": "Reconoce. Recuerda. Comparte.",
+        "direction": "in",
+        "search_hint": "Abadía de Westminster",
+        "duration": 5.62
+      },
+      {
+        "title": "Cierre",
+        "narration": "Abadía de Westminster. KUDOS.",
+        "direction": "out",
+        "search_hint": "Abadía de Westminster",
+        "duration": 5.62
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-westminster\\00_ac33135a.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/44/Abad%C3%ADa_de_Westminster%2C_Londres%2C_Inglaterra%2C_2014-08-07%2C_DD_025.JPG",
+      "title": "File:Abadía de Westminster, Londres, Inglaterra, 2014-08-07, DD 025.JPG",
+      "author": "Diego Delso",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1342
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-westminster\\01_7215b714.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/25/Abad%C3%ADa_de_Westminster%2C_Londres%2C_Inglaterra%2C_2014-08-11%2C_DD_207.JPG",
+      "title": "File:Abadía de Westminster, Londres, Inglaterra, 2014-08-11, DD 207.JPG",
+      "author": "Diego Delso",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-westminster\\02_0e9eeeca.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d7/Abad%C3%ADa_de_Westminster%2C_Londres%2C_Inglaterra%2C_2014-08-11%2C_DD_208.JPG",
+      "title": "File:Abadía de Westminster, Londres, Inglaterra, 2014-08-11, DD 208.JPG",
+      "author": "Diego Delso",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2787
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-westminster\\03_c9166b37.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Abad%C3%ADa_de_Westminster%2C_Londres%2C_Inglaterra%2C_2022-11-23%2C_DD_58-60_HDR.jpg",
+      "title": "File:Abadía de Westminster, Londres, Inglaterra, 2022-11-23, DD 58-60 HDR.jpg",
+      "author": "Diego Delso",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 3043
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-westminster\\04_25b1ee95.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f2/Abad%C3%ADa_de_Westminster%2C_Londres%2C_Inglaterra%2C_2022-11-23%2C_DD_67-69_HDR.jpg",
+      "title": "File:Abadía de Westminster, Londres, Inglaterra, 2022-11-23, DD 67-69 HDR.jpg",
+      "author": "Diego Delso",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-westminster\\05_50c6700e.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/9d/Atlas_Van_der_Hagen-KW1049B11_021-Receptie_van_S.K.H._den_Prince_van_Orange_op_zijn_intrede_tot_London_%3D_THE_Reception_of_His_Royal_Highnesse_the_Prince_of_Orange_at_his_entring_London.jpeg",
+      "title": "File:Atlas Van der Hagen-KW1049B11 021-Receptie van S.K.H. den Prince van Orange op zijn intrede tot London = THE Reception of His Royal Highnesse the Prince of Orange at his entring London.jpeg",
+      "author": "Romeyn de Hooghe",
+      "license": "Public domain",
+      "width": 1920,
+      "height": 1561
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-westminster\\06_9fe47be6.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d0/London%2C_Elizabeth_Tower_--_2016_--_4620.jpg",
+      "title": "File:London, Elizabeth Tower -- 2016 -- 4620.jpg",
+      "author": "Dietmar Rabich",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2880
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-westminster\\07_4e07b8af.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/10/London%2C_Elizabeth_Tower_--_2016_--_4624.jpg",
+      "title": "File:London, Elizabeth Tower -- 2016 -- 4624.jpg",
+      "author": "Dietmar Rabich",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 3413
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-westminster\\08_9c28c489.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/99/London%2C_Elizabeth_Tower_--_2016_--_4802.jpg",
+      "title": "File:London, Elizabeth Tower -- 2016 -- 4802.jpg",
+      "author": "Dietmar Rabich",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 3072
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-westminster\\09_32fab038.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/13/London%2C_Elizabeth_Tower_--_2016_--_4803.jpg",
+      "title": "File:London, Elizabeth Tower -- 2016 -- 4803.jpg",
+      "author": "Dietmar Rabich",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2880
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-westminster\\10_023d4dc7.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/75/London%2C_Elizabeth_Tower_--_2016_--_4804.jpg",
+      "title": "File:London, Elizabeth Tower -- 2016 -- 4804.jpg",
+      "author": "Dietmar Rabich",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2880
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-westminster\\11_0f73f541.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/7d/London%2C_Elizabeth_Tower_--_2016_--_4807.jpg",
+      "title": "File:London, Elizabeth Tower -- 2016 -- 4807.jpg",
+      "author": "Dietmar Rabich",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2880
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:Abadía de Westminster, Londres, Inglaterra, 2014-08-07, DD 025.JPG — Diego Delso — CC BY-SA 4.0\n  · File:Atlas Van der Hagen-KW1049B11 021-Receptie van S.K.H. den Prince van Orange op zijn intrede tot London = THE Reception of His Royal Highnesse the Prince of Orange at his entring London.jpeg — Romeyn de Hooghe — Public domain\n  · File:London, Elizabeth Tower -- 2016 -- 4620.jpg — Dietmar Rabich — CC BY-SA 4.0"
+}

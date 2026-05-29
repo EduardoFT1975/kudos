@@ -21,12 +21,11 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "commondatastorage.googleapis.com" },
     ],
   },
-  // En build de produccion ignoramos errores de TS y ESLint que vienen
-  // de codigo AXON viejo (lib/capsule-engine/, lib/capsule-generation/)
-  // que no forma parte del MVP de maquetas. El frontend MVP compila
-  // limpio. En dev local seguimos viendo los errores con `npm run typecheck`.
-  eslint: { ignoreDuringBuilds: true },
-  typescript: { ignoreBuildErrors: true },
+  // T1.1 · Build integrity restaurado.
+  // El codigo legacy AXON fue eliminado en T1.1 limpieza.
+  // El build ahora respeta errores de TS y ESLint.
+  // Si algun error reaparece, hay que arreglarlo, NO ocultarlo.
+  // (eslint y typescript ahora se ejecutan en cada build)
 
   // Rewrite /api/* al backend Django · SIEMPRE (dev Y prod).
   // En dev evita CORS+cookies cross-origin con localhost.

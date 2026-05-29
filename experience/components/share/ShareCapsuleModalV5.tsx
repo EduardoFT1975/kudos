@@ -520,3 +520,19 @@ const FOOTNOTE: React.CSSProperties = {
   color: "rgba(255,255,255,0.5)",
   textAlign: "center" as const,
 };
+
+
+const DISCOVERED_BY: React.CSSProperties = {
+  display: "inline-flex", alignItems: "center", gap: 7,
+  padding: "5px 10px", borderRadius: 999,
+  background: "rgba(201,169,97,0.10)",
+  border: "1px solid rgba(201,169,97,0.32)",
+  fontSize: 11, color: "rgba(255,255,255,0.85)",
+  alignSelf: "flex-start", marginBottom: 12,
+  letterSpacing: "0.02em",
+};
+const DISCOVERED_DOT: React.CSSProperties = {
+  width: 7, height: 7, borderRadius: "50%",
+  background: "#C9A961",
+  boxShadow: "0 0 8px rgba(201,169,97,0.6)",
+};

@@ -1,0 +1,187 @@
+{
+  "poi": {
+    "id": "wd-Q926846",
+    "name": "Abadía de San Benedicto de Polirone",
+    "lat": 45.04255,
+    "lng": 10.928603,
+    "country_code": "IT",
+    "category": "monumento",
+    "type": "templo",
+    "wikidata": "Q926846",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/AbbaziaDelPolirone%20SanBenedettoPo.jpg",
+    "unesco": true,
+    "tier": "A",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Abadía de San Benedicto de Polirone",
+    "subtitle": "Un lugar que merece ser recordado",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "Existe un lugar donde el tiempo se detuvo: Abadía de San Benedicto de Polirone.",
+        "direction": "in",
+        "search_hint": "Abadía de San Benedicto de Polirone",
+        "duration": 5.62
+      },
+      {
+        "title": "Contexto",
+        "narration": "Su historia atraviesa siglos.",
+        "direction": "right",
+        "search_hint": "Abadía de San Benedicto de Polirone",
+        "duration": 5.62
+      },
+      {
+        "title": "Escala",
+        "narration": "Sus dimensiones desafían lo posible.",
+        "direction": "out",
+        "search_hint": "Abadía de San Benedicto de Polirone",
+        "duration": 5.62
+      },
+      {
+        "title": "Detalle",
+        "narration": "Cada piedra guarda una memoria.",
+        "direction": "left",
+        "search_hint": "Abadía de San Benedicto de Polirone",
+        "duration": 5.62
+      },
+      {
+        "title": "Significado",
+        "narration": "Aquí cambió el curso de la civilización.",
+        "direction": "in",
+        "search_hint": "Abadía de San Benedicto de Polirone",
+        "duration": 5.62
+      },
+      {
+        "title": "Legado",
+        "narration": "Hoy sigue inspirando al mundo.",
+        "direction": "up",
+        "search_hint": "Abadía de San Benedicto de Polirone",
+        "duration": 5.62
+      },
+      {
+        "title": "KUDOS",
+        "narration": "Reconoce. Recuerda. Comparte.",
+        "direction": "in",
+        "search_hint": "Abadía de San Benedicto de Polirone",
+        "duration": 5.62
+      },
+      {
+        "title": "Cierre",
+        "narration": "Abadía de San Benedicto de Polirone. KUDOS.",
+        "direction": "out",
+        "search_hint": "Abadía de San Benedicto de Polirone",
+        "duration": 5.62
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-san-benedicto-de-polirone\\00_683a7625.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/c0/AbbaziaDelPolirone_SanBenedettoPo.jpg",
+      "title": "File:AbbaziaDelPolirone SanBenedettoPo.jpg",
+      "author": "Zavijavah",
+      "license": "CC BY-SA 3.0",
+      "width": 1000,
+      "height": 750
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-san-benedicto-de-polirone\\01_39eadf55.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/51/Abbazia_di_San_Benedetto_in_Polirone_-_San_Benedetto_Po%2C_Mantova%2C_Italia_-_15_Febbraio_2020.jpg",
+      "title": "File:Abbazia di San Benedetto in Polirone - San Benedetto Po, Mantova, Italia - 15 Febbraio 2020.jpg",
+      "author": "Giorgio Galeotti",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2880
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-san-benedicto-de-polirone\\02_337e9b3e.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/eb/Abbazia_di_San_Benedetto_in_Polirone_-_San_Benedetto_Po%2C_Mantova%2C_Italia_-_15_Febbraio_2020_01.jpg",
+      "title": "File:Abbazia di San Benedetto in Polirone - San Benedetto Po, Mantova, Italia - 15 Febbraio 2020 01.jpg",
+      "author": "Giorgio Galeotti",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-san-benedicto-de-polirone\\03_8f162fca.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/43/Complesso_monastico_polironiano.jpg",
+      "title": "File:Complesso monastico polironiano.jpg",
+      "author": "Giampaolo Rebuzzi",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 796
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-san-benedicto-de-polirone\\04_0f680b03.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/95/Polirone-Bell_tower.jpg",
+      "title": "File:Polirone-Bell tower.jpg",
+      "author": "Dani 7C3",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 2560
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-san-benedicto-de-polirone\\05_c9654a50.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Polirone_-_Cloister_of_Saint_Simeon.jpg",
+      "title": "File:Polirone - Cloister of Saint Simeon.jpg",
+      "author": "Dani 7C3",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-san-benedicto-de-polirone\\06_1aa9b3d2.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/de/Polirone_Abbey_-_San_Benedetto_Po%2C_Mantova%2C_Italy_-_February_2%2C_2020.jpg",
+      "title": "File:Polirone Abbey - San Benedetto Po, Mantova, Italy - February 2, 2020.jpg",
+      "author": "Giorgio Galeotti",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-san-benedicto-de-polirone\\07_0cbc4ef3.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d5/Polirone_chiostro.jpg",
+      "title": "File:Polirone chiostro.jpg",
+      "author": "Lkcl it",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-san-benedicto-de-polirone\\08_e87fe859.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/44/San_Benedetto_Po%2C_Abbazia_del_Polirone.jpg",
+      "title": "File:San Benedetto Po, Abbazia del Polirone.jpg",
+      "author": "FranzK",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-san-benedicto-de-polirone\\09_b7ca6fd4.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/5f/San_Benedetto_Po_-_Abbazia_di_San_Benedetto_in_Polirone_-_2025-09-20_12-12-42_001.jpg",
+      "title": "File:San Benedetto Po - Abbazia di San Benedetto in Polirone - 2025-09-20 12-12-42 001.jpg",
+      "author": "231286M",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:AbbaziaDelPolirone SanBenedettoPo.jpg — Zavijavah — CC BY-SA 3.0\n  · File:Abbazia di San Benedetto in Polirone - San Benedetto Po, Mantova, Italia - 15 Febbraio 2020.jpg — Giorgio Galeotti — CC BY-SA 4.0\n  · File:Complesso monastico polironiano.jpg — Giampaolo Rebuzzi — CC BY-SA 4.0\n  · File:Polirone-Bell tower.jpg — Dani 7C3 — CC BY-SA 3.0\n  · File:Polirone chiostro.jpg — Lkcl it — CC BY-SA 3.0\n  · File:San Benedetto Po, Abbazia del Polirone.jpg — FranzK — CC BY-SA 4.0\n  · File:San Benedetto Po - Abbazia di San Benedetto in Polirone - 2025-09-20 12-12-42 001.jpg — 231286M — CC BY-SA 4.0"
+}

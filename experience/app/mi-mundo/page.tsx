@@ -1,15 +1,19 @@
 /**
- * /mi-mundo · KUDOS Personal World Layer v5 (mockup GPT-5 / AXÓN 1.0).
- * Phase 1: datos desde localStorage. Phase 2: API v2 desplegada.
+ * /mi-mundo · KUDOS Personal World V2 · T3.2 EJEC Day 16.
+ *
+ * Tres tabs:
+ *   - Mapa cognitivo  -> PersonalGraph (constelacion 7 pilares)
+ *   - Tus shifts      -> ShiftHistory (lista revisitable)
+ *   - Tus lugares     -> MiMundoV5 (favoritos clasicos)
  */
 import type { Metadata } from "next";
-import { MiMundoV5 } from "@/components/screens/mi-mundo/v5/MiMundoV5";
+import { MiMundoTabs } from "@/components/screens/mi-mundo/v5/MiMundoTabs";
 
 export const metadata: Metadata = {
-  title: "KUDOS · Mi Mundo",
-  description: "Tu universo de lugares, historias y recuerdos.",
+  title: "KUDOS - Mi Mundo",
+  description: "Tu mapa personal de descubrimiento.",
 };
 
 export default function MiMundoPage() {
-  return <MiMundoV5 />;
+  return <MiMundoTabs />;
 }

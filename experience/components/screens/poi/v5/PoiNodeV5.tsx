@@ -1,9 +1,21 @@
 "use client";
 /**
- * KUDOS POI Node v5 · vista detalle de POI (mockup GPT-5).
+ * KUDOS POI Node V2 · refactor T3.2 EJEC Day 4.
  *
- * Phase 1: placeholder con tabs · KUDOS MIND es UI sin chat real.
- * Phase 2: conectar a /api/world/poi/{id}/node del Capsule Engine v2.
+ * 6 secciones canonicas (T3.1 Bloque 4):
+ *   1. INFO        - hero foto + nombre + flag + tags + datos clave
+ *   2. HISTORIA    - encuadre breve narrativo (~200 palabras)
+ *   3. WHY MATTERS - WHY IT MATTERS si existe en backend para este POI
+ *   4. SHIFT       - Discovery Shift Card (si POI Core/Omega)
+ *   5. RELATED     - 3 POIs vinculados ("Donde te lleva esto")
+ *   6. ACTION      - ActionPotentialCard
+ *
+ * Tracking automatico:
+ *   - node_open al mount
+ *   - poi_scroll_depth en 25%, 50%, 75%, 100%
+ *   - capsule_complete si llega al final
+ *
+ * Defensive: si POI no tiene WHY MATTERS o shift, se ocultan esas secciones.
  */
 import * as React from "react";
 import { useRouter } from "next/navigation";
@@ -13,116 +25,148 @@ import { AddToMyWorldButton } from "@/components/discovery/AddToMyWorldButton";
 import { useScrollDepth } from "@/components/discovery/useScrollDepth";
 import { useTimeOnScreen } from "@/components/discovery/useTimeOnScreen";
 import { Track } from "@/components/discovery/kudosTelemetry";
-import { useRelatedPois } from "@/components/discovery/useRelatedPois";
 import { useNarratives, TYPE_ICON } from "@/components/discovery/useNarratives";
 import { usePoiData } from "@/components/discovery/usePoiData";
 import { useSignals } from "@/components/discovery/useSignals";
+import { RelatedHumanityRail } from "./RelatedHumanityRail";
+import { ActionPotentialCard } from "./ActionPotentialCard";
 
 
-interface Props {
-  poiId: string;
+const API = process.env.NEXT_PUBLIC_KUDOS_API_URL || "";
+
+
+interface Props { poiId: string; }
+
+
+interface CoreData {
+  pillar: string | null;
+  narrative: { hook: string | null; body_md: string | null; title: string | null } | null;
+  shift: { before: string; discovery: string; after: string; action_potential?: string | null } | null;
 }
-
-
-type Tab = "resumen" | "historia" | "tiempo" | "experiencias" | "info" | "mind";
 
 
 export function PoiNodeV5({ poiId }: Props) {
   const router = useRouter();
-  const [tab, setTab] = React.useState<Tab>("resumen");
-  const [era, setEra] = React.useState<"80" | "120" | "1500" | "1800" | "hoy">("80");
-
   const { poi: realPoi } = usePoiData(poiId);
   const { data: signals } = useSignals(poiId);
+  const [coreData, setCoreData] = React.useState<CoreData | null>(null);
 
-  const poi = {
-    name: realPoi?.name || "Coliseo",
-    category: realPoi?.category || "MONUMENTO HISTÓRICO",
-    location: realPoi?.country || "Roma, Italia",
-    flag: realPoi?.flag || "🇮🇹",
-    rating: signals ? Math.round((Math.max(60, signals.emotion_score) / 100 + 4) * 10) / 10 : 4.9,
-    ratingCount: signals?.total_resonances || 1248,
-    description: realPoi?.short_description || "Anfiteatro emblemático del Imperio Romano. Escenario de luchas de gladiadores y espectáculos que fascinaban al mundo.",
-    tags: deriveTagsForCategory(realPoi?.category),
-    distance: "320 m",
-    schedule: "Abierto ahora 8:30 – 19:00",
-    keyData: deriveKeyData(realPoi?.category, realPoi?.country),
-  };
-
-  // HDG · capa Discovery · disparar al mount + medir tiempo
+  // HDG capturas
   React.useEffect(() => { Track.nodeOpen(poiId); }, [poiId]);
   useTimeOnScreen("poi_time_on_screen", poiId);
   useScrollDepth(poiId);
+
+  // Si el POI es Core, cargar narrative + shift del backend
+  React.useEffect(() => {
+    if (!API) return;
+    fetch(`${API}/api/core/${poiId}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((j) => { if (j) setCoreData(j); })
+      .catch(() => {});
+  }, [poiId]);
+
+  const poi = {
+    name: realPoi?.name || "POI",
+    category: realPoi?.category || "Lugar de interes",
+    location: realPoi?.country || "-",
+    flag: realPoi?.flag || "X",
+    description: realPoi?.short_description || coreData?.narrative?.hook || "Sin descripcion.",
+    tags: deriveTagsForCategory(realPoi?.category),
+    keyData: deriveKeyData(realPoi?.category, realPoi?.country),
+  };
 
   return (
     <div style={ROOT}>
       <Header onBack={() => router.back()} />
 
+      {/* SECCION 1 - INFO */}
       <section style={HERO}>
         <div style={HERO_IMG} />
         <div style={HERO_GRAD} />
-
         <div style={HERO_TEXT}>
+          {coreData?.pillar && (
+            <span style={CORE_TAG}>HUMANITY CORE · {coreData.pillar.toUpperCase()}</span>
+          )}
           <span style={CATEGORY_CHIP}>{poi.category}</span>
           <h1 style={POI_TITLE}>{poi.name}</h1>
           <div style={LOC_ROW}>
             <span>{poi.flag}</span>
             <span>{poi.location}</span>
           </div>
-          <div style={{ marginTop: 12, marginBottom: 4 }}>
-            <ResonancePicker poiId={poiId} variant="full" />
-          </div>
           <p style={POI_DESC}>{poi.description}</p>
-          <div style={TAGS}>
+          <div style={TAGS_ROW}>
             {poi.tags.map((t) => <span key={t} style={TAG}>{t}</span>)}
-          </div>
-        </div>
-
-        <div style={DIST_INFO}>
-          <div style={DIST_ROW}>
-            <span style={{ color: "rgba(255,255,255,0.65)" }}>Estás a</span>
-            <strong>{poi.distance}</strong>
-            <button style={NAV_BTN}>➤</button>
-          </div>
-          <div style={SCHEDULE_ROW}>
-            <span style={{ color: "#8B6BFF" }}>●</span> {poi.schedule}
           </div>
         </div>
       </section>
 
-      {/* Tabs */}
-      <nav style={TABS}>
-        <TabBtn id="resumen"      label="Resumen"            icon="◇" active={tab} onClick={setTab} />
-        <TabBtn id="historia"     label="Historia"           icon="🏛" active={tab} onClick={setTab} />
-        <TabBtn id="tiempo"       label="Explorar en el tiempo" icon="⏱" active={tab} onClick={setTab} />
-        <TabBtn id="experiencias" label="Experiencias"       icon="⚙" active={tab} onClick={setTab} />
-        <TabBtn id="info"         label="Info práctica"      icon="ⓘ" active={tab} onClick={setTab} />
-        <TabBtn id="mind"         label="Conversar con KUDOS" icon="💭" active={tab} onClick={setTab} />
-      </nav>
-
-      {tab === "resumen" && <ResumenTab keyData={poi.keyData} />}
-      {tab === "historia" && <HistoriaTab poiId={poiId} />}
-      {tab === "tiempo" && <TiempoTab era={era} setEra={setEra} />}
-      {tab === "experiencias" && <ExperienciasTab poiId={poiId} />}
-      {tab === "info" && <InfoTab />}
-      {tab === "mind" && <MindTab />}
-
-      <BottomToolbar />
-
-      <div style={EXP_BANNER}>
-        <div>
-          <div style={EXP_TITLE}>Vive la experiencia completa</div>
-          <div style={EXP_SUB}>Entradas, tours y experiencias cerca del {poi.name}.</div>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={AVATARS}>
-            <span style={AV}>👤</span>
-            <span style={{ ...AV, marginLeft: -8 }}>👤</span>
-            <span style={{ ...AV, marginLeft: -8 }}>👤</span>
-            <span style={AV_COUNT}>+1.2k</span>
+      <section style={DATA_CARD}>
+        <h4 style={SECTION_TITLE}>Datos clave</h4>
+        {poi.keyData.map((d) => (
+          <div key={d.label} style={KD_ROW}>
+            <div style={KD_LBL}>{d.label}</div>
+            <div style={KD_VAL}>{d.value}</div>
           </div>
-          <button style={EXP_BTN}>Ver experiencias</button>
+        ))}
+      </section>
+
+      {/* SECCION 2 - HISTORIA breve */}
+      <section style={STORY_BOX}>
+        <div style={LABEL}>HISTORIA</div>
+        <p style={STORY_TXT}>{poi.description}</p>
+      </section>
+
+      {/* SECCION 3 - WHY IT MATTERS (si Core) */}
+      {coreData?.narrative?.body_md && (
+        <section style={WHY_BOX}>
+          <div style={LABEL_GOLD}>WHY IT MATTERS</div>
+          {coreData.narrative.title && <h2 style={WHY_TITLE}>{coreData.narrative.title}</h2>}
+          <NarrativeBody markdown={coreData.narrative.body_md} />
+        </section>
+      )}
+
+      {/* SECCION 4 - DISCOVERY SHIFT CARD (si Core/Omega) */}
+      {coreData?.shift && (
+        <section style={SHIFT_BOX}>
+          <div style={SHIFT_BLOCK}>
+            <div style={SHIFT_LABEL}>ANTES</div>
+            <p style={SHIFT_TEXT}>{coreData.shift.before}</p>
+          </div>
+          <div style={SHIFT_LINE} />
+          <div style={SHIFT_BLOCK}>
+            <div style={SHIFT_LABEL}>DESCUBRIMIENTO</div>
+            <p style={SHIFT_TEXT}>{coreData.shift.discovery}</p>
+          </div>
+          <div style={SHIFT_LINE} />
+          <div style={SHIFT_BLOCK}>
+            <div style={SHIFT_LABEL}>AHORA PUEDES PENSAR</div>
+            <p style={SHIFT_TEXT}>{coreData.shift.after}</p>
+          </div>
+        </section>
+      )}
+
+      {/* SECCION 5 - RELATED HUMANITY */}
+      <RelatedHumanityRail poiId={poiId} />
+
+      {/* SECCION 6 - ACTION POTENTIAL */}
+      {coreData?.shift?.action_potential && (
+        <ActionPotentialCard
+          poiId={poiId}
+          action={coreData.shift.action_potential}
+          pillar={coreData.pillar}
+        />
+      )}
+
+      {/* Resonancia + Save */}
+      <section style={ACTIONS_BAR}>
+        <ResonancePicker poiId={poiId} variant="full" />
+        <div style={{ marginTop: 16 }}>
+          <AddToMyWorldButton poiId={poiId} poiName={poi.name} variant="primary" />
         </div>
+      </section>
+
+      <div style={FOOTER}>
+        <p style={FOOTER_TXT}>Cada POI es una pregunta.<br />La proxima vez que pases por aqui, vuelve.</p>
       </div>
     </div>
   );
@@ -134,630 +178,248 @@ function Header({ onBack }: { onBack: () => void }) {
     <header style={HDR}>
       <button style={HDR_BACK} onClick={onBack}>‹ Volver</button>
       <div style={HDR_CENTER}>
-        <KudosFlowerLogo size={24} variant="gold" glow />
+        <KudosFlowerLogo size={20} variant="gold" glow />
         <span style={HDR_LOGO}>KUDOS</span>
       </div>
-      <div style={HDR_ACTIONS}>
-        <HdrAction icon="↗" label="Compartir" />
-        <HdrAction icon="🔖" label="Guardar" />
-        <HdrAction icon="⋮" label="Más" />
-      </div>
+      <div style={{ width: 60 }} />
     </header>
   );
 }
 
-function HdrAction({ icon, label }: { icon: string; label: string }) {
-  return (
-    <button style={HDR_ACT}>
-      <span style={{ fontSize: 16 }}>{icon}</span>
-      <span style={{ fontSize: 9, marginTop: 2 }}>{label}</span>
-    </button>
-  );
-}
 
-
-function TabBtn({ id, label, icon, active, onClick }: {
-  id: Tab; label: string; icon: string; active: Tab; onClick: (t: Tab) => void;
-}) {
-  const isActive = active === id;
-  return (
-    <button style={{
-      ...TAB,
-      color: isActive ? "#8B6BFF" : "rgba(255,255,255,0.5)",
-      borderBottom: isActive ? "2px solid #8B6BFF" : "2px solid transparent",
-    }} onClick={() => onClick(id)}>
-      <span style={{ fontSize: 13 }}>{icon}</span>
-      <span style={{ fontSize: 12, fontWeight: isActive ? 600 : 500 }}>{label}</span>
-    </button>
-  );
-}
-
-
-function ResumenTab({ keyData }: { keyData: { icon: string; label: string; value: string }[] }) {
-  return (
-    <div style={GRID3}>
-      <div style={{ ...CARD, padding: 0, overflow: "hidden" }}>
-        <div style={CAP_HERO}>
-          <span style={CAP_BADGE}>Cápsula destacada</span>
-          <span style={CAP_TIME}>00:15</span>
-          <button style={CAP_PLAY}>▶</button>
-        </div>
-        <div style={{ padding: 16 }}>
-          <h4 style={CAP_TITLE}>La grandeza del entretenimiento romano</h4>
-        </div>
-      </div>
-
-      <div style={CARD}>
-        <h4 style={CARD_TITLE}>Datos clave</h4>
-        {keyData.map((d) => (
-          <div key={d.label} style={KD_ROW}>
-            <div style={KD_ICON}>{d.icon}</div>
-            <div style={{ flex: 1 }}>
-              <div style={KD_LBL}>{d.label}</div>
-              <div style={KD_VAL}>{d.value}</div>
-            </div>
-          </div>
-        ))}
-        <a style={SEE_ALL}>Ver más información ›</a>
-      </div>
-
-      <div style={CARD}>
-        <h4 style={CARD_TITLE}>Ubicación</h4>
-        <div style={MINI_MAP}>
-          <span style={MAP_PIN}>📍</span>
-        </div>
-        <button style={HOW_BTN}>📍 Cómo llegar</button>
-      </div>
-    </div>
-  );
-}
-
-
-function HistoriaTab() {
-  // Multi-Capsule System · "Más historias del lugar" (P0 CTO)
-  // Phase 1: placeholders · cuando narrative engine genere reales, conecta
-  const narratives = [
-    { icon: "⚔", title: "Gladiadores", hook: "Vidas que se decidían en arena.", type: "Human Story", dur: "0:45" },
-    { icon: "🏛", title: "Roma Imperial", hook: "El símbolo del poder de un imperio.", type: "Hidden Truth", dur: "0:30" },
-    { icon: "⚙", title: "Ingeniería", hook: "Cómo levantaron lo imposible.", type: "Transformation", dur: "0:30" },
-    { icon: "🌧", title: "Violencia pública", hook: "Lo que pagaron los romanos por entretenerse.", type: "Mystery", dur: "0:30" },
-    { icon: "🪨", title: "Construcción", hook: "Cada piedra contó una historia.", type: "Lost World", dur: "0:45" },
-    { icon: "💭", title: "Legado", hook: "Por qué sigue importando hoy.", type: "Present Connection", dur: "0:30" },
-  ];
-
+function NarrativeBody({ markdown }: { markdown: string }) {
+  const blocks = markdown.split(/\n\n+/);
   return (
     <>
-      <div style={CARD}>
-        <h3 style={CARD_TITLE}>Más historias de este lugar</h3>
-        <p style={{ margin: "6px 0 14px", fontSize: 12, color: "rgba(255,255,255,0.55)" }}>
-          Un POI no es una historia. Es un universo narrativo.
-        </p>
-        <div style={NARRATIVES_GRID}>
-          {narratives.map((n, i) => (
-            <button key={i} style={NARRATIVE_CARD}>
-              <div style={NARRATIVE_HEAD}>
-                <div style={NARRATIVE_ICON}>{n.icon}</div>
-                <div style={NARRATIVE_DUR}>{n.dur} ▶</div>
-              </div>
-              <div style={NARRATIVE_TITLE}>{n.title}</div>
-              <div style={NARRATIVE_HOOK}>{n.hook}</div>
-              <div style={NARRATIVE_TYPE}>{n.type}</div>
-            </button>
-          ))}
-        </div>
-      </div>
+      {blocks.map((b, i) => {
+        const trimmed = b.trim();
+        if (/^\*\*[A-Z ]+\*\*$/.test(trimmed)) {
+          const label = trimmed.replace(/\*\*/g, "");
+          return <h4 key={i} style={BLOCK_LABEL}>{label}</h4>;
+        }
+        return <p key={i} style={BODY_P}>{trimmed.replace(/\*\*/g, "")}</p>;
+      })}
     </>
   );
 }
 
 
-function TiempoTab({ era, setEra }: { era: "80" | "120" | "1500" | "1800" | "hoy"; setEra: (e: any) => void }) {
-  const eras = [
-    { id: "80",  label: "80 d.C.",  sub: "En su máximo esplendor" },
-    { id: "120", label: "120 d.C.", sub: "Tras las modificaciones" },
-    { id: "1500", label: "1500",    sub: "Piedra para otras obras" },
-    { id: "1800", label: "1800",    sub: "Descubrimiento romántico" },
-    { id: "hoy",  label: "Hoy",     sub: "Patrimonio mundial" },
+function deriveTagsForCategory(cat?: string): string[] {
+  const c = (cat || "").toLowerCase();
+  if (c.includes("monumento") || c.includes("imperio")) return ["Historia", "Arquitectura", "Imperio"];
+  if (c.includes("religioso") || c.includes("iglesia")) return ["Espiritualidad", "Arte sacro", "Patrimonio"];
+  if (c.includes("arqueol")) return ["Historia antigua", "Descubrimiento", "Civilizaciones"];
+  if (c.includes("museo")) return ["Arte", "Conocimiento", "Cultura"];
+  if (c.includes("natural") || c.includes("parque")) return ["Naturaleza", "Paisaje", "Biosfera"];
+  return ["Cultura", "Viajes", "Patrimonio"];
+}
+
+
+function deriveKeyData(cat?: string, country?: string): { label: string; value: string }[] {
+  const co = country || "-";
+  const c = (cat || "").toLowerCase();
+  if (c.includes("monumento") || c.includes("imperio")) return [
+    { label: "Tipo",   value: "Monumento historico" },
+    { label: "Pais",   value: co },
+    { label: "Epoca",  value: "Antiguedad / Medieval" },
   ];
-  return (
-    <div style={CARD}>
-      <div style={CARD_HEAD}>
-        <h3 style={CARD_TITLE}>Explorar en el tiempo</h3>
-        <a style={SEE_ALL}>Ver timeline completo ›</a>
-      </div>
-      <div style={ERA_PILLS}>
-        {eras.map((e) => (
-          <button key={e.id} style={{
-            ...ERA_PILL,
-            background: era === e.id ? "#8B6BFF" : "rgba(255,255,255,0.06)",
-            color: era === e.id ? "#fff" : "rgba(255,255,255,0.7)",
-          }} onClick={() => setEra(e.id as any)}>
-            {e.label}
-          </button>
-        ))}
-      </div>
-      <div style={ERA_GALLERY}>
-        {eras.map((e) => (
-          <div key={e.id} style={{
-            ...ERA_THUMB,
-            border: era === e.id ? "2px solid #8B6BFF" : "2px solid transparent",
-          }}>
-            <div style={ERA_IMG} />
-            <div style={ERA_INFO}>
-              <div style={ERA_LBL}>{e.label}</div>
-              <div style={ERA_SUB}>{e.sub}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-
-function ExperienciasTab({ poiId }: { poiId: string }) {
-  const { related, loading } = useRelatedPois(poiId, 8);
-  return (
-    <div style={CARD}>
-      <h3 style={CARD_TITLE}>POIs relacionados</h3>
-      <p style={{ margin: "6px 0 12px", fontSize: 11.5, color: "rgba(255,255,255,0.55)" }}>
-        Lugares conectados con este por cercanía o tema.
-      </p>
-      {loading && <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>Cargando relaciones...</div>}
-      {!loading && related.length === 0 && (
-        <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>
-          Aún sin relaciones generadas · ejecuta <code style={{ background: "rgba(255,255,255,0.05)", padding: "1px 4px" }}>python -m kudos_engine.scripts.generate_relationships</code>
-        </div>
-      )}
-      <div style={{ marginTop: 12 }}>
-        {related.map((r) => (
-          <a key={r.id} href={`/poi/${r.id}`} style={REL_ROW_LINK}>
-            <div style={REL_THUMB} />
-            <div style={{ flex: 1 }}>
-              <div style={REL_NAME}>{r.id.replace("wd-Q", "Q").replace(/-/g, " ")}</div>
-              <div style={REL_DIST}>
-                {r.distance_km !== undefined ? `A ${r.distance_km < 1 ? Math.round(r.distance_km * 1000) + " m" : r.distance_km + " km"} · ${r.type}` : r.type}
-              </div>
-            </div>
-            <span style={{ color: "#8B6BFF", fontSize: 14 }}>›</span>
-          </a>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-
-function InfoTab() {
-  return (
-    <div style={CARD}>
-      <h3 style={CARD_TITLE}>Info práctica</h3>
-      <p style={{ marginTop: 12, color: "rgba(255,255,255,0.55)", fontSize: 13 }}>
-        Información práctica del lugar: horarios detallados, precios, accesibilidad, transporte público, recomendaciones y reglas de visita.
-      </p>
-      <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, marginTop: 12 }}>
-        Pendiente de conectar con API v2 (próximamente).
-      </p>
-    </div>
-  );
-}
-
-
-function MindTab() {
-  const prompts = [
-    "¿Qué eventos ocurrieron aquí?",
-    "Muéstrame el Coliseo en 80 d.C.",
-    "¿Cómo era la vida de un gladiador?",
+  if (c.includes("religioso") || c.includes("iglesia")) return [
+    { label: "Culto",  value: "Patrimonio religioso" },
+    { label: "Pais",   value: co },
+    { label: "Estilo", value: "Gotico / Barroco" },
   ];
-  return (
-    <div style={{ ...CARD, background: "linear-gradient(135deg, rgba(139,107,255,0.18) 0%, rgba(15,10,31,0.6) 100%)" }}>
-      <div style={MIND_HEAD}>
-        <KudosFlowerLogo size={22} variant="gold" glow />
-        <div>
-          <div style={MIND_TITLE}>KUDOS MIND</div>
-          <div style={MIND_SUB}>Pregúntame sobre este lugar</div>
-        </div>
-      </div>
-      <div style={{ marginTop: 16 }}>
-        {prompts.map((p, i) => (
-          <button key={i} style={MIND_PROMPT}>
-            <span>{p}</span>
-            <span style={{ color: "#8B6BFF", fontSize: 16 }}>➤</span>
-          </button>
-        ))}
-      </div>
-      <button style={MIND_SPEAK}>
-        <span style={{ marginRight: 8 }}>🎙</span> Hablar ahora
-      </button>
-    </div>
-  );
-}
-
-
-function BottomToolbar() {
-  const actions = [
-    { icon: "📍", label: "Estuve aquí",   sub: "Deja tu huella" },
-    { icon: "🌍", label: "Añadir a Mi Mundo", sub: "Tu mapa de significado" },
-    { icon: "⊕",  label: "Crear cápsula",  sub: "Comparte tu perspectiva", primary: true },
-    { icon: "↗",  label: "Compartir",      sub: "Con amigos" },
-    { icon: "📐", label: "Ruta",           sub: "Añadir a ruta" },
+  if (c.includes("arqueol")) return [
+    { label: "Yacimiento", value: "Sitio arqueologico" },
+    { label: "Pais",       value: co },
+    { label: "Antiguedad", value: "Mas de 1.000 anos" },
   ];
-  return (
-    <div style={TOOLBAR}>
-      {actions.map((a) => (
-        <button key={a.label} style={{
-          ...TB_ACT,
-          background: a.primary ? "radial-gradient(circle, rgba(139,107,255,0.6) 0%, transparent 70%)" : "transparent",
-        }}>
-          <div style={{
-            ...TB_ICON,
-            background: a.primary ? "linear-gradient(135deg, #8B6BFF, #6e4dd6)" : "transparent",
-            border: a.primary ? "none" : "1px solid rgba(255,255,255,0.15)",
-            width: a.primary ? 48 : 36, height: a.primary ? 48 : 36,
-            color: a.primary ? "#fff" : "rgba(255,255,255,0.7)",
-          }}>{a.icon}</div>
-          <div style={TB_LBL}>{a.label}</div>
-          <div style={TB_SUB}>{a.sub}</div>
-        </button>
-      ))}
-    </div>
-  );
+  if (c.includes("museo")) return [
+    { label: "Tipo",       value: "Museo" },
+    { label: "Pais",       value: co },
+    { label: "Coleccion",  value: "Permanente / temporal" },
+  ];
+  return [
+    { label: "Tipo",      value: cat || "Lugar de interes" },
+    { label: "Pais",      value: co },
+    { label: "Patrimonio", value: "Cultural / historico" },
+  ];
 }
 
 
-// ─── Styles ─────────────────────────────────────────────────────────
+// ===================== STYLES =====================
 const ROOT: React.CSSProperties = {
-  background: "#0a0814", color: "#fff",
-  minHeight: "100vh", paddingBottom: 80,
-  fontFamily: '"Poppins", system-ui, sans-serif',
+  background: "#0a0814", minHeight: "100vh",
+  paddingBottom: 110, color: "#fff",
+  maxWidth: 720, margin: "0 auto",
 };
-
 const HDR: React.CSSProperties = {
-  display: "flex", alignItems: "center", justifyContent: "space-between",
-  padding: "16px 22px",
-  background: "rgba(10,8,20,0.7)",
-  backdropFilter: "blur(10px)",
-  position: "sticky", top: 0, zIndex: 10,
+  display: "flex", justifyContent: "space-between", alignItems: "center",
+  padding: "16px 20px",
 };
 const HDR_BACK: React.CSSProperties = {
-  background: "transparent", border: "none",
-  color: "#fff", fontSize: 14, cursor: "pointer", padding: "6px 0",
-  fontFamily: 'inherit',
+  background: "transparent", border: "none", color: "rgba(255,255,255,0.7)",
+  fontSize: 14, cursor: "pointer",
 };
 const HDR_CENTER: React.CSSProperties = {
-  display: "flex", alignItems: "center", gap: 8,
+  display: "flex", alignItems: "center", gap: 6,
 };
 const HDR_LOGO: React.CSSProperties = {
-  fontWeight: 700, fontSize: 17, letterSpacing: "0.18em", color: "#fff",
-};
-const HDR_ACTIONS: React.CSSProperties = { display: "flex", gap: 18 };
-const HDR_ACT: React.CSSProperties = {
-  background: "transparent", border: "none",
-  color: "#fff", cursor: "pointer",
-  display: "flex", flexDirection: "column", alignItems: "center",
-  fontFamily: 'inherit',
+  fontFamily: '"Poppins", system-ui, sans-serif',
+  fontSize: 14, fontWeight: 700, letterSpacing: "0.18em",
 };
 
 const HERO: React.CSSProperties = {
-  position: "relative", padding: "32px 22px 24px",
-  display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22,
-  minHeight: 320,
+  position: "relative",
+  minHeight: 340, padding: "20px 24px 28px",
+  background: "linear-gradient(135deg, #2a1542 0%, #1a0f2e 100%)",
+  overflow: "hidden" as const,
 };
 const HERO_IMG: React.CSSProperties = {
-  position: "absolute", top: 0, right: 0, bottom: 0, left: "40%",
-  background: 'url("https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Colosseo_2020.jpg/1200px-Colosseo_2020.jpg") center/cover',
+  position: "absolute", inset: 0,
+  background: "linear-gradient(180deg, rgba(0,0,0,0.2), rgba(10,8,20,0.95))",
+  pointerEvents: "none",
 };
 const HERO_GRAD: React.CSSProperties = {
-  position: "absolute", top: 0, right: 0, bottom: 0, left: "40%",
-  background: "linear-gradient(90deg, #0a0814 0%, transparent 30%)",
+  position: "absolute", inset: 0,
+  background: "radial-gradient(circle at top right, rgba(201,169,97,0.18), transparent 60%)",
+  pointerEvents: "none",
 };
-const HERO_TEXT: React.CSSProperties = { position: "relative", zIndex: 2 };
+const HERO_TEXT: React.CSSProperties = {
+  position: "relative", zIndex: 1,
+  display: "flex", flexDirection: "column",
+  justifyContent: "flex-end", minHeight: 300,
+};
+const CORE_TAG: React.CSSProperties = {
+  display: "inline-block",
+  padding: "4px 10px", borderRadius: 999,
+  background: "rgba(201,169,97,0.15)",
+  border: "1px solid rgba(201,169,97,0.4)",
+  fontSize: 9, letterSpacing: "0.22em", fontWeight: 600,
+  color: "#C9A961", marginBottom: 12,
+  width: "fit-content" as const,
+};
 const CATEGORY_CHIP: React.CSSProperties = {
   display: "inline-block",
-  fontSize: 10, fontWeight: 700, color: "#8B6BFF",
-  letterSpacing: "0.18em",
-  marginBottom: 14,
+  fontSize: 10, letterSpacing: "0.16em", fontWeight: 600,
+  color: "rgba(255,255,255,0.65)", marginBottom: 8,
+  width: "fit-content" as const,
 };
 const POI_TITLE: React.CSSProperties = {
-  margin: 0,
-  fontFamily: 'Georgia, "Times New Roman", serif',
-  fontWeight: 400, fontSize: 48, lineHeight: 1.05,
+  fontFamily: 'var(--kudos-font-display, "Cormorant Garamond", Georgia, serif)',
+  fontSize: 36, fontWeight: 600, lineHeight: 1.05,
+  margin: "0 0 8px", letterSpacing: "-0.01em",
 };
 const LOC_ROW: React.CSSProperties = {
-  marginTop: 10, display: "flex", alignItems: "center", gap: 6,
-  fontSize: 14, color: "rgba(255,255,255,0.75)",
+  display: "flex", alignItems: "center", gap: 8,
+  fontSize: 12, color: "rgba(255,255,255,0.7)", marginBottom: 14,
 };
-const RATING_ROW: React.CSSProperties = {
-  marginTop: 8, display: "flex", alignItems: "center", gap: 6,
-  fontSize: 14, color: "#fff",
-};
-const STAR: React.CSSProperties = { color: "#C9A961", fontSize: 14 };
-const RATING_COUNT: React.CSSProperties = { color: "rgba(255,255,255,0.5)", fontSize: 12, marginLeft: 4 };
 const POI_DESC: React.CSSProperties = {
-  margin: "16px 0", fontSize: 13.5, lineHeight: 1.5,
-  color: "rgba(255,255,255,0.72)",
+  fontFamily: 'Georgia, serif',
+  fontSize: 14, lineHeight: 1.55,
+  color: "rgba(255,255,255,0.85)", margin: "0 0 14px",
 };
-const TAGS: React.CSSProperties = { display: "flex", gap: 6, flexWrap: "wrap" };
+const TAGS_ROW: React.CSSProperties = {
+  display: "flex", flexWrap: "wrap" as const, gap: 6,
+};
 const TAG: React.CSSProperties = {
-  fontSize: 11, padding: "5px 12px", borderRadius: 999,
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  color: "rgba(255,255,255,0.85)",
-};
-
-const DIST_INFO: React.CSSProperties = {
-  position: "absolute", bottom: 24, right: 22,
-  textAlign: "right" as const,
-  zIndex: 2,
-};
-const DIST_ROW: React.CSSProperties = {
-  display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8,
-  fontSize: 14, color: "#fff",
-};
-const NAV_BTN: React.CSSProperties = {
-  width: 30, height: 30, borderRadius: "50%",
-  background: "#8B6BFF", border: "none", color: "#fff",
-  cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center",
-};
-const SCHEDULE_ROW: React.CSSProperties = {
-  marginTop: 6, fontSize: 12, color: "rgba(255,255,255,0.7)",
-};
-
-const TABS: React.CSSProperties = {
-  display: "flex", gap: 20, padding: "0 22px",
-  borderBottom: "1px solid rgba(255,255,255,0.06)",
-  overflowX: "auto" as const,
-  scrollbarWidth: "none" as const,
-};
-const TAB: React.CSSProperties = {
-  display: "flex", alignItems: "center", gap: 6,
-  padding: "12px 0",
-  background: "transparent", border: "none", borderBottom: "2px solid transparent",
-  cursor: "pointer", fontFamily: 'inherit',
-  flexShrink: 0,
-};
-
-const GRID3: React.CSSProperties = {
-  display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr",
-  gap: 14, padding: "18px 22px",
-};
-
-const CARD: React.CSSProperties = {
-  background: "rgba(15,10,31,0.6)",
-  border: "1px solid rgba(139,107,255,0.12)",
-  borderRadius: 16, padding: 18,
-  margin: "18px 22px",
-};
-const CARD_HEAD: React.CSSProperties = {
-  display: "flex", justifyContent: "space-between", alignItems: "center",
-  marginBottom: 6,
-};
-const CARD_TITLE: React.CSSProperties = {
-  margin: 0, fontSize: 16, fontWeight: 600, color: "#fff",
-};
-const SEE_ALL: React.CSSProperties = {
-  fontSize: 11, color: "#8B6BFF", cursor: "pointer",
-  display: "inline-block", marginTop: 8,
-};
-
-const CAP_HERO: React.CSSProperties = {
-  position: "relative", height: 160,
-  background: 'url("https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Colosseo_2020.jpg/800px-Colosseo_2020.jpg") center/cover',
-};
-const CAP_BADGE: React.CSSProperties = {
-  position: "absolute", top: 10, left: 10,
   padding: "4px 10px", borderRadius: 999,
-  background: "rgba(139,107,255,0.85)",
-  fontSize: 10, color: "#fff",
-};
-const CAP_TIME: React.CSSProperties = {
-  position: "absolute", top: 10, right: 10,
-  padding: "4px 10px", borderRadius: 999,
-  background: "rgba(0,0,0,0.7)",
-  fontSize: 11, color: "#fff", fontWeight: 600,
-};
-const CAP_PLAY: React.CSSProperties = {
-  position: "absolute", top: "50%", left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 50, height: 50, borderRadius: "50%",
-  background: "rgba(255,255,255,0.9)", color: "#1f1b18",
-  border: "none", fontSize: 18, cursor: "pointer",
-};
-const CAP_TITLE: React.CSSProperties = {
-  margin: 0, fontSize: 14, fontWeight: 600, color: "#fff",
-};
-
-const KD_ROW: React.CSSProperties = {
-  display: "flex", alignItems: "flex-start", gap: 10,
-  padding: "10px 0",
-  borderTop: "1px solid rgba(255,255,255,0.05)",
-};
-const KD_ICON: React.CSSProperties = { fontSize: 14, color: "#8B6BFF", marginTop: 2 };
-const KD_LBL: React.CSSProperties = { fontSize: 10, color: "rgba(255,255,255,0.55)", marginBottom: 2 };
-const KD_VAL: React.CSSProperties = { fontSize: 12, color: "#fff", fontWeight: 500 };
-
-const MINI_MAP: React.CSSProperties = {
-  position: "relative", height: 140,
-  background: "linear-gradient(135deg, #1a1428, #0f0a1f)",
-  borderRadius: 12, marginTop: 10,
-  display: "flex", alignItems: "center", justifyContent: "center",
-};
-const MAP_PIN: React.CSSProperties = { fontSize: 28, color: "#8B6BFF" };
-const HOW_BTN: React.CSSProperties = {
-  marginTop: 10, width: "100%",
-  padding: "10px 14px", borderRadius: 999,
-  background: "rgba(139,107,255,0.18)",
-  border: "1px solid rgba(139,107,255,0.4)",
-  color: "#fff", fontSize: 12, cursor: "pointer",
-  fontFamily: 'inherit',
-};
-
-const NARRATIVES_GRID: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-  gap: 12,
-};
-const NARRATIVE_CARD: React.CSSProperties = {
-  background: "rgba(15,10,31,0.4)",
-  border: "1px solid rgba(139,107,255,0.18)",
-  borderRadius: 14,
-  padding: 14,
-  cursor: "pointer",
-  fontFamily: "inherit",
-  textAlign: "left",
-  transition: "all 0.2s ease",
-};
-const NARRATIVE_HEAD: React.CSSProperties = {
-  display: "flex", justifyContent: "space-between", alignItems: "center",
-  marginBottom: 8,
-};
-const NARRATIVE_ICON: React.CSSProperties = {
-  fontSize: 18, color: "#8B6BFF",
-};
-const NARRATIVE_DUR: React.CSSProperties = {
-  fontSize: 10, fontWeight: 600, color: "#fff",
-  padding: "3px 8px", borderRadius: 999,
-  background: "rgba(139,107,255,0.18)",
-};
-const NARRATIVE_TITLE: React.CSSProperties = {
-  fontFamily: 'Georgia, "Times New Roman", serif',
-  fontSize: 18, fontWeight: 400, color: "#fff",
-  marginBottom: 4,
-};
-const NARRATIVE_HOOK: React.CSSProperties = {
-  fontSize: 12, color: "rgba(255,255,255,0.7)",
-  fontStyle: "italic" as const,
-  lineHeight: 1.4, marginBottom: 6,
-};
-const NARRATIVE_TYPE: React.CSSProperties = {
-  fontSize: 9, color: "#8B6BFF",
-  letterSpacing: "0.12em", fontWeight: 700,
-};
-
-const HIGHLIGHT: React.CSSProperties = {
-  background: "rgba(255,255,255,0.04)",
-  borderRadius: 12, padding: 14,
-};
-const HIGHLIGHT_ICON: React.CSSProperties = { fontSize: 22, color: "#8B6BFF" };
-const HIGHLIGHT_TITLE: React.CSSProperties = {
-  marginTop: 8, fontSize: 13, fontWeight: 600, color: "#fff",
-};
-const HIGHLIGHT_DESC: React.CSSProperties = {
-  marginTop: 4, fontSize: 11, color: "rgba(255,255,255,0.55)",
-};
-
-const ERA_PILLS: React.CSSProperties = {
-  display: "flex", gap: 8, marginTop: 14,
-};
-const ERA_PILL: React.CSSProperties = {
-  padding: "7px 14px", borderRadius: 999,
-  border: "none", fontSize: 12, fontWeight: 500,
-  cursor: "pointer", fontFamily: 'inherit',
-};
-const ERA_GALLERY: React.CSSProperties = {
-  display: "grid", gridTemplateColumns: "repeat(5, 1fr)",
-  gap: 10, marginTop: 16,
-};
-const ERA_THUMB: React.CSSProperties = {
-  borderRadius: 10, overflow: "hidden",
-  background: "rgba(255,255,255,0.04)",
-};
-const ERA_IMG: React.CSSProperties = {
-  width: "100%", height: 100,
-  background: "linear-gradient(135deg, #2a1542, #1a0f2e)",
-};
-const ERA_INFO: React.CSSProperties = { padding: "8px 10px" };
-const ERA_LBL: React.CSSProperties = { fontSize: 12, fontWeight: 600, color: "#fff" };
-const ERA_SUB: React.CSSProperties = { fontSize: 9.5, color: "rgba(255,255,255,0.5)", marginTop: 2 };
-
-const REL_ROW_LINK: React.CSSProperties = {
-  display: "flex", alignItems: "center", gap: 12,
-  padding: "10px 0", textDecoration: "none", color: "inherit",
-  borderTop: "1px solid rgba(255,255,255,0.06)",
-};
-
-const REL_ROW: React.CSSProperties = {
-  display: "flex", alignItems: "center", gap: 12,
-  padding: "10px 0",
-  borderTop: "1px solid rgba(255,255,255,0.06)",
-};
-const REL_THUMB: React.CSSProperties = {
-  width: 56, height: 50, borderRadius: 8,
-  background: "linear-gradient(135deg, #2a1542, #1a0f2e)",
-};
-const REL_NAME: React.CSSProperties = { fontSize: 13, fontWeight: 600, color: "#fff" };
-const REL_DIST: React.CSSProperties = { fontSize: 10, color: "rgba(255,255,255,0.5)" };
-
-const MIND_HEAD: React.CSSProperties = {
-  display: "flex", alignItems: "center", gap: 10,
-};
-const MIND_TITLE: React.CSSProperties = {
-  fontSize: 14, fontWeight: 700, color: "#fff",
-};
-const MIND_SUB: React.CSSProperties = {
-  fontSize: 11, color: "rgba(255,255,255,0.55)",
-};
-const MIND_PROMPT: React.CSSProperties = {
-  display: "flex", alignItems: "center", justifyContent: "space-between",
-  width: "100%", padding: "12px 16px",
   background: "rgba(255,255,255,0.06)",
+  fontSize: 11, color: "rgba(255,255,255,0.75)",
+};
+
+const SECTION_TITLE: React.CSSProperties = {
+  fontFamily: 'var(--kudos-font-display, "Cormorant Garamond", Georgia, serif)',
+  fontSize: 18, fontWeight: 500, color: "#fff",
+  margin: "0 0 12px",
+};
+
+const DATA_CARD: React.CSSProperties = {
+  margin: "20px 24px 8px",
+  padding: "20px 18px",
+  background: "rgba(255,255,255,0.04)",
   border: "1px solid rgba(255,255,255,0.08)",
-  borderRadius: 12,
-  color: "#fff", fontSize: 12, fontWeight: 500,
-  marginBottom: 8,
-  cursor: "pointer", fontFamily: 'inherit',
+  borderRadius: 14,
 };
-const MIND_SPEAK: React.CSSProperties = {
-  marginTop: 10, width: "100%",
-  padding: "12px 20px", borderRadius: 12,
-  background: "linear-gradient(135deg, #8B6BFF, #6e4dd6)",
-  border: "none", color: "#fff",
-  fontSize: 13, fontWeight: 600,
-  cursor: "pointer", fontFamily: 'inherit',
+const KD_ROW: React.CSSProperties = {
+  display: "flex", justifyContent: "space-between",
+  padding: "8px 0",
+  borderBottom: "1px solid rgba(255,255,255,0.05)",
+};
+const KD_LBL: React.CSSProperties = { fontSize: 12, color: "rgba(255,255,255,0.55)" };
+const KD_VAL: React.CSSProperties = { fontSize: 13, color: "rgba(255,255,255,0.92)", fontWeight: 500 };
+
+const STORY_BOX: React.CSSProperties = {
+  margin: "24px 24px 8px",
+  padding: "20px 18px",
+};
+const LABEL: React.CSSProperties = {
+  fontSize: 10, letterSpacing: "0.22em", color: "rgba(201,169,97,0.85)",
+  fontWeight: 600, marginBottom: 12,
+};
+const STORY_TXT: React.CSSProperties = {
+  fontFamily: 'Georgia, serif',
+  fontSize: 15, lineHeight: 1.6, color: "rgba(255,255,255,0.85)",
+  margin: 0,
 };
 
-const TOOLBAR: React.CSSProperties = {
-  display: "grid", gridTemplateColumns: "repeat(5, 1fr)",
-  gap: 8, padding: "20px 22px 12px",
-  borderTop: "1px solid rgba(255,255,255,0.06)",
+const WHY_BOX: React.CSSProperties = {
+  margin: "32px 24px 8px",
+  padding: "20px 18px",
+  borderTop: "1px solid rgba(201,169,97,0.18)",
 };
-const TB_ACT: React.CSSProperties = {
-  display: "flex", flexDirection: "column", alignItems: "center",
-  background: "transparent", border: "none",
-  cursor: "pointer", fontFamily: 'inherit',
+const LABEL_GOLD: React.CSSProperties = {
+  fontSize: 10, letterSpacing: "0.22em", color: "#C9A961",
+  fontWeight: 700, marginBottom: 14, marginTop: 6,
 };
-const TB_ICON: React.CSSProperties = {
-  borderRadius: "50%",
-  display: "flex", alignItems: "center", justifyContent: "center",
-  fontSize: 16, marginBottom: 6,
+const WHY_TITLE: React.CSSProperties = {
+  fontFamily: 'var(--kudos-font-display, "Cormorant Garamond", Georgia, serif)',
+  fontSize: 26, fontWeight: 600, lineHeight: 1.1,
+  margin: "0 0 18px", letterSpacing: "-0.01em",
 };
-const TB_LBL: React.CSSProperties = { fontSize: 11, fontWeight: 600, color: "#fff" };
-const TB_SUB: React.CSSProperties = { fontSize: 9, color: "rgba(255,255,255,0.5)", marginTop: 2 };
+const BLOCK_LABEL: React.CSSProperties = {
+  fontSize: 11, letterSpacing: "0.20em", color: "#C9A961",
+  fontWeight: 600, marginTop: 20, marginBottom: 10,
+};
+const BODY_P: React.CSSProperties = {
+  fontFamily: 'Georgia, serif',
+  fontSize: 16, lineHeight: 1.65, color: "rgba(255,255,255,0.88)",
+  margin: "0 0 16px",
+};
 
-const EXP_BANNER: React.CSSProperties = {
-  display: "flex", alignItems: "center", justifyContent: "space-between",
-  margin: "0 22px 22px",
-  padding: "16px 20px",
-  background: "rgba(255,255,255,0.04)",
+const SHIFT_BOX: React.CSSProperties = {
+  margin: "24px",
+  padding: "26px 22px",
+  background: "rgba(255,255,255,0.03)",
+  border: "1px solid rgba(201,169,97,0.18)",
   borderRadius: 16,
 };
-const EXP_TITLE: React.CSSProperties = { fontSize: 14, fontWeight: 600, color: "#fff" };
-const EXP_SUB: React.CSSProperties = { fontSize: 11, color: "rgba(255,255,255,0.55)", marginTop: 2 };
-const AVATARS: React.CSSProperties = { display: "flex", alignItems: "center" };
-const AV: React.CSSProperties = {
-  width: 28, height: 28, borderRadius: "50%",
-  background: "#8B6BFF", color: "#fff",
-  border: "2px solid #0a0814",
-  display: "inline-flex", alignItems: "center", justifyContent: "center",
-  fontSize: 12,
+const SHIFT_BLOCK: React.CSSProperties = { padding: "8px 0" };
+const SHIFT_LABEL: React.CSSProperties = {
+  fontSize: 10, letterSpacing: "0.22em", color: "#C9A961",
+  fontWeight: 600, marginBottom: 8,
 };
-const AV_COUNT: React.CSSProperties = {
-  marginLeft: 8, fontSize: 11, color: "rgba(255,255,255,0.7)",
+const SHIFT_TEXT: React.CSSProperties = {
+  fontFamily: 'Georgia, serif',
+  fontSize: 16, lineHeight: 1.5,
+  color: "rgba(255,255,255,0.92)", margin: 0,
 };
-const EXP_BTN: React.CSSProperties = {
-  padding: "10px 18px", borderRadius: 12,
-  background: "linear-gradient(135deg, #8B6BFF, #6e4dd6)",
-  border: "none", color: "#fff",
-  fontSize: 12, fontWeight: 600,
-  cursor: "pointer", fontFamily: 'inherit',
+const SHIFT_LINE: React.CSSProperties = {
+  width: 1, height: 24, margin: "6px auto",
+  background: "rgba(201,169,97,0.35)",
+};
+
+const ACTIONS_BAR: React.CSSProperties = {
+  margin: "30px 24px 12px",
+  padding: "18px 18px",
+};
+
+const FOOTER: React.CSSProperties = {
+  marginTop: 40, padding: "20px 24px",
+  textAlign: "center" as const,
+};
+const FOOTER_TXT: React.CSSProperties = {
+  fontFamily: 'var(--kudos-font-display, "Cormorant Garamond", Georgia, serif)',
+  fontSize: 13, fontStyle: "italic",
+  color: "rgba(255,255,255,0.4)", margin: 0,
+  lineHeight: 1.6,
 };

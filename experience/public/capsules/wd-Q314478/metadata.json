@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q314478",
+    "name": "Abadía de Altzella",
+    "lat": 51.0603,
+    "lng": 13.2765,
+    "country_code": "DE",
+    "category": "museo",
+    "type": "museo",
+    "wikidata": "Q314478",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Altzella%20Konversenhaus.jpg",
+    "unesco": true,
+    "tier": "A",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Abadía de Altzella",
+    "subtitle": "Un lugar que merece ser recordado",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "Existe un lugar donde el tiempo se detuvo: Abadía de Altzella.",
+        "direction": "in",
+        "search_hint": "Abadía de Altzella",
+        "duration": 5.62
+      },
+      {
+        "title": "Contexto",
+        "narration": "Su historia atraviesa siglos.",
+        "direction": "right",
+        "search_hint": "Abadía de Altzella",
+        "duration": 5.62
+      },
+      {
+        "title": "Escala",
+        "narration": "Sus dimensiones desafían lo posible.",
+        "direction": "out",
+        "search_hint": "Abadía de Altzella",
+        "duration": 5.62
+      },
+      {
+        "title": "Detalle",
+        "narration": "Cada piedra guarda una memoria.",
+        "direction": "left",
+        "search_hint": "Abadía de Altzella",
+        "duration": 5.62
+      },
+      {
+        "title": "Significado",
+        "narration": "Aquí cambió el curso de la civilización.",
+        "direction": "in",
+        "search_hint": "Abadía de Altzella",
+        "duration": 5.62
+      },
+      {
+        "title": "Legado",
+        "narration": "Hoy sigue inspirando al mundo.",
+        "direction": "up",
+        "search_hint": "Abadía de Altzella",
+        "duration": 5.62
+      },
+      {
+        "title": "KUDOS",
+        "narration": "Reconoce. Recuerda. Comparte.",
+        "direction": "in",
+        "search_hint": "Abadía de Altzella",
+        "duration": 5.62
+      },
+      {
+        "title": "Cierre",
+        "narration": "Abadía de Altzella. KUDOS.",
+        "direction": "out",
+        "search_hint": "Abadía de Altzella",
+        "duration": 5.62
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-altzella\\00_b62d2cb1.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/de/02720-Alt_-_Zella-1902-Ruinen_des_Klosters%2C_Tor-Giebel-Kapelle-Br%C3%BCck_%26_Sohn_Kunstverlag.jpg",
+      "title": "File:02720-Alt - Zella-1902-Ruinen des Klosters, Tor-Giebel-Kapelle-Brück & Sohn Kunstverlag.jpg",
+      "author": "Brück &amp; Sohn Kunstverlag Meißen",
+      "license": "CC0",
+      "width": 1526,
+      "height": 1000
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-altzella\\01_d68d2ca2.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/5a/02734-Altzella-1902-Kloster_-_Kapelle_der_heiligen_drei_K%C3%B6nige-Br%C3%BCck_%26_Sohn_Kunstverlag.jpg",
+      "title": "File:02734-Altzella-1902-Kloster - Kapelle der heiligen drei Könige-Brück & Sohn Kunstverlag.jpg",
+      "author": "Brück &amp; Sohn Kunstverlag Meißen",
+      "license": "CC0",
+      "width": 1000,
+      "height": 1545
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-altzella\\02_9fa42965.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d6/08519-Alt-Zella-1907-Klostergut-Br%C3%BCck_%26_Sohn_Kunstverlag.jpg",
+      "title": "File:08519-Alt-Zella-1907-Klostergut-Brück & Sohn Kunstverlag.jpg",
+      "author": "Brück &amp; Sohn Kunstverlag Meißen",
+      "license": "CC0",
+      "width": 1536,
+      "height": 1000
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-altzella\\03_04b1be2b.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/25/12131-Alt_-_Zella-1910-Eingang_zum_Weinkeller-Br%C3%BCck_%26_Sohn_Kunstverlag.jpg",
+      "title": "File:12131-Alt - Zella-1910-Eingang zum Weinkeller-Brück & Sohn Kunstverlag.jpg",
+      "author": "Brück &amp; Sohn Kunstverlag Meißen",
+      "license": "CC0",
+      "width": 1000,
+      "height": 1521
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-altzella\\04_01a6753f.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/62/13228-Altzella-1911-Wandelgang_am_Klosterbach-Br%C3%BCck_%26_Sohn_Kunstverlag.jpg",
+      "title": "File:13228-Altzella-1911-Wandelgang am Klosterbach-Brück & Sohn Kunstverlag.jpg",
+      "author": "Brück &amp; Sohn Kunstverlag Meißen",
+      "license": "CC0",
+      "width": 1502,
+      "height": 1000
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-altzella\\05_0c465285.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/ff/25056-Altzella-1929-Gasthof-Br%C3%BCck_%26_Sohn_Kunstverlag.jpg",
+      "title": "File:25056-Altzella-1929-Gasthof-Brück & Sohn Kunstverlag.jpg",
+      "author": "Brück &amp; Sohn Kunstverlag Meißen",
+      "license": "CC BY-SA 3.0",
+      "width": 1517,
+      "height": 1000
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-altzella\\06_4b909f11.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/ef/Altzella.jpg",
+      "title": "File:Altzella.jpg",
+      "author": "Hanson59",
+      "license": "CC BY-SA 3.0",
+      "width": 1024,
+      "height": 768
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-altzella\\07_dd3f347c.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/e2/Altzella_Weinkeller.jpg",
+      "title": "File:Altzella Weinkeller.jpg",
+      "author": "Paulis",
+      "license": "CC BY 2.5",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-altzella\\08_3bd62f34.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/48/Kloster_Altzella_102.JPG",
+      "title": "File:Kloster Altzella 102.JPG",
+      "author": "Brücke-Osteuropa",
+      "license": "CC0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-altzella\\09_b270a08f.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Kloster_Altzella_106.JPG",
+      "title": "File:Kloster Altzella 106.JPG",
+      "author": "Brücke-Osteuropa",
+      "license": "CC0",
+      "width": 1920,
+      "height": 1081
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-altzella\\10_20e941b4.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/02/Kloster_Altzella_11.JPG",
+      "title": "File:Kloster Altzella 11.JPG",
+      "author": "Brücke-Osteuropa",
+      "license": "CC0",
+      "width": 1920,
+      "height": 2560
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-altzella\\11_45e01af1.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f4/Kloster_Altzella_114.JPG",
+      "title": "File:Kloster Altzella 114.JPG",
+      "author": "Brücke-Osteuropa",
+      "license": "CC0",
+      "width": 1920,
+      "height": 1440
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:02720-Alt - Zella-1902-Ruinen des Klosters, Tor-Giebel-Kapelle-Brück & Sohn Kunstverlag.jpg — Brück &amp; Sohn Kunstverlag Meißen — CC0\n  · File:25056-Altzella-1929-Gasthof-Brück & Sohn Kunstverlag.jpg — Brück &amp; Sohn Kunstverlag Meißen — CC BY-SA 3.0\n  · File:Altzella.jpg — Hanson59 — CC BY-SA 3.0\n  · File:Altzella Weinkeller.jpg — Paulis — CC BY 2.5\n  · File:Kloster Altzella 102.JPG — Brücke-Osteuropa — CC0"
+}

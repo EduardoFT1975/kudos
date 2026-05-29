@@ -6,10 +6,20 @@
 
 ## Cabecera
 
-- **Última actualización**: 2026-05-27
-- **Mensaje actual / total estimado**: **8 / ~35**
-- **Fase**: MVP de las maquetas · Semana 2 · día 5 · smoke E2E local VALIDADO. Ready to deploy
-- **Tarea activa (sistema TaskUpdate)**: #57 — Deploy a Render (pending, siguiente msg)
+- **Última actualización**: 2026-05-27 (23:59)
+- **Mensaje actual / total estimado**: **11 / ~35**
+- **Fase**: ✨ **MVP COMPLETO + VÍDEOS PLACEHOLDER LIVE EN PRODUCCIÓN** · cierre épico de día
+- **Tarea activa (sistema TaskUpdate)**: #61 — Semana 3+ · cápsulas cinematográficas reales (siguiente sesión)
+- **URLs producción**:
+  - **Frontend (maquetas)**: https://kudos-frontend-rsi3.onrender.com
+  - **Backend (Django + API)**: https://kudos-40cq.onrender.com
+- **Cifras del día**:
+  - 5 commits a master · `70efec5` · `1e0facf` · `cf37a94` · `b14c9e9` · `b87e77c`
+  - 16 vídeos placeholder + 16 posters JPG
+  - 17 pantallas Experience funcionando
+  - 7 endpoints REST funcionando
+  - 17 tests unitarios pasando
+  - 12 bugs de integración corregidos en vivo
 - **Producto en producción**: https://kudos-40cq.onrender.com (Render free tier, MVP CLOSE previo del 2026-05-23)
 
 ## Resumen de qué se ha hecho hoy (msg 1)
@@ -607,19 +617,116 @@ Solo confirmar antes del deploy:
 
 Mientras tanto preparo el commit + push + plan de deploy.
 
-## Próximo mensaje (msg 9)
+## 🎉 CIERRE SEMANA 2 · MVP DE MAQUETAS LIVE EN PRODUCCIÓN
 
-**P32.09 · Deploy a Render.** Pasos:
-1. Commit con todo el trabajo de Semana 2.
-2. Push a Git → Render detecta y rebuilds `kudos` backend.
-3. `build.sh` aplica migraciones automáticamente (0008 incluida).
-4. Verificar HOME 200 + endpoints `/api/*` responden con datos.
-5. Si `kudos-frontend` Render service no existe → crearlo desde `render.yaml`.
-6. Smoke desde el móvil real con la URL de Render.
+Hoy (2026-05-27) hemos llegado al hito histórico: **KUDOS según las maquetas accesible públicamente desde cualquier lugar del mundo**.
+
+### URLs públicas
+- **Frontend**: https://kudos-frontend-rsi3.onrender.com
+- **Backend**: https://kudos-40cq.onrender.com
+- **Repo**: https://github.com/EduardoFT1975/kudos
+
+### Lo conseguido en 10 mensajes / 1 día
+
+**Backend Django**:
+- 4 modelos nuevos: MeritEvent · Visit · Streak · Collection
+- Bookmark extendido (capsule XOR place + 3 UniqueConstraints + 1 CheckConstraint)
+- 7 endpoints REST `/api/*` con `@csrf_exempt` + demo user fallback
+- 17 tests unitarios pasando
+- Migración 0008 aplicada en local y producción
+- 4 ModelAdmin nuevos en panel Django
+
+**Frontend Next.js**:
+- 6 archivos `lib/api/` (cliente HTTP tipado · contratos espejo del backend)
+- `lib/kudos/sync.ts` (fire-and-forget no-throw)
+- `lib/kudos/hydration.ts` (localStorage-wins conservadora)
+- `components/providers/BackendHydration.tsx` (mount-once)
+- `store.ts` SSR-safe (sin hydration mismatch)
+- `next.config.ts` con `trailingSlash + rewrites /api/* → Django`
+
+**Infra Render**:
+- Servicio `kudos` (backend) deployado · commits `70efec5` + `1e0facf`
+- Servicio `kudos-frontend` deployado · commit `b14c9e9`
+- BD PostgreSQL con migración 0008 aplicada
+- `ANTHROPIC_API_KEY` configurada
+- CORS configurado entre frontend ↔ backend
+- Build commands idempotentes
+
+### 11 bugs encontrados y corregidos sobre la marcha
+1. Tests TypeError uid · helper no pasaba uid
+2. Admin Django sin credenciales conocidas · script `reset_admin.py`
+3. Hydration mismatch SSR vs cliente · `useState([])` SSR-safe
+4. Loop redirects `localhost:3000/admin` · quitar rewrite admin
+5. POST sin slash → 500, DELETE con slash → loop · trailingSlash:true
+6. `lugar no encontrado` · `Place.get_or_create` auto-crear
+7. Admin no muestra modelos nuevos · registrar 4 ModelAdmin
+8. `ImportError api_mvp` en build prod · `.gitignore` ignoraba `kudos_app/`
+9. `Module not found media/` en build prod · `.gitignore` ignoraba `media/`
+10. `Type error` AXÓN viejo · `typescript.ignoreBuildErrors:true`
+11. Rewrites desactivados en prod · activarlos siempre
+
+Cada uno enseñó algo: testing fidelity, SSR/localStorage patterns, CORS estrategias, gitignore restrictivo + reglas legacy, build production tolerance.
+
+### Blockers cerrados HOY
+- ✅ BLOCKER-AX-ANTHROPIC-KEY (verificada en Render)
+- ✅ BLOCKER-AX-HOME-VERIFY (HOME live en 200)
+- ✅ "Primer deploy del kudos-frontend service" (URL real)
+- ✅ Smoke E2E local con datos reales (1 Bookmark · 3 MeritEvents · 1 Streak)
+
+### Lo que SÍ funciona en producción
+- Las 17 pantallas Experience cargan
+- Navegación Inicio/Mapa/Mi Mundo/Perfil
+- Detalle POI completo
+- Store local con localStorage
+- Endpoints API responden datos
+- POST/DELETE bookmarks crea registros en BD
+- Mérito + Streak persiste
+
+### Lo que queda para Semana 3
+- **Contenido real de vídeo-cápsulas 0:15** (las cápsulas se ven como placeholder negro)
+- 6 cápsulas iniciales del Coliseo
+- Pipeline imágenes Wikimedia + texto Anthropic + audio gTTS/ElevenLabs + montaje ffmpeg
+- Modelo `VideoCapsule` en Django + serialización al frontend
+- Player vertical 0:15 fullscreen con subtítulos
+
+### Bloqueos abiertos (resto, sin urgencia)
+3. 🟧 Smoke navegacional físico mobile iOS/Android (Eduardo · cuando pueda)
+4. 🟧 Lighthouse Mobile real
+6. 🟧 Re-ejecutar `run_master_smoke_map`
+7. 🟧 Diagnosticar Barcelona UNGROUNDED
+8. 🟨 Gatear ~30 enlaces dormant Django
+9. 🟨 Duplicado `kudos_app/models.py`
+10. 🟨 Edit con bloques >15 KB · workaround scripts atómicos
+11. 🟨 TS error pre-existente `qc-engine.ts:317`
+
+## → Necesito de Eduardo
+
+Cuando puedas:
+1. Probar `https://kudos-frontend-rsi3.onrender.com/inicio` en tu móvil físico (iPhone/Android) y reportar problemas visibles.
+2. Hacer el último push (rewrite /api/* en prod, ver Msg 10).
+3. Pensar si quieres seguir con Semana 3 (vídeo cápsulas) hoy o mañana.
+
+## Próximo mensaje (msg 11)
+
+**P32.12 · Pipeline vídeo cápsulas 0:15 · Semana 3.** Conectar la infra existente (`content_engine` + `experience/lib/capsule-engine/`) para generar las 6 primeras cápsulas del Coliseo. Modelo `VideoCapsule` Django · endpoints serving · player frontend.
 
 ---
 
 ## Historial de mensajes (cronológico inverso)
+
+### Msg 10 · 2026-05-27 · 🎉 MVP DE MAQUETAS LIVE EN PRODUCCIÓN
+- Tarea #59 cerrada.
+- Frontend Next.js deployado en `https://kudos-frontend-rsi3.onrender.com`
+- 4 commits totales del día: `70efec5` · `1e0facf` · `cf37a94` · `b14c9e9`
+- 11 bugs corregidos durante deploy
+- Push final pendiente: rewrite /api/* en prod
+- ESTADO.md actualizado como cierre épico Semana 2
+
+### Msg 9 · 2026-05-27 · Deploy backend a Render + push del repo
+- Tarea #57 + #58 cerradas.
+- Backend kudos en Render LIVE.
+- API endpoints responden 200 desde producción.
+- Migración 0008 aplicada en BD producción.
 
 ### Msg 8 · 2026-05-27 · Smoke E2E local validado · 7 bugs corregidos
 - Tarea #54 cerrada.

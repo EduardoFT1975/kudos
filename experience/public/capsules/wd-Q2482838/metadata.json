@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q2482838",
+    "name": "Abadía de Reading",
+    "lat": 51.456347,
+    "lng": -0.965086,
+    "country_code": "GB",
+    "category": "monumento",
+    "type": "templo",
+    "wikidata": "Q2482838",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Reading%20Abbey%20interior.jpg",
+    "unesco": true,
+    "tier": "A",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Abadía de Reading",
+    "subtitle": "Un lugar que merece ser recordado",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "Existe un lugar donde el tiempo se detuvo: Abadía de Reading.",
+        "direction": "in",
+        "search_hint": "Abadía de Reading",
+        "duration": 5.62
+      },
+      {
+        "title": "Contexto",
+        "narration": "Su historia atraviesa siglos.",
+        "direction": "right",
+        "search_hint": "Abadía de Reading",
+        "duration": 5.62
+      },
+      {
+        "title": "Escala",
+        "narration": "Sus dimensiones desafían lo posible.",
+        "direction": "out",
+        "search_hint": "Abadía de Reading",
+        "duration": 5.62
+      },
+      {
+        "title": "Detalle",
+        "narration": "Cada piedra guarda una memoria.",
+        "direction": "left",
+        "search_hint": "Abadía de Reading",
+        "duration": 5.62
+      },
+      {
+        "title": "Significado",
+        "narration": "Aquí cambió el curso de la civilización.",
+        "direction": "in",
+        "search_hint": "Abadía de Reading",
+        "duration": 5.62
+      },
+      {
+        "title": "Legado",
+        "narration": "Hoy sigue inspirando al mundo.",
+        "direction": "up",
+        "search_hint": "Abadía de Reading",
+        "duration": 5.62
+      },
+      {
+        "title": "KUDOS",
+        "narration": "Reconoce. Recuerda. Comparte.",
+        "direction": "in",
+        "search_hint": "Abadía de Reading",
+        "duration": 5.62
+      },
+      {
+        "title": "Cierre",
+        "narration": "Abadía de Reading. KUDOS.",
+        "direction": "out",
+        "search_hint": "Abadía de Reading",
+        "duration": 5.62
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-reading\\00_14c31d53.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Abbots_Walk_Reading_2023-10-15_12.14.10.jpg",
+      "title": "File:Abbots Walk Reading 2023-10-15 12.14.10.jpg",
+      "author": "Chris j wood",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 887
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-reading\\01_fa2ceb65.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Abbots_Walk_Reading_2023-10-15_12.15.50.jpg",
+      "title": "File:Abbots Walk Reading 2023-10-15 12.15.50.jpg",
+      "author": "Chris j wood",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 887
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-reading\\02_e774aade.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Abbots_Walk_Reading_2023-10-15_12.15.50_cropped.jpg",
+      "title": "File:Abbots Walk Reading 2023-10-15 12.15.50 cropped.jpg",
+      "author": "Chris j wood",
+      "license": "CC BY-SA 4.0",
+      "width": 1371,
+      "height": 1848
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-reading\\03_d9e4bd52.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/cf/Abbots_Walk_Reading_2023-10-15_12.16.08.jpg",
+      "title": "File:Abbots Walk Reading 2023-10-15 12.16.08.jpg",
+      "author": "Chris j wood",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 887
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-reading\\04_a0b3e0f5.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/22/Garden_next_to_Reading_Abbey_-_geograph.org.uk_-_5740209.jpg",
+      "title": "File:Garden next to Reading Abbey - geograph.org.uk - 5740209.jpg",
+      "author": "Chris Wood",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 933
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-reading\\05_389f3f9d.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/48/Raading_Abbey_Ruins_01.jpg",
+      "title": "File:Raading Abbey Ruins 01.jpg",
+      "author": "Rodw",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-reading\\06_f4398688.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/52/Raading_Abbey_Ruins_02.jpg",
+      "title": "File:Raading Abbey Ruins 02.jpg",
+      "author": "Rodw",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-reading\\07_fdd1ea3c.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d3/Raading_Abbey_Ruins_03.jpg",
+      "title": "File:Raading Abbey Ruins 03.jpg",
+      "author": "Rodw",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-reading\\08_b99b2753.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Raading_Abbey_Ruins_04.jpg",
+      "title": "File:Raading Abbey Ruins 04.jpg",
+      "author": "Rodw",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-reading\\09_5a21e842.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/7c/Raading_Abbey_Ruins_05.jpg",
+      "title": "File:Raading Abbey Ruins 05.jpg",
+      "author": "Rodw",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-reading\\10_44492e45.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/51/Raading_Abbey_Ruins_06.jpg",
+      "title": "File:Raading Abbey Ruins 06.jpg",
+      "author": "Rodw",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-reading\\11_97279e77.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Raading_Abbey_Ruins_07.jpg",
+      "title": "File:Raading Abbey Ruins 07.jpg",
+      "author": "Rodw",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:Abbots Walk Reading 2023-10-15 12.14.10.jpg — Chris j wood — CC BY-SA 4.0\n  · File:Garden next to Reading Abbey - geograph.org.uk - 5740209.jpg — Chris Wood — CC BY-SA 4.0\n  · File:Raading Abbey Ruins 01.jpg — Rodw — CC BY-SA 4.0"
+}

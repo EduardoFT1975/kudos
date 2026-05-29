@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q3405514",
+    "name": "Abadía de Tewkesbury",
+    "lat": 51.9903,
+    "lng": -2.1604,
+    "country_code": "GB",
+    "category": "monumento",
+    "type": "templo",
+    "wikidata": "Q3405514",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Tewkesbury%20Abbey%202011.jpg",
+    "unesco": true,
+    "tier": "A",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Abadía de Tewkesbury",
+    "subtitle": "Un lugar que merece ser recordado",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "Existe un lugar donde el tiempo se detuvo: Abadía de Tewkesbury.",
+        "direction": "in",
+        "search_hint": "Abadía de Tewkesbury",
+        "duration": 5.62
+      },
+      {
+        "title": "Contexto",
+        "narration": "Su historia atraviesa siglos.",
+        "direction": "right",
+        "search_hint": "Abadía de Tewkesbury",
+        "duration": 5.62
+      },
+      {
+        "title": "Escala",
+        "narration": "Sus dimensiones desafían lo posible.",
+        "direction": "out",
+        "search_hint": "Abadía de Tewkesbury",
+        "duration": 5.62
+      },
+      {
+        "title": "Detalle",
+        "narration": "Cada piedra guarda una memoria.",
+        "direction": "left",
+        "search_hint": "Abadía de Tewkesbury",
+        "duration": 5.62
+      },
+      {
+        "title": "Significado",
+        "narration": "Aquí cambió el curso de la civilización.",
+        "direction": "in",
+        "search_hint": "Abadía de Tewkesbury",
+        "duration": 5.62
+      },
+      {
+        "title": "Legado",
+        "narration": "Hoy sigue inspirando al mundo.",
+        "direction": "up",
+        "search_hint": "Abadía de Tewkesbury",
+        "duration": 5.62
+      },
+      {
+        "title": "KUDOS",
+        "narration": "Reconoce. Recuerda. Comparte.",
+        "direction": "in",
+        "search_hint": "Abadía de Tewkesbury",
+        "duration": 5.62
+      },
+      {
+        "title": "Cierre",
+        "narration": "Abadía de Tewkesbury. KUDOS.",
+        "direction": "out",
+        "search_hint": "Abadía de Tewkesbury",
+        "duration": 5.62
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-tewkesbury\\00_541292ac.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/1e/1201159_Abbey_Church_of_St_Mary%2C_South_door_Tewkesbury_20240601_0120_DxO.jpg",
+      "title": "File:1201159 Abbey Church of St Mary, South door Tewkesbury 20240601 0120 DxO.jpg",
+      "author": "Tilman2007",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-tewkesbury\\01_b8b42856.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/20/1201159_Abbey_Church_of_St_Mary%2C_South_door_Tewkesbury_20240601_0121_DxO.jpg",
+      "title": "File:1201159 Abbey Church of St Mary, South door Tewkesbury 20240601 0121 DxO.jpg",
+      "author": "Tilman2007",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-tewkesbury\\02_6395f295.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/94/1201159_Abbey_Church_of_St_Mary%2C_South_door_Tewkesbury_20240601_0122_DxO.jpg",
+      "title": "File:1201159 Abbey Church of St Mary, South door Tewkesbury 20240601 0122 DxO.jpg",
+      "author": "Tilman2007",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-tewkesbury\\03_91071d0f.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/1f/1201159_Abbey_Church_of_St_Mary%2C_South_door_Tewkesbury_20240601_0123_DxO.jpg",
+      "title": "File:1201159 Abbey Church of St Mary, South door Tewkesbury 20240601 0123 DxO.jpg",
+      "author": "Tilman2007",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-tewkesbury\\04_afb94598.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/a7/1201159_Abbey_Church_of_St_Mary%2C_South_door_Tewkesbury_20240601_0124_DxO.jpg",
+      "title": "File:1201159 Abbey Church of St Mary, South door Tewkesbury 20240601 0124 DxO.jpg",
+      "author": "Tilman2007",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2880
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-tewkesbury\\05_51a99b25.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b5/1201159_Abbey_Church_of_St_Mary%2C_South_door_Tewkesbury_20240601_0125_DxO.jpg",
+      "title": "File:1201159 Abbey Church of St Mary, South door Tewkesbury 20240601 0125 DxO.jpg",
+      "author": "Tilman2007",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2880
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-tewkesbury\\06_6051870f.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/1201159_Abbey_Church_of_St_Mary%2C_South_door_Tewkesbury_20240601_0126_DxO.jpg",
+      "title": "File:1201159 Abbey Church of St Mary, South door Tewkesbury 20240601 0126 DxO.jpg",
+      "author": "Tilman2007",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2880
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-tewkesbury\\07_66d1a7b1.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/67/1201159_Abbey_Church_of_St_Mary%2C_South_door_Tewkesbury_20240601_0127_DxO.jpg",
+      "title": "File:1201159 Abbey Church of St Mary, South door Tewkesbury 20240601 0127 DxO.jpg",
+      "author": "Tilman2007",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2880
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-tewkesbury\\08_7473bc86.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f3/1201159_Abbey_Church_of_St_Mary%2C_West_door_Tewkesbury_20240601_0128_DxO.jpg",
+      "title": "File:1201159 Abbey Church of St Mary, West door Tewkesbury 20240601 0128 DxO.jpg",
+      "author": "Tilman2007",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2880
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-tewkesbury\\09_54bf9f79.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/bb/1201159_Abbey_Church_of_St_Mary%2C_north_side_Tewkesbury_20240601_0137_DxO.jpg",
+      "title": "File:1201159 Abbey Church of St Mary, north side Tewkesbury 20240601 0137 DxO.jpg",
+      "author": "Tilman2007",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-tewkesbury\\10_7ea9ee91.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/1201159_Abbey_Church_of_St_Mary%2C_north_side_Tewkesbury_20240601_0138_DxO.jpg",
+      "title": "File:1201159 Abbey Church of St Mary, north side Tewkesbury 20240601 0138 DxO.jpg",
+      "author": "Tilman2007",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abadía-de-tewkesbury\\11_805752d8.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/3b/1201159_Abbey_Church_of_St_Mary%2C_north_side_Tewkesbury_20240601_0140_DxO.jpg",
+      "title": "File:1201159 Abbey Church of St Mary, north side Tewkesbury 20240601 0140 DxO.jpg",
+      "author": "Tilman2007",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2880
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:1201159 Abbey Church of St Mary, South door Tewkesbury 20240601 0120 DxO.jpg — Tilman2007 — CC BY-SA 4.0"
+}

@@ -7,6 +7,10 @@
  */
 import * as React from "react";
 import { Track } from "./kudosTelemetry";
+import { useAuth } from "@/components/auth/useAuth";
+
+
+const API = process.env.NEXT_PUBLIC_KUDOS_API_URL || "";
 
 
 export type Resonance = "asombro" | "aprendizaje" | "inspiracion" | "conexion" | "nostalgia";
@@ -30,6 +34,7 @@ interface Props {
 
 export function ResonancePicker({ poiId, initial = null, onChange, variant = "full" }: Props) {
   const [active, setActive] = React.useState<Resonance | null>(initial);
+  const { user, authedFetch } = useAuth();
 
   // Cargar resonancia previa de localStorage
   React.useEffect(() => {
@@ -45,6 +50,15 @@ export function ResonancePicker({ poiId, initial = null, onChange, variant = "fu
     try { localStorage.setItem(`kudos:resonance:${poiId}`, r); } catch {}
     Track.resonance(poiId, r);
     onChange?.(r);
+    // Si autenticado + API: persistir en Postgres (WHY canonico)
+    if (user && API) {
+      void authedFetch(`${API}/api/save/resonance`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ poi_id: poiId, resonance_type: r, intensity: 1 }),
+        keepalive: true,
+      }).catch(() => {});
+    }
   };
 
   return (

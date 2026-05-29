@@ -454,422 +454,370 @@ def _osm_total() -> int:
 # ═══════════════════════ HTML (single page, sin build) ═══════════════════
 # Se carga al final para no romper la lectura del módulo
 INDEX_HTML = """<!doctype html>
-<html lang=es>
+<html lang="es">
 <head>
-<meta charset=utf-8>
+<meta charset="utf-8">
 <title>KUDOS · Panel del Fundador</title>
-<meta name=viewport content="width=device-width,initial-scale=1">
-<link rel=preconnect href="https://fonts.googleapis.com">
-<link rel=preconnect href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel=stylesheet>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --navy:#1A1333; --navy2:#14112a; --navy3:#0a0612;
     --violet:#6C3CFF; --pink:#FF3CAC; --orange:#FF9A00; --yellow:#FFD23F;
     --white:#F2F2F7; --mute:#8b8b95; --border:#2a2548;
-    --gradh:linear-gradient(90deg,#FF9A00 0%,#FF3CAC 50%,#6C3CFF 100%);
+    --grad:linear-gradient(90deg,#FF9A00 0%,#FF3CAC 50%,#6C3CFF 100%);
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family:"Poppins",-apple-system,"Segoe UI",system-ui,sans-serif; background:radial-gradient(ellipse at top left,rgba(108,60,255,0.10) 0%,transparent 50%),radial-gradient(ellipse at top right,rgba(255,60,172,0.08) 0%,transparent 50%),var(--navy3); color:var(--white); padding:28px; line-height:1.5; min-height:100vh; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:"Poppins",system-ui,sans-serif; background:var(--navy3); color:var(--white); padding:24px; line-height:1.5; min-height:100vh; }
   .hero { display:grid; grid-template-columns:auto 1fr auto; gap:22px; align-items:center; margin-bottom:24px; padding-bottom:22px; border-bottom:1px solid var(--border); }
-  .hero-logo { width:60px; height:60px; flex-shrink:0; }
-  .hero-text h1 { font-size:26px; font-weight:800; letter-spacing:-0.5px; color:var(--white); display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
-  .hero-text h1 .mark { background:var(--gradh); -webkit-background-clip:text; background-clip:text; color:transparent; font-size:18px; font-weight:600; }
+  .hero-logo { width:60px; height:60px; }
+  .hero h1 { font-size:24px; font-weight:800; }
+  .hero h1 .mark { background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; font-size:18px; font-weight:600; margin-left:8px; }
   .hero-tagline { font-size:11px; font-weight:700; letter-spacing:3px; color:var(--mute); text-transform:uppercase; margin-top:6px; }
   .hero-quote { text-align:right; max-width:320px; font-size:12px; color:var(--mute); font-style:italic; line-height:1.4; }
-  .hero-quote b { display:block; color:var(--white); font-style:normal; font-weight:700; font-size:13px; margin-bottom:2px; letter-spacing:0.5px; }
+  .hero-quote b { display:block; color:var(--white); font-style:normal; font-weight:700; font-size:13px; }
   .hero-quote small { display:block; margin-top:4px; font-style:normal; font-size:10px; letter-spacing:1.5px; color:var(--violet); font-weight:700; text-transform:uppercase; }
   .pillars { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
   .pillar { background:rgba(108,60,255,0.06); border:1px solid rgba(108,60,255,0.18); border-radius:12px; padding:14px 16px; text-align:center; }
-  .pillar-icon { font-size:22px; margin-bottom:6px; line-height:1; }
+  .pillar-icon { font-size:22px; margin-bottom:6px; }
   .pillar-name { font-size:11px; font-weight:700; letter-spacing:1.5px; color:var(--violet); }
-  .pillar-desc { font-size:10.5px; color:var(--mute); margin-top:3px; line-height:1.35; }
-  @media (max-width:720px){ .pillars{grid-template-columns:repeat(2,1fr);} }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; }
-  .card { background: #14112a; border: 1px solid #2a2548; border-radius: 14px; padding: 18px; }
-  .card h2 { font-size: 14px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #b8b8c5; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
-  .dot.green { background: #10b981; box-shadow: 0 0 8px #10b98166; }
-  .dot.red { background: #ef4444; }
-  .dot.gray { background: #4b5563; }
-  .dot.yellow { background: #f59e0b; }
-  .stat { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #1f1b35; font-size: 13px; }
-  .stat:last-child { border: none; }
-  .stat b { color: #fff; }
-  button { appearance: none; border: none; background: linear-gradient(90deg,#6C3CFF,#FF3CAC); color: #fff; padding: 8px 14px; border-radius: 10px; font-weight: 600; font-size: 12.5px; cursor: pointer; transition: transform 0.1s; margin-right: 6px; margin-top: 6px; }
-  button:hover { transform: translateY(-1px); }
-  button.ghost { background: transparent; border: 1px solid #4b5563; }
-  button.danger { background: #dc2626; }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
-  input, select { background: #1f1b35; border: 1px solid #3a3358; color: #f2f2f7; padding: 8px 10px; border-radius: 8px; font-size: 13px; margin-right: 6px; }
-  pre { background: #0a0612; border: 1px solid #2a2548; border-radius: 8px; padding: 10px; font-size: 11px; font-family: "JetBrains Mono", monospace; max-height: 220px; overflow-y: auto; white-space: pre-wrap; word-break: break-word; color: #a0a0b0; }
-  .toast { position: fixed; bottom: 20px; right: 20px; background: #14112a; border: 1px solid #2a2548; padding: 10px 14px; border-radius: 10px; font-size: 13px; opacity: 0; transition: opacity 0.3s; }
-  .toast.show { opacity: 1; }
-  .api-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid #1f1b35; font-size: 12.5px; }
-  .api-row:last-child { border: none; }
-  table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid #1f1b35; }
-  th { color: #b8b8c5; font-weight: 600; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.4px; }
+  .pillar-desc { font-size:10.5px; color:var(--mute); margin-top:3px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:16px; }
+  .card { background:var(--navy2); border:1px solid var(--border); border-radius:16px; padding:20px; position:relative; overflow:hidden; }
+  .card::before { content:""; position:absolute; inset:0 0 auto 0; height:2px; background:var(--grad); opacity:0.5; }
+  .card h2 { font-size:12.5px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--white); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; }
+  .dot.green { background:#10b981; }
+  .dot.gray { background:#4b5563; }
+  .stat { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; color:var(--mute); }
+  .stat:last-child { border:none; }
+  .stat b { color:var(--white); font-weight:600; }
+  button { appearance:none; border:none; background:var(--grad); color:#fff; padding:9px 16px; border-radius:10px; font-family:"Poppins"; font-weight:600; font-size:12.5px; cursor:pointer; margin-right:6px; margin-top:8px; }
+  button:hover { transform:translateY(-1px); }
+  button.ghost { background:transparent; border:1px solid var(--border); color:var(--white); }
+  button.danger { background:#dc2626; }
+  input, select { background:var(--navy3); border:1px solid var(--border); color:var(--white); padding:8px 12px; border-radius:8px; font-size:13px; font-family:"Poppins"; margin-right:6px; }
+  pre { background:var(--navy3); border:1px solid var(--border); border-radius:10px; padding:12px; font-size:11px; font-family:monospace; max-height:240px; overflow-y:auto; white-space:pre-wrap; color:#a0a0b0; }
+  .toast { position:fixed; bottom:24px; right:24px; background:var(--navy2); border:1px solid var(--violet); padding:12px 18px; border-radius:12px; font-size:13px; opacity:0; transition:opacity 0.3s; z-index:1000; }
+  .toast.show { opacity:1; }
+  .api-row { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:12.5px; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid rgba(255,255,255,0.05); }
+  th { color:var(--mute); font-weight:600; text-transform:uppercase; font-size:10px; letter-spacing:1px; }
 </style>
 </head>
 <body>
 
-<header class=hero>
-  <svg class=hero-logo viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" aria-label="KUDOS">
-    <defs>
-      <linearGradient id="kHero" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#6C3CFF"/>
-        <stop offset="38%" stop-color="#FF3CAC"/>
-        <stop offset="72%" stop-color="#FF9A00"/>
-        <stop offset="100%" stop-color="#FFD23F"/>
-      </linearGradient>
-    </defs>
+<header class="hero">
+  <svg class="hero-logo" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="kHero" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6C3CFF"/>
+      <stop offset="38%" stop-color="#FF3CAC"/>
+      <stop offset="72%" stop-color="#FF9A00"/>
+      <stop offset="100%" stop-color="#FFD23F"/>
+    </linearGradient></defs>
     <rect width="96" height="96" rx="22" fill="#1A1333"/>
     <circle cx="48" cy="48" r="32" fill="none" stroke="url(#kHero)" stroke-width="6"/>
     <path d="M 48 28 L 51 45 L 68 48 L 51 51 L 48 68 L 45 51 L 28 48 L 45 45 Z" fill="url(#kHero)"/>
   </svg>
-  <div class=hero-text>
-    <h1>KUDOS <span class=mark>· Panel del Fundador</span></h1>
-    <div class=hero-tagline>MÉRITO · DESCUBRIMIENTO · MEMORIA</div>
+  <div>
+    <h1>KUDOS <span class="mark">· Panel del Fundador</span></h1>
+    <div class="hero-tagline">MÉRITO · DESCUBRIMIENTO · MEMORIA</div>
   </div>
-  <div class=hero-quote>
+  <div class="hero-quote">
     <b>Eduardo F.</b>
-    "Construimos tecnología con propósito para dejar huella en el mundo."
+    Construimos tecnología con propósito para dejar huella en el mundo.
     <small>Fundador & CEO</small>
   </div>
 </header>
 
-<section class=pillars>
-  <div class=pillar><div class=pillar-icon>✦</div><div class=pillar-name>DESCUBRE</div><div class=pillar-desc>Lugares que merecen ser conocidos</div></div>
-  <div class=pillar><div class=pillar-icon>🔖</div><div class=pillar-name>GUARDA</div><div class=pillar-desc>Tu mapa personal de inspiración</div></div>
-  <div class=pillar><div class=pillar-icon>↗</div><div class=pillar-name>COMPARTE</div><div class=pillar-desc>Inspira a otros con cápsulas únicas</div></div>
-  <div class=pillar><div class=pillar-icon>♡</div><div class=pillar-name>DEJA HUELLA</div><div class=pillar-desc>El legado del futuro</div></div>
+<section class="pillars">
+  <div class="pillar"><div class="pillar-icon">✦</div><div class="pillar-name">DESCUBRE</div><div class="pillar-desc">Lugares que merecen ser conocidos</div></div>
+  <div class="pillar"><div class="pillar-icon">🔖</div><div class="pillar-name">GUARDA</div><div class="pillar-desc">Tu mapa personal de inspiración</div></div>
+  <div class="pillar"><div class="pillar-icon">↗</div><div class="pillar-name">COMPARTE</div><div class="pillar-desc">Inspira a otros con cápsulas únicas</div></div>
+  <div class="pillar"><div class="pillar-icon">♡</div><div class="pillar-name">DEJA HUELLA</div><div class="pillar-desc">El legado del futuro</div></div>
 </section>
 
 <div class="grid">
-
-  <!-- WORKER -->
   <div class="card">
-    <h2>🎬 Worker · <span id=worker-dot class="dot gray"></span><span id=worker-status>cargando…</span></h2>
-    <div id=worker-stats></div>
+    <h2>🎬 Worker · <span id="worker-dot" class="dot gray"></span> <span id="worker-status">cargando</span></h2>
+    <div id="worker-stats"></div>
     <div>
-      <button onclick="post('/api/worker/start', 'Worker arrancado')">▶ Arrancar</button>
-      <button class=danger onclick="post('/api/worker/stop', 'Worker detenido')">■ Detener</button>
-      <button class=ghost onclick="loadLogs()">📋 Ver logs</button>
+      <button onclick="callApi('/api/worker/start','POST','Worker arrancado')">▶ Arrancar</button>
+      <button class="danger" onclick="callApi('/api/worker/stop','POST','Worker detenido')">■ Detener</button>
+      <button class="ghost" onclick="loadLogs()">📋 Logs</button>
     </div>
-    <pre id=worker-logs style="display:none;margin-top:10px"></pre>
+    <pre id="worker-logs" style="display:none;margin-top:10px"></pre>
   </div>
 
-  <!-- POIs -->
   <div class="card">
     <h2>📍 POIs</h2>
-    <div id=pois-stats>cargando…</div>
+    <div id="pois-stats">cargando</div>
     <div>
-      <button onclick="post('/api/pois/reseed', 'Cola regenerada con TOP 85 POIs')">🌱 Reseed (85 POIs)</button>
+      <button onclick="callApi('/api/pois/reseed','POST','Cola regenerada')">🌱 Reseed (85)</button>
     </div>
-    <div style="margin-top: 10px;">
-      <select id=osm-country>
-        <option value=ES>España</option>
-        <option value=IT>Italia</option>
-        <option value=FR>Francia</option>
-        <option value=GR>Grecia</option>
-        <option value=PT>Portugal</option>
-        <option value=DE>Alemania</option>
-        <option value=GB>Reino Unido</option>
-        <option value=EG>Egipto</option>
-        <option value=MX>México</option>
-        <option value=PE>Perú</option>
-        <option value=IN>India</option>
-        <option value=CN>China</option>
-        <option value=JP>Japón</option>
-        <option value=TR>Turquía</option>
-        <option value=US>EE.UU.</option>
+    <div style="margin-top:10px">
+      <select id="osm-country">
+        <option value="ES">España</option><option value="IT">Italia</option><option value="FR">Francia</option>
       </select>
-      <input type=number id=osm-max value=2000 min=100 max=10000 style="width:90px;">
-      <button onclick="importOSM()">📦 Importar OSM</button>
+      <input type="number" id="osm-max" value="2000" style="width:90px">
+      <button onclick="importOsm()">📦 Importar OSM</button>
     </div>
     <div style="margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.06)">
-      <div style="font-size:11px; color:var(--mute); letter-spacing:1px; margin-bottom:8px; text-transform:uppercase">🌐 Wikidata (recomendado · foto + UNESCO)</div>
-      <select id=wd-country style="width:auto">
-        <option value=ES>España</option>
-        <option value=IT>Italia</option>
-        <option value=FR>Francia</option>
-        <option value=GR>Grecia</option>
-        <option value=PT>Portugal</option>
-        <option value=DE>Alemania</option>
-        <option value=GB>Reino Unido</option>
-        <option value=JP>Japón</option>
-        <option value=EG>Egipto</option>
-        <option value=MX>México</option>
-        <option value=PE>Perú</option>
-        <option value=TR>Turquía</option>
-        <option value=US>EE.UU.</option>
-        <option value=MA>Marruecos</option>
+      <div style="font-size:11px; color:var(--mute); letter-spacing:1px; margin-bottom:8px;">🌐 WIKIDATA (foto + UNESCO)</div>
+      <select id="wd-country">
+        <option value="ES">España</option><option value="IT">Italia</option><option value="FR">Francia</option>
+        <option value="GR">Grecia</option><option value="PT">Portugal</option><option value="DE">Alemania</option>
+        <option value="GB">Reino Unido</option><option value="JP">Japón</option>
       </select>
       <button onclick="importWikidata()">⬇ Importar Wikidata</button>
-      <button onclick="importWikidataAll()">🌍 Top mundo (14 paises)</button>
-      <button class=ghost onclick="autoPush()">⬆ Auto-push JSONs</button>
-      <div id=wd-status style="margin-top:8px; font-size:11px; color:var(--mute)">cargando…</div>
+      <button onclick="importWikidataAll()">🌍 Top mundo (14)</button>
+      <button class="ghost" onclick="autoPush()">⬆ Auto-push</button>
+      <div id="wd-status" style="margin-top:8px; font-size:11px; color:var(--mute)">cargando</div>
     </div>
   </div>
 
-  <!-- APIs -->
   <div class="card">
     <h2>🔑 APIs externas</h2>
-    <div id=apis-list>cargando…</div>
+    <div id="apis-list">cargando</div>
     <div style="margin-top:10px">
-      <select id=api-name>
-        <option value=ANTHROPIC_API_KEY>Anthropic</option>
-        <option value=OPENAI_API_KEY>OpenAI (Sora)</option>
-        <option value=KLING_API_KEY>Kling</option>
-        <option value=ELEVENLABS_API_KEY>ElevenLabs</option>
+      <select id="api-name">
+        <option value="ANTHROPIC_API_KEY">Anthropic</option>
+        <option value="OPENAI_API_KEY">OpenAI</option>
+        <option value="KLING_API_KEY">Kling</option>
+        <option value="ELEVENLABS_API_KEY">ElevenLabs</option>
       </select>
-      <input type=password id=api-value placeholder="sk-..." style="width:180px;">
-      <button onclick="setKey()">💾 Guardar</button>
+      <input type="password" id="api-value" placeholder="sk-..." style="width:180px">
+      <button onclick="setApiKey()">💾 Guardar</button>
     </div>
   </div>
 
-  <!-- CAPSULES -->
-  <div class="card" style="grid-column: 1 / -1;">
+  <div class="card" style="grid-column:1 / -1">
     <h2>🎥 Cápsulas generadas</h2>
-    <div id=capsules-stats style="margin-bottom:10px;font-size:12.5px;color:#b8b8c5"></div>
-    <table id=capsules-table>
+    <div id="capsules-stats" style="margin-bottom:10px; font-size:12.5px; color:var(--mute)"></div>
+    <table>
       <thead><tr><th>Slug</th><th>Tamaño</th><th>Generada</th><th></th></tr></thead>
-      <tbody id=capsules-body></tbody>
+      <tbody id="capsules-body"></tbody>
     </table>
   </div>
 
-  <!-- GIT / DEPLOY -->
   <div class="card">
     <h2>🚀 Git / Deploy</h2>
-    <div id=git-stats>cargando…</div>
+    <div id="git-stats">cargando</div>
     <div>
       <button onclick="gitPush()">⬆ Push pendientes</button>
     </div>
   </div>
 
-  <!-- METRICS -->
   <div class="card">
     <h2>📊 Métricas globales</h2>
-    <div id=metrics>cargando…</div>
+    <div id="metrics">cargando</div>
   </div>
-
 </div>
 
-<div id=toast class=toast></div>
+<div id="toast" class="toast"></div>
 
 <script>
-const toast = (msg) => {
-  const t = document.getElementById('toast');
+console.log("[KUDOS] panel script START");
+
+function toast(msg) {
+  var t = document.getElementById("toast");
   t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2400);
-};
+  t.classList.add("show");
+  setTimeout(function(){ t.classList.remove("show"); }, 2400);
+}
 
-const post = async (url, ok_msg) => {
-  try {
-    const r = await fetch(url, {method:'POST'});
-    const j = await r.json();
-    if (j.ok === false) {
-      console.error('POST error:', j.error);
-      toast('❌ ' + String(j.error || 'error').slice(0, 100));
-      if (j.error && String(j.error).length > 80) alert(j.error);
-    } else {
-      toast('✅ ' + (ok_msg || 'OK'));
+function callApi(url, method, okMsg) {
+  fetch(url, {method: method||"POST"})
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if (j.ok === false) {
+        toast("ERROR: " + String(j.error || "error").slice(0,80));
+        if (j.error && String(j.error).length > 80) alert(j.error);
+      } else {
+        toast(okMsg || "OK");
+      }
+      setTimeout(refresh, 600);
+    })
+    .catch(function(e){ toast("ERROR: " + e.message); });
+}
+
+function importOsm() {
+  var country = document.getElementById("osm-country").value;
+  var max = parseInt(document.getElementById("osm-max").value, 10);
+  fetch("/api/pois/import_osm", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({country: country, max_results: max})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(j){
+    if (j.ok) toast("Importando " + country + " (pid " + j.pid + ")");
+    else { toast("ERROR"); alert(j.error || "error"); }
+  })
+  .catch(function(e){ toast("ERROR: " + e.message); });
+}
+
+function importWikidata() {
+  var country = document.getElementById("wd-country").value;
+  fetch("/api/pois/import_wikidata", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({country: country, max_per_type: 800})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(j){
+    if (j.ok) toast("Importando Wikidata " + country + " (3-5 min)");
+    else { toast("ERROR"); alert(j.error || "error"); }
+  })
+  .catch(function(e){ toast("ERROR: " + e.message); });
+}
+
+function importWikidataAll() {
+  if (!confirm("Importar 14 paises top mundo? Tarda 40-60 min en background.")) return;
+  fetch("/api/pois/import_wikidata_all", {method: "POST"})
+    .then(function(r){ return r.json(); })
+    .then(function(j){ toast(j.ok ? "Importando 14 paises" : "ERROR: " + j.error); });
+}
+
+function autoPush() {
+  toast("Pushing...");
+  fetch("/api/git/auto_push", {method: "POST"})
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if (j.ok) toast("Push OK - Render redesplegara");
+      else { toast("ERROR"); alert(j.error || "error"); }
+      setTimeout(refresh, 800);
+    });
+}
+
+function gitPush() {
+  toast("Pushing...");
+  fetch("/api/git/push", {method: "POST"})
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      toast(j.ok ? "Push OK" : "Push fallo");
+      setTimeout(refresh, 800);
+    });
+}
+
+function setApiKey() {
+  var name = document.getElementById("api-name").value;
+  var value = document.getElementById("api-value").value;
+  if (!value) { toast("Pega la clave"); return; }
+  fetch("/api/apis/key", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({name: name, value: value})
+  })
+  .then(function(r){
+    if (r.ok) {
+      toast("Guardada");
+      document.getElementById("api-value").value = "";
     }
     setTimeout(refresh, 600);
-  } catch (e) { toast('❌ ' + e.message); }
-};
-
-const importOSM = async () => {
-  const country = document.getElementById('osm-country').value;
-  const max_results = parseInt(document.getElementById('osm-max').value, 10);
-  try {
-    const r = await fetch('/api/pois/import_osm', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({country, max_results}),
-    });
-    const j = await r.json();
-    if (j.ok) {
-      toast(`📦 Importando ${country} (pid ${j.pid}) · tarda 1-3 min`);
-    } else {
-      console.error('Import OSM ERROR:', j.error);
-      toast('❌ Importar OSM falló · ver detalle');
-      alert('IMPORTAR OSM FALLÓ: - ' + j.error);
-    }
-    setTimeout(refresh, 600);
-  } catch (e) { toast('❌ ' + e.message); }
-};
-
-const setKey = async () => {
-  const name = document.getElementById('api-name').value;
-  const value = document.getElementById('api-value').value;
-  if (!value) { toast('❌ pega la clave'); return; }
-  try {
-    const r = await fetch('/api/apis/key', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({name, value}),
-    });
-    if (r.ok) { toast('💾 Guardada'); document.getElementById('api-value').value = ''; }
-    setTimeout(refresh, 600);
-  } catch (e) { toast('❌ ' + e.message); }
-};
-
-const gitPush = async () => {
-  toast('⬆ Pushing…');
-  const r = await fetch('/api/git/push', {method:'POST'});
-  const j = await r.json();
-  toast(j.ok ? '✅ Push OK' : '❌ Push falló');
-  setTimeout(refresh, 600);
-};
-
-const delCapsule = async (slug) => {
-  if (!confirm(`Borrar ${slug}.mp4?`)) return;
-  await fetch(`/api/capsules/${slug}`, {method:'DELETE'});
-  toast(`🗑 ${slug}.mp4 borrada`);
-  setTimeout(refresh, 200);
-};
-
-const loadLogs = async () => {
-  const pre = document.getElementById('worker-logs');
-  pre.style.display = 'block';
-  const r = await fetch('/api/worker/logs');
-  pre.textContent = await r.text();
-  pre.scrollTop = pre.scrollHeight;
-};
-
-async function refresh() {
-  try {
-    const s = await fetch('/api/status').then(r => r.json());
-
-    // Worker
-    const wDot = document.getElementById('worker-dot');
-    const wSt = document.getElementById('worker-status');
-    if (s.worker.running) {
-      wDot.className = 'dot green';
-      wSt.textContent = `corriendo (pid ${s.worker.pid})`;
-    } else {
-      wDot.className = 'dot gray';
-      wSt.textContent = 'parado';
-    }
-    document.getElementById('worker-stats').innerHTML = `
-      <div class=stat><span>POIs hechos</span><b>${s.pois.done}</b></div>
-      <div class=stat><span>POIs pendientes</span><b>${s.pois.pending}</b></div>
-      <div class=stat><span>Cápsulas en disco</span><b>${s.capsules.total} · ${s.capsules.total_mb} MB</b></div>
-    `;
-
-    // POIs
-    const ps = await fetch('/api/pois/stats').then(r => r.json());
-    const byTier = Object.entries(ps.by_tier).map(([t,n]) => `${t}:${n}`).join(' · ');
-    document.getElementById('pois-stats').innerHTML = `
-      <div class=stat><span>Cola total</span><b>${ps.queue}</b></div>
-      <div class=stat><span>Por tier</span><b>${byTier || '—'}</b></div>
-      <div class=stat><span>Siguientes</span><b style="font-size:11px;font-weight:normal">${ps.next_5.map(p=>p.name).join(' · ') || '—'}</b></div>
-    `;
-
-    // APIs
-    document.getElementById('apis-list').innerHTML =
-      Object.entries(s.apis).map(([k,a]) => `
-        <div class=api-row>
-          <div>
-            <div>${a.label}</div>
-            <div style="font-size:10.5px;color:#8b8b95">${a.cost_hint}</div>
-            ${a.preview ? `<div style="font-size:10px;color:#10b981;font-family:monospace">${a.preview}</div>` : ''}
-          </div>
-          <span class="dot ${a.configured ? 'green' : 'gray'}"></span>
-        </div>
-      `).join('');
-
-    // Cápsulas
-    const cap = await fetch('/api/capsules').then(r => r.json());
-    document.getElementById('capsules-stats').textContent = `${cap.count} cápsulas · ${(cap.items.reduce((a,c)=>a+c.size_kb,0)/1024).toFixed(1)} MB total`;
-    document.getElementById('capsules-body').innerHTML = cap.items.slice(0, 50).map(c => `
-      <tr>
-        <td><b>${c.slug}</b></td>
-        <td>${c.size_kb} KB</td>
-        <td>${new Date(c.mtime).toLocaleString('es-ES')}</td>
-        <td><button class=ghost onclick="delCapsule('${c.slug}')">🗑</button></td>
-      </tr>
-    `).join('');
-
-    // Git
-    const g = await fetch('/api/git/status').then(r => r.json());
-    document.getElementById('git-stats').innerHTML = `
-      <div class=stat><span>Branch</span><b>${g.branch}</b></div>
-      <div class=stat><span>HEAD</span><b>${g.head}</b></div>
-      <div class=stat><span>Commits pendientes push</span><b style="color:${g.ahead>0?'#f59e0b':'#10b981'}">${g.ahead}</b></div>
-      <div class=stat><span>Archivos sin commit</span><b>${g.dirty_files}</b></div>
-    `;
-
-    // Metrics
-    document.getElementById('metrics').innerHTML = `
-      <div class=stat><span>POIs en cola</span><b>${s.pois.queue}</b></div>
-      <div class=stat><span>POIs procesados</span><b>${s.pois.done}</b></div>
-      <div class=stat><span>Cápsulas MP4</span><b>${s.capsules.total}</b></div>
-      <div class=stat><span>POIs OSM importados</span><b>${s.osm.total_pois}</b></div>
-      <div class=stat><span>Archivos OSM</span><b>${s.osm.files.length}</b></div>
-      <div class=stat><span>Último HEAD</span><b>${s.git.head}</b></div>
-    `;
-
-    // V8 · Wikidata status
-    try {
-      const wd = await fetch('/api/pois/wikidata_status').then(r => r.json());
-      const txt = wd.total_pois > 0
-        ? `${wd.total_pois.toLocaleString('es-ES')} POIs · ${wd.files.length} países (${wd.files.map(f => f.country).join(' · ')})`
-        : 'Sin datos aún · pulsa Importar Wikidata';
-      document.getElementById('wd-status').textContent = txt;
-    } catch (e) { /* opcional */ }
-  } catch (e) {
-    console.error('refresh ERROR:', e);
-  }
+  });
 }
 
-// V8 · handlers Wikidata
-async function importWikidata() {
-  const country = document.getElementById('wd-country').value;
-  try {
-    const r = await fetch('/api/pois/import_wikidata', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({country, max_per_type: 800}),
-    });
-    const j = await r.json();
-    if (j.ok) {
-      toast(`⬇ Importando Wikidata ${country} (pid ${j.pid}) · 3-5 min`);
-    } else {
-      toast('❌ ' + String(j.error || 'error').slice(0,80));
-      if (j.error && String(j.error).length > 80) alert(j.error);
+function delCapsule(slug) {
+  if (!confirm("Borrar " + slug + ".mp4?")) return;
+  fetch("/api/capsules/" + slug, {method: "DELETE"})
+    .then(function(){ toast(slug + " borrada"); setTimeout(refresh, 200); });
+}
+
+function loadLogs() {
+  var pre = document.getElementById("worker-logs");
+  pre.style.display = "block";
+  fetch("/api/worker/logs")
+    .then(function(r){ return r.text(); })
+    .then(function(t){ pre.textContent = t; pre.scrollTop = pre.scrollHeight; });
+}
+
+function refresh() {
+  console.log("[KUDOS] refresh tick");
+  fetch("/api/status")
+    .then(function(r){ return r.json(); })
+    .then(function(s){
+      var wDot = document.getElementById("worker-dot");
+      var wSt = document.getElementById("worker-status");
+      if (s.worker.running) {
+        wDot.className = "dot green";
+        wSt.textContent = "corriendo (pid " + s.worker.pid + ")";
+      } else {
+        wDot.className = "dot gray";
+        wSt.textContent = "PARADO";
+      }
+      document.getElementById("worker-stats").innerHTML =
+        '<div class="stat"><span>POIs hechos</span><b>' + s.pois.done + '</b></div>' +
+        '<div class="stat"><span>POIs pendientes</span><b>' + s.pois.pending + '</b></div>' +
+        '<div class="stat"><span>Capsulas en disco</span><b>' + s.capsules.total + ' · ' + s.capsules.total_mb + ' MB</b></div>';
+      var apisHtml = "";
+      Object.keys(s.apis).forEach(function(k){
+        var a = s.apis[k];
+        apisHtml += '<div class="api-row">' +
+          '<div><div>' + a.label + '</div><div style="font-size:10.5px;color:var(--mute)">' + a.cost_hint + '</div>' +
+          (a.preview ? '<div style="font-size:10px;color:#10b981;font-family:monospace">' + a.preview + '</div>' : '') +
+          '</div><span class="dot ' + (a.configured ? "green" : "gray") + '"></span></div>';
+      });
+      document.getElementById("apis-list").innerHTML = apisHtml;
+      document.getElementById("metrics").innerHTML =
+        '<div class="stat"><span>POIs en cola</span><b>' + s.pois.queue + '</b></div>' +
+        '<div class="stat"><span>POIs procesados</span><b>' + s.pois.done + '</b></div>' +
+        '<div class="stat"><span>Capsulas MP4</span><b>' + s.capsules.total + '</b></div>' +
+        '<div class="stat"><span>POIs OSM importados</span><b>' + s.osm.total_pois + '</b></div>' +
+        '<div class="stat"><span>Ultimo HEAD</span><b>' + s.git.head + '</b></div>';
+    })
+    .catch(function(e){ console.warn("status fail", e); });
+
+  fetch("/api/pois/stats").then(function(r){ return r.json(); }).then(function(ps){
+    var byTier = Object.keys(ps.by_tier).map(function(t){ return t + ":" + ps.by_tier[t]; }).join(" · ");
+    document.getElementById("pois-stats").innerHTML =
+      '<div class="stat"><span>Cola total</span><b>' + ps.queue + '</b></div>' +
+      '<div class="stat"><span>Por tier</span><b>' + (byTier || "-") + '</b></div>';
+  }).catch(function(){});
+
+  fetch("/api/capsules").then(function(r){ return r.json(); }).then(function(cap){
+    document.getElementById("capsules-stats").textContent = cap.count + " capsulas";
+    var body = "";
+    for (var i = 0; i < cap.items.length && i < 50; i++) {
+      var c = cap.items[i];
+      var tr = document.createElement("tr");
+      var td1 = document.createElement("td"); td1.innerHTML = "<b>" + c.slug + "</b>"; tr.appendChild(td1);
+      var td2 = document.createElement("td"); td2.textContent = c.size_kb + " KB"; tr.appendChild(td2);
+      var td3 = document.createElement("td"); td3.textContent = new Date(c.mtime).toLocaleString(); tr.appendChild(td3);
+      var td4 = document.createElement("td"); 
+      var btn = document.createElement("button"); btn.className = "ghost"; btn.textContent = "Borrar";
+      btn.dataset.slug = c.slug;
+      btn.onclick = function() { delCapsule(this.dataset.slug); };
+      td4.appendChild(btn); tr.appendChild(td4);
+      body += tr.outerHTML;
     }
-  } catch (e) { toast('❌ ' + e.message); }
+    document.getElementById("capsules-body").innerHTML = body;
+  }).catch(function(){});
+
+  fetch("/api/git/status").then(function(r){ return r.json(); }).then(function(g){
+    document.getElementById("git-stats").innerHTML =
+      '<div class="stat"><span>Branch</span><b>' + g.branch + '</b></div>' +
+      '<div class="stat"><span>HEAD</span><b>' + g.head + '</b></div>' +
+      '<div class="stat"><span>Commits pendientes</span><b>' + g.ahead + '</b></div>' +
+      '<div class="stat"><span>Archivos sin commit</span><b>' + g.dirty_files + '</b></div>';
+  }).catch(function(){});
+
+  fetch("/api/pois/wikidata_status").then(function(r){ return r.json(); }).then(function(wd){
+    var txt = wd.total_pois > 0
+      ? wd.total_pois.toLocaleString() + " POIs · " + wd.files.length + " paises (" + wd.files.map(function(f){return f.country;}).join(", ") + ")"
+      : "Sin datos · pulsa Importar Wikidata";
+    document.getElementById("wd-status").textContent = txt;
+  }).catch(function(){});
 }
 
-async function importWikidataAll() {
-  if (!confirm('Importar Wikidata para 14 países top mundo en background?\nTarda ~40-60 min. Mientras corre puedes seguir usando el panel.')) return;
-  try {
-    const r = await fetch('/api/pois/import_wikidata_all', {method:'POST'});
-    const j = await r.json();
-    toast(j.ok ? '🌍 Importando 14 países en background · ~40-60 min' : '❌ ' + j.error);
-  } catch (e) { toast('❌ ' + e.message); }
-}
-
-async function autoPush() {
-  toast('⬆ Pushing...');
-  try {
-    const r = await fetch('/api/git/auto_push', {method:'POST'});
-    const j = await r.json();
-    if (j.ok) {
-      toast('✅ JSONs subidos a GitHub · Render redesplegará');
-    } else {
-      toast('❌ ' + String(j.error || 'error').slice(0,80));
-      if (j.error) alert('AUTO-PUSH: - ' + j.error);
-    }
-    setTimeout(refresh, 800);
-  } catch (e) { toast('❌ ' + e.message); }
-}
-
+console.log("[KUDOS] llamando refresh por primera vez");
 refresh();
 setInterval(refresh, 5000);
+console.log("[KUDOS] panel script END · interval cada 5s");
 </script>
-
 </body>
 </html>
 """

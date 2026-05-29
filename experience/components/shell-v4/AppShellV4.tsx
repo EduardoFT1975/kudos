@@ -1,20 +1,11 @@
 "use client";
-
 /**
- * KUDOS . AppShellV4 . Canonical global shell.
- *
- * FULLSCREEN_ROUTES: rutas v5 con su propio Header · sin TopBar shell.
- *   - /world (mapa cinematográfico)
- *   - /inicio (HomeFeedV5)
- *   - /mi-mundo (MiMundoV5)
- *   - /poi/[id] (PoiNodeV5)
- *   - /merit/[poi_id] (MeritEngineV5)
- *
- * En todas estas rutas mantenemos BottomNav + ShareModal + Toast del shell
- * para no aislar las pantallas y permitir navegación.
+ * AppShellV4 · KUDOS T3.2 EJEC Day 18.
+ * Top nav + bottom nav + modals globales.
  */
 import * as React from "react";
 import { usePathname } from "next/navigation";
+
 import { FatalRecoveryLayer } from "@/features/launch-closure/FatalRecoveryLayer";
 import { MobileSafeAreaProvider } from "@/features/mobile-hardening/MobileSafeAreaProvider";
 import { KeyboardViewportGuard } from "@/features/mobile-hardening/KeyboardViewportGuard";
@@ -23,13 +14,15 @@ import { AppTopBarV4 } from "./AppTopBarV4";
 import { AppBottomNavV4 } from "./AppBottomNavV4";
 import { AppCanvasV4 } from "./AppCanvasV4";
 import { ShareCapsuleModalV5 } from "@/components/share/ShareCapsuleModalV5";
+import { ShareReflectionModalV2 } from "@/components/share/ShareReflectionModalV2";
 import { MeritToast } from "@/components/share/MeritToast";
 import { FirstTimeOnboarding } from "@/components/discovery/FirstTimeOnboarding";
+import { NotificationServiceBootstrap } from "@/components/notifications/NotificationService";
+import { AuthBootstrap } from "@/components/auth/AuthBootstrap";
 
 interface Props { children: React.ReactNode; }
 
-// v5 pages · cada una tiene su Header propio (no usan TopBar shell)
-const FULLSCREEN_ROUTES = ["/world", "/inicio", "/mi-mundo", "/poi", "/merit", "/perfil", "/guardados"];
+const FULLSCREEN_ROUTES = ["/world", "/inicio", "/mi-mundo", "/poi", "/merit", "/perfil", "/guardados", "/core", "/login"];
 
 export function AppShellV4({ children }: Props) {
   const pathname = usePathname() || "";
@@ -44,8 +37,11 @@ export function AppShellV4({ children }: Props) {
           {children}
           <AppBottomNavV4 />
           <ShareCapsuleModalV5 />
+          <ShareReflectionModalV2 />
           <MeritToast />
           <FirstTimeOnboarding />
+          <NotificationServiceBootstrap />
+          <AuthBootstrap />
         </FatalRecoveryLayer>
       </MobileSafeAreaProvider>
     );
@@ -60,7 +56,10 @@ export function AppShellV4({ children }: Props) {
         <AppCanvasV4>{children}</AppCanvasV4>
         <AppBottomNavV4 />
         <ShareCapsuleModalV5 />
+        <ShareReflectionModalV2 />
         <MeritToast />
+        <NotificationServiceBootstrap />
+        <AuthBootstrap />
       </FatalRecoveryLayer>
     </MobileSafeAreaProvider>
   );

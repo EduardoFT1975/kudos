@@ -1,0 +1,31 @@
+[2026-05-28 11:21:59] KUDOS Worker arrancando · loop infinito
+[2026-05-28 11:21:59]   queue: C:\Users\efert\kudos_project\kudos_engine\state\queue.json
+[2026-05-28 11:21:59]   done:  C:\Users\efert\kudos_project\kudos_engine\state\done.json
+[2026-05-28 11:21:59]   out:   C:\Users\efert\kudos_project\experience\public\capsules
+[2026-05-28 11:21:59] queue.json vacía · ejecuta: python -m kudos_engine.worker --reseed
+[2026-05-28 11:35:56] KUDOS Worker arrancando · loop infinito
+[2026-05-28 11:35:56]   queue: C:\Users\efert\kudos_project\kudos_engine\state\queue.json
+[2026-05-28 11:35:56]   done:  C:\Users\efert\kudos_project\kudos_engine\state\done.json
+[2026-05-28 11:35:56]   out:   C:\Users\efert\kudos_project\experience\public\capsules
+[2026-05-28 11:35:56] queue.json vacía · ejecuta: python -m kudos_engine.worker --reseed
+[2026-05-28 11:35:59] KUDOS Worker arrancando · loop infinito
+[2026-05-28 11:35:59]   queue: C:\Users\efert\kudos_project\kudos_engine\state\queue.json
+[2026-05-28 11:35:59]   done:  C:\Users\efert\kudos_project\kudos_engine\state\done.json
+[2026-05-28 11:35:59]   out:   C:\Users\efert\kudos_project\experience\public\capsules
+[2026-05-28 11:35:59] queue.json vacía · ejecuta: python -m kudos_engine.worker --reseed
+[2026-05-28 11:36:00] KUDOS Worker arrancando · loop infinito
+[2026-05-28 11:36:00]   queue: C:\Users\efert\kudos_project\kudos_engine\state\queue.json
+[2026-05-28 11:36:00]   done:  C:\Users\efert\kudos_project\kudos_engine\state\done.json
+[2026-05-28 11:36:00]   out:   C:\Users\efert\kudos_project\experience\public\capsules
+[2026-05-28 11:36:00] queue.json vacía · ejecuta: python -m kudos_engine.worker --reseed
+[2026-05-28 11:36:02] KUDOS Worker arrancando · loop infinito
+[2026-05-28 11:36:02]   queue: C:\Users\efert\kudos_project\kudos_engine\state\queue.json
+[2026-05-28 11:36:02]   done:  C:\Users\efert\kudos_project\kudos_engine\state\done.json
+[2026-05-28 11:36:02]   out:   C:\Users\efert\kudos_project\experience\public\capsules
+[2026-05-28 11:36:02] queue.json vacía · ejecuta: python -m kudos_engine.worker --reseed
+[2026-05-28 11:36:07] queue.json creada · 85 POIs en cola
+[2026-05-28 11:39:48] KUDOS Worker arrancando · loop infinito
+[2026-05-28 11:39:48]   queue: C:\Users\efert\kudos_project\kudos_engine\state\queue.json
+[2026-05-28 11:39:48]   done:  C:\Users\efert\kudos_project\kudos_engine\state\done.json
+[2026-05-28 11:39:48]   out:   C:\Users\efert\kudos_project\experience\public\capsules
+[2026-05-28 11:40:40] queue.json creada · 85 POIs en cola

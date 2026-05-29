@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q19371614",
+    "name": "Basílica de San Pedro",
+    "lat": 41.44171,
+    "lng": -8.29589,
+    "country_code": "PT",
+    "category": "monumento",
+    "type": "templo",
+    "wikidata": "Q19371614",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Igreja%20de%20S%C3%A3o%20Pedro%20-%20Guimar%C3%A3es%20-%20Portugal%20%2826744065836%29.jpg",
+    "unesco": true,
+    "tier": "S",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Basílica de San Pedro",
+    "subtitle": "Un lugar que merece ser recordado",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "Existe un lugar donde el tiempo se detuvo: Basílica de San Pedro.",
+        "direction": "in",
+        "search_hint": "Basílica de San Pedro",
+        "duration": 5.62
+      },
+      {
+        "title": "Contexto",
+        "narration": "Su historia atraviesa siglos.",
+        "direction": "right",
+        "search_hint": "Basílica de San Pedro",
+        "duration": 5.62
+      },
+      {
+        "title": "Escala",
+        "narration": "Sus dimensiones desafían lo posible.",
+        "direction": "out",
+        "search_hint": "Basílica de San Pedro",
+        "duration": 5.62
+      },
+      {
+        "title": "Detalle",
+        "narration": "Cada piedra guarda una memoria.",
+        "direction": "left",
+        "search_hint": "Basílica de San Pedro",
+        "duration": 5.62
+      },
+      {
+        "title": "Significado",
+        "narration": "Aquí cambió el curso de la civilización.",
+        "direction": "in",
+        "search_hint": "Basílica de San Pedro",
+        "duration": 5.62
+      },
+      {
+        "title": "Legado",
+        "narration": "Hoy sigue inspirando al mundo.",
+        "direction": "up",
+        "search_hint": "Basílica de San Pedro",
+        "duration": 5.62
+      },
+      {
+        "title": "KUDOS",
+        "narration": "Reconoce. Recuerda. Comparte.",
+        "direction": "in",
+        "search_hint": "Basílica de San Pedro",
+        "duration": 5.62
+      },
+      {
+        "title": "Cierre",
+        "narration": "Basílica de San Pedro. KUDOS.",
+        "direction": "out",
+        "search_hint": "Basílica de San Pedro",
+        "duration": 5.62
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\basílica-de-san-pedro\\00_c79872bd.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Ancient_ruins_and_dome_of_St._Peter_seen_from_Palatino_hill.JPG",
+      "title": "File:Ancient ruins and dome of St. Peter seen from Palatino hill.JPG",
+      "author": "Livioandronico2013",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1277
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\basílica-de-san-pedro\\01_2a187005.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/92/Basilica_Sancti_Petri_blue_hour.jpg",
+      "title": "File:Basilica Sancti Petri blue hour.jpg",
+      "author": "Jebulon",
+      "license": "CC0",
+      "width": 1920,
+      "height": 1367
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\basílica-de-san-pedro\\02_c4c0ad05.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f5/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg",
+      "title": "File:Basilica di San Pietro in Vaticano September 2015-1a.jpg",
+      "author": "Alvesgaspar",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1003
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\basílica-de-san-pedro\\03_7143dec0.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/6a/Basilique_Saint-Pierre_Vatican_dome.jpg",
+      "title": "File:Basilique Saint-Pierre Vatican dome.jpg",
+      "author": "Myrabella",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 2560
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\basílica-de-san-pedro\\04_c8dbe2d4.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Bridge_Vittorio_Emanuele_II_and_dome_of_San_peter.jpg",
+      "title": "File:Bridge Vittorio Emanuele II and dome of San peter.jpg",
+      "author": "Livioandronico2013",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1350
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\basílica-de-san-pedro\\05_bcac6153.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/7d/Capilla_de_los_M%C3%A1rtires_de_C%C3%B3rdoba%2C_Iglesia_de_San_Pedro_%28C%C3%B3rdoba%29.jpg",
+      "title": "File:Capilla de los Mártires de Córdoba, Iglesia de San Pedro (Córdoba).jpg",
+      "author": "Jl FilpoC",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2560
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\basílica-de-san-pedro\\06_138457c3.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f6/CoA_Pius_VI_Saint_Peter%27s_Basilica_Vatican_City.jpg",
+      "title": "File:CoA Pius VI Saint Peter's Basilica Vatican City.jpg",
+      "author": "Jebulon",
+      "license": "CC0",
+      "width": 1920,
+      "height": 2975
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\basílica-de-san-pedro\\07_50ab5b84.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Colonnade_of_St._Peter_and_sky.jpg",
+      "title": "File:Colonnade of St. Peter and sky.jpg",
+      "author": "Livioandronico2013",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1696
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\basílica-de-san-pedro\\08_e90ac9d5.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b5/Cuppolas_Saint_Peter%27s_basilica%2C_Vatican_City.jpg",
+      "title": "File:Cuppolas Saint Peter's basilica, Vatican City.jpg",
+      "author": "Jebulon",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1212
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\basílica-de-san-pedro\\09_437172bb.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Dome_of_S.Peter_in_night.jpg",
+      "title": "File:Dome of S.Peter in night.jpg",
+      "author": "Livioandronico2013",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2473
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\basílica-de-san-pedro\\10_09966be8.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Dome_of_S.Peter_in_the_night.jpg",
+      "title": "File:Dome of S.Peter in the night.jpg",
+      "author": "Livioandronico2013",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1703
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\basílica-de-san-pedro\\11_efd6b865.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Dome_of_Saint_Peter%27s_Basilica_%28exterior%29.jpg",
+      "title": "File:Dome of Saint Peter's Basilica (exterior).jpg",
+      "author": "Staselnik",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 2652
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:Ancient ruins and dome of St. Peter seen from Palatino hill.JPG — Livioandronico2013 — CC BY-SA 4.0\n  · File:Basilica Sancti Petri blue hour.jpg — Jebulon — CC0\n  · File:Basilica di San Pietro in Vaticano September 2015-1a.jpg — Alvesgaspar — CC BY-SA 4.0\n  · File:Basilique Saint-Pierre Vatican dome.jpg — Myrabella — CC BY-SA 3.0\n  · File:Capilla de los Mártires de Córdoba, Iglesia de San Pedro (Córdoba).jpg — Jl FilpoC — CC BY-SA 4.0\n  · File:Cuppolas Saint Peter's basilica, Vatican City.jpg — Jebulon — CC BY-SA 3.0\n  · File:Dome of Saint Peter's Basilica (exterior).jpg — Staselnik — CC BY-SA 3.0"
+}

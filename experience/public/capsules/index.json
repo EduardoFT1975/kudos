@@ -62,7 +62,79 @@
       "meta_url": "/capsules/wd-Q243/metadata.json",
       "size_mb": 23.39,
       "generated_at": "2026-05-28T23:59:48Z"
+    },
+    "wd-Q19371614": {
+      "status": "ok",
+      "tier": "S",
+      "name": "Basílica de San Pedro",
+      "url": "/capsules/wd-Q19371614/capsule.mp4",
+      "meta_url": "/capsules/wd-Q19371614/metadata.json",
+      "size_mb": 35.1,
+      "generated_at": "2026-05-29T09:10:54Z"
+    },
+    "wd-Q62378": {
+      "status": "ok",
+      "tier": "S",
+      "name": "Torre de Londres",
+      "url": "/capsules/wd-Q62378/capsule.mp4",
+      "meta_url": "/capsules/wd-Q62378/metadata.json",
+      "size_mb": 19.26,
+      "generated_at": "2026-05-29T09:17:36Z"
+    },
+    "wd-Q314478": {
+      "status": "ok",
+      "tier": "A",
+      "name": "Abadía de Altzella",
+      "url": "/capsules/wd-Q314478/capsule.mp4",
+      "meta_url": "/capsules/wd-Q314478/metadata.json",
+      "size_mb": 23.92,
+      "generated_at": "2026-05-29T09:24:21Z"
+    },
+    "wd-Q2482838": {
+      "status": "ok",
+      "tier": "A",
+      "name": "Abadía de Reading",
+      "url": "/capsules/wd-Q2482838/capsule.mp4",
+      "meta_url": "/capsules/wd-Q2482838/metadata.json",
+      "size_mb": 25.72,
+      "generated_at": "2026-05-29T09:29:36Z"
+    },
+    "wd-Q926846": {
+      "status": "ok",
+      "tier": "A",
+      "name": "Abadía de San Benedicto de Polirone",
+      "url": "/capsules/wd-Q926846/capsule.mp4",
+      "meta_url": "/capsules/wd-Q926846/metadata.json",
+      "size_mb": 26.27,
+      "generated_at": "2026-05-29T09:34:49Z"
+    },
+    "wd-Q3405514": {
+      "status": "ok",
+      "tier": "A",
+      "name": "Abadía de Tewkesbury",
+      "url": "/capsules/wd-Q3405514/capsule.mp4",
+      "meta_url": "/capsules/wd-Q3405514/metadata.json",
+      "size_mb": 30.19,
+      "generated_at": "2026-05-29T09:40:58Z"
+    },
+    "wd-Q5933": {
+      "status": "ok",
+      "tier": "A",
+      "name": "Abadía de Westminster",
+      "url": "/capsules/wd-Q5933/capsule.mp4",
+      "meta_url": "/capsules/wd-Q5933/metadata.json",
+      "size_mb": 44.96,
+      "generated_at": "2026-05-29T09:45:53Z"
+    },
+    "wd-Q3662761": {
+      "status": "ok",
+      "tier": "A",
+      "name": "Abbey of Saint Mary of Maniace",
+      "url": "/capsules/wd-Q3662761/capsule.mp4",
+      "meta_url": "/capsules/wd-Q3662761/metadata.json",
+      "size_mb": 26.42,
+      "generated_at": "2026-05-29T09:51:19Z"
     }
   },
-  "updated_at": "2026-05-28T23:59:48Z"
+  "updated_at": "2026-05-29T09:51:19Z"
 }

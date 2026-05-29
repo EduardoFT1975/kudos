@@ -9,6 +9,8 @@ import * as React from "react";
 import { Track } from "./kudosTelemetry";
 import { useMyWorld } from "./useMyWorld";
 import { MeaningPicker, type Motivation } from "./MeaningPicker";
+import { useAuth } from "@/components/auth/useAuth";
+import { useRequireAuth } from "@/components/auth/AuthGate";
 
 
 interface Props {
@@ -24,10 +26,12 @@ export function AddToMyWorldButton({
   showMeaningPicker = true, onAdded,
 }: Props) {
   const { isInMyWorld, add, remove } = useMyWorld();
+  const { user } = useAuth();
+  const requireAuth = useRequireAuth();
   const added = isInMyWorld(poiId);
   const [meaningOpen, setMeaningOpen] = React.useState(false);
 
-  const handle = async () => {
+  const doAction = async () => {
     if (added) {
       await remove(poiId);
       Track.removedFromMyWorld(poiId);
@@ -38,10 +42,19 @@ export function AddToMyWorldButton({
     Track.addedToMyWorld(poiId);
     if (showMeaningPicker) setMeaningOpen(true);
     else {
-      dispatchToast("Añadido a Mi Mundo");
+      dispatchToast(user ? "Añadido a Mi Mundo" : "Guardado en este dispositivo");
       onAdded?.(null);
     }
   };
+
+  const handle = () => {
+    // Permitimos save anonimo (local) pero invitamos suavemente a login
+    // tras la primera vez. Si el usuario quiere persistencia entre devices,
+    // /auth/sign-in. La accion en si NO bloquea.
+    void doAction();
+  };
+
+  void requireAuth;  // reserved for future force-auth on certain actions
 
   const baseStyle = (variant === "primary" ? STYLE_PRIMARY :
                     variant === "ghost"   ? STYLE_GHOST   :

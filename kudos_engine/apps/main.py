@@ -1,7 +1,7 @@
-"""KUDOS Capsule Engine v2 · T1.2-T1.5 + T3.2 Core Engine + Admin Metrics."""
+"""KUDOS Capsule Engine v2 - T1.2-T1.5 + T3.2 Core Engine + Admin Metrics + Personal Graph."""
 from __future__ import annotations
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -30,9 +30,9 @@ def create_app() -> FastAPI:
     sentry_active = init_sentry()
 
     app = FastAPI(
-        title="KUDOS Capsule Engine v2 + HDG + Core Engine + Admin",
+        title="KUDOS Capsule Engine v2 + HDG + Core Engine + Admin + Personal",
         description="Contextual discovery infrastructure",
-        version="2.8.0",
+        version="2.9.0",
     )
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -44,7 +44,7 @@ def create_app() -> FastAPI:
         allow_origins=allowed_origins(),
         allow_credentials=True,
         allow_methods=["GET", "POST", "PATCH", "DELETE"],
-        allow_headers=["Authorization", "Content-Type", "X-Admin-Token"],
+        allow_headers=["Authorization", "Content-Type", "X-Admin-Token", "X-Session-Id"],
         max_age=600,
     )
 
@@ -74,9 +74,11 @@ def create_app() -> FastAPI:
         from kudos_engine.apps.core_engine.router import router as core_router
         app.include_router(core_router)
 
-        # === T3.2 Day 10-11 · Admin Metrics + Cron ===
         from kudos_engine.apps.admin_metrics.router import router as admin_metrics_router
         app.include_router(admin_metrics_router)
+
+        from kudos_engine.apps.personal.router import router as personal_router
+        app.include_router(personal_router)
     else:
         app.include_router(save_router_legacy)
         app.include_router(telemetry_router_legacy)
@@ -87,12 +89,13 @@ def create_app() -> FastAPI:
         persistence = "postgres" if is_postgres_enabled() else "json-legacy"
         return {
             "service": "kudos-capsule-engine-v2",
-            "version": "2.8.0",
+            "version": "2.9.0",
             "status": "operational",
             "persistence": persistence,
             "auth": "google-oauth-jwt" if is_postgres_enabled() else "disabled",
             "core_engine": "active" if is_postgres_enabled() else "disabled",
             "admin_metrics": "active" if is_postgres_enabled() else "disabled",
+            "personal_graph": "active" if is_postgres_enabled() else "disabled",
             "endpoints_mode": "postgres-aware" if is_postgres_enabled() else "json-legacy",
             "security": {
                 "cors": "hardened",
@@ -101,13 +104,14 @@ def create_app() -> FastAPI:
                 "security_headers": "enabled",
                 "sentry": "active" if sentry_active else "disabled",
             },
-            "modules_loaded": ["pois", "capsules", "merit", "narrative", "media", "feed", "save", "nodes", "telemetry", "signals", "core_engine", "admin_metrics"],
+            "modules_loaded": ["pois", "capsules", "merit", "narrative", "media", "feed", "save", "nodes", "telemetry", "signals", "core_engine", "admin_metrics", "personal_graph"],
             "personal_world": ["saved", "visited", "watched", "resonances", "memory"],
             "human_discovery_graph": ["discovery", "importance", "memory", "emotion", "future_value"],
             "trust_layer": ["trusted", "normal", "suspect", "bot"],
             "why_signals": ["motivation", "visit_reason", "watch_reason", "resonance_reason", "memory_reason", "event_reason"],
             "humanity_core": ["olduvai", "gobekli", "lascaux", "jerusalen", "galapagos", "apollo11", "hiroshima"],
             "mvp_metrics": ["completion_rate", "resonance_rate", "reflection_rate", "return_visit_rate", "dti_preliminary"],
+            "discovery_dna": ["pillars_touched_5_plus", "cores_completed_2_plus", "return_visit_1_plus", "reflection_1_plus", "relationship_followed_3_plus"],
         }
 
     @app.get("/health")

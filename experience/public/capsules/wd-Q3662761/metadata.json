@@ -1,0 +1,115 @@
+{
+  "poi": {
+    "id": "wd-Q3662761",
+    "name": "Abbey of Saint Mary of Maniace",
+    "lat": 37.858588,
+    "lng": 14.818548,
+    "country_code": "IT",
+    "category": "monumento",
+    "type": "castillo",
+    "wikidata": "Q3662761",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Maniace%20abbey%20portal.jpg",
+    "unesco": true,
+    "tier": "A",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Abbey of Saint Mary of Maniace",
+    "subtitle": "Un lugar que merece ser recordado",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "Existe un lugar donde el tiempo se detuvo: Abbey of Saint Mary of Maniace.",
+        "direction": "in",
+        "search_hint": "Abbey of Saint Mary of Maniace",
+        "duration": 5.62
+      },
+      {
+        "title": "Contexto",
+        "narration": "Su historia atraviesa siglos.",
+        "direction": "right",
+        "search_hint": "Abbey of Saint Mary of Maniace",
+        "duration": 5.62
+      },
+      {
+        "title": "Escala",
+        "narration": "Sus dimensiones desafían lo posible.",
+        "direction": "out",
+        "search_hint": "Abbey of Saint Mary of Maniace",
+        "duration": 5.62
+      },
+      {
+        "title": "Detalle",
+        "narration": "Cada piedra guarda una memoria.",
+        "direction": "left",
+        "search_hint": "Abbey of Saint Mary of Maniace",
+        "duration": 5.62
+      },
+      {
+        "title": "Significado",
+        "narration": "Aquí cambió el curso de la civilización.",
+        "direction": "in",
+        "search_hint": "Abbey of Saint Mary of Maniace",
+        "duration": 5.62
+      },
+      {
+        "title": "Legado",
+        "narration": "Hoy sigue inspirando al mundo.",
+        "direction": "up",
+        "search_hint": "Abbey of Saint Mary of Maniace",
+        "duration": 5.62
+      },
+      {
+        "title": "KUDOS",
+        "narration": "Reconoce. Recuerda. Comparte.",
+        "direction": "in",
+        "search_hint": "Abbey of Saint Mary of Maniace",
+        "duration": 5.62
+      },
+      {
+        "title": "Cierre",
+        "narration": "Abbey of Saint Mary of Maniace. KUDOS.",
+        "direction": "out",
+        "search_hint": "Abbey of Saint Mary of Maniace",
+        "duration": 5.62
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abbey-of-saint-mary-of-maniace\\00_0a61583e.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Dettagli_Castello_Nelson.jpg",
+      "title": "File:Dettagli Castello Nelson.jpg",
+      "author": "Ilaria Giuliodori",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\abbey-of-saint-mary-of-maniace\\01_581927fb.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/85/Maniace_abbey_portal.jpg",
+      "title": "File:Maniace abbey portal.jpg",
+      "author": "epanto",
+      "license": "CC BY-SA 2.0",
+      "width": 1920,
+      "height": 2560
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:Dettagli Castello Nelson.jpg — Ilaria Giuliodori — CC BY-SA 4.0\n  · File:Maniace abbey portal.jpg — epanto — CC BY-SA 2.0"
+}
