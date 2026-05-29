@@ -74,10 +74,12 @@ async def db_seed(
 
 @router.post("/upgrade")
 async def db_upgrade(x_admin_token: str | None = Header(None)):
-    """T3.2 Day 22+ - Ejecuta `alembic upgrade head` desde Python (sin shell).
+    """T3.2 Day 22+ - Ejecuta `alembic upgrade head` desde Python (sin shell, sin .ini fisico).
 
     Aplica todas las migraciones pendientes (001 -> 002 -> 003 -> 004 -> 005).
     Idempotente: si ya estan aplicadas, no hace nada.
+    Configuracion 100% programatica: NO necesita alembic.ini en filesystem
+    (Render solo copia codigo Python al deploy).
     Require X-Admin-Token.
     """
     _require_admin(x_admin_token)
@@ -85,24 +87,47 @@ async def db_upgrade(x_admin_token: str | None = Header(None)):
         raise HTTPException(503, detail="Postgres no habilitado")
 
     import os
+    import sys
     from alembic import command
     from alembic.config import Config
 
-    # Localizar alembic.ini (esta en la raiz del repo en deploy)
-    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    ini_path = os.path.join(repo_root, "alembic.ini")
-    if not os.path.isfile(ini_path):
-        ini_path = os.path.join(os.getcwd(), "alembic.ini")
-    if not os.path.isfile(ini_path):
-        raise HTTPException(500, detail=f"alembic.ini not found (cwd={os.getcwd()})")
+    # Localizar carpeta de migraciones (sale del __file__ de este router)
+    here = os.path.dirname(__file__)
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(here)))
+    script_dir = os.path.join(repo_root, "kudos_engine", "db", "alembic")
 
-    cfg = Config(ini_path)
+    if not os.path.isdir(script_dir):
+        # Fallback: probar desde cwd
+        script_dir = os.path.join(os.getcwd(), "kudos_engine", "db", "alembic")
+    if not os.path.isdir(script_dir):
+        raise HTTPException(
+            500,
+            detail=f"alembic script_dir not found (tried {repo_root}/kudos_engine/db/alembic and cwd={os.getcwd()})",
+        )
+
+    # Aseguramos que repo_root esta en sys.path para que env.py pueda importar models
+    if repo_root not in sys.path:
+        sys.path.insert(0, repo_root)
+    if os.getcwd() not in sys.path:
+        sys.path.insert(0, os.getcwd())
+
+    # Config programatica (sin .ini)
+    cfg = Config()
+    cfg.set_main_option("script_location", script_dir)
+    cfg.set_main_option("prepend_sys_path", ".")
+    # env.py lee DATABASE_URL desde env var directamente, no necesitamos pasarla aqui
+
     try:
         command.upgrade(cfg, "head")
     except Exception as e:
-        raise HTTPException(500, detail=f"alembic upgrade failed: {type(e).__name__}: {e}")
+        import traceback
+        tb = traceback.format_exc()[-600:]
+        raise HTTPException(
+            500,
+            detail=f"alembic upgrade failed: {type(e).__name__}: {e}\n{tb}",
+        )
 
-    return {"ok": True, "msg": "alembic upgrade head completed"}
+    return {"ok": True, "msg": "alembic upgrade head completed", "script_dir": script_dir}
 
 
 @router.post("/seed-humanity-core")
