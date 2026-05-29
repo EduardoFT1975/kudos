@@ -14,6 +14,7 @@ import { HeroBlock } from "./HeroBlock";
 import { DestacadoCard } from "./DestacadoCard";
 import { StoryRail } from "./StoryRail";
 import { ErasCard } from "./ErasCard";
+import { TimelineStoryRail } from "./TimelineStoryRail";
 import type { CapsulesIndex } from "./types";
 import { MemoryPrompt, type StaleSave } from "@/components/discovery/MemoryPrompt";
 import { useDiscoverySignals } from "@/components/discovery/useDiscoverySignals";
@@ -137,6 +138,10 @@ export function HomeFeedV5() {
           onPlay={playCapsule}
           onSeeAll={() => router.push("/world")}
         />
+      </ErrorBoundary>
+
+      <ErrorBoundary fallback={null}>
+        <TimelineStoryRail />
       </ErrorBoundary>
 
       <ErrorBoundary fallback={null}>

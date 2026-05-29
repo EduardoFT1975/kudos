@@ -14,6 +14,9 @@ import { useScrollDepth } from "@/components/discovery/useScrollDepth";
 import { useTimeOnScreen } from "@/components/discovery/useTimeOnScreen";
 import { Track } from "@/components/discovery/kudosTelemetry";
 import { useRelatedPois } from "@/components/discovery/useRelatedPois";
+import { useNarratives, TYPE_ICON } from "@/components/discovery/useNarratives";
+import { usePoiData } from "@/components/discovery/usePoiData";
+import { useSignals } from "@/components/discovery/useSignals";
 
 
 interface Props {
@@ -29,24 +32,21 @@ export function PoiNodeV5({ poiId }: Props) {
   const [tab, setTab] = React.useState<Tab>("resumen");
   const [era, setEra] = React.useState<"80" | "120" | "1500" | "1800" | "hoy">("80");
 
-  // Phase 1 placeholder · hardcoded Coliseo
+  const { poi: realPoi } = usePoiData(poiId);
+  const { data: signals } = useSignals(poiId);
+
   const poi = {
-    name: "Coliseo",
-    category: "MONUMENTO HISTÓRICO",
-    location: "Roma, Italia",
-    flag: "🇮🇹",
-    rating: 4.9,
-    ratingCount: 1248,
-    description: "Anfiteatro emblemático del Imperio Romano. Escenario de luchas de gladiadores y espectáculos que fascinaban al mundo.",
-    tags: ["Historia", "Arquitectura", "Imperio Romano"],
+    name: realPoi?.name || "Coliseo",
+    category: realPoi?.category || "MONUMENTO HISTÓRICO",
+    location: realPoi?.country || "Roma, Italia",
+    flag: realPoi?.flag || "🇮🇹",
+    rating: signals ? Math.round((Math.max(60, signals.emotion_score) / 100 + 4) * 10) / 10 : 4.9,
+    ratingCount: signals?.total_resonances || 1248,
+    description: realPoi?.short_description || "Anfiteatro emblemático del Imperio Romano. Escenario de luchas de gladiadores y espectáculos que fascinaban al mundo.",
+    tags: deriveTagsForCategory(realPoi?.category),
     distance: "320 m",
     schedule: "Abierto ahora 8:30 – 19:00",
-    keyData: [
-      { icon: "🏛", label: "Construido", value: "70-80 d.C." },
-      { icon: "👑", label: "Emperador", value: "Vespasiano" },
-      { icon: "👥", label: "Capacidad", value: "50.000 - 80.000 espectadores" },
-      { icon: "⚔", label: "Uso", value: "Juegos, combates y espectáculos públicos" },
-    ],
+    keyData: deriveKeyData(realPoi?.category, realPoi?.country),
   };
 
   // HDG · capa Discovery · disparar al mount + medir tiempo
@@ -101,7 +101,7 @@ export function PoiNodeV5({ poiId }: Props) {
       </nav>
 
       {tab === "resumen" && <ResumenTab keyData={poi.keyData} />}
-      {tab === "historia" && <HistoriaTab />}
+      {tab === "historia" && <HistoriaTab poiId={poiId} />}
       {tab === "tiempo" && <TiempoTab era={era} setEra={setEra} />}
       {tab === "experiencias" && <ExperienciasTab poiId={poiId} />}
       {tab === "info" && <InfoTab />}

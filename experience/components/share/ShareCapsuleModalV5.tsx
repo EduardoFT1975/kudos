@@ -169,13 +169,16 @@ function PreviewCard({ style, poiName, location, evocative, dur, image }: {
   style: PreviewStyle; poiName: string; location: string;
   evocative: string; dur: number; image?: string;
 }) {
+  const bg =
+    style === "epico"    ? (image ? `linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(15,10,31,0.85) 100%), url("${image}") center/cover` : "linear-gradient(135deg, #2a1542 0%, #1a0f2e 100%)") :
+    style === "minimal"  ? "linear-gradient(180deg, #0a0814 0%, #14101f 100%)" :
+    style === "mapa"     ? "linear-gradient(180deg, #0b1428 0%, #142847 100%)" :
+                            "linear-gradient(180deg, #2a1219 0%, #1a0a12 100%)";
+
   return (
-    <div style={{
-      ...CARD_WRAP,
-      background: image ? `linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(15,10,31,0.85) 100%), url("${image}") center/cover` : "linear-gradient(135deg, #2a1542 0%, #1a0f2e 100%)",
-    }}>
+    <div style={{ ...CARD_WRAP, background: bg }}>
       <div style={CARD_TOP}>
-        <KudosFlowerLogo size={28} variant="white" />
+        <KudosFlowerLogo size={28} variant={style === "minimal" ? "gold" : "white"} />
         <span style={CARD_BRAND}>KUDOS</span>
       </div>
 
@@ -184,10 +187,19 @@ function PreviewCard({ style, poiName, location, evocative, dur, image }: {
         <span>{location}</span>
       </div>
 
+      {style === "mapa" && <MiniMapOverlay />}
+      {style === "timeline" && <TimelineOverlay />}
+      {style === "minimal" && <MinimalGlow />}
+
       <div style={{ flex: 1 }} />
 
-      <h3 style={CARD_TITLE}>{poiName}</h3>
+      <h3 style={{ ...CARD_TITLE, fontWeight: style === "minimal" ? 300 : 600 }}>{poiName}</h3>
       <p style={CARD_EVOCATIVE}>{evocative}</p>
+
+      <div style={DISCOVERED_BY}>
+        <span style={DISCOVERED_DOT} />
+        <span>Descubierto por <strong style={{ color: "#C9A961" }}>Eduardo</strong></span>
+      </div>
 
       <div style={CARD_BOTTOM_ROW}>
         <div style={CARD_CTA}>
@@ -199,6 +211,63 @@ function PreviewCard({ style, poiName, location, evocative, dur, image }: {
         <div style={CARD_QR} aria-label="QR placeholder" />
       </div>
     </div>
+  );
+}
+
+
+function MiniMapOverlay() {
+  return (
+    <svg
+      viewBox="0 0 280 110"
+      style={{ position: "absolute", inset: "60px 16px auto", width: "calc(100% - 32px)", height: 110, opacity: 0.6, pointerEvents: "none" }}
+      preserveAspectRatio="none"
+    >
+      {[0, 0.25, 0.5, 0.75, 1].map((p, i) => (
+        <line key={`h${i}`} x1="0" y1={110 * p} x2="280" y2={110 * p}
+              stroke="rgba(139,107,255,0.18)" strokeWidth="0.5" />
+      ))}
+      {[0, 0.2, 0.4, 0.6, 0.8, 1].map((p, i) => (
+        <line key={`v${i}`} x1={280 * p} y1="0" x2={280 * p} y2="110"
+              stroke="rgba(139,107,255,0.18)" strokeWidth="0.5" />
+      ))}
+      <path d="M30,80 Q90,40 140,55 T260,30" fill="none" stroke="#8B6BFF" strokeWidth="1.5" strokeDasharray="3 4" />
+      <circle cx="30" cy="80" r="3" fill="#C9A961" />
+      <circle cx="140" cy="55" r="5" fill="#8B6BFF" stroke="#fff" strokeWidth="1.5" />
+      <circle cx="260" cy="30" r="3" fill="#C9A961" />
+    </svg>
+  );
+}
+
+
+function TimelineOverlay() {
+  return (
+    <svg
+      viewBox="0 0 280 60"
+      style={{ position: "absolute", inset: "70px 16px auto", width: "calc(100% - 32px)", height: 60, opacity: 0.7, pointerEvents: "none" }}
+      preserveAspectRatio="none"
+    >
+      <line x1="10" y1="30" x2="270" y2="30" stroke="rgba(201,169,97,0.4)" strokeWidth="1.5" />
+      {[20, 80, 140, 200, 250].map((x, i) => (
+        <g key={i}>
+          <circle cx={x} cy="30" r={i === 2 ? 5 : 3} fill={i === 2 ? "#C9A961" : "rgba(201,169,97,0.55)"} />
+          <text x={x} y="50" textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.45)">
+            {["80 d.C.", "476", "1300", "1800", "Hoy"][i]}
+          </text>
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+
+function MinimalGlow() {
+  return (
+    <div style={{
+      position: "absolute", top: 80, left: "50%", transform: "translateX(-50%)",
+      width: 140, height: 140, borderRadius: "50%",
+      background: "radial-gradient(circle, rgba(201,169,97,0.18) 0%, transparent 70%)",
+      pointerEvents: "none",
+    }} />
   );
 }
 

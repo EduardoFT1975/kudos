@@ -11,6 +11,8 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { KudosFlowerLogo } from "@/components/brand/KudosFlowerLogo";
+import { useSignals, meritScore, meritLabel, type PoiSignalsData } from "@/components/discovery/useSignals";
+import { usePoiData, type PoiData } from "@/components/discovery/usePoiData";
 
 
 interface Props {
@@ -18,7 +20,7 @@ interface Props {
 }
 
 
-// Placeholder Phase 1
+// Placeholder Phase 1 (solo se usa si signals/poi devuelven null)
 const PLACEHOLDER = {
   name: "Coliseo",
   location: "Roma, Italia",
@@ -60,9 +62,77 @@ const PLACEHOLDER = {
 };
 
 
+
+/** Convierte signals + poi reales al shape que esperan las cards. */
+function buildMeritView(poiId: string, poi: PoiData | null, signals: PoiSignalsData | null) {
+  if (!signals || !poi) return PLACEHOLDER;
+  const score = meritScore(signals);
+  const label = meritLabel(score);
+  const factors = [
+    { id: "impacto",     emoji: "★", name: "Impacto cultural",      sub: "Importancia histórica y cultural global", value: Math.round(signals.importance_score / 5),     max: 20 },
+    { id: "conexion",    emoji: "♥", name: "Conexión emocional",    sub: "Capacidad de generar emoción y asombro",  value: Math.round(signals.emotion_score / 5),         max: 20 },
+    { id: "relevancia",  emoji: "◍", name: "Relevancia colectiva",  sub: "Cuántas personas lo valoran positivamente", value: Math.round(signals.discovery_score / 5),     max: 20 },
+    { id: "calidad",     emoji: "◉", name: "Calidad del contenido", sub: "Rigor, profundidad y claridad",            value: Math.round((signals.discovery_score + signals.importance_score) / 12), max: 20 },
+    { id: "permanencia", emoji: "⏱", name: "Permanencia temporal",  sub: "Valor a lo largo del tiempo y generaciones", value: Math.round(signals.memory_score * 15 / 100), max: 15 },
+    { id: "contexto",    emoji: "PIN", name: "Contexto local",        sub: "Importancia para el lugar y su comunidad", value: Math.round(signals.future_value_score * 10 / 100), max: 10 },
+  ];
+  const ep = signals.emotion_profile || {};
+  const affinities = [
+    { id: "tema",     name: "Afinidad temática",   value: Math.round((ep.aprendizaje || 0.3) * 100 + 40) },
+    { id: "interes",  name: "Interés histórico",   value: Math.round((ep.asombro || 0.32) * 100 + 35) },
+    { id: "viajes",   name: "Viajes futuros",      value: Math.round(signals.future_value_score * 0.9) },
+    { id: "conexion", name: "Conexión personal",   value: Math.round((ep.conexion || 0.14) * 100 + 30) },
+  ].map((a) => ({ ...a, value: Math.min(99, Math.max(20, a.value)) }));
+  const total = Math.max(50, signals.total_resonances || 800);
+  const community = {
+    total,
+    breakdown: [
+      { name: "Inspirador",     pct: Math.round((ep.asombro || 0.4) * 100 * 1.6),    color: "#4a9d5f" },
+      { name: "Impresionante",  pct: Math.round((ep.inspiracion || 0.18) * 100),     color: "#4080c8" },
+      { name: "Interesante",    pct: Math.round((ep.aprendizaje || 0.24) * 100 * 0.4), color: "#d4a857" },
+      { name: "Neutral",        pct: 2, color: "#888" },
+      { name: "Poco relevante", pct: 1, color: "#c85858" },
+    ].map((b) => ({ ...b, pct: Math.min(80, Math.max(1, b.pct)) })),
+  };
+  const sum = community.breakdown.reduce((a, b) => a + b.pct, 0);
+  if (sum > 0) community.breakdown = community.breakdown.map((b) => ({ ...b, pct: Math.round(b.pct * 100 / sum) }));
+  return {
+    name: poi.name,
+    location: poi.country || "—",
+    category: poi.category,
+    score,
+    scoreLabel: label,
+    scoreDelta: Math.round(signals.discovery_score / 10),
+    factors,
+    affinities,
+    tags: deriveTagsMerit(poi.category),
+    comparativa: [
+      { rank: 2, name: "Machu Picchu", score: Math.max(75, score - 4) },
+      { rank: 1, name: poi.name,        score },
+      { rank: 3, name: "Taj Mahal",     score: Math.max(72, score - 6) },
+    ],
+    community,
+    countries: Math.max(20, Math.round(signals.total_views / 80)),
+  };
+}
+
+
+function deriveTagsMerit(category: string): string[] {
+  const c = (category || "").toLowerCase();
+  if (c.includes("monumento") || c.includes("imperio")) return ["Historia antigua", "Arquitectura", "Viajes", "Civilizaciones"];
+  if (c.includes("religioso") || c.includes("iglesia")) return ["Espiritualidad", "Arquitectura sacra", "Arte", "Patrimonio"];
+  if (c.includes("arqueol"))                              return ["Historia antigua", "Descubrimiento", "Civilizaciones"];
+  if (c.includes("museo"))                                 return ["Arte", "Conocimiento", "Cultura"];
+  if (c.includes("natural") || c.includes("parque"))      return ["Naturaleza", "Paisaje", "Biosfera"];
+  return ["Cultura", "Patrimonio", "Viajes"];
+}
+
+
 export function MeritEngineV5({ poiId }: Props) {
   const router = useRouter();
-  const m = PLACEHOLDER;     // futuro: fetch /api/merit/{poiId}
+  const { data: signals } = useSignals(poiId);
+  const { poi } = usePoiData(poiId);
+  const m = buildMeritView(poiId, poi, signals);
 
   return (
     <div style={ROOT}>

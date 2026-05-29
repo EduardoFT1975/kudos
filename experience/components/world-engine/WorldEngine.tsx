@@ -221,6 +221,8 @@ export function WorldEngine() {
   const mapRef = React.useRef<any>(null);
   const LRef = React.useRef<any>(null);
   const markersRef = React.useRef<Map<string, any>>(new Map());
+  // World Graph: lineas POI<->POI cuando hay activeId
+  const relationLinesRef = React.useRef<any[]>([]);
 
   // ALL nodes viven en ref · NO en React state (evita re-render con 43k)
   const allNodesRef = React.useRef<WorldPoi[]>([]);
@@ -661,6 +663,52 @@ export function WorldEngine() {
     setVisibleCount(next.size);
     visibleIdsRef.current = Array.from(next.keys());
   }, [renderTick, zoom, mapReady, activeId, activeFilter, capsulesIndex]);
+
+
+  // World Graph: lineas POI<->POI cuando hay activeId
+  React.useEffect(() => {
+    const map = mapRef.current;
+    const L = LRef.current;
+    if (!map || !L) return;
+    relationLinesRef.current.forEach((ln) => { try { ln.remove(); } catch {} });
+    relationLinesRef.current = [];
+    if (!activeId) return;
+    const active = allNodesRef.current.find((p) => p.id === activeId);
+    if (!active) return;
+    fetch("/data/relationships/index.json", { cache: "force-cache" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((j) => {
+        const rels: any[] = (j && j.relationships && j.relationships[activeId]) || [];
+        if (rels.length === 0) return;
+        for (const r of rels.slice(0, 5)) {
+          const target = allNodesRef.current.find((p) => p.id === r.id);
+          if (!target) continue;
+          if (isNaN(target.lat) || isNaN(target.lng)) continue;
+          const color = r.type === "geographical" ? "#8B6BFF" :
+                        r.type === "thematic"     ? "#C9A961" :
+                        r.type === "historical"   ? "#6e4dd6" :
+                                                     "#a87cff";
+          try {
+            const line = L.polyline(
+              [[active.lat, active.lng], [target.lat, target.lng]],
+              {
+                color,
+                weight: 1.6,
+                opacity: 0.55,
+                dashArray: r.type === "thematic" ? "4 6" : undefined,
+                interactive: false,
+              }
+            ).addTo(map);
+            relationLinesRef.current.push(line);
+          } catch {}
+        }
+      })
+      .catch(() => {});
+    return () => {
+      relationLinesRef.current.forEach((ln) => { try { ln.remove(); } catch {} });
+      relationLinesRef.current = [];
+    };
+  }, [activeId, mapReady]);
 
   return (
     <div style={ROOT}>

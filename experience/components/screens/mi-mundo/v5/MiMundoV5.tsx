@@ -9,18 +9,18 @@ import { KudosFlowerLogo } from "@/components/brand/KudosFlowerLogo";
 import { AddToMyWorldButton } from "@/components/discovery/AddToMyWorldButton";
 import { ResonancePicker } from "@/components/discovery/ResonancePicker";
 import { MyWorldMiniMap } from "@/components/discovery/MyWorldMiniMap";
+import { useMyWorld } from "@/components/discovery/useMyWorld";
+import { usePoiData } from "@/components/discovery/usePoiData";
 
 
 export function MiMundoV5() {
   const router = useRouter();
-  const [saves, setSaves] = React.useState<string[]>([]);
-
-  React.useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem("kudos:saves") || "[]");
-      setSaves(Array.isArray(s) ? s : []);
-    } catch {}
-  }, []);
+  const { saves: myWorld } = useMyWorld();
+  const saves: string[] = React.useMemo(() => {
+    if (!Array.isArray(myWorld)) return [];
+    return myWorld.map((s: any) => typeof s === "string" ? s : (s?.poi_id || ""))
+                  .filter((id: string) => !!id);
+  }, [myWorld]);
 
   return (
     <div style={ROOT}>
@@ -39,7 +39,7 @@ export function MiMundoV5() {
         </div>
 
         <div style={COL_RIGHT}>
-          <FavoritosCard count={saves.length} />
+          <FavoritosCard count={saves.length} saves={saves} />
           <TimelinePersonal />
           <LogrosCard />
           <QuieresVisitar />
@@ -180,35 +180,46 @@ function CapsulasCreadasCard() {
 }
 
 
-function FavoritosCard({ count }: { count: number }) {
-  const favoritos = [
-    { name: "Coliseo", loc: "Roma, Italia", capsules: 8 },
-    { name: "Machu Picchu", loc: "Cusco, Perú", capsules: 6 },
-    { name: "Kyoto", loc: "Japón", capsules: 4 },
-  ];
+function FavoritosCard({ count, saves }: { count: number; saves: string[] }) {
+  const ids = saves.slice(0, 6);
   return (
     <div style={CARD}>
       <div style={CARD_HEAD}>
         <h3 style={CARD_TITLE}>Tus lugares de Mi Mundo</h3>
-        <a style={SEE_ALL}>Ver todos ›</a>
+        <a style={SEE_ALL} href="/guardados">Ver todos ›</a>
       </div>
-      <div style={FAV_GRID}>
-        {favoritos.map((f) => (
-          <div key={f.name} style={FAV_CARD}>
-            <div style={FAV_HERO}>
-              <div style={{ position: "absolute", top: 8, right: 8 }}>
-                <AddToMyWorldButton poiId={f.name.toLowerCase().replace(/\s+/g, "-")} poiName={f.name} variant="compact" showMeaningPicker={false} />
-              </div>
-            </div>
-            <div style={FAV_BODY}>
-              <div style={FAV_NAME}>{f.name}</div>
-              <div style={FAV_LOC}>{f.loc}</div>
-              <div style={FAV_CHIP}>{f.capsules} cápsulas</div>
-            </div>
-          </div>
-        ))}
-      </div>
+      {ids.length === 0 ? (
+        <div style={{ padding: "20px 8px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: 13 }}>
+          Aún no has añadido lugares a Mi Mundo.<br/>
+          Pulsa el corazón en cualquier POI para empezar.
+        </div>
+      ) : (
+        <div style={FAV_GRID}>
+          {ids.map((id) => <FavCard key={id} id={id} />)}
+        </div>
+      )}
     </div>
+  );
+}
+
+
+function FavCard({ id }: { id: string }) {
+  const { poi } = usePoiData(id);
+  if (!poi) return null;
+  return (
+    <a href={`/poi/${id}`} style={{ ...FAV_CARD, textDecoration: "none" }}>
+      <div style={FAV_HERO}>
+        <div style={{ position: "absolute", top: 8, right: 8 }}>
+          <AddToMyWorldButton poiId={id} poiName={poi.name} variant="compact" showMeaningPicker={false} />
+        </div>
+        <div style={{ position: "absolute", bottom: 8, left: 8, fontSize: 22 }}>{poi.flag}</div>
+      </div>
+      <div style={FAV_BODY}>
+        <div style={FAV_NAME}>{poi.name}</div>
+        <div style={FAV_LOC}>{poi.country || "—"}</div>
+        <div style={FAV_CHIP}>Mi Mundo</div>
+      </div>
+    </a>
   );
 }
 
