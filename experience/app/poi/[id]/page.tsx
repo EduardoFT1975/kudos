@@ -1,14 +1,24 @@
 /**
- * /poi/[id] · KUDOS POI Node v5 (mockup GPT-5 / AXÓN 1.0).
- * Phase 1: placeholder. Phase 2: conectado a /api/world/poi/{id}/node.
+ * /poi/[id] - KUDOS POI MVP - PROMPT 4/6.
+ *
+ * Pantalla POI rediseñada al 100% segun maqueta:
+ * Hero + Cápsula + Datos clave + Historia + Timeline + Relacionados + KUDOS Mind.
+ *
+ * El PoiNodeV5 anterior queda congelado en _postlaunch/poi-v5/
+ * con sus dependencias (ActionPotentialCard, RelatedHumanityRail, etc).
  */
 import type { Metadata } from "next";
-import { PoiNodeV5 } from "@/components/screens/poi/v5/PoiNodeV5";
+import { PoiMVP } from "@/components/screens/poi/mvp/PoiMVP";
 
-export const metadata: Metadata = {
-  title: "KUDOS · POI",
-};
+interface Props { params: { id: string }; searchParams?: { play?: string } }
 
-export default function PoiPage({ params }: { params: { id: string } }) {
-  return <PoiNodeV5 poiId={params.id} />;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  return {
+    title: `KUDOS - ${params.id}`,
+  };
+}
+
+export default function PoiPage({ params, searchParams }: Props) {
+  const autoPlay = searchParams?.play === "1";
+  return <PoiMVP poiId={params.id} autoPlayCapsule={autoPlay} />;
 }

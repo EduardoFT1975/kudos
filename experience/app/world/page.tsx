@@ -1,16 +1,20 @@
 /**
- * KUDOS · /world
- * Nueva pantalla del WORLD ENGINE.
- * Vive en paralelo a /mapa (que queda como demo legacy).
+ * /world - KUDOS Map MVP - PROMPT 3/6.
+ *
+ * Pantalla cinematografica de mapa: imagen aerea Roma nocturna + POIs
+ * flotantes con halos + carousel inferior. NO usa Leaflet.
+ *
+ * El WorldEngine anterior queda congelado en _postlaunch/world-engine
+ * (preservado, no importado).
  */
 import type { Metadata } from "next";
-import { WorldEngine } from "@/components/world-engine/WorldEngine";
+import { MapMVP } from "@/components/screens/map/v1/MapMVP";
 
 export const metadata: Metadata = {
-  title: "KUDOS · World",
-  description: "El primer mapa emocional, contextual y vivo del planeta.",
+  title: "KUDOS - Mapa",
+  description: "Roma nocturna iluminada por historias.",
 };
 
 export default function WorldPage() {
-  return <WorldEngine />;
+  return <MapMVP />;
 }

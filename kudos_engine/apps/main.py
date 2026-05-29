@@ -1,4 +1,4 @@
-"""KUDOS Capsule Engine v2 - T1.2-T1.5 + T3.2 Core + Admin + Personal + Push."""
+"""KUDOS Capsule Engine v2 - PROMPT 2/6 + T3.2 backstops."""
 from __future__ import annotations
 
 from fastapi import FastAPI
@@ -30,9 +30,9 @@ def create_app() -> FastAPI:
     sentry_active = init_sentry()
 
     app = FastAPI(
-        title="KUDOS Capsule Engine v2 + HDG + Core + Admin + Personal + Push",
+        title="KUDOS Capsule Engine - MVP build",
         description="Contextual discovery infrastructure",
-        version="3.0.0",
+        version="3.1.0",
     )
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -55,6 +55,10 @@ def create_app() -> FastAPI:
     app.include_router(media_router)
     app.include_router(feed_router)
     app.include_router(nodes_router)
+
+    # PROMPT 2/6 - Discover MVP composer (sin requirement Postgres)
+    from kudos_engine.apps.discover.router import router as discover_router
+    app.include_router(discover_router)
 
     if is_postgres_enabled():
         from kudos_engine.apps.save.pg_router import router as save_pg
@@ -80,7 +84,6 @@ def create_app() -> FastAPI:
         from kudos_engine.apps.personal.router import router as personal_router
         app.include_router(personal_router)
 
-        # T3.2 Day 22 - Push notifications (Web Push)
         from kudos_engine.apps.push.router import router as push_router
         app.include_router(push_router)
     else:
@@ -92,27 +95,15 @@ def create_app() -> FastAPI:
     def root():
         persistence = "postgres" if is_postgres_enabled() else "json-legacy"
         return {
-            "service": "kudos-capsule-engine-v2",
-            "version": "3.0.0",
+            "service": "kudos-capsule-engine",
+            "version": "3.1.0",
             "status": "operational",
             "persistence": persistence,
-            "auth": "google-oauth-jwt" if is_postgres_enabled() else "disabled",
-            "core_engine": "active" if is_postgres_enabled() else "disabled",
-            "admin_metrics": "active" if is_postgres_enabled() else "disabled",
-            "personal_graph": "active" if is_postgres_enabled() else "disabled",
-            "push": "active" if is_postgres_enabled() else "disabled",
+            "discover_mvp": "active",
             "endpoints_mode": "postgres-aware" if is_postgres_enabled() else "json-legacy",
-            "security": {
-                "cors": "hardened",
-                "rate_limit": "slowapi",
-                "body_limit": "256kb",
-                "security_headers": "enabled",
-                "sentry": "active" if sentry_active else "disabled",
-            },
-            "modules_loaded": ["pois", "capsules", "merit", "narrative", "media", "feed", "save", "nodes", "telemetry", "signals", "core_engine", "admin_metrics", "personal_graph", "push"],
-            "humanity_core": ["olduvai", "gobekli", "lascaux", "jerusalen", "galapagos", "apollo11", "hiroshima"],
-            "mvp_metrics": ["completion_rate", "resonance_rate", "reflection_rate", "return_visit_rate", "dti_preliminary"],
-            "discovery_dna": ["pillars_touched_5_plus", "cores_completed_2_plus", "return_visit_1_plus", "reflection_1_plus", "relationship_followed_3_plus"],
+            "modules_loaded": ["pois", "capsules", "merit", "narrative", "media", "feed", "save", "nodes", "telemetry", "signals", "discover"],
+            "humanity_core": "frozen (post-MVP)",
+            "mvp_screens": ["discover", "map", "poi", "mi_mundo", "compartir"],
         }
 
     @app.get("/health")

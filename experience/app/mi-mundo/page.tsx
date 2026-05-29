@@ -1,19 +1,19 @@
 /**
- * /mi-mundo · KUDOS Personal World V2 · T3.2 EJEC Day 16.
+ * /mi-mundo - KUDOS Mi Mundo MVP - PROMPT 5/6.
  *
- * Tres tabs:
- *   - Mapa cognitivo  -> PersonalGraph (constelacion 7 pilares)
- *   - Tus shifts      -> ShiftHistory (lista revisitable)
- *   - Tus lugares     -> MiMundoV5 (favoritos clasicos)
+ * Pantalla rediseñada al 100% según maqueta:
+ * 6 bloques: Hero · Stats · Guardados · Actividad · Cápsulas · Huella.
+ *
+ * MiMundoTabs (PersonalGraph + ShiftHistory) congelado en _postlaunch/mi-mundo-v5.
  */
 import type { Metadata } from "next";
-import { MiMundoTabs } from "@/components/screens/mi-mundo/v5/MiMundoTabs";
+import { MiMundoMVP } from "@/components/screens/mi-mundo/mvp/MiMundoMVP";
 
 export const metadata: Metadata = {
   title: "KUDOS - Mi Mundo",
-  description: "Tu mapa personal de descubrimiento.",
+  description: "Tu mapa personal de descubrimientos.",
 };
 
 export default function MiMundoPage() {
-  return <MiMundoTabs />;
+  return <MiMundoMVP />;
 }

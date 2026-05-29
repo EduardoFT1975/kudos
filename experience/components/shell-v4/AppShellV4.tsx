@@ -1,7 +1,7 @@
 "use client";
 /**
- * AppShellV4 · KUDOS T3.2 EJEC Day 18.
- * Top nav + bottom nav + modals globales.
+ * AppShellV4 - KUDOS PROMPT 5/6.
+ * Top nav + bottom nav + modal compartir UNICO (ShareMVP).
  */
 import * as React from "react";
 import { usePathname } from "next/navigation";
@@ -13,8 +13,7 @@ import { MobileShellFixes } from "@/features/mobile-hardening/MobileShellFixes";
 import { AppTopBarV4 } from "./AppTopBarV4";
 import { AppBottomNavV4 } from "./AppBottomNavV4";
 import { AppCanvasV4 } from "./AppCanvasV4";
-import { ShareCapsuleModalV5 } from "@/components/share/ShareCapsuleModalV5";
-import { ShareReflectionModalV2 } from "@/components/share/ShareReflectionModalV2";
+import { ShareMVP } from "@/components/share/ShareMVP";
 import { MeritToast } from "@/components/share/MeritToast";
 import { FirstTimeOnboarding } from "@/components/discovery/FirstTimeOnboarding";
 import { NotificationServiceBootstrap } from "@/components/notifications/NotificationService";
@@ -36,8 +35,7 @@ export function AppShellV4({ children }: Props) {
         <FatalRecoveryLayer>
           {children}
           <AppBottomNavV4 />
-          <ShareCapsuleModalV5 />
-          <ShareReflectionModalV2 />
+          <ShareMVP />
           <MeritToast />
           <FirstTimeOnboarding />
           <NotificationServiceBootstrap />
@@ -55,8 +53,7 @@ export function AppShellV4({ children }: Props) {
         <AppTopBarV4 />
         <AppCanvasV4>{children}</AppCanvasV4>
         <AppBottomNavV4 />
-        <ShareCapsuleModalV5 />
-        <ShareReflectionModalV2 />
+        <ShareMVP />
         <MeritToast />
         <NotificationServiceBootstrap />
         <AuthBootstrap />
