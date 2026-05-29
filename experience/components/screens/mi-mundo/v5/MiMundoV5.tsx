@@ -99,10 +99,10 @@ function HuellaCard() {
   return (
     <div style={CARD}>
       <div style={CARD_HEAD}>
-        <h3 style={CARD_TITLE}>Tu Huella</h3>
+        <h3 style={CARD_TITLE}>Tu Mapa de Significado</h3>
         <span style={CARD_HELP}>?</span>
       </div>
-      <p style={CARD_SUBTITLE}>Has explorado <strong style={{ color: "#8B6BFF" }}>3% del mundo</strong></p>
+      <p style={CARD_SUBTITLE}>Cada lugar guardado tiene un peso · cada resonancia construye tu identidad</p>
       <div style={{ marginTop: 16 }}>
         {continents.map((c) => (
           <div key={c.name} style={BAR_ROW}>
@@ -189,7 +189,7 @@ function FavoritosCard({ count }: { count: number }) {
   return (
     <div style={CARD}>
       <div style={CARD_HEAD}>
-        <h3 style={CARD_TITLE}>Tus lugares favoritos</h3>
+        <h3 style={CARD_TITLE}>Tus lugares de Mi Mundo</h3>
         <a style={SEE_ALL}>Ver todos ›</a>
       </div>
       <div style={FAV_GRID}>

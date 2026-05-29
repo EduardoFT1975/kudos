@@ -27,7 +27,7 @@ const TABS_LEFT: ReadonlyArray<Tab> = [
   { href: "/world",   label: "Mapa",   icon: "map" },
 ];
 const TABS_RIGHT: ReadonlyArray<Tab> = [
-  { href: "/mi-mundo", label: "Mi Mundo", icon: "saved" },
+  { href: "/guardados", label: "Guardados", icon: "saved" },
   { href: "/perfil",   label: "Perfil",   icon: "people" },
 ];
 

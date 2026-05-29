@@ -1,12 +1,13 @@
+/**
+ * /perfil · KUDOS Profile v5.
+ */
 import type { Metadata } from "next";
-import { PerfilScreen } from "@/components/screens/perfil/PerfilScreen";
+import { PerfilV5 } from "@/components/screens/perfil/v5/PerfilV5";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Perfil",
-  description: "Tu identidad y reputacion en KUDOS.",
+  title: "KUDOS · Perfil",
 };
 
 export default function PerfilPage() {
-  return <PerfilScreen />;
+  return <PerfilV5 />;
 }

@@ -38,6 +38,7 @@ import { WorldHud, FILTER_TO_CATEGORIES } from "./WorldHud";
 import { AddToMyWorldButton } from "@/components/discovery/AddToMyWorldButton";
 import { ResonancePicker } from "@/components/discovery/ResonancePicker";
 import { useDiscoverySignals } from "@/components/discovery/useDiscoverySignals";
+import { Track } from "@/components/discovery/kudosTelemetry";
 import { WorldCityPicker } from "./WorldCityPicker";
 import { WorldEraSwitcher } from "./WorldEraSwitcher";
 import { WorldBottomCarousel, type CarouselPoi } from "./WorldBottomCarousel";
@@ -650,7 +651,7 @@ export function WorldEngine() {
           existing.setIcon(icon);
         } else {
           const m = L.marker([n.lat, n.lng], { icon }).addTo(map);
-          m.on("click", () => setActiveId(id));
+          m.on("click", () => { Track.poiClick(id); setActiveId(id); });
           markersRef.current.set(id, m);
         }
       } catch (err) {
@@ -787,7 +788,7 @@ export function WorldEngine() {
             onSelect={setActiveId}
             onPlayCapsule={(id) => {
               const cap = capsulesIndex[id];
-              if (cap?.url) setActiveVideoUrl(cap.url);
+              if (cap?.url) { Track.capsulePlay(id, id); setActiveVideoUrl(cap.url); }
               else showToast("Cápsula en preparación", 2400);
             }}
             onSave={(id) => {

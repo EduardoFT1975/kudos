@@ -17,6 +17,8 @@ import { ErasCard } from "./ErasCard";
 import type { CapsulesIndex } from "./types";
 import { MemoryPrompt, type StaleSave } from "@/components/discovery/MemoryPrompt";
 import { useDiscoverySignals } from "@/components/discovery/useDiscoverySignals";
+import { useScrollDepth } from "@/components/discovery/useScrollDepth";
+import { useTimeOnScreen } from "@/components/discovery/useTimeOnScreen";
 
 
 export function HomeFeedV5() {
@@ -24,6 +26,10 @@ export function HomeFeedV5() {
   const [index, setIndex] = React.useState<CapsulesIndex | null>(null);
   const [activeVideoUrl, setActiveVideoUrl] = React.useState<string | null>(null);
   const [stalePrompt, setStalePrompt] = React.useState<StaleSave | null>(null);
+
+  // HDG · captura automática time + scroll
+  useTimeOnScreen("home_feed_time_on_screen");
+  useScrollDepth();
 
   // Cargar manifest de cápsulas (defensivo)
   React.useEffect(() => {

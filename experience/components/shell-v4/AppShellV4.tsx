@@ -28,7 +28,7 @@ import { MeritToast } from "@/components/share/MeritToast";
 interface Props { children: React.ReactNode; }
 
 // v5 pages · cada una tiene su Header propio (no usan TopBar shell)
-const FULLSCREEN_ROUTES = ["/world", "/inicio", "/mi-mundo", "/poi", "/merit"];
+const FULLSCREEN_ROUTES = ["/world", "/inicio", "/mi-mundo", "/poi", "/merit", "/perfil", "/guardados"];
 
 export function AppShellV4({ children }: Props) {
   const pathname = usePathname() || "";

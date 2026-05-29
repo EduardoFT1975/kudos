@@ -10,6 +10,10 @@ import { useRouter } from "next/navigation";
 import { KudosFlowerLogo } from "@/components/brand/KudosFlowerLogo";
 import { ResonancePicker } from "@/components/discovery/ResonancePicker";
 import { AddToMyWorldButton } from "@/components/discovery/AddToMyWorldButton";
+import { useScrollDepth } from "@/components/discovery/useScrollDepth";
+import { useTimeOnScreen } from "@/components/discovery/useTimeOnScreen";
+import { Track } from "@/components/discovery/kudosTelemetry";
+import { useRelatedPois } from "@/components/discovery/useRelatedPois";
 
 
 interface Props {
@@ -44,6 +48,11 @@ export function PoiNodeV5({ poiId }: Props) {
       { icon: "⚔", label: "Uso", value: "Juegos, combates y espectáculos públicos" },
     ],
   };
+
+  // HDG · capa Discovery · disparar al mount + medir tiempo
+  React.useEffect(() => { Track.nodeOpen(poiId); }, [poiId]);
+  useTimeOnScreen("poi_time_on_screen", poiId);
+  useScrollDepth(poiId);
 
   return (
     <div style={ROOT}>
@@ -94,7 +103,7 @@ export function PoiNodeV5({ poiId }: Props) {
       {tab === "resumen" && <ResumenTab keyData={poi.keyData} />}
       {tab === "historia" && <HistoriaTab />}
       {tab === "tiempo" && <TiempoTab era={era} setEra={setEra} />}
-      {tab === "experiencias" && <ExperienciasTab />}
+      {tab === "experiencias" && <ExperienciasTab poiId={poiId} />}
       {tab === "info" && <InfoTab />}
       {tab === "mind" && <MindTab />}
 
@@ -205,23 +214,39 @@ function ResumenTab({ keyData }: { keyData: { icon: string; label: string; value
 
 
 function HistoriaTab() {
+  // Multi-Capsule System · "Más historias del lugar" (P0 CTO)
+  // Phase 1: placeholders · cuando narrative engine genere reales, conecta
+  const narratives = [
+    { icon: "⚔", title: "Gladiadores", hook: "Vidas que se decidían en arena.", type: "Human Story", dur: "0:45" },
+    { icon: "🏛", title: "Roma Imperial", hook: "El símbolo del poder de un imperio.", type: "Hidden Truth", dur: "0:30" },
+    { icon: "⚙", title: "Ingeniería", hook: "Cómo levantaron lo imposible.", type: "Transformation", dur: "0:30" },
+    { icon: "🌧", title: "Violencia pública", hook: "Lo que pagaron los romanos por entretenerse.", type: "Mystery", dur: "0:30" },
+    { icon: "🪨", title: "Construcción", hook: "Cada piedra contó una historia.", type: "Lost World", dur: "0:45" },
+    { icon: "💭", title: "Legado", hook: "Por qué sigue importando hoy.", type: "Present Connection", dur: "0:30" },
+  ];
+
   return (
-    <div style={CARD}>
-      <h3 style={CARD_TITLE}>Lo más destacado</h3>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginTop: 14 }}>
-        {[
-          { icon: "🏛", title: "Arquitectura única", desc: "Maravilla de la ingeniería romana." },
-          { icon: "⚔", title: "Eventos históricos", desc: "Escenario de hechos que marcaron una época." },
-          { icon: "💡", title: "Curiosidades", desc: "Se usaba un sistema de velas para cubrir el anfiteatro." },
-        ].map((h, i) => (
-          <div key={i} style={HIGHLIGHT}>
-            <div style={HIGHLIGHT_ICON}>{h.icon}</div>
-            <div style={HIGHLIGHT_TITLE}>{h.title}</div>
-            <div style={HIGHLIGHT_DESC}>{h.desc}</div>
-          </div>
-        ))}
+    <>
+      <div style={CARD}>
+        <h3 style={CARD_TITLE}>Más historias de este lugar</h3>
+        <p style={{ margin: "6px 0 14px", fontSize: 12, color: "rgba(255,255,255,0.55)" }}>
+          Un POI no es una historia. Es un universo narrativo.
+        </p>
+        <div style={NARRATIVES_GRID}>
+          {narratives.map((n, i) => (
+            <button key={i} style={NARRATIVE_CARD}>
+              <div style={NARRATIVE_HEAD}>
+                <div style={NARRATIVE_ICON}>{n.icon}</div>
+                <div style={NARRATIVE_DUR}>{n.dur} ▶</div>
+              </div>
+              <div style={NARRATIVE_TITLE}>{n.title}</div>
+              <div style={NARRATIVE_HOOK}>{n.hook}</div>
+              <div style={NARRATIVE_TYPE}>{n.type}</div>
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -270,24 +295,32 @@ function TiempoTab({ era, setEra }: { era: "80" | "120" | "1500" | "1800" | "hoy
 }
 
 
-function ExperienciasTab() {
+function ExperienciasTab({ poiId }: { poiId: string }) {
+  const { related, loading } = useRelatedPois(poiId, 8);
   return (
     <div style={CARD}>
-      <h3 style={CARD_TITLE}>Cápsulas relacionadas</h3>
+      <h3 style={CARD_TITLE}>POIs relacionados</h3>
+      <p style={{ margin: "6px 0 12px", fontSize: 11.5, color: "rgba(255,255,255,0.55)" }}>
+        Lugares conectados con este por cercanía o tema.
+      </p>
+      {loading && <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>Cargando relaciones...</div>}
+      {!loading && related.length === 0 && (
+        <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 12 }}>
+          Aún sin relaciones generadas · ejecuta <code style={{ background: "rgba(255,255,255,0.05)", padding: "1px 4px" }}>python -m kudos_engine.scripts.generate_relationships</code>
+        </div>
+      )}
       <div style={{ marginTop: 12 }}>
-        {[
-          { name: "Foro Romano", dist: "A 250 m" },
-          { name: "Arco de Constantino", dist: "A 350 m" },
-          { name: "Palatino", dist: "A 500 m" },
-        ].map((r, i) => (
-          <div key={i} style={REL_ROW}>
+        {related.map((r) => (
+          <a key={r.id} href={`/poi/${r.id}`} style={REL_ROW_LINK}>
             <div style={REL_THUMB} />
             <div style={{ flex: 1 }}>
-              <div style={REL_NAME}>{r.name}</div>
-              <div style={REL_DIST}>{r.dist}</div>
+              <div style={REL_NAME}>{r.id.replace("wd-Q", "Q").replace(/-/g, " ")}</div>
+              <div style={REL_DIST}>
+                {r.distance_km !== undefined ? `A ${r.distance_km < 1 ? Math.round(r.distance_km * 1000) + " m" : r.distance_km + " km"} · ${r.type}` : r.type}
+              </div>
             </div>
-            <span style={{ color: "rgba(255,255,255,0.4)" }}>🔖</span>
-          </div>
+            <span style={{ color: "#8B6BFF", fontSize: 14 }}>›</span>
+          </a>
         ))}
       </div>
     </div>
@@ -559,6 +592,48 @@ const HOW_BTN: React.CSSProperties = {
   fontFamily: 'inherit',
 };
 
+const NARRATIVES_GRID: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+  gap: 12,
+};
+const NARRATIVE_CARD: React.CSSProperties = {
+  background: "rgba(15,10,31,0.4)",
+  border: "1px solid rgba(139,107,255,0.18)",
+  borderRadius: 14,
+  padding: 14,
+  cursor: "pointer",
+  fontFamily: "inherit",
+  textAlign: "left",
+  transition: "all 0.2s ease",
+};
+const NARRATIVE_HEAD: React.CSSProperties = {
+  display: "flex", justifyContent: "space-between", alignItems: "center",
+  marginBottom: 8,
+};
+const NARRATIVE_ICON: React.CSSProperties = {
+  fontSize: 18, color: "#8B6BFF",
+};
+const NARRATIVE_DUR: React.CSSProperties = {
+  fontSize: 10, fontWeight: 600, color: "#fff",
+  padding: "3px 8px", borderRadius: 999,
+  background: "rgba(139,107,255,0.18)",
+};
+const NARRATIVE_TITLE: React.CSSProperties = {
+  fontFamily: 'Georgia, "Times New Roman", serif',
+  fontSize: 18, fontWeight: 400, color: "#fff",
+  marginBottom: 4,
+};
+const NARRATIVE_HOOK: React.CSSProperties = {
+  fontSize: 12, color: "rgba(255,255,255,0.7)",
+  fontStyle: "italic" as const,
+  lineHeight: 1.4, marginBottom: 6,
+};
+const NARRATIVE_TYPE: React.CSSProperties = {
+  fontSize: 9, color: "#8B6BFF",
+  letterSpacing: "0.12em", fontWeight: 700,
+};
+
 const HIGHLIGHT: React.CSSProperties = {
   background: "rgba(255,255,255,0.04)",
   borderRadius: 12, padding: 14,
@@ -594,6 +669,12 @@ const ERA_IMG: React.CSSProperties = {
 const ERA_INFO: React.CSSProperties = { padding: "8px 10px" };
 const ERA_LBL: React.CSSProperties = { fontSize: 12, fontWeight: 600, color: "#fff" };
 const ERA_SUB: React.CSSProperties = { fontSize: 9.5, color: "rgba(255,255,255,0.5)", marginTop: 2 };
+
+const REL_ROW_LINK: React.CSSProperties = {
+  display: "flex", alignItems: "center", gap: 12,
+  padding: "10px 0", textDecoration: "none", color: "inherit",
+  borderTop: "1px solid rgba(255,255,255,0.06)",
+};
 
 const REL_ROW: React.CSSProperties = {
   display: "flex", alignItems: "center", gap: 12,
