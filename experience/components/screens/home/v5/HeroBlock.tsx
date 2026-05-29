@@ -88,12 +88,8 @@ const WRAP: React.CSSProperties = {
 const BG: React.CSSProperties = {
   position: "absolute",
   inset: 0,
-  background: 'radial-gradient(circle at 72% 22%, #2a1f55 0%, #0a0814 55%), url("https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/800px-The_Earth_seen_from_Apollo_17.jpg")',
-  backgroundSize: "cover, 60%",
-  backgroundPosition: "center, 75% 25%",
-  backgroundRepeat: "no-repeat, no-repeat",
-  backgroundBlendMode: "screen, normal",
-  opacity: 0.85,
+  background: "radial-gradient(circle at 72% 22%, #2a1f55 0%, #0a0814 65%, #050308 100%)",
+  opacity: 1,
 };
 
 const BG_GRAD: React.CSSProperties = {

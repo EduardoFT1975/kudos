@@ -23,21 +23,6 @@ export function MiMundoV5() {
 
   return (
     <div style={ROOT}>
-      {/* Header */}
-      <header style={HDR}>
-        <span style={HDR_LOGO}>KUDOS</span>
-        <nav style={HDR_TABS}>
-          <Tab label="Descubrir" icon="🧭" onClick={() => router.push("/inicio")} />
-          <Tab label="Mapa" icon="🌍" onClick={() => router.push("/world")} />
-          <Tab label="Mi Mundo" icon={<KudosFlowerLogo size={20} variant="gold" glow />} active />
-          <Tab label="Guardados" icon="🔖" onClick={() => router.push("/guardados")} />
-          <Tab label="Perfil" icon="◍" onClick={() => router.push("/perfil")} />
-        </nav>
-        <div style={HDR_AVATAR}>
-          <span style={HDR_AVATAR_DOT} />
-        </div>
-      </header>
-
       {/* Hero · título */}
       <section style={HERO}>
         <h1 style={H1}>Mi Mundo</h1>

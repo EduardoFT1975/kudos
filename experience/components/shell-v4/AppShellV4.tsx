@@ -1,21 +1,17 @@
 "use client";
 
 /**
- * KUDOS . AppShellV4 . Canonical global shell rebuilt to mockup.
+ * KUDOS . AppShellV4 . Canonical global shell.
  *
- * Composition order:
- *   MobileSafeAreaProvider
- *     KeyboardViewportGuard
- *     MobileShellFixes
- *     FatalRecoveryLayer
- *       AppTopBarV4         (fixed top)
- *       AppCanvasV4         (route content slot)
- *       AppBottomNavV4      (fixed bottom . FAB central dispatches share)
- *       GlobalShareModal    (listens kudos:share-capsule:open globally)
- *       MeritToast          (listens kudos:merit:change globally . microfeedback)
+ * FULLSCREEN_ROUTES: rutas v5 con su propio Header · sin TopBar shell.
+ *   - /world (mapa cinematográfico)
+ *   - /inicio (HomeFeedV5)
+ *   - /mi-mundo (MiMundoV5)
+ *   - /poi/[id] (PoiNodeV5)
+ *   - /merit/[poi_id] (MeritEngineV5)
  *
- * /world · cinematográfico sin top bar pero CON bottom nav (integración app).
- * Backdrop intentionally omitted . mockups use flat --kudos-bg.
+ * En todas estas rutas mantenemos BottomNav + ShareModal + Toast del shell
+ * para no aislar las pantallas y permitir navegación.
  */
 import * as React from "react";
 import { usePathname } from "next/navigation";
@@ -31,16 +27,16 @@ import { MeritToast } from "@/components/share/MeritToast";
 
 interface Props { children: React.ReactNode; }
 
-// Rutas que NO usan top bar (pero SÍ bottom nav).
-const FULLSCREEN_ROUTES = ["/world"];
+// v5 pages · cada una tiene su Header propio (no usan TopBar shell)
+const FULLSCREEN_ROUTES = ["/world", "/inicio", "/mi-mundo", "/poi", "/merit"];
 
 export function AppShellV4({ children }: Props) {
   const pathname = usePathname() || "";
-  const isFullscreen = FULLSCREEN_ROUTES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+  const isFullscreen = FULLSCREEN_ROUTES.some(
+    (p) => pathname === p || pathname.startsWith(p + "/")
+  );
 
   if (isFullscreen) {
-    // /world · cinematográfico SIN top bar · pero CON bottom nav
-    // para no aislar la pantalla del resto de la app.
     return (
       <MobileSafeAreaProvider>
         <FatalRecoveryLayer>
