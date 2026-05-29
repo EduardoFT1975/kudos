@@ -201,6 +201,31 @@ async def top_cores(
     return {"window_days": 7, "cores": rows}
 
 
+@router.get("/metrics/dti-timeseries")
+async def dti_timeseries(
+    hours_back: int = 24,
+    bucket_hours: int = 1,
+    x_admin_token: str | None = Header(None),
+    db: AsyncSession = Depends(get_async_session),
+):
+    """T3.2 Day 24 - DTI preliminary timeseries (mini sparkline 7-24 puntos)."""
+    _require_admin(x_admin_token)
+    n_buckets = max(1, min(48, hours_back // max(1, bucket_hours)))
+    out = []
+    for i in range(n_buckets, 0, -1):
+        end = datetime.now(timezone.utc) - timedelta(hours=(i - 1) * bucket_hours)
+        start = end - timedelta(hours=bucket_hours)
+        dti = await _users_with_transformation_signals(db, start, min_signals=3)
+        plays = await _users_with_core_play(db, start)
+        out.append({
+            "ts": end.isoformat(),
+            "dti_users": dti,
+            "plays_users": plays,
+            "dti_pct": round((dti / plays * 100) if plays else 0, 1),
+        })
+    return {"bucket_hours": bucket_hours, "hours_back": hours_back, "points": out}
+
+
 @router.post("/cron/recompute-return-visits")
 async def trigger_cron_return_visits(
     x_admin_token: str | None = Header(None),

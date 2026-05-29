@@ -90,9 +90,13 @@ export function ShareReflectionModalV2() {
       });
     } catch { /* tolerante */ }
 
-    // 2. Construir URL corta con ref
+    // 2. Construir URL corta con ref + text + author (Day 25 OG dinamico)
     const cid = payload.capsuleId || payload.poiId;
-    const shareUrl = `${PUBLIC_BASE}/c/${encodeURIComponent(cid)}${userId ? `?ref=${encodeURIComponent(userId)}` : ""}`;
+    const qs = new URLSearchParams();
+    if (userId)   qs.set("ref", userId);
+    qs.set("text", reflection.trim().slice(0, 200));
+    qs.set("author", userName.slice(0, 40));
+    const shareUrl = `${PUBLIC_BASE}/c/${encodeURIComponent(cid)}?${qs.toString()}`;
 
     // 3. share_initiated event
     try {

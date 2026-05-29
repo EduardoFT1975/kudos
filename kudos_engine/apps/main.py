@@ -1,4 +1,4 @@
-"""KUDOS Capsule Engine v2 - T1.2-T1.5 + T3.2 Core Engine + Admin Metrics + Personal Graph."""
+"""KUDOS Capsule Engine v2 - T1.2-T1.5 + T3.2 Core + Admin + Personal + Push."""
 from __future__ import annotations
 
 from fastapi import FastAPI
@@ -30,9 +30,9 @@ def create_app() -> FastAPI:
     sentry_active = init_sentry()
 
     app = FastAPI(
-        title="KUDOS Capsule Engine v2 + HDG + Core Engine + Admin + Personal",
+        title="KUDOS Capsule Engine v2 + HDG + Core + Admin + Personal + Push",
         description="Contextual discovery infrastructure",
-        version="2.9.0",
+        version="3.0.0",
     )
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -79,6 +79,10 @@ def create_app() -> FastAPI:
 
         from kudos_engine.apps.personal.router import router as personal_router
         app.include_router(personal_router)
+
+        # T3.2 Day 22 - Push notifications (Web Push)
+        from kudos_engine.apps.push.router import router as push_router
+        app.include_router(push_router)
     else:
         app.include_router(save_router_legacy)
         app.include_router(telemetry_router_legacy)
@@ -89,13 +93,14 @@ def create_app() -> FastAPI:
         persistence = "postgres" if is_postgres_enabled() else "json-legacy"
         return {
             "service": "kudos-capsule-engine-v2",
-            "version": "2.9.0",
+            "version": "3.0.0",
             "status": "operational",
             "persistence": persistence,
             "auth": "google-oauth-jwt" if is_postgres_enabled() else "disabled",
             "core_engine": "active" if is_postgres_enabled() else "disabled",
             "admin_metrics": "active" if is_postgres_enabled() else "disabled",
             "personal_graph": "active" if is_postgres_enabled() else "disabled",
+            "push": "active" if is_postgres_enabled() else "disabled",
             "endpoints_mode": "postgres-aware" if is_postgres_enabled() else "json-legacy",
             "security": {
                 "cors": "hardened",
@@ -104,11 +109,7 @@ def create_app() -> FastAPI:
                 "security_headers": "enabled",
                 "sentry": "active" if sentry_active else "disabled",
             },
-            "modules_loaded": ["pois", "capsules", "merit", "narrative", "media", "feed", "save", "nodes", "telemetry", "signals", "core_engine", "admin_metrics", "personal_graph"],
-            "personal_world": ["saved", "visited", "watched", "resonances", "memory"],
-            "human_discovery_graph": ["discovery", "importance", "memory", "emotion", "future_value"],
-            "trust_layer": ["trusted", "normal", "suspect", "bot"],
-            "why_signals": ["motivation", "visit_reason", "watch_reason", "resonance_reason", "memory_reason", "event_reason"],
+            "modules_loaded": ["pois", "capsules", "merit", "narrative", "media", "feed", "save", "nodes", "telemetry", "signals", "core_engine", "admin_metrics", "personal_graph", "push"],
             "humanity_core": ["olduvai", "gobekli", "lascaux", "jerusalen", "galapagos", "apollo11", "hiroshima"],
             "mvp_metrics": ["completion_rate", "resonance_rate", "reflection_rate", "return_visit_rate", "dti_preliminary"],
             "discovery_dna": ["pillars_touched_5_plus", "cores_completed_2_plus", "return_visit_1_plus", "reflection_1_plus", "relationship_followed_3_plus"],

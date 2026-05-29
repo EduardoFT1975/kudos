@@ -73,6 +73,9 @@ export function AdminDashboard() {
   const [topCores, setTopCores] = React.useState<TopCore[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
+  // T3.2 Day 24 - DTI timeseries + last refresh
+  const [dtiSeries, setDtiSeries] = React.useState<{ ts: string; dti_pct: number }[]>([]);
+  const [lastRefresh, setLastRefresh] = React.useState<Date | null>(null);
 
   // Cargar token guardado
   React.useEffect(() => {
@@ -81,34 +84,42 @@ export function AdminDashboard() {
     if (saved) setToken(saved);
   }, []);
 
-  // Fetch metricas cuando hay token
+  // Fetch metricas cuando hay token + auto-refresh cada 60s (Day 24)
   React.useEffect(() => {
     if (!token || !API) return;
     let alive = true;
-    setLoading(true);
-    setError(null);
 
-    Promise.all([
-      fetch(`${API}/api/admin/metrics`, { headers: { "X-Admin-Token": token } }),
-      fetch(`${API}/api/admin/metrics/top-cores`, { headers: { "X-Admin-Token": token } }),
-    ])
-      .then(async ([r1, r2]) => {
-        if (!r1.ok) throw new Error(`metrics: ${r1.status}`);
-        if (!r2.ok) throw new Error(`top-cores: ${r2.status}`);
-        const d = await r1.json();
-        const t = await r2.json();
-        if (!alive) return;
-        setData(d);
-        setTopCores(t.cores || []);
-        setLoading(false);
-      })
-      .catch((e) => {
-        if (!alive) return;
-        setError(String(e?.message || e));
-        setLoading(false);
-      });
+    const doFetch = () => {
+      setLoading(true);
+      setError(null);
+      Promise.all([
+        fetch(`${API}/api/admin/metrics`, { headers: { "X-Admin-Token": token } }),
+        fetch(`${API}/api/admin/metrics/top-cores`, { headers: { "X-Admin-Token": token } }),
+        fetch(`${API}/api/admin/metrics/dti-timeseries?hours_back=24&bucket_hours=3`, { headers: { "X-Admin-Token": token } }),
+      ])
+        .then(async ([r1, r2, r3]) => {
+          if (!r1.ok) throw new Error(`metrics: ${r1.status}`);
+          if (!r2.ok) throw new Error(`top-cores: ${r2.status}`);
+          const d = await r1.json();
+          const t = await r2.json();
+          const dti = r3.ok ? await r3.json() : { points: [] };
+          if (!alive) return;
+          setData(d);
+          setTopCores(t.cores || []);
+          setDtiSeries(dti.points || []);
+          setLastRefresh(new Date());
+          setLoading(false);
+        })
+        .catch((e) => {
+          if (!alive) return;
+          setError(String(e?.message || e));
+          setLoading(false);
+        });
+    };
 
-    return () => { alive = false; };
+    doFetch();
+    const iv = setInterval(doFetch, 60_000);
+    return () => { alive = false; clearInterval(iv); };
   }, [token]);
 
   const handleSaveToken = () => {
@@ -188,8 +199,20 @@ export function AdminDashboard() {
       </header>
       <p style={SUB}>
         Las 5 metricas core del MVP.<br/>
-        Datos a {new Date(data.now).toLocaleString("es-ES")}.
+        Datos a {new Date(data.now).toLocaleString("es-ES")}
+        {lastRefresh && (
+          <span style={{ color: loading ? "#C9A961" : "rgba(255,255,255,0.45)", marginLeft: 12, fontSize: 11 }}>
+            {loading ? "actualizando..." : `auto-refresh hace ${Math.round((Date.now() - lastRefresh.getTime()) / 1000)}s`}
+          </span>
+        )}
       </p>
+
+      {dtiSeries.length > 0 && (
+        <section style={CARD}>
+          <h2 style={H2}>DTI preliminary · ultimas 24h (sparkline)</h2>
+          <DtiSparkline points={dtiSeries} />
+        </section>
+      )}
 
       <section style={CARD}>
         <h2 style={H2}>Metricas globales</h2>
@@ -323,38 +346,75 @@ const INPUT: React.CSSProperties = {
   background: "rgba(255,255,255,0.04)",
   border: "1px solid rgba(255,255,255,0.10)",
   borderRadius: 8,
-  color: "#fff", fontSize: 13, outline: "none",
+  color: "#fff", fontSize: 14, outline: "none",
 };
 const BTN_SAVE: React.CSSProperties = {
-  padding: "10px 18px",
-  background: "#C9A961", color: "#1a1333",
-  border: "none", borderRadius: 8,
-  fontSize: 13, fontWeight: 600, cursor: "pointer",
+  padding: "10px 18px", borderRadius: 8,
+  background: "#C9A961", color: "#0a0814",
+  fontSize: 13, fontWeight: 700, border: "none",
+  cursor: "pointer",
 };
 const BTN_LOGOUT: React.CSSProperties = {
-  marginTop: 14, padding: "8px 16px",
-  background: "transparent", color: "rgba(255,255,255,0.6)",
+  padding: "10px 18px", borderRadius: 8,
+  background: "transparent", color: "rgba(255,255,255,0.7)",
   border: "1px solid rgba(255,255,255,0.15)",
-  borderRadius: 8, fontSize: 12, cursor: "pointer",
+  fontSize: 13, cursor: "pointer",
+  marginTop: 16,
 };
 const BTN_LOGOUT_TOP: React.CSSProperties = {
-  padding: "6px 14px",
-  background: "transparent", color: "rgba(255,255,255,0.5)",
-  border: "1px solid rgba(255,255,255,0.15)",
-  borderRadius: 999, fontSize: 11, cursor: "pointer",
+  padding: "6px 14px", borderRadius: 999,
+  background: "transparent", color: "rgba(255,255,255,0.6)",
+  border: "1px solid rgba(255,255,255,0.12)",
+  fontSize: 11, cursor: "pointer",
 };
 const LOADING_TXT: React.CSSProperties = {
-  color: "rgba(255,255,255,0.5)", fontSize: 14,
+  color: "rgba(255,255,255,0.55)", padding: "60px 20px",
+  textAlign: "center" as const,
 };
 const ERR_PRE: React.CSSProperties = {
-  background: "rgba(168,88,88,0.15)",
-  border: "1px solid rgba(168,88,88,0.4)",
-  borderRadius: 8, padding: 16,
-  color: "rgba(255,255,255,0.85)",
-  fontSize: 12, overflow: "auto" as const,
+  background: "rgba(168,88,88,0.1)",
+  border: "1px solid rgba(168,88,88,0.3)",
+  color: "#E0815A",
+  padding: 14, borderRadius: 8,
+  fontSize: 12, overflow: "auto",
 };
 const FOOT: React.CSSProperties = {
-  marginTop: 32, fontSize: 11,
-  color: "rgba(255,255,255,0.35)",
-  fontStyle: "italic", lineHeight: 1.6,
+  margin: "24px 0 0",
+  padding: "12px 16px",
+  fontSize: 11, lineHeight: 1.6,
+  color: "rgba(255,255,255,0.45)",
+  background: "rgba(255,255,255,0.02)",
+  border: "1px solid rgba(255,255,255,0.05)",
+  borderRadius: 8,
 };
+
+
+function DtiSparkline({ points }: { points: { ts: string; dti_pct: number }[] }) {
+  if (!points || points.length === 0) return null;
+  const w = 320, h = 70, pad = 6;
+  const maxV = Math.max(1, ...points.map((p) => p.dti_pct));
+  const stepX = (w - 2 * pad) / Math.max(1, points.length - 1);
+  const ptsStr = points.map((p, i) => {
+    const x = pad + i * stepX;
+    const y = h - pad - (p.dti_pct / maxV) * (h - 2 * pad);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+  const lastPt = points[points.length - 1];
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ background: "rgba(255,255,255,0.02)", borderRadius: 6 }}>
+        <polyline fill="none" stroke="#C9A961" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" points={ptsStr} />
+        {points.map((p, i) => {
+          const x = pad + i * stepX;
+          const y = h - pad - (p.dti_pct / maxV) * (h - 2 * pad);
+          return <circle key={i} cx={x} cy={y} r={1.8} fill="#C9A961" />;
+        })}
+      </svg>
+      <div>
+        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", letterSpacing: "0.06em"}}>ULTIMO BUCKET</div>
+        <div style={{ fontSize: 28, fontWeight: 700, color: "#C9A961" }}>{lastPt.dti_pct}%</div>
+        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.45)" }}>{points.length} buckets de 3h</div>
+      </div>
+    </div>
+  );
+}

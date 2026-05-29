@@ -1,145 +1,248 @@
 "use client";
 /**
- * KUDOS · onboarding minimal first-time.
+ * KUDOS - FirstTimeOnboarding - T3.2 EJEC Day 23.
  *
- * Una sola pregunta · zero friction:
- *   "¿Qué te atrae?"
- *   - Historia · Arte · Naturaleza · Misterio · Sociedad · Sin preferencia
+ * 3 slides MAX antes de soltar al usuario en la app:
+ *   1. Bienvenida   - "Lugares que importan. Sin scroll infinito."
+ *   2. 7 pilares    - explica Discovery DNA en 1 parrafo
+ *   3. Interes      - 5 chips (Historia/Arte/Naturaleza/Misterio/Sociedad) + skip
  *
- * Solo se muestra UNA vez (flag en localStorage).
- * La elección alimenta el perfil de relevancia personal (HDG).
+ * Se muestra UNA vez (flag kudos:onboarded en localStorage).
  */
 import * as React from "react";
 import { trackEvent } from "./kudosTelemetry";
 
 
 const INTERESTS = [
-  { id: "historia",   emoji: "🏛", label: "Historia" },
-  { id: "arte",       emoji: "🎨", label: "Arte" },
-  { id: "naturaleza", emoji: "🌿", label: "Naturaleza" },
-  { id: "misterio",   emoji: "🔮", label: "Misterio" },
-  { id: "sociedad",   emoji: "👥", label: "Sociedad" },
+  { id: "historia",   label: "Historia" },
+  { id: "arte",       label: "Arte" },
+  { id: "naturaleza", label: "Naturaleza" },
+  { id: "misterio",   label: "Misterio" },
+  { id: "sociedad",   label: "Sociedad" },
 ];
 
 
 export function FirstTimeOnboarding() {
-  const [show, setShow] = React.useState(false);
+  const [step, setStep] = React.useState(0);
+  const [picked, setPicked] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     try {
       const done = localStorage.getItem("kudos:onboarded");
       if (!done) {
-        // Espera 2s para que el usuario vea primero la app
-        setTimeout(() => setShow(true), 2000);
+        setTimeout(() => setStep(1), 1200);
       }
     } catch {}
   }, []);
 
-  const handle = (interestId: string | null) => {
+  const finish = (interestId: string | null) => {
     try {
       localStorage.setItem("kudos:onboarded", "1");
       if (interestId) {
         localStorage.setItem("kudos:primary_interest", interestId);
         trackEvent({ event: "onboarding_interest", properties: { interest: interestId } });
-      } else {
-        trackEvent({ event: "onboarding_skipped" });
       }
+      trackEvent({ event: "onboarding_completed", properties: { slides_seen: 3, interest: interestId } });
     } catch {}
-    setShow(false);
+    setStep(0);
   };
 
-  if (!show) return null;
+  const skip = () => {
+    try {
+      localStorage.setItem("kudos:onboarded", "1");
+      trackEvent({ event: "onboarding_skipped" });
+    } catch {}
+    setStep(0);
+  };
+
+  if (step === 0) return null;
 
   return (
-    <div style={BACKDROP} onClick={() => handle(null)}>
+    <div style={BACKDROP} onClick={skip}>
       <div style={SHEET} onClick={(e) => e.stopPropagation()}>
-        <div style={LOGO}>K</div>
-        <h2 style={TITLE}>Bienvenido a KUDOS</h2>
-        <p style={SUB}>¿Qué te atrae más del mundo?</p>
+        <header style={STEP_HEAD}>
+          <div style={DOTS}>
+            {[1, 2, 3].map((n) => (
+              <span key={n} style={{ ...DOT, background: n === step ? "#C9A961" : "rgba(255,255,255,0.18)" }} />
+            ))}
+          </div>
+          <button onClick={skip} style={SKIP_BTN}>Saltar</button>
+        </header>
 
-        <div style={GRID}>
-          {INTERESTS.map((i) => (
-            <button key={i.id} style={CHIP} onClick={() => handle(i.id)}>
-              <span style={CHIP_EMOJI}>{i.emoji}</span>
-              <span>{i.label}</span>
-            </button>
-          ))}
-        </div>
-
-        <button style={SKIP} onClick={() => handle(null)}>
-          Saltar · descubriré por mí mismo
-        </button>
+        {step === 1 && <SlideIntro onNext={() => setStep(2)} />}
+        {step === 2 && <SlidePillars onNext={() => setStep(3)} />}
+        {step === 3 && (
+          <SlideInterest
+            picked={picked}
+            onPick={setPicked}
+            onFinish={() => finish(picked)}
+          />
+        )}
       </div>
     </div>
   );
 }
 
 
+function SlideIntro({ onNext }: { onNext: () => void }) {
+  return (
+    <div style={SLIDE}>
+      <div style={LOGO}>KUDOS</div>
+      <h2 style={H2}>Lugares que importan.</h2>
+      <p style={LEAD}>
+        No es una guia de viajes. No hay scroll infinito ni recomendados.
+        Es una capa que te ayuda a entender por que ciertos lugares cambiaron el mundo,
+        y por que pueden cambiar como lo ves.
+      </p>
+      <button style={PRIMARY} onClick={onNext}>Cuentame mas</button>
+    </div>
+  );
+}
+
+
+function SlidePillars({ onNext }: { onNext: () => void }) {
+  return (
+    <div style={SLIDE}>
+      <div style={LABEL}>TU DISCOVERY DNA</div>
+      <h2 style={H2}>Siete pilares humanos.</h2>
+      <p style={LEAD}>
+        Cada descubrimiento toca uno de los 7 pilares:
+        <br />
+        <em style={{ color: "rgba(201,169,97,0.9)" }}>
+          origen, significado, belleza, creencia, conocimiento, exploracion, memoria
+        </em>
+        <br /><br />
+        Tu mapa cognitivo se ilumina solo cuando tocas un pilar de verdad.
+        No por click. No por tiempo. Por reflexion.
+      </p>
+      <button style={PRIMARY} onClick={onNext}>Casi listo</button>
+    </div>
+  );
+}
+
+
+function SlideInterest({ picked, onPick, onFinish }: {
+  picked: string | null;
+  onPick: (id: string) => void;
+  onFinish: () => void;
+}) {
+  return (
+    <div style={SLIDE}>
+      <div style={LABEL}>UNA ULTIMA COSA</div>
+      <h2 style={H2}>Que te atrae mas?</h2>
+      <p style={LEAD}>
+        Solo para empezar. Tu DNA se construye con lo que descubres,
+        no con lo que dices al principio.
+      </p>
+      <div style={CHIPS}>
+        {INTERESTS.map((i) => (
+          <button
+            key={i.id}
+            onClick={() => onPick(i.id)}
+            style={{
+              ...CHIP,
+              background: picked === i.id ? "#C9A961" : "rgba(255,255,255,0.05)",
+              color: picked === i.id ? "#0a0814" : "rgba(255,255,255,0.85)",
+              borderColor: picked === i.id ? "#C9A961" : "rgba(255,255,255,0.15)",
+            }}
+          >
+            {i.label}
+          </button>
+        ))}
+      </div>
+      <button style={{ ...PRIMARY, marginTop: 24 }} onClick={onFinish}>
+        Empezar
+      </button>
+      <p style={PRIVACY_NOTE}>
+        Privado por defecto. Tu mapa no se publica.
+        <br />
+        Puedes entrar con Google despues si quieres sync entre dispositivos.
+      </p>
+    </div>
+  );
+}
+
+
 const BACKDROP: React.CSSProperties = {
-  position: "fixed", inset: 0, zIndex: 8500,
-  background: "rgba(0,0,0,0.85)",
+  position: "fixed", inset: 0, zIndex: 9998,
+  background: "rgba(5,3,15,0.92)",
   display: "flex", alignItems: "center", justifyContent: "center",
-  padding: 16,
-  backdropFilter: "blur(8px)",
-  animation: "kudos-sheet-fade 0.4s ease both",
-};
-
-const SHEET: React.CSSProperties = {
-  width: "100%", maxWidth: 400,
-  background: "linear-gradient(180deg, #1a1438 0%, #0a0814 100%)",
-  borderRadius: 24,
-  padding: "32px 24px 24px",
-  border: "1px solid rgba(139,107,255,0.32)",
-  color: "#fff",
-  textAlign: "center" as const,
+  padding: "16px",
   fontFamily: '"Poppins", system-ui, sans-serif',
-  animation: "kudos-sheet-slide-up 0.4s cubic-bezier(0.22,1,0.36,1) both",
 };
-
-const LOGO: React.CSSProperties = {
-  width: 56, height: 56, borderRadius: "50%",
-  background: "linear-gradient(135deg, #8B6BFF, #C9A961)",
-  margin: "0 auto 16px",
-  display: "flex", alignItems: "center", justifyContent: "center",
-  fontFamily: 'Georgia, "Times New Roman", serif',
-  fontSize: 32, color: "#fff",
-  boxShadow: "0 4px 20px rgba(139,107,255,0.45)",
-};
-
-const TITLE: React.CSSProperties = {
-  margin: "0 0 6px",
-  fontFamily: 'Georgia, "Times New Roman", serif',
-  fontSize: 26, fontWeight: 400, color: "#fff",
-};
-
-const SUB: React.CSSProperties = {
-  margin: "0 0 22px",
-  fontSize: 13, color: "rgba(255,255,255,0.65)",
-};
-
-const GRID: React.CSSProperties = {
-  display: "grid", gridTemplateColumns: "1fr 1fr",
-  gap: 10, marginBottom: 16,
-};
-
-const CHIP: React.CSSProperties = {
-  display: "inline-flex", alignItems: "center", gap: 8,
-  padding: "13px 12px",
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(139,107,255,0.25)",
-  borderRadius: 14,
+const SHEET: React.CSSProperties = {
+  width: "100%", maxWidth: 480,
+  background: "linear-gradient(180deg, #15102b 0%, #0a0814 100%)",
+  border: "1px solid rgba(201,169,97,0.18)",
+  borderRadius: 22,
+  padding: "20px 24px 28px",
   color: "#fff",
-  fontSize: 13, fontWeight: 500,
-  cursor: "pointer",
-  fontFamily: 'inherit',
-  transition: "all 0.2s ease",
 };
-const CHIP_EMOJI: React.CSSProperties = { fontSize: 16 };
-
-const SKIP: React.CSSProperties = {
+const STEP_HEAD: React.CSSProperties = {
+  display: "flex", justifyContent: "space-between", alignItems: "center",
+  marginBottom: 18,
+};
+const DOTS: React.CSSProperties = {
+  display: "flex", gap: 8,
+};
+const DOT: React.CSSProperties = {
+  width: 24, height: 4, borderRadius: 2,
+  transition: "background 200ms",
+};
+const SKIP_BTN: React.CSSProperties = {
   background: "transparent", border: "none",
+  color: "rgba(255,255,255,0.5)",
+  fontSize: 12, cursor: "pointer",
+  letterSpacing: "0.04em",
+};
+const SLIDE: React.CSSProperties = {
+  textAlign: "center" as const,
+};
+const LOGO: React.CSSProperties = {
+  fontSize: 14, letterSpacing: "0.32em", fontWeight: 700,
+  color: "#C9A961",
+  marginBottom: 24,
+};
+const LABEL: React.CSSProperties = {
+  fontSize: 10, letterSpacing: "0.25em", fontWeight: 700,
+  color: "rgba(201,169,97,0.85)",
+  marginBottom: 14,
+};
+const H2: React.CSSProperties = {
+  margin: 0,
+  fontFamily: 'var(--kudos-font-display, "Cormorant Garamond", Georgia, serif)',
+  fontSize: 30, fontWeight: 500,
+  letterSpacing: "-0.01em",
+  marginBottom: 14,
+};
+const LEAD: React.CSSProperties = {
+  margin: "0 0 26px",
+  fontSize: 14, lineHeight: 1.65,
+  color: "rgba(255,255,255,0.72)",
+};
+const PRIMARY: React.CSSProperties = {
+  padding: "12px 30px",
+  background: "#C9A961", color: "#0a0814",
+  border: "none", borderRadius: 999,
+  fontSize: 14, fontWeight: 700,
+  letterSpacing: "0.04em", cursor: "pointer",
+};
+const CHIPS: React.CSSProperties = {
+  display: "flex", flexWrap: "wrap" as const,
+  justifyContent: "center", gap: 8,
+  marginTop: 8,
+};
+const CHIP: React.CSSProperties = {
+  padding: "8px 16px", borderRadius: 999,
+  fontSize: 12, fontWeight: 500,
+  borderWidth: 1, borderStyle: "solid",
+  cursor: "pointer",
+  transition: "all 160ms",
+};
+const PRIVACY_NOTE: React.CSSProperties = {
+  margin: "22px 0 0",
+  fontSize: 11, lineHeight: 1.55,
   color: "rgba(255,255,255,0.4)",
-  fontSize: 12, cursor: "pointer", padding: 6,
-  fontFamily: 'inherit',
+  fontStyle: "italic",
 };

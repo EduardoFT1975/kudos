@@ -8,6 +8,7 @@ from kudos_engine.db.models.content import Capsule, Narrative, PoiRelationship
 from kudos_engine.db.models.merit import MeritOverride
 from kudos_engine.db.models.profile import UserProfile
 from kudos_engine.db.models.shift import DiscoveryShift
+from kudos_engine.db.models.push_subscription import PushSubscription
 
 __all__ = [
     "Base",
@@ -19,4 +20,5 @@ __all__ = [
     "MeritOverride",
     "UserProfile",
     "DiscoveryShift",
+    "PushSubscription",
 ]
