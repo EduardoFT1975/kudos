@@ -70,3 +70,71 @@ async def db_seed(
             "relationships": relationships,
         },
     }
+
+
+@router.post("/upgrade")
+async def db_upgrade(x_admin_token: str | None = Header(None)):
+    """T3.2 Day 22+ - Ejecuta `alembic upgrade head` desde Python (sin shell).
+
+    Aplica todas las migraciones pendientes (001 -> 002 -> 003 -> 004 -> 005).
+    Idempotente: si ya estan aplicadas, no hace nada.
+    Require X-Admin-Token.
+    """
+    _require_admin(x_admin_token)
+    if not is_postgres_enabled():
+        raise HTTPException(503, detail="Postgres no habilitado")
+
+    import os
+    from alembic import command
+    from alembic.config import Config
+
+    # Localizar alembic.ini (esta en la raiz del repo en deploy)
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    ini_path = os.path.join(repo_root, "alembic.ini")
+    if not os.path.isfile(ini_path):
+        ini_path = os.path.join(os.getcwd(), "alembic.ini")
+    if not os.path.isfile(ini_path):
+        raise HTTPException(500, detail=f"alembic.ini not found (cwd={os.getcwd()})")
+
+    cfg = Config(ini_path)
+    try:
+        command.upgrade(cfg, "head")
+    except Exception as e:
+        raise HTTPException(500, detail=f"alembic upgrade failed: {type(e).__name__}: {e}")
+
+    return {"ok": True, "msg": "alembic upgrade head completed"}
+
+
+@router.post("/seed-humanity-core")
+async def db_seed_humanity_core(
+    x_admin_token: str | None = Header(None),
+    db: AsyncSession = Depends(get_async_session),
+):
+    """T3.2 Day 1 - Carga las 7 narrativas + 7 Discovery Shifts del Humanity Core.
+
+    Idempotente: usa upsert por (poi_id, language).
+    Require X-Admin-Token.
+    """
+    _require_admin(x_admin_token)
+    if not is_postgres_enabled():
+        raise HTTPException(503, detail="Postgres no habilitado")
+
+    try:
+        from kudos_engine.db.seed.seed_humanity_core import seed_narratives, seed_shifts
+    except ImportError as e:
+        raise HTTPException(500, detail=f"seed_humanity_core import failed: {e}")
+
+    try:
+        n_narratives = await seed_narratives(db)
+        n_shifts = await seed_shifts(db)
+        await db.commit()
+        return {
+            "ok": True,
+            "seeded": {
+                "narratives": n_narratives,
+                "discovery_shifts": n_shifts,
+            },
+        }
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(500, detail=f"seed_humanity_core failed: {type(e).__name__}: {e}")
