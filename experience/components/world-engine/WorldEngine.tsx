@@ -35,6 +35,12 @@ import { WorldLogo } from "./WorldLogo";
 import { WorldSearch, type CityPreset } from "./WorldSearch";
 import { WorldWeather } from "./WorldWeather";
 import { WorldHud, FILTER_TO_CATEGORIES } from "./WorldHud";
+import { AddToMyWorldButton } from "@/components/discovery/AddToMyWorldButton";
+import { ResonancePicker } from "@/components/discovery/ResonancePicker";
+import { useDiscoverySignals } from "@/components/discovery/useDiscoverySignals";
+import { WorldCityPicker } from "./WorldCityPicker";
+import { WorldEraSwitcher } from "./WorldEraSwitcher";
+import { WorldBottomCarousel, type CarouselPoi } from "./WorldBottomCarousel";
 
 
 interface WorldPoi {
@@ -230,9 +236,13 @@ export function WorldEngine() {
   const [activeFilter, setActiveFilter] = React.useState<string>("todo");
   const [mapCenter, setMapCenter] = React.useState<{lat:number; lng:number} | null>(null);
   const [currentCity, setCurrentCity] = React.useState<string>("Explora el mundo");
+  const [currentCityShort, setCurrentCityShort] = React.useState<string>("Roma");
+  const [currentCountry, setCurrentCountry] = React.useState<string>("Italia");
+  const [era, setEra] = React.useState<"now" | "past">("now");
   const blueDotRef = React.useRef<any>(null);
   const [capsulesIndex, setCapsulesIndex] = React.useState<Record<string, { url: string; name: string; tier: string }>>({});
   const [activeVideoUrl, setActiveVideoUrl] = React.useState<string | null>(null);
+  const [showResonanceAfterVideo, setShowResonanceAfterVideo] = React.useState(false);
   const [toast, setToast] = React.useState<string | null>(null);
   const toastTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const showToast = React.useCallback((msg: string, durationMs: number = 2200) => {
@@ -240,6 +250,20 @@ export function WorldEngine() {
     setToast(msg);
     toastTimerRef.current = setTimeout(() => setToast(null), durationMs);
   }, []);
+
+  // Escuchar eventos toast globales (ej. WorldEraSwitcher · Phase 1 placeholder)
+  React.useEffect(() => {
+    function onToast(ev: Event) {
+      const ce = ev as CustomEvent<string>;
+      if (typeof ce.detail === "string") showToast(ce.detail, 2400);
+    }
+    window.addEventListener("kudos:toast", onToast as EventListener);
+    return () => window.removeEventListener("kudos:toast", onToast as EventListener);
+  }, [showToast]);
+
+  // ─── HDG · Capa 1 · Discovery Event Engine · captura automática ──
+  const visibleIdsRef = React.useRef<string[]>([]);
+  useDiscoverySignals(visibleIdsRef.current, activeId);
 
   const geo = useGeolocation();
   const centeredOnUserRef = React.useRef(false);
@@ -634,6 +658,7 @@ export function WorldEngine() {
       }
     });
     setVisibleCount(next.size);
+    visibleIdsRef.current = Array.from(next.keys());
   }, [renderTick, zoom, mapReady, activeId, activeFilter, capsulesIndex]);
 
   return (
@@ -705,22 +730,13 @@ export function WorldEngine() {
               <div style={SHEET_BODY}>
                 <h2 style={SHEET_TITLE}>{poi.name}</h2>
                 <p style={SHEET_EVOCATIVE}>{evocative}</p>
+                <div style={{ marginBottom: 14 }}>
+                  <ResonancePicker poiId={poi.id} variant="compact" />
+                </div>
                 <div style={SHEET_ACTIONS}>
-                  <button style={SHEET_BTN_GHOST} onClick={() => {
-                    try {
-                      const k = "kudos:saves";
-                      const saves = JSON.parse(localStorage.getItem(k) || "[]");
-                      if (!saves.includes(poi.id)) {
-                        saves.push(poi.id);
-                        localStorage.setItem(k, JSON.stringify(saves));
-                        showToast("Guardado en Mi Mundo");
-                      } else {
-                        showToast("Ya estaba en Mi Mundo");
-                      }
-                    } catch { showToast("No se pudo guardar"); }
-                  }}>
-                    Guardar
-                  </button>
+                  <div style={{ flex: 1 }}>
+                    <AddToMyWorldButton poiId={poi.id} poiName={poi.name} variant="ghost" />
+                  </div>
                   <button style={SHEET_BTN_PRIMARY} onClick={() => {
                     const cap = capsulesIndex[poi.id];
                     if (cap && cap.url) {
@@ -735,6 +751,58 @@ export function WorldEngine() {
               </div>
             </div>
           </div>
+        );
+      })()}
+
+      {/* HomeMap v5 · bottom sheet horizontal carrusel POIs cercanos */}
+      {activeId && (() => {
+        const active = allNodesRef.current.find((p) => p.id === activeId);
+        if (!active) return null;
+        // POIs cercanos · ordenados por distancia · top 7
+        const nearby = allNodesRef.current
+          .filter((p) => p.tier === "S" || p.tier === "A" || p.tier === "B")
+          .map((p) => ({
+            p,
+            d: (p.lat - active.lat) ** 2 + (p.lng - active.lng) ** 2,
+          }))
+          .sort((a, b) => a.d - b.d)
+          .slice(0, 7)
+          .map(({ p, d }) => {
+            const km = Math.sqrt(d) * 111;
+            const distLabel = km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+            return {
+              id: p.id,
+              name: p.name,
+              image: wikimediaHero(p.image),
+              category: CATEGORY_LABEL_ES[p.category],
+              distanceLabel: p.id === active.id ? "Aquí" : distLabel,
+              evocativeShort: EVOCATIVE_LINES_ES[p.category],
+            } as CarouselPoi;
+          });
+        return (
+          <WorldBottomCarousel
+            pois={nearby}
+            activeId={activeId}
+            hasCapsule={(id) => !!capsulesIndex[id]}
+            onSelect={setActiveId}
+            onPlayCapsule={(id) => {
+              const cap = capsulesIndex[id];
+              if (cap?.url) setActiveVideoUrl(cap.url);
+              else showToast("Cápsula en preparación", 2400);
+            }}
+            onSave={(id) => {
+              try {
+                const k = "kudos:saves";
+                const saves = JSON.parse(localStorage.getItem(k) || "[]");
+                if (!saves.includes(id)) {
+                  saves.push(id);
+                  localStorage.setItem(k, JSON.stringify(saves));
+                  showToast("Guardado en Mi Mundo");
+                }
+              } catch {}
+            }}
+            onClose={() => setActiveId(null)}
+          />
         );
       })()}
 
@@ -770,12 +838,34 @@ export function WorldEngine() {
             <video
               src={activeVideoUrl}
               controls autoPlay playsInline
-              style={{ width: "100%", height: "auto", maxHeight: "85vh", display: "block", borderRadius: 16 }}
+              style={{ width: "100%", height: "auto", maxHeight: "75vh", display: "block", borderRadius: 16 }}
               onError={() => {
                 showToast("No se pudo reproducir · intenta de nuevo", 2400);
                 setActiveVideoUrl(null);
               }}
+              onEnded={() => setShowResonanceAfterVideo(true)}
             />
+            {showResonanceAfterVideo && activeId && (
+              <div style={{
+                padding: "16px 18px",
+                background: "rgba(15,10,31,0.96)",
+                borderTop: "1px solid rgba(139,107,255,0.18)",
+              }}>
+                <p style={{
+                  margin: "0 0 12px",
+                  fontSize: 13, color: "rgba(255,255,255,0.75)",
+                  fontFamily: '"Poppins", system-ui, sans-serif',
+                  fontStyle: "italic",
+                }}>¿Cómo te ha resonado?</p>
+                <ResonancePicker poiId={activeId} variant="full" onChange={() => {
+                  setTimeout(() => {
+                    setShowResonanceAfterVideo(false);
+                    setActiveVideoUrl(null);
+                    showToast("Gracias por compartir");
+                  }, 600);
+                }} />
+              </div>
+            )}
           </div>
         </div>
       )}
