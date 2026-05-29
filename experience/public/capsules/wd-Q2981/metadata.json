@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q2981",
+    "name": "Notre-Dame de París",
+    "lat": 48.853,
+    "lng": 2.3498,
+    "country_code": "FR",
+    "category": "monumento",
+    "type": "atracción turística",
+    "wikidata": "Q2981",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Notre-Dame%20de%20Paris%202013-07-24.jpg",
+    "unesco": true,
+    "tier": "S",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Notre-Dame de París",
+    "subtitle": "Donde la piedra captura el tiempo",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "En el corazón de París se alza una catedral que ha presenciado ocho siglos de historia.",
+        "direction": "in",
+        "search_hint": "Notre-Dame de Reims aerial view",
+        "duration": 5.5
+      },
+      {
+        "title": "Fachada oeste",
+        "narration": "Sus agujas góticas perforan el cielo parisino como dedos de piedra que tocan lo infinito.",
+        "direction": "up",
+        "search_hint": "Notre-Dame de Chartres west facade",
+        "duration": 5.5
+      },
+      {
+        "title": "Rosetón norte",
+        "narration": "Rosetones de vidrio medieval capturan la luz como gemas que hablan en colores ancestrales.",
+        "direction": "right",
+        "search_hint": "Notre-Dame rose window stained glass",
+        "duration": 5.5
+      },
+      {
+        "title": "Interior luminoso",
+        "narration": "Adentro, la luz transfigura el espacio. Bóvedas ojivales crean catedrales de aire y sombra.",
+        "direction": "in",
+        "search_hint": "Notre-Dame interior nave ribbed vaults",
+        "duration": 5.5
+      },
+      {
+        "title": "Gárgolas vigilantes",
+        "narration": "Desde las cornisas, gárgolas custodian la ciudad. Guardianes de piedra entre realidad e imaginación.",
+        "direction": "left",
+        "search_hint": "Notre-Dame gargoyles chimeras towers",
+        "duration": 5.5
+      },
+      {
+        "title": "La Île de la Cité",
+        "narration": "Sobre una isla del Sena, esta catedral es símbolo del genio medieval europeo.",
+        "direction": "out",
+        "search_hint": "Notre-Dame Île de la Cité Seine river",
+        "duration": 5.5
+      },
+      {
+        "title": "Detalles en piedra",
+        "narration": "Cada columna, cada arco cuenta historias de maestría artesanal sin igual.",
+        "direction": "down",
+        "search_hint": "Notre-Dame stone carving sculptural details",
+        "duration": 5.5
+      },
+      {
+        "title": "Legado eterno",
+        "narration": "Notre-Dame permanece como testigo inmóvil de lo que el ser humano es capaz de crear.",
+        "direction": "out",
+        "search_hint": "Notre-Dame de Paris sunset twilight",
+        "duration": 5.5
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\notre-dame-de-parís\\00_d3c5ad48.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/33/04-2017._Notre-Dame_de_Paris-71.jpg",
+      "title": "File:04-2017. Notre-Dame de Paris-71.jpg",
+      "author": "Luis Miguel Bugallo Sánchez (Lmbuga)",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2880
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\notre-dame-de-parís\\01_a66a8d38.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/42/2016-02-23_16-00-44_paris.jpg",
+      "title": "File:2016-02-23 16-00-44 paris.jpg",
+      "author": "Thomas Bresson",
+      "license": "CC BY 4.0",
+      "width": 1920,
+      "height": 1561
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\notre-dame-de-parís\\02_300fa6f0.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b4/Cath%C3%A9drale_Notre-Dame_de_Paris%2C_20_March_2014.jpg",
+      "title": "File:Cathédrale Notre-Dame de Paris, 20 March 2014.jpg",
+      "author": "DXR",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 2428
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\notre-dame-de-parís\\03_a9947e90.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/ce/Cath%C3%A9drale_Notre-Dame_de_Paris%2C_Northwest_view_at_sunrise_20140320.jpg",
+      "title": "File:Cathédrale Notre-Dame de Paris, Northwest view at sunrise 20140320.jpg",
+      "author": "DXR",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 2560
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\notre-dame-de-parís\\04_c87511bf.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Cath%C3%A9drale_Notre-Dame_de_Paris_-_12.jpg",
+      "title": "File:Cathédrale Notre-Dame de Paris - 12.jpg",
+      "author": "Carlos Delgado",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 2485
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\notre-dame-de-parís\\05_73a4e2c6.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/7f/Cath%C3%A9drale_Notre_Dame%2C_Paris_30_September_2015.jpg",
+      "title": "File:Cathédrale Notre Dame, Paris 30 September 2015.jpg",
+      "author": "Antonin Subtil",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2224
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\notre-dame-de-parís\\06_f772b19a.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/3b/Charleville-M%C3%A9zi%C3%A8res%2C_Basilique_Notre_Dame_D%27esperance_--_2017_--_4834.jpg",
+      "title": "File:Charleville-Mézières, Basilique Notre Dame D'esperance -- 2017 -- 4834.jpg",
+      "author": "Dietmar Rabich",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\notre-dame-de-parís\\07_dbc4f386.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/12/Fl%C3%A8che_en_feu_-_Spire_on_Fire.jpeg",
+      "title": "File:Flèche en feu - Spire on Fire.jpeg",
+      "author": "LEVRIER Guillaume",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2694
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\notre-dame-de-parís\\08_65e0cc92.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/fb/Fl%C3%A8che_et_rosace_transept_sud_Notre-Dame_de_Paris.jpg",
+      "title": "File:Flèche et rosace transept sud Notre-Dame de Paris.jpg",
+      "author": "Jebulon",
+      "license": "CC0",
+      "width": 1920,
+      "height": 2920
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\notre-dame-de-parís\\09_38c228ca.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/84/Les_Plus_Belles_Eglises_DU_Monde_-_Notre-Dame_de_Paris.jpg",
+      "title": "File:Les Plus Belles Eglises DU Monde - Notre-Dame de Paris.jpg",
+      "author": "Unknown authorUnknown author",
+      "license": "Public domain",
+      "width": 1920,
+      "height": 1416
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\notre-dame-de-parís\\10_69abfd49.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d8/North_rose_window_of_Notre-Dame_de_Paris%2C_Aug_2010.jpg",
+      "title": "File:North rose window of Notre-Dame de Paris, Aug 2010.jpg",
+      "author": "Julie Anne Workman",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 2498
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\notre-dame-de-parís\\11_39112de2.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Notre-Dame_Matin.jpg",
+      "title": "File:Notre-Dame Matin.jpg",
+      "author": "Rafesmar",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:04-2017. Notre-Dame de Paris-71.jpg — Luis Miguel Bugallo Sánchez (Lmbuga) — CC BY-SA 4.0\n  · File:2016-02-23 16-00-44 paris.jpg — Thomas Bresson — CC BY 4.0\n  · File:Cathédrale Notre-Dame de Paris, 20 March 2014.jpg — DXR — CC BY-SA 3.0\n  · File:Cathédrale Notre-Dame de Paris - 12.jpg — Carlos Delgado — CC BY-SA 3.0\n  · File:Cathédrale Notre Dame, Paris 30 September 2015.jpg — Antonin Subtil — CC BY-SA 4.0\n  · File:Charleville-Mézières, Basilique Notre Dame D'esperance -- 2017 -- 4834.jpg — Dietmar Rabich — CC BY-SA 4.0\n  · File:Flèche en feu - Spire on Fire.jpeg — LEVRIER Guillaume — CC BY-SA 4.0\n  · File:Flèche et rosace transept sud Notre-Dame de Paris.jpg — Jebulon — CC0\n  · File:Les Plus Belles Eglises DU Monde - Notre-Dame de Paris.jpg — Unknown authorUnknown author — Public domain\n  · File:North rose window of Notre-Dame de Paris, Aug 2010.jpg — Julie Anne Workman — CC BY-SA 3.0\n  · File:Notre-Dame Matin.jpg — Rafesmar — CC BY-SA 4.0"
+}

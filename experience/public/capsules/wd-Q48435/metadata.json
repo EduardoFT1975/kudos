@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q48435",
+    "name": "Templo Expiatorio de la Sagrada Familia",
+    "lat": 41.40369,
+    "lng": 2.17433,
+    "country_code": "ES",
+    "category": "monumento",
+    "type": "templo",
+    "wikidata": "Q48435",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/SF%20maig%202026.jpg",
+    "unesco": true,
+    "tier": "S",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Sagrada Familia",
+    "subtitle": "Donde la piedra se convierte en oración",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "En el corazón de Barcelona se alza una catedral inacabada. Un monumento que desafía el tiempo y la geometría.",
+        "direction": "in",
+        "search_hint": "Sagrada Familia Barcelona exterior facade",
+        "duration": 6
+      },
+      {
+        "title": "Torres",
+        "narration": "Dieciocho torres se elevan hacia el cielo, cada una con su propia geometría sagrada.",
+        "direction": "up",
+        "search_hint": "Sagrada Familia spires towers vertical",
+        "duration": 5
+      },
+      {
+        "title": "Fachada Natidad",
+        "narration": "La fachada de Levante cuenta historias de vida en cada piedra tallada con precisión.",
+        "direction": "right",
+        "search_hint": "Sagrada Familia Nativity facade detail sculpture",
+        "duration": 5
+      },
+      {
+        "title": "Interior",
+        "narration": "Adentro, la luz filtra entre columnas que parecen bosques pétreos de extraordinaria armonía.",
+        "direction": "in",
+        "search_hint": "Sagrada Familia interior columns nave light",
+        "duration": 5
+      },
+      {
+        "title": "Bóvedas",
+        "narration": "Las bóvedas crean un firmamento arquitectónico donde cada ángulo busca la perfección divina.",
+        "direction": "up",
+        "search_hint": "Sagrada Familia vaults ceiling hyperboloid",
+        "duration": 5
+      },
+      {
+        "title": "Construcción",
+        "narration": "Iniciada en mil ochocientos ochenta y tres, sigue transformándose como obra viva de fe y ingenio.",
+        "direction": "right",
+        "search_hint": "Sagrada Familia construction work in progress",
+        "duration": 5.5
+      },
+      {
+        "title": "Detalle Orgánico",
+        "narration": "Sus formas respiran la naturaleza. Cada elemento imita las estructuras vivas del universo.",
+        "direction": "left",
+        "search_hint": "Sagrada Familia organic forms Gaudí design",
+        "duration": 5
+      },
+      {
+        "title": "Cierre",
+        "narration": "Un templo que aún busca completarse, donde la arquitectura se convierte en lenguaje del espíritu.",
+        "direction": "out",
+        "search_hint": "Sagrada Familia Barcelona skyline sunset",
+        "duration": 6
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\templo-expiatorio-de-la-sagrada-familia\\00_41f5b0d6.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/cb/15-10-27-Mirador_desde_Park_Guell-WMA_2914_1.jpg",
+      "title": "File:15-10-27-Mirador desde Park Guell-WMA 2914 1.jpg",
+      "author": "Ralf Roletschek",
+      "license": "GFDL 1.2",
+      "width": 1920,
+      "height": 2520
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\templo-expiatorio-de-la-sagrada-familia\\01_1c02f35e.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/41/A_view_of_Barcelona_from_Montju%C3%AFc_Castle_with_Collserola_in_the_background.jpg",
+      "title": "File:A view of Barcelona from Montjuïc Castle with Collserola in the background.jpg",
+      "author": "Darer101",
+      "license": "CC0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\templo-expiatorio-de-la-sagrada-familia\\02_f035b9dd.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/83/Antoni_Gaudi%27s_Sagrada_Familia%2C_Barcelona_%28Ank_Kumar%29_08.jpg",
+      "title": "File:Antoni Gaudi's Sagrada Familia, Barcelona (Ank Kumar) 08.jpg",
+      "author": "Ank Kumar",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\templo-expiatorio-de-la-sagrada-familia\\03_72bf30e0.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/65/Antoni_Gaudi%E2%80%98s_Sagrada_Familia%2C_Barcelona_%28Ank_Kumar%29_07.jpg",
+      "title": "File:Antoni Gaudi‘s Sagrada Familia, Barcelona (Ank Kumar) 07.jpg",
+      "author": "Ank Kumar",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2880
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\templo-expiatorio-de-la-sagrada-familia\\04_226ed547.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Antoni_Gaudi%E2%80%98s_Sagrada_Familia%2C_Barcelona_%28Ank_Kumar%29_09.jpg",
+      "title": "File:Antoni Gaudi‘s Sagrada Familia, Barcelona (Ank Kumar) 09.jpg",
+      "author": "Ank Kumar",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\templo-expiatorio-de-la-sagrada-familia\\05_0a76fb3f.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Antoni_Gaudi%E2%80%99s_Sagrada_Familia_03.jpg",
+      "title": "File:Antoni Gaudi’s Sagrada Familia 03.jpg",
+      "author": "Ank Kumar",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\templo-expiatorio-de-la-sagrada-familia\\06_51adc058.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/ff/Antoni_Gaudi%E2%80%99s_Sagrada_Familia_05.jpg",
+      "title": "File:Antoni Gaudi’s Sagrada Familia 05.jpg",
+      "author": "Ank Kumar",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\templo-expiatorio-de-la-sagrada-familia\\07_d109b514.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/8f/Barcelona_-_Montju%C3%AFc_-_Avinguda_de_Miramar_-_View_North_towards_the_Sagrada_Fam%C3%ADlia.jpg",
+      "title": "File:Barcelona - Montjuïc - Avinguda de Miramar - View North towards the Sagrada Família.jpg",
+      "author": "Txllxt TxllxT",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\templo-expiatorio-de-la-sagrada-familia\\08_43301ae0.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Barcelona_-_Parc_G%C3%BCell_-_Panorama_View_with_Torre_Gl%C3%B2ries%2C_Sagrada_Fam%C3%ADlia_%26_Montju%C3%AFc_06.jpg",
+      "title": "File:Barcelona - Parc Güell - Panorama View with Torre Glòries, Sagrada Família & Montjuïc 06.jpg",
+      "author": "Txllxt TxllxT",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\templo-expiatorio-de-la-sagrada-familia\\09_ad4c78ef.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/3c/Barcelona_Sagrada_Familia_BW_2019-10-07_13-08-58.jpg",
+      "title": "File:Barcelona Sagrada Familia BW 2019-10-07 13-08-58.jpg",
+      "author": "Berthold Werner",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1277
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\templo-expiatorio-de-la-sagrada-familia\\10_cd21a2b1.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Frontside_of_the_Sagrada_Fam%C3%ADlia_on_the_2024-07-12.jpg",
+      "title": "File:Frontside of the Sagrada Família on the 2024-07-12.jpg",
+      "author": "TimKicker",
+      "license": "CC BY 4.0",
+      "width": 1600,
+      "height": 1066
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\templo-expiatorio-de-la-sagrada-familia\\11_e93a80db.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/31/Nativity_towers%2C_Sagrada_Familia%2C_Barcelona_08.jpg",
+      "title": "File:Nativity towers, Sagrada Familia, Barcelona 08.jpg",
+      "author": "Ank Kumar",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:15-10-27-Mirador desde Park Guell-WMA 2914 1.jpg — Ralf Roletschek — GFDL 1.2\n  · File:A view of Barcelona from Montjuïc Castle with Collserola in the background.jpg — Darer101 — CC0\n  · File:Antoni Gaudi's Sagrada Familia, Barcelona (Ank Kumar) 08.jpg — Ank Kumar — CC BY-SA 4.0\n  · File:Barcelona - Montjuïc - Avinguda de Miramar - View North towards the Sagrada Família.jpg — Txllxt TxllxT — CC BY-SA 4.0\n  · File:Barcelona Sagrada Familia BW 2019-10-07 13-08-58.jpg — Berthold Werner — CC BY-SA 4.0\n  · File:Frontside of the Sagrada Família on the 2024-07-12.jpg — TimKicker — CC BY 4.0"
+}

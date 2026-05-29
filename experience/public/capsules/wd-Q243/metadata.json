@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q243",
+    "name": "torre Eiffel",
+    "lat": 48.858296,
+    "lng": 2.294479,
+    "country_code": "FR",
+    "category": "monumento",
+    "type": "atracción turística",
+    "wikidata": "Q243",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Tour%20Eiffel%20Wikimedia%20Commons.jpg",
+    "unesco": true,
+    "tier": "S",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "La Torre Eiffel",
+    "subtitle": "Símbolo de hierro que desafió el cielo de París",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "En 1889, cuando el mundo dudaba, Gustave Eiffel erigió una estructura que parecía imposible: trescientos metros de hierro reticulado.",
+        "direction": "up",
+        "search_hint": "Eiffel Tower construction 1889",
+        "duration": 6
+      },
+      {
+        "title": "Estructura",
+        "narration": "Dieciocho mil piezas metálicas, unidas con precisión de relojería, crearon una red que desafiaba la gravedad.",
+        "direction": "right",
+        "search_hint": "Eiffel Tower iron lattice structure",
+        "duration": 5
+      },
+      {
+        "title": "Perspectiva",
+        "narration": "Desde sus tres plantas, París se despliega como un mapa vivo de calles, río y horizonte infinito.",
+        "direction": "down",
+        "search_hint": "Eiffel Tower panoramic view Paris",
+        "duration": 5
+      },
+      {
+        "title": "Luz nocturna",
+        "narration": "Cuando cae la noche, veinte mil bombillas transforman el hierro en constelación, un faro de oro que respira.",
+        "direction": "in",
+        "search_hint": "Eiffel Tower night illumination lights",
+        "duration": 5
+      },
+      {
+        "title": "Escala humana",
+        "narration": "Los visitantes suben sus escaleras infinitas, pequeños puntos que recorren un monumento que mide la ambición de una era.",
+        "direction": "left",
+        "search_hint": "Eiffel Tower visitors stairs crowds",
+        "duration": 5
+      },
+      {
+        "title": "Historia",
+        "narration": "Críticos la llamaron cicatriz. Hoy es el símbolo más reconocido del mundo, testigo de siglos de humanidad.",
+        "direction": "up",
+        "search_hint": "Eiffel Tower historical monument icon",
+        "duration": 5
+      },
+      {
+        "title": "Movimiento",
+        "narration": "El hierro respira con el viento y la temperatura. Cada día se expande y contrae, vivo como un corazón.",
+        "direction": "right",
+        "search_hint": "Eiffel Tower thermal expansion wind",
+        "duration": 5
+      },
+      {
+        "title": "Cierre",
+        "narration": "Permanece. Inmóvil en su movimiento, temporal en su eternidad, la Torre Eiffel sigue siendo el sueño de París hecho acero.",
+        "direction": "out",
+        "search_hint": "Eiffel Tower Paris landmark eternal",
+        "duration": 4
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\torre-eiffel\\00_038f298e.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/39/American_soldiers_watch_as_the_Tricolor_flies_from_the_Eiffel_Tower_again.jpg",
+      "title": "File:American soldiers watch as the Tricolor flies from the Eiffel Tower again.jpg",
+      "author": "Unknown authorUnknown author or not provided",
+      "license": "Public domain",
+      "width": 1920,
+      "height": 2439
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\torre-eiffel\\01_59128438.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d5/Ascenseur_tour_Eiffel_-_20150801_16h59_%2810633%29.jpg",
+      "title": "File:Ascenseur tour Eiffel - 20150801 16h59 (10633).jpg",
+      "author": "Another one of my pictures:\n\n\n\nThis photograph was taken by Medium69 (William Crochot) and released under the license stated below. You are free to use it for any purpose as long as you credit the author (William Crochot), the Source (Wikimedia Commons) and the license (CC-BY-SA 4.0) in close relation to the image.\n\n\n\n\n\nPlease do not upload an updated image here without consultation with the Author. The author would like to make corrections only at his own source RAW. This ensures that the changes are preserved.Please if you think that any changes should be required, please inform the author.Otherwise you can upload a new image with a new name. Please use one of the templates derivative or extract.",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 2880
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\torre-eiffel\\02_57474e3a.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Buste_Gustave_Eiffel_-_20150801_14h57_%2810618%29.jpg",
+      "title": "File:Buste Gustave Eiffel - 20150801 14h57 (10618).jpg",
+      "author": "Another one of my pictures:\n\n\n\nThis photograph was taken by Medium69 (William Crochot) and released under the license stated below. You are free to use it for any purpose as long as you credit the author (William Crochot), the Source (Wikimedia Commons) and the license (CC-BY-SA 4.0) in close relation to the image.\n\n\n\n\n\nPlease do not upload an updated image here without consultation with the Author. The author would like to make corrections only at his own source RAW. This ensures that the changes are preserved.Please if you think that any changes should be required, please inform the author.Otherwise you can upload a new image with a new name. Please use one of the templates derivative or extract.",
+      "license": "CC BY-SA 4.0",
+      "width": 1375,
+      "height": 2062
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\torre-eiffel\\03_d088d58f.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Champ_de_Mars_from_the_Eiffel_Tower_-_July_2006_edit.jpg",
+      "title": "File:Champ de Mars from the Eiffel Tower - July 2006 edit.jpg",
+      "author": "Diliff, edited by Fir0002",
+      "license": "CC BY 2.5",
+      "width": 1900,
+      "height": 1871
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\torre-eiffel\\04_e9937e3f.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/de/Contorno_da_Torre_Eiffel_com_o_Dirig%C3%ADvel_N%C2%BA6_-_1-13651-0000-0000%2C_Acervo_do_Museu_Paulista_da_USP.jpg",
+      "title": "File:Contorno da Torre Eiffel com o Dirigível Nº6 - 1-13651-0000-0000, Acervo do Museu Paulista da USP.jpg",
+      "author": "José Rosael/Hélio Nobre/Museu Paulista da USP",
+      "license": "Public domain",
+      "width": 1920,
+      "height": 2519
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\torre-eiffel\\05_25c7e033.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/67/Eiffel_Tower%2C_full-view_looking_toward_the_Trocadero%2C_Exposition_Universal%2C_1900%2C_Paris%2C_France.jpg",
+      "title": "File:Eiffel Tower, full-view looking toward the Trocadero, Exposition Universal, 1900, Paris, France.jpg",
+      "author": "Unknown authorUnknown author",
+      "license": "Public domain",
+      "width": 1920,
+      "height": 2715
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\torre-eiffel\\06_95513a9a.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/de/Eiffel_Tower_and_Pont_Alexandre_III_at_night.jpg",
+      "title": "File:Eiffel Tower and Pont Alexandre III at night.jpg",
+      "author": "Getfunky Paris",
+      "license": "CC BY 2.0",
+      "width": 1920,
+      "height": 1230
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\torre-eiffel\\07_2a18b5e3.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/78/Eiffel_Tower_from_north_Avenue_de_New_York%2C_Aug_2010.jpg",
+      "title": "File:Eiffel Tower from north Avenue de New York, Aug 2010.jpg",
+      "author": "Julie Anne Workman",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 3693
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\torre-eiffel\\08_533547f9.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Eiffel_Tower_in_2022_02.jpg",
+      "title": "File:Eiffel Tower in 2022 02.jpg",
+      "author": "Maksim Sokolov (maxergon.com)",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\torre-eiffel\\09_897a7960.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/da/Front_de_Seine_as_seen_from_Pont_Mirabeau%2C_22_April_2014.jpg",
+      "title": "File:Front de Seine as seen from Pont Mirabeau, 22 April 2014.jpg",
+      "author": "DXR",
+      "license": "CC BY-SA 2.0",
+      "width": 1920,
+      "height": 686
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\torre-eiffel\\10_87e35bd8.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/58/Front_de_Seine_as_seen_from_Pont_Mirabeau%2C_April_2014.jpg",
+      "title": "File:Front de Seine as seen from Pont Mirabeau, April 2014.jpg",
+      "author": "DXR",
+      "license": "CC BY-SA 2.0",
+      "width": 1920,
+      "height": 550
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\torre-eiffel\\11_d60d5fd9.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Front_de_Seine_as_seen_from_Pont_Mirabeau_140412_1.jpg",
+      "title": "File:Front de Seine as seen from Pont Mirabeau 140412 1.jpg",
+      "author": "DXR",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 768
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:American soldiers watch as the Tricolor flies from the Eiffel Tower again.jpg — Unknown authorUnknown author or not provided — Public domain\n  · File:Ascenseur tour Eiffel - 20150801 16h59 (10633).jpg — Another one of my pictures:\n\n\n\nThis photograph was taken by Medium69 (William Crochot) and released under the license stated below. You are free to use it for any purpose as long as you credit the author (William Crochot), the Source (Wikimedia Commons) and the license (CC-BY-SA 4.0) in close relation to the image.\n\n\n\n\n\nPlease do not upload an updated image here without consultation with the Author. The author would like to make corrections only at his own source RAW. This ensures that the changes are preserved.Please if you think that any changes should be required, please inform the author.Otherwise you can upload a new image with a new name. Please use one of the templates derivative or extract. — CC BY-SA 4.0\n  · File:Champ de Mars from the Eiffel Tower - July 2006 edit.jpg — Diliff, edited by Fir0002 — CC BY 2.5\n  · File:Contorno da Torre Eiffel com o Dirigível Nº6 - 1-13651-0000-0000, Acervo do Museu Paulista da USP.jpg — José Rosael/Hélio Nobre/Museu Paulista da USP — Public domain\n  · File:Eiffel Tower, full-view looking toward the Trocadero, Exposition Universal, 1900, Paris, France.jpg — Unknown authorUnknown author — Public domain\n  · File:Eiffel Tower and Pont Alexandre III at night.jpg — Getfunky Paris — CC BY 2.0\n  · File:Eiffel Tower from north Avenue de New York, Aug 2010.jpg — Julie Anne Workman — CC BY-SA 3.0\n  · File:Eiffel Tower in 2022 02.jpg — Maksim Sokolov (maxergon.com) — CC BY-SA 4.0\n  · File:Front de Seine as seen from Pont Mirabeau, 22 April 2014.jpg — DXR — CC BY-SA 2.0\n  · File:Front de Seine as seen from Pont Mirabeau 140412 1.jpg — DXR — CC BY-SA 3.0"
+}

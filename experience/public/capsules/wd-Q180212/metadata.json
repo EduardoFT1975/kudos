@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q180212",
+    "name": "Foro Romano",
+    "lat": 41.8922,
+    "lng": 12.4852,
+    "country_code": "IT",
+    "category": "monumento",
+    "type": "atracción turística",
+    "wikidata": "Q180212",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Foro%20Romano%20Musei%20Capitolini%20Roma.jpg",
+    "unesco": true,
+    "tier": "S",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "Foro Romano",
+    "subtitle": "El corazón político de un imperio",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "Hace dos mil años, donde hoy caminamos entre ruinas, latía el pulso del poder romano.",
+        "direction": "in",
+        "search_hint": "Roman Forum aerial view",
+        "duration": 5.5
+      },
+      {
+        "title": "Columnas del Templo de Saturno",
+        "narration": "Las columnas que subsisten susurran historias de asambleas que decidieron el destino de millones.",
+        "direction": "right",
+        "search_hint": "Temple of Saturn Roman Forum columns",
+        "duration": 5.5
+      },
+      {
+        "title": "Basílica de Majencio",
+        "narration": "La basílica se alza aún, monumento a la ambición arquitectónica y el comercio que fluía sin cesar.",
+        "direction": "up",
+        "search_hint": "Basilica of Maxentius Rome",
+        "duration": 5.5
+      },
+      {
+        "title": "Camino de la Vía Sacra",
+        "narration": "Por la Vía Sacra marchaban generales victoriosos en procesiones que el pueblo observaba maravillado.",
+        "direction": "left",
+        "search_hint": "Via Sacra Roman Forum pathway",
+        "duration": 5.5
+      },
+      {
+        "title": "Arco de Tito",
+        "narration": "Este arco conmemora conquistas; sus relieves narran historias grabadas en piedra eterna.",
+        "direction": "down",
+        "search_hint": "Arch of Titus relief carvings",
+        "duration": 5.5
+      },
+      {
+        "title": "Templo de Vesta",
+        "narration": "El pequeño templo circular resguardaba el fuego sagrado, símbolo de la continuidad de Roma.",
+        "direction": "right",
+        "search_hint": "Temple of Vesta circular structure",
+        "duration": 5.5
+      },
+      {
+        "title": "Estratificación temporal",
+        "narration": "Capas de civilización se superponen: palacios bajo tierra, civilizaciones olvidadas que ceden paso a nuevas.",
+        "direction": "down",
+        "search_hint": "Roman Forum archaeological layers excavation",
+        "duration": 5.5
+      },
+      {
+        "title": "Cierre",
+        "narration": "El Foro permanece como testigo silencioso de ambiciones, caídas y el ciclo eterno del poder humano.",
+        "direction": "out",
+        "search_hint": "Roman Forum sunset ruins panorama",
+        "duration": 5.0
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\foro-romano\\00_250899d8.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Acanthus_at_the_Forum_Rome_1980.jpg",
+      "title": "File:Acanthus at the Forum Rome 1980.jpg",
+      "author": "Acroterion",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1282
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\foro-romano\\01_f780e825.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Colonne_onorarie_%283%29.jpg",
+      "title": "File:Colonne onorarie (3).jpg",
+      "author": "Krzysztof Golik",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 3520
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\foro-romano\\02_1c0673e9.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/0c/Foro_Romano%2C_Rome%2C_Italy.jpg",
+      "title": "File:Foro Romano, Rome, Italy.jpg",
+      "author": "Ambra75",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1238
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\foro-romano\\03_96166404.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/6a/Foro_Romano_Musei_Capitolini_Roma.jpg",
+      "title": "File:Foro Romano Musei Capitolini Roma.jpg",
+      "author": "This Photo was taken by Wolfgang Moroder.  \n\nFeel free to use my photos, but please mention me as the author and send me a  message. \n\n\n\nThis image is not in the public domain. Please respect the copyright protection. It may only be used according to the rules mentioned here. This specifically excludes use in social media, if applicable terms of the licenses listed here not appropriate.\n\n\n\nPlease do not upload an updated image here without consultation with the Author. The author would like to make corrections only at his own source. This ensures that the changes are preserved.Please if you think that any changes should be required, please inform the author.Otherwise you can upload a new image with a new name. Please use one of the templates derivative or extract.",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 788
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\foro-romano\\04_59439a54.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Foro_Romano_visto_dal_Vittoriano_Roma.jpg",
+      "title": "File:Foro Romano visto dal Vittoriano Roma.jpg",
+      "author": "This Photo was taken by Wolfgang Moroder.  \n\nFeel free to use my photos, but please mention me as the author and send me a  message. \n\n\n\nThis image is not in the public domain. Please respect the copyright protection. It may only be used according to the rules mentioned here. This specifically excludes use in social media, if applicable terms of the licenses listed here not appropriate.\n\n\n\nPlease do not upload an updated image here without consultation with the Author. The author would like to make corrections only at his own source. This ensures that the changes are preserved.Please if you think that any changes should be required, please inform the author.Otherwise you can upload a new image with a new name. Please use one of the templates derivative or extract.",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 1056
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\foro-romano\\05_637bb85e.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/42/Foro_romano_with_a_bunch_of_people_on_the_way.jpg",
+      "title": "File:Foro romano with a bunch of people on the way.jpg",
+      "author": "Alex Sirac",
+      "license": "CC BY 4.0",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\foro-romano\\06_6524007e.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Forum_Romanum7.JPG",
+      "title": "File:Forum Romanum7.JPG",
+      "author": "Schlurcher",
+      "license": "CC BY 4.0",
+      "width": 1920,
+      "height": 1275
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\foro-romano\\07_e36eb512.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/94/Forum_Romanum8.JPG",
+      "title": "File:Forum Romanum8.JPG",
+      "author": "Schlurcher",
+      "license": "CC BY 4.0",
+      "width": 1920,
+      "height": 1275
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\foro-romano\\08_0af0aa72.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/6e/Forum_Romanum_%2814%29.jpg",
+      "title": "File:Forum Romanum (14).jpg",
+      "author": "Krzysztof Golik",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 370
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\foro-romano\\09_1d3d5ecd.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/2d/Forum_Romanum_%28Rome%29_05.jpg",
+      "title": "File:Forum Romanum (Rome) 05.jpg",
+      "author": "John Samuel",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\foro-romano\\10_7f804fa7.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/af/Forum_Romanum_%28Rome%29_06.jpg",
+      "title": "File:Forum Romanum (Rome) 06.jpg",
+      "author": "John Samuel",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\foro-romano\\11_519a47bd.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/51/Forum_Romanum_%28Rome%29_07.jpg",
+      "title": "File:Forum Romanum (Rome) 07.jpg",
+      "author": "John Samuel",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1280
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:Acanthus at the Forum Rome 1980.jpg — Acroterion — CC BY-SA 4.0\n  · File:Colonne onorarie (3).jpg — Krzysztof Golik — CC BY-SA 4.0\n  · File:Foro Romano, Rome, Italy.jpg — Ambra75 — CC BY-SA 4.0\n  · File:Foro Romano Musei Capitolini Roma.jpg — This Photo was taken by Wolfgang Moroder.  \n\nFeel free to use my photos, but please mention me as the author and send me a  message. \n\n\n\nThis image is not in the public domain. Please respect the copyright protection. It may only be used according to the rules mentioned here. This specifically excludes use in social media, if applicable terms of the licenses listed here not appropriate.\n\n\n\nPlease do not upload an updated image here without consultation with the Author. The author would like to make corrections only at his own source. This ensures that the changes are preserved.Please if you think that any changes should be required, please inform the author.Otherwise you can upload a new image with a new name. Please use one of the templates derivative or extract. — CC BY-SA 3.0\n  · File:Foro romano with a bunch of people on the way.jpg — Alex Sirac — CC BY 4.0\n  · File:Forum Romanum7.JPG — Schlurcher — CC BY 4.0\n  · File:Forum Romanum (Rome) 05.jpg — John Samuel — CC BY-SA 4.0"
+}

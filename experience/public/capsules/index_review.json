@@ -22,5 +22,22 @@
       "name": "Castillo de Alhambra",
       "canonical": false
     }
+  ],
+  "sagrada-familia": [
+    {
+      "id": "wd-Q61942244",
+      "name": "iglesia de la Sagrada Familia",
+      "canonical": true
+    },
+    {
+      "id": "wd-Q48435",
+      "name": "Templo Expiatorio de la Sagrada Familia",
+      "canonical": false
+    },
+    {
+      "id": "wd-Q66815979",
+      "name": "Capela da Sagrada Familia e Quinta do Descanso",
+      "canonical": false
+    }
   ]
 }

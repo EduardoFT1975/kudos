@@ -1,0 +1,205 @@
+{
+  "poi": {
+    "id": "wd-Q61942244",
+    "name": "iglesia de la Sagrada Familia",
+    "lat": 38.981528,
+    "lng": -0.686944,
+    "country_code": "ES",
+    "category": "monumento",
+    "type": "templo",
+    "wikidata": "Q61942244",
+    "image_url": "http://commons.wikimedia.org/wiki/Special:FilePath/Portada%20antiguo%20convento%20Carmelitas%20Descalzas.%20Actual%20iglesia%20del%20Convento.jpg",
+    "unesco": true,
+    "tier": "S",
+    "wikipedia_languages": 30,
+    "annual_visitors": 500000
+  },
+  "classification": {
+    "tier": "S",
+    "score": 75,
+    "recipe": {
+      "duration_seconds": 45,
+      "scenes": 8,
+      "generate_voice": true,
+      "generate_music": true,
+      "rich_card": true,
+      "min_photos": 10
+    },
+    "rationale": "Tier S (cápsula 45'') — Patrimonio UNESCO (+40) · 500,000 visitantes/año (+15) · 30 idiomas en Wikipedia (+20)"
+  },
+  "script": {
+    "title": "La Sagrada Familia",
+    "subtitle": "Donde la piedra se convierte en oración",
+    "scenes": [
+      {
+        "title": "Apertura",
+        "narration": "En Barcelona, una basílica incompleta desafía el tiempo. Cien años de construcción continua, generación tras generación.",
+        "direction": "in",
+        "search_hint": "Sagrada Familia Barcelona exterior",
+        "duration": 5.5
+      },
+      {
+        "title": "Fachada Natività",
+        "narration": "La fachada naciente respira con la vida del nacimiento de Cristo. Cada piedra cuenta una historia de fe.",
+        "direction": "right",
+        "search_hint": "Sagrada Familia Nativity facade detail",
+        "duration": 5.0
+      },
+      {
+        "title": "Torres ascendentes",
+        "narration": "Dieciocho torres se elevan como espinas dorsales de piedra. Symbología arquitectónica de apóstoles y santos.",
+        "direction": "up",
+        "search_hint": "Sagrada Familia towers spires",
+        "duration": 5.0
+      },
+      {
+        "title": "Interior nave central",
+        "narration": "Dentro, la luz fragmentada crea un bosque de columnas. Cada soporte es un árbol de fe sosteniendo el cielo.",
+        "direction": "in",
+        "search_hint": "Sagrada Familia interior columns light",
+        "duration": 5.5
+      },
+      {
+        "title": "Geometría orgánica",
+        "narration": "Curvas naturales y números perfectos convergen. La arquitectura dialoga con la biología del universo.",
+        "direction": "down",
+        "search_hint": "Sagrada Familia organic geometry Gaudí",
+        "duration": 5.0
+      },
+      {
+        "title": "Fachada Pasión",
+        "narration": "La fachada occidental muestra sufrimiento y redención. Superficies angulares que rasguñan el horizonte.",
+        "direction": "left",
+        "search_hint": "Sagrada Familia Passion facade",
+        "duration": 5.0
+      },
+      {
+        "title": "Obra en progreso",
+        "narration": "Aún se construye. Máquinas modernas junto a técnicas milenarias. La basílica vive, crece, evoluciona.",
+        "direction": "out",
+        "search_hint": "Sagrada Familia construction 2024",
+        "duration": 5.0
+      },
+      {
+        "title": "Trascendencia",
+        "narration": "No es solo piedra. Es la cristalización de un sueño colectivo que trasciende generaciones.",
+        "direction": "up",
+        "search_hint": "Sagrada Familia Barcelona spiritual",
+        "duration": 4.0
+      }
+    ]
+  },
+  "voice": "es-ES-AlvaroNeural",
+  "music": null,
+  "images": [
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\iglesia-de-la-sagrada-familia\\00_c269debe.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/5/51/ABN_10724.jpg",
+      "title": "File:ABN 10724.jpg",
+      "author": "Bate &amp; Ca.",
+      "license": "Public domain",
+      "width": 1500,
+      "height": 1248
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\iglesia-de-la-sagrada-familia\\01_fc427d5d.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/ABN_11089.jpg",
+      "title": "File:ABN 11089.jpg",
+      "author": "Scrap",
+      "license": "Public domain",
+      "width": 1500,
+      "height": 1327
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\iglesia-de-la-sagrada-familia\\02_bd50c506.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/d2/ABN_1852.jpg",
+      "title": "File:ABN 1852.jpg",
+      "author": "Escuela Nacional de Artes y Oficios",
+      "license": "Public domain",
+      "width": 1920,
+      "height": 1406
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\iglesia-de-la-sagrada-familia\\03_5609e40c.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/17/Austrian_Hospice_in_Jerusalem%2C_2019_%2808%29.jpg",
+      "title": "File:Austrian Hospice in Jerusalem, 2019 (08).jpg",
+      "author": "Bahnfrend",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1536
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\iglesia-de-la-sagrada-familia\\04_2a949cd2.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/b7/Auto_Volkswagen_Passat_B2_Church_of_the_Holy_Family_Church_of_the_Holy_Family_%D0%95995%D0%95%D0%A339_2021-08_603.jpg",
+      "title": "File:Auto Volkswagen Passat B2 Church of the Holy Family Church of the Holy Family Е995ЕУ39 2021-08 603.jpg",
+      "author": "Artyom Svetlov",
+      "license": "CC BY 4.0",
+      "width": 1920,
+      "height": 1280
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\iglesia-de-la-sagrada-familia\\05_f9d3f2c1.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/f/f1/CAESAR%27S_HALL_AUSTRIAN_HOSPICE_JERUSALEM.jpg",
+      "title": "File:CAESAR'S HALL AUSTRIAN HOSPICE JERUSALEM.jpg",
+      "author": "ABRAHAM GRAICER",
+      "license": "CC BY-SA 4.0",
+      "width": 1920,
+      "height": 1281
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\iglesia-de-la-sagrada-familia\\06_16e4b921.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Capilla_Jackson%2C_Montevideo.jpg",
+      "title": "File:Capilla Jackson, Montevideo.jpg",
+      "author": "Nicolas Barriola",
+      "license": "CC BY-SA 3.0",
+      "width": 800,
+      "height": 1200
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\iglesia-de-la-sagrada-familia\\07_29039420.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Capilla_Jackson%2C_interior_01.jpg",
+      "title": "File:Capilla Jackson, interior 01.jpg",
+      "author": "Nicolas Barriola",
+      "license": "CC BY-SA 3.0",
+      "width": 800,
+      "height": 1200
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\iglesia-de-la-sagrada-familia\\08_deb715b2.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/6/6c/Capilla_Jackson%2C_interior_03.jpg",
+      "title": "File:Capilla Jackson, interior 03.jpg",
+      "author": "Nicolas Barriola",
+      "license": "CC BY-SA 3.0",
+      "width": 800,
+      "height": 1200
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\iglesia-de-la-sagrada-familia\\09_60efcc5d.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/4/4e/Capilla_Jackson%2C_interior_10.jpg",
+      "title": "File:Capilla Jackson, interior 10.jpg",
+      "author": "Nicolas Barriola",
+      "license": "CC BY-SA 3.0",
+      "width": 800,
+      "height": 1200
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\iglesia-de-la-sagrada-familia\\10_ff4a0d75.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/c/c0/Capilla_Jackson%2C_interior_12.jpg",
+      "title": "File:Capilla Jackson, interior 12.jpg",
+      "author": "Nicolas Barriola",
+      "license": "CC BY-SA 3.0",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "path": "C:\\Users\\efert\\kudos_project\\kudos_engine\\cache\\wikimedia\\iglesia-de-la-sagrada-familia\\11_833c8443.jpg",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/19/Capilla_Jackson_en_el_barrio_Atahualpa.JPG",
+      "title": "File:Capilla Jackson en el barrio Atahualpa.JPG",
+      "author": "Cubodelnorte",
+      "license": "CC BY-SA 3.0",
+      "width": 1920,
+      "height": 2560
+    }
+  ],
+  "credits": "Imágenes via Wikimedia Commons:\n  · File:ABN 10724.jpg — Bate &amp; Ca. — Public domain\n  · File:ABN 11089.jpg — Scrap — Public domain\n  · File:ABN 1852.jpg — Escuela Nacional de Artes y Oficios — Public domain\n  · File:Austrian Hospice in Jerusalem, 2019 (08).jpg — Bahnfrend — CC BY-SA 4.0\n  · File:Auto Volkswagen Passat B2 Church of the Holy Family Church of the Holy Family Е995ЕУ39 2021-08 603.jpg — Artyom Svetlov — CC BY 4.0\n  · File:CAESAR'S HALL AUSTRIAN HOSPICE JERUSALEM.jpg — ABRAHAM GRAICER — CC BY-SA 4.0\n  · File:Capilla Jackson, Montevideo.jpg — Nicolas Barriola — CC BY-SA 3.0\n  · File:Capilla Jackson en el barrio Atahualpa.JPG — Cubodelnorte — CC BY-SA 3.0"
+}
