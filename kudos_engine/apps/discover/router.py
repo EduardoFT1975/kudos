@@ -39,46 +39,138 @@ def _capsules_dir() -> str:
 _CACHE: dict[str, Any] = {"capsules": None}
 
 
+# Fallback hardcoded: si el filesystem no tiene los metadata.json (Docker del
+# backend no copia experience/public/), devolvemos los 12 POIs principales
+# con imagenes de Wikidata Commons. Garantiza que el feed Discover NUNCA
+# este vacio en produccion.
+_FALLBACK_CAPSULES: list[dict] = [
+    {
+        "poi_id": "wd-Q10285", "name": "Coliseo", "country_code": "IT", "category": "monumento",
+        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Colosseo%202020.jpg?width=1200",
+        "tier": "S", "duration_s": 45, "score": 100,
+        "video_url": "/capsules/wd-Q10285/capsule.mp4",
+    },
+    {
+        "poi_id": "wd-Q131013", "name": "Acropolis de Atenas", "country_code": "GR", "category": "monumento",
+        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Attica%2006-13%20Athens%2050%20View%20from%20Philopappos%20-%20Acropolis%20Hill.jpg?width=1200",
+        "tier": "S", "duration_s": 45, "score": 100,
+        "video_url": "/capsules/wd-Q131013/capsule.mp4",
+    },
+    {
+        "poi_id": "wd-Q47476", "name": "Alhambra", "country_code": "ES", "category": "monumento",
+        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Alhambra%20de%20noche.jpg?width=1200",
+        "tier": "S", "duration_s": 45, "score": 95,
+        "video_url": "/capsules/wd-Q47476/capsule.mp4",
+    },
+    {
+        "poi_id": "wd-Q61942244", "name": "Sagrada Familia", "country_code": "ES", "category": "iglesia",
+        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Sagrada%20Familia%2008-2018%20%282%29.jpg?width=1200",
+        "tier": "S", "duration_s": 45, "score": 95,
+        "video_url": "/capsules/wd-Q61942244/capsule.mp4",
+    },
+    {
+        "poi_id": "wd-Q180212", "name": "Foro Romano", "country_code": "IT", "category": "arqueologia",
+        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Foro%20Romano%20Musei%20Capitolini%20Roma.jpg?width=1200",
+        "tier": "S", "duration_s": 45, "score": 90,
+        "video_url": "/capsules/wd-Q180212/capsule.mp4",
+    },
+    {
+        "poi_id": "wd-Q2981", "name": "Notre-Dame de Paris", "country_code": "FR", "category": "iglesia",
+        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Notre-Dame%20de%20Paris%2C%204%20October%202017.jpg?width=1200",
+        "tier": "S", "duration_s": 45, "score": 90,
+        "video_url": "/capsules/wd-Q2981/capsule.mp4",
+    },
+    {
+        "poi_id": "wd-Q12506", "name": "Hagia Sofia", "country_code": "TR", "category": "iglesia",
+        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Hagia%20Sophia%20Mars%202013.jpg?width=1200",
+        "tier": "S", "duration_s": 45, "score": 90,
+        "video_url": "/capsules/wd-Q12506/capsule.mp4",
+    },
+    {
+        "poi_id": "wd-Q243", "name": "Torre Eiffel", "country_code": "FR", "category": "monumento",
+        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tour%20Eiffel%20Wikimedia%20Commons.jpg?width=1200",
+        "tier": "S", "duration_s": 45, "score": 90,
+        "video_url": "/capsules/wd-Q243/capsule.mp4",
+    },
+    {
+        "poi_id": "wd-Q43332", "name": "Pompeya", "country_code": "IT", "category": "arqueologia",
+        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pompeii%20Family%20Feast%20Painting%20Naples.jpg?width=1200",
+        "tier": "S", "duration_s": 45, "score": 85,
+        "video_url": "/capsules/wd-Q43332/capsule.mp4",
+    },
+    {
+        "poi_id": "wd-Q43473", "name": "Machu Picchu", "country_code": "PE", "category": "arqueologia",
+        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Machu%20Picchu%2C%20Peru.jpg?width=1200",
+        "tier": "S", "duration_s": 45, "score": 95,
+        "video_url": "/capsules/wd-Q43473/capsule.mp4",
+    },
+    {
+        "poi_id": "wd-Q5788", "name": "Petra", "country_code": "JO", "category": "arqueologia",
+        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/The%20Treasury%2C%20Petra%2C%20Jordan8.jpg?width=1200",
+        "tier": "S", "duration_s": 45, "score": 90,
+        "video_url": "/capsules/wd-Q5788/capsule.mp4",
+    },
+    {
+        "poi_id": "wd-Q9202", "name": "Taj Mahal", "country_code": "IN", "category": "monumento",
+        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Taj%20Mahal%2C%20Agra%2C%20India%20edit3.jpg?width=1200",
+        "tier": "S", "duration_s": 45, "score": 95,
+        "video_url": "/capsules/wd-Q9202/capsule.mp4",
+    },
+]
+
+
 def _load_capsules_metadata() -> list[dict]:
-    """Carga todos los metadata.json individuales de /public/capsules/wd-*/."""
+    """Carga capsulas desde varios paths posibles. Si nada existe, usa fallback hardcoded."""
     if _CACHE["capsules"] is not None:
         return _CACHE["capsules"]
 
-    cdir = _capsules_dir()
-    if not os.path.isdir(cdir):
-        _CACHE["capsules"] = []
-        return []
+    # Probar varios paths candidatos (Render Docker, Render Python, dev local)
+    candidates = [
+        _capsules_dir(),
+        os.path.join(os.getcwd(), "experience", "public", "capsules"),
+        "/app/experience/public/capsules",
+        "/opt/render/project/src/experience/public/capsules",
+    ]
 
-    out = []
-    for name in os.listdir(cdir):
-        if not name.startswith("wd-"):
+    out: list[dict] = []
+    for cdir in candidates:
+        if not os.path.isdir(cdir):
             continue
-        meta_path = os.path.join(cdir, name, "metadata.json")
-        if not os.path.isfile(meta_path):
-            continue
-        try:
-            with open(meta_path, "r", encoding="utf-8") as f:
-                meta = json.load(f)
-            poi = meta.get("poi", {})
-            cls = meta.get("classification", {})
-            recipe = cls.get("recipe", {})
-            score = cls.get("score", 50)
-            out.append({
-                "poi_id": poi.get("id") or name,
-                "name": poi.get("name", name),
-                "country_code": poi.get("country_code", ""),
-                "category": poi.get("category", ""),
-                "image_url": poi.get("image_url", ""),
-                "tier": poi.get("tier") or cls.get("tier", "B"),
-                "lat": poi.get("lat"),
-                "lng": poi.get("lng"),
-                "annual_visitors": poi.get("annual_visitors"),
-                "duration_s": int(recipe.get("duration_seconds") or 30),
-                "score": int(score),
-                "video_url": f"/capsules/{name}/capsule.mp4",
-            })
-        except Exception:
-            continue
+        for name in os.listdir(cdir):
+            if not name.startswith("wd-"):
+                continue
+            meta_path = os.path.join(cdir, name, "metadata.json")
+            if not os.path.isfile(meta_path):
+                continue
+            try:
+                with open(meta_path, "r", encoding="utf-8") as f:
+                    meta = json.load(f)
+                poi = meta.get("poi", {})
+                cls = meta.get("classification", {})
+                recipe = cls.get("recipe", {})
+                score = cls.get("score", 50)
+                out.append({
+                    "poi_id": poi.get("id") or name,
+                    "name": poi.get("name", name),
+                    "country_code": poi.get("country_code", ""),
+                    "category": poi.get("category", ""),
+                    "image_url": poi.get("image_url", ""),
+                    "tier": poi.get("tier") or cls.get("tier", "B"),
+                    "lat": poi.get("lat"),
+                    "lng": poi.get("lng"),
+                    "annual_visitors": poi.get("annual_visitors"),
+                    "duration_s": int(recipe.get("duration_seconds") or 30),
+                    "score": int(score),
+                    "video_url": f"/capsules/{name}/capsule.mp4",
+                })
+            except Exception:
+                continue
+        if out:
+            break  # encontramos en este candidato, no seguir
+
+    # Fallback final: si no encontramos NADA en filesystem, usar hardcoded
+    if not out:
+        out = list(_FALLBACK_CAPSULES)
 
     out.sort(key=lambda c: c["score"], reverse=True)
     _CACHE["capsules"] = out
