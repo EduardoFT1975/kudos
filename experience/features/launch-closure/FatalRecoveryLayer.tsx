@@ -115,21 +115,32 @@ export class FatalRecoveryLayer extends React.Component<
     const bad: string[] = [];
     try {
       const ls = window.localStorage;
+      // Claves que son STRING SIMPLE (no JSON) · NO validar
+      const STRING_KEYS = new Set([
+        "kudos:anon_id",
+        "kudos:session_id",
+        "kudos:memory_prompt:last",
+      ]);
       for (let i = 0; i < ls.length; i++) {
         const k = ls.key(i);
         if (!k || !k.startsWith("kudos:")) continue;
+        if (STRING_KEYS.has(k)) continue;     // string simple legítimo
         const raw = ls.getItem(k);
         if (raw == null) continue;
+        // Solo intentar parse si parece JSON (empieza con { [ " t f n - dígito)
+        const first = raw.trim().charAt(0);
+        if (!"{[\"tfn-0123456789".includes(first)) continue;
         try {
           JSON.parse(raw);
         } catch {
-          bad.push(k);
+          // Auto-limpiar silenciosamente · no molestar al usuario
+          try { ls.removeItem(k); } catch {}
         }
       }
     } catch {
       /* ignore */
     }
-    return bad;
+    return bad;   // siempre vacío · auto-limpieza silenciosa
   }
 
   // -------------------------------------------------------------------------

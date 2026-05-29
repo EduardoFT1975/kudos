@@ -15,8 +15,9 @@ interface Props {
   onSave?: () => void;
 }
 
-export function DestacadoCard({ capsule, onPlay, onSave }: Props) {
-  if (!capsule) return <DestacadoSkeleton />;
+export function DestacadoCard({ capsuleId, capsule, onPlay, onSave }: Props) {
+  // Modo "sin cápsula real" · placeholder elegante
+  if (!capsule || !capsuleId) return <DestacadoPlaceholder />;
 
   const evocativeTitle = makeEvocativeTitle(capsule.name);
   const location = makeLocation(capsule.name);
@@ -57,13 +58,25 @@ export function DestacadoCard({ capsule, onPlay, onSave }: Props) {
 }
 
 
-function DestacadoSkeleton() {
+function DestacadoPlaceholder() {
   return (
-    <div style={{ ...WRAP, opacity: 0.4 }}>
-      <div style={{ ...HERO, background: "#1a1428" }} />
+    <div style={{ ...WRAP, cursor: "default" }}>
+      <div style={{ ...HERO, background: "linear-gradient(135deg, #1a0f2e 0%, #2a1542 50%, #1a0f2e 100%)" }}>
+        <div style={HERO_OVERLAY} />
+        <div style={BADGE_TOP}>
+          <span style={BADGE_ICON}>✦</span>
+          <span style={BADGE_TXT}>EN PREPARACIÓN</span>
+        </div>
+      </div>
       <div style={BODY}>
-        <h2 style={TITLE}>Esperando descubrimientos...</h2>
-        <p style={DESC}>Las primeras cápsulas estarán disponibles pronto.</p>
+        <h2 style={TITLE}>Las primeras cápsulas están llegando</h2>
+        <div style={LOCATION}>
+          <span style={LOCATION_DASH}>——</span>
+          <span style={LOCATION_TXT}>EL MUNDO TE ESPERA</span>
+        </div>
+        <p style={DESC}>
+          Estamos componiendo las cápsulas inaugurales · Coliseo, Alhambra, Acrópolis · te avisaremos cuando estén listas para descubrir.
+        </p>
       </div>
     </div>
   );
