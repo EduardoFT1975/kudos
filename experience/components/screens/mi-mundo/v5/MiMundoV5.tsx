@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { KudosFlowerLogo } from "@/components/brand/KudosFlowerLogo";
 import { AddToMyWorldButton } from "@/components/discovery/AddToMyWorldButton";
 import { ResonancePicker } from "@/components/discovery/ResonancePicker";
+import { MyWorldMiniMap } from "@/components/discovery/MyWorldMiniMap";
 
 
 export function MiMundoV5() {
@@ -99,10 +100,10 @@ function HuellaCard() {
   return (
     <div style={CARD}>
       <div style={CARD_HEAD}>
-        <h3 style={CARD_TITLE}>Tu Mapa de Significado</h3>
+        <h3 style={CARD_TITLE}>Tu Huella</h3>
         <span style={CARD_HELP}>?</span>
       </div>
-      <p style={CARD_SUBTITLE}>Cada lugar guardado tiene un peso · cada resonancia construye tu identidad</p>
+      <p style={CARD_SUBTITLE}>Has explorado <strong style={{ color: "#8B6BFF" }}>3% del mundo</strong></p>
       <div style={{ marginTop: 16 }}>
         {continents.map((c) => (
           <div key={c.name} style={BAR_ROW}>
@@ -114,11 +115,10 @@ function HuellaCard() {
           </div>
         ))}
       </div>
-      <button style={MINIMAP_BTN}>
-        <span style={{ marginRight: 8 }}>📍</span>
-        <span>Ver mapa de tu huella</span>
-        <span style={{ marginLeft: "auto" }}>➤</span>
-      </button>
+      {/* Mini-mapa real debajo · combinando huella estática + mapa personal */}
+      <div style={{ marginTop: 18 }}>
+        <MyWorldMiniMap height={150} />
+      </div>
     </div>
   );
 }
