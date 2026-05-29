@@ -1,12 +1,15 @@
+/**
+ * /inicio · KUDOS Home Feed v5 (mockup GPT-5 / AXÓN 1.0).
+ * El HomeScreen anterior queda disponible en /inicio-legacy.
+ */
 import type { Metadata } from "next";
-import { HomeScreen } from "@/components/screens/home/HomeScreen";
+import { HomeFeedV5 } from "@/components/screens/home/v5/HomeFeedV5";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Inicio",
-  description: "KUDOS . Descubre lugares y capsulas que merecen ser conocidos.",
+  title: "KUDOS · Descubre",
+  description: "El mundo está lleno de historias esperando ser descubiertas.",
 };
 
 export default function InicioPage() {
-  return <HomeScreen />;
+  return <HomeFeedV5 />;
 }

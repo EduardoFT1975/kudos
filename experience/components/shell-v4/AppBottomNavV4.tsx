@@ -18,6 +18,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon, type IconName } from "@/design-system/v2";
+import { KudosFlowerLogo } from "@/components/brand/KudosFlowerLogo";
 
 interface Tab { href: string; label: string; icon: IconName; }
 
@@ -56,7 +57,7 @@ export function AppBottomNavV4() {
             aria-label="Crear o compartir capsula"
             style={CTA_BTN}
           >
-            <Icon name="plus" size={26} />
+            <KudosFlowerLogo size={32} variant="gold" glow />
           </button>
         </div>
 
@@ -134,8 +135,8 @@ const CTA_BTN: React.CSSProperties = {
   width: 64,
   height: 64,
   borderRadius: "50%",
-  background: "var(--kudos-gradient-cta)",
-  border: "4px solid var(--kudos-bg, #1A1333)",
+  background: "radial-gradient(circle, rgba(201,169,97,0.12) 0%, rgba(20,16,8,0.95) 75%)",
+  border: "2px solid rgba(201,169,97,0.65)",
   color: "#fff",
   cursor: "pointer",
   display: "inline-flex",
@@ -143,4 +144,5 @@ const CTA_BTN: React.CSSProperties = {
   justifyContent: "center",
   padding: 0,
   transition: "transform 160ms",
+  boxShadow: "0 4px 24px rgba(201,169,97,0.32), 0 0 0 4px var(--kudos-bg, #1A1333)",
 };

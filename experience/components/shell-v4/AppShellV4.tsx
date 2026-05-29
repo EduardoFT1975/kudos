@@ -26,7 +26,7 @@ import { MobileShellFixes } from "@/features/mobile-hardening/MobileShellFixes";
 import { AppTopBarV4 } from "./AppTopBarV4";
 import { AppBottomNavV4 } from "./AppBottomNavV4";
 import { AppCanvasV4 } from "./AppCanvasV4";
-import { GlobalShareModal } from "@/components/share/ShareCapsuleModal";
+import { ShareCapsuleModalV5 } from "@/components/share/ShareCapsuleModalV5";
 import { MeritToast } from "@/components/share/MeritToast";
 
 interface Props { children: React.ReactNode; }
@@ -46,7 +46,7 @@ export function AppShellV4({ children }: Props) {
         <FatalRecoveryLayer>
           {children}
           <AppBottomNavV4 />
-          <GlobalShareModal />
+          <ShareCapsuleModalV5 />
           <MeritToast />
         </FatalRecoveryLayer>
       </MobileSafeAreaProvider>
@@ -61,7 +61,7 @@ export function AppShellV4({ children }: Props) {
         <AppTopBarV4 />
         <AppCanvasV4>{children}</AppCanvasV4>
         <AppBottomNavV4 />
-        <GlobalShareModal />
+        <ShareCapsuleModalV5 />
         <MeritToast />
       </FatalRecoveryLayer>
     </MobileSafeAreaProvider>

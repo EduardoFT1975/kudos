@@ -133,3 +133,32 @@ export const Track = {
   memoryReleased:    (poi_id: string) => trackEvent({ event: "memory_released", poi_id, memory_response: "released" }),
   memoryRevisited:   (poi_id: string) => trackEvent({ event: "memory_revisited", poi_id, memory_response: "revisit" }),
 };
+
+// ─── Auto-saneamiento defensivo al cargar el módulo ─────────────────
+function sanitizeLocalStorage(): number {
+  if (typeof window === "undefined") return 0;
+  let cleaned = 0;
+  try {
+    const toRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !k.startsWith("kudos:")) continue;
+      const v = localStorage.getItem(k);
+      if (!v) continue;
+      if (v.startsWith("[") || v.startsWith("{")) {
+        try { JSON.parse(v); }
+        catch { toRemove.push(k); cleaned++; }
+      }
+    }
+    toRemove.forEach((k) => localStorage.removeItem(k));
+  } catch {}
+  return cleaned;
+}
+
+if (typeof window !== "undefined") {
+  setTimeout(() => {
+    const n = sanitizeLocalStorage();
+    if (n > 0) console.warn(`[kudos] saneadas ${n} claves localStorage corruptas`);
+  }, 1500);
+}
+

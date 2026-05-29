@@ -1,33 +1,46 @@
 """
-KUDOS Capsule Engine v2 · Personal World Layer · SavedWorld + extensions.
+KUDOS Capsule Engine v2 · Personal World Layer · World Collection Engine.
 
-CTO directive Phase 9: "Save ≠ bookmark. Save = graph signal."
-Extensiones para Personal World:
-  - SavedWorld         → POI guardado (planificación · "quiero ir")
-  - VisitedWorld       → POI visitado en la realidad (con coords GPS)
-  - WatchedCapsule     → cápsula vista (con % completion)
-  - EmotionalReaction  → POI/capsule etiquetado emocionalmente
-
-Estos cuatro modelos alimentan el ranking personalizado del feed,
-el "tu mundo" del usuario, y el recommendation engine futuro.
+CTO directive: "Save ≠ bookmark. Save = graph signal."
+Implementa:
+  - Capa 2 · World Collection Engine (SavedWorld con colecciones + temas)
+  - Capa 3 · Meaning Capture Engine (motivación)
+  - Capa 4 · Memory Engine (revisitas)
+  - Capa 5 · Emotional Resonance Engine
+  - Visit (estuve aquí · GPS-verified)
+  - WatchedCapsule (cápsula vista con completion%)
 """
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field
 
 
-# ─── 1) SAVE · "quiero ir / quiero acordarme" ────────────────────────
+# ─── 1) SAVE · "Añadir a Mi Mundo" (NO favorito) ────────────────────
 
 class SavedWorld(BaseModel):
+    """Item añadido al mapa personal de significado."""
     id: str
     user_id: str
     poi_id: str
     capsule_id: Optional[str] = None
+
+    # Capa 2 · World Collection · puede pertenecer a colecciones temáticas
     collection_type: Optional[str] = "default"
-    emotional_reason: Optional[str] = None
-    future_relevance: Optional[str] = None
+    themes: List[str] = Field(default_factory=list)   # "viaje-roma" "renacimiento" etc.
+
+    # Capa 3 · Meaning Capture Engine
+    motivation: Optional[str] = None  # me_inspira | quiero_visitarlo | quiero_aprender | me_emociona | me_recuerda_algo
+    emotional_reason: Optional[str] = None   # texto libre opcional ("me recordó a mi abuela")
+    future_relevance: Optional[str] = None   # texto libre opcional
+
+    # Capa 4 · Memory · revisitas
+    last_revisited_at: Optional[str] = None
+    revisit_count: int = 0
+    memory_status: Optional[str] = None      # "still_relevant" | "released" | "want_to_revisit"
+    memory_updated_at: Optional[str] = None
+
     saved_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
 
 
@@ -36,23 +49,30 @@ class SaveRequest(BaseModel):
     poi_id: str
     capsule_id: Optional[str] = None
     collection_type: Optional[str] = "default"
+    themes: List[str] = Field(default_factory=list)
+    motivation: Optional[str] = None
     emotional_reason: Optional[str] = None
     future_relevance: Optional[str] = None
 
 
-# ─── 2) VISITED · "estuve aquí en la realidad" ───────────────────────
+class MemoryUpdateRequest(BaseModel):
+    """Capa 4 · "¿sigue siendo importante?" · "ya no" · "quiero revisitar"."""
+    save_id: str
+    status: str   # "still_relevant" | "released" | "want_to_revisit"
+
+
+# ─── 2) VISITED · "estuve aquí" GPS-verified ─────────────────────────
 
 class VisitedWorld(BaseModel):
-    """Visita real al POI · GPS-verified."""
     id: str
     user_id: str
     poi_id: str
     visited_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
-    coords_lat: Optional[float] = None     # GPS real del momento
+    coords_lat: Optional[float] = None
     coords_lng: Optional[float] = None
-    accuracy_m: Optional[float] = None     # precisión GPS
-    note: Optional[str] = None             # nota personal del viaje
-    photo_url: Optional[str] = None        # foto del usuario
+    accuracy_m: Optional[float] = None
+    note: Optional[str] = None
+    photo_url: Optional[str] = None
 
 
 class VisitRequest(BaseModel):
@@ -65,15 +85,14 @@ class VisitRequest(BaseModel):
     photo_url: Optional[str] = None
 
 
-# ─── 3) WATCHED CAPSULE · "vi la cápsula" ────────────────────────────
+# ─── 3) WATCHED CAPSULE · cápsula reproducida ────────────────────────
 
 class WatchedCapsule(BaseModel):
-    """Cápsula reproducida · con métrica de completion."""
     id: str
     user_id: str
     capsule_id: str
     poi_id: Optional[str] = None
-    completion_pct: float = 0.0            # 0..1 · 1.0 = vio completa
+    completion_pct: float = 0.0
     duration_watched_s: float = 0.0
     watched_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
 
@@ -86,25 +105,29 @@ class WatchRequest(BaseModel):
     duration_watched_s: float = 0.0
 
 
-# ─── 4) EMOTIONAL REACTION · "me hizo sentir X" ──────────────────────
+# ─── 4) EMOTIONAL RESONANCE · capa 5 ─────────────────────────────────
+# Sustituye al like clásico. Una pulsación · una emoción.
 
-class EmotionalReaction(BaseModel):
-    """Etiqueta emocional sobre un POI o cápsula · feeds personal layer."""
+class EmotionalResonance(BaseModel):
+    """Resonancia emocional · una pulsación · sin likes/dislikes."""
     id: str
     user_id: str
     target_type: str                       # "poi" | "capsule"
     target_id: str
-    emotion: str                           # awe, melancholy, wonder, joy, calm,
-                                            # nostalgia, curiosity, gratitude, etc.
-    intensity: float = 0.5                 # 0..1
+    resonance: str                         # asombro | aprendizaje | inspiracion | conexion | nostalgia
+    intensity: float = 1.0                 # default 1.0 · usuarios avanzados pueden modular
     note: Optional[str] = None
     reacted_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
 
 
-class ReactionRequest(BaseModel):
+class ResonanceRequest(BaseModel):
     user_id: str
     target_type: str
     target_id: str
-    emotion: str
-    intensity: float = 0.5
+    resonance: str
     note: Optional[str] = None
+
+
+# ─── Aliases legacy para compat ──────────────────────────────────────
+EmotionalReaction = EmotionalResonance
+ReactionRequest = ResonanceRequest

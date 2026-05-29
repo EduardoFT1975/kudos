@@ -1,12 +1,15 @@
+/**
+ * /mi-mundo · KUDOS Personal World Layer v5 (mockup GPT-5 / AXÓN 1.0).
+ * Phase 1: datos desde localStorage. Phase 2: API v2 desplegada.
+ */
 import type { Metadata } from "next";
-import { MiMundoScreen } from "@/components/screens/mi-mundo/MiMundoScreen";
+import { MiMundoV5 } from "@/components/screens/mi-mundo/v5/MiMundoV5";
 
-export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Mi Mundo",
-  description: "Tu mapa personal de lugares guardados en KUDOS.",
+  title: "KUDOS · Mi Mundo",
+  description: "Tu universo de lugares, historias y recuerdos.",
 };
 
 export default function MiMundoPage() {
-  return <MiMundoScreen />;
+  return <MiMundoV5 />;
 }

@@ -1,8 +1,5 @@
 """
-KUDOS Capsule Engine v2 · FastAPI app principal.
-
-Monta todos los módulos. Corre con:
-  uvicorn kudos_engine.apps.main:app --port 8001
+KUDOS Capsule Engine v2 · FastAPI app principal · con HDG signals.
 """
 from __future__ import annotations
 
@@ -18,13 +15,14 @@ from kudos_engine.apps.nodes.router import router as nodes_router
 from kudos_engine.apps.pois.router import router as pois_router
 from kudos_engine.apps.save.router import router as save_router
 from kudos_engine.apps.telemetry.router import router as telemetry_router
+from kudos_engine.apps.signals.router import router as signals_router
 
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="KUDOS Capsule Engine v2",
-        description="Contextual discovery infrastructure · CTO directive compliant",
-        version="2.1.0",
+        title="KUDOS Capsule Engine v2 + Human Discovery Graph",
+        description="Contextual discovery infrastructure · HDG signals capture day 1",
+        version="2.2.0",
     )
 
     app.add_middleware(
@@ -44,22 +42,21 @@ def create_app() -> FastAPI:
     app.include_router(save_router)
     app.include_router(nodes_router)
     app.include_router(telemetry_router)
+    app.include_router(signals_router)
 
     @app.get("/")
     def root():
         return {
             "service": "kudos-capsule-engine-v2",
+            "version": "2.2.0",
             "status": "operational",
-            "version": "2.1.0",
             "modules_loaded": [
                 "pois", "capsules", "merit", "narrative", "media",
-                "feed", "save", "nodes", "telemetry",
+                "feed", "save", "nodes", "telemetry", "signals",
             ],
-            "personal_world": [
-                "saved", "visited", "watched", "reactions",
-            ],
-            "i18n_ready": True,
-            "kpis_tracked": ["SAVE_RATE", "EXPLORATION_DEPTH", "VIEW_COUNT", "SHARE_COUNT"],
+            "personal_world": ["saved", "visited", "watched", "resonances", "memory"],
+            "human_discovery_graph": ["discovery", "importance", "memory", "emotion", "future_value"],
+            "kpis_tracked": ["ADDED_TO_MY_WORLD", "RESONANCE", "MOTIVATION_CAPTURED", "MEMORY_REVISITED"],
         }
 
     @app.get("/health")

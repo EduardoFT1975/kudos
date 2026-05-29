@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="KUDOS · memoria visual">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a0d2e" />
+      <stop offset="55%" stop-color="#0f0a1f" />
+      <stop offset="100%" stop-color="#050a1f" />
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="38%" r="60%">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.32" />
+      <stop offset="100%" stop-color="#050a1f" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="aurora-a" cx="22%" cy="72%" r="48%">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#050a1f" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="aurora-b" cx="78%" cy="28%" r="42%">
+      <stop offset="0%" stop-color="#f472b6" stop-opacity="0.16" />
+      <stop offset="100%" stop-color="#050a1f" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)" />
+  <rect width="1280" height="720" fill="url(#halo)" />
+  <rect width="1280" height="720" fill="url(#aurora-a)" />
+  <rect width="1280" height="720" fill="url(#aurora-b)" />
+  <g opacity="0.6">
+    <circle cx="320" cy="180" r="1.2" fill="#f8fafc" />
+    <circle cx="540" cy="220" r="0.9" fill="#f8fafc" />
+    <circle cx="780" cy="160" r="1.4" fill="#f8fafc" />
+    <circle cx="960" cy="240" r="0.8" fill="#f8fafc" />
+    <circle cx="1100" cy="190" r="1.1" fill="#f8fafc" />
+    <circle cx="180" cy="380" r="0.9" fill="#f8fafc" />
+    <circle cx="420" cy="500" r="1.0" fill="#f8fafc" />
+    <circle cx="860" cy="540" r="0.8" fill="#f8fafc" />
+  </g>
+  <g transform="translate(640 340)" opacity="0.45">
+    <circle r="120" stroke="#f8fafc" stroke-opacity="0.18" stroke-width="1" fill="none" />
+    <circle r="72" stroke="#a78bfa" stroke-opacity="0.45" stroke-width="1" fill="none" />
+    <circle r="6" fill="#a78bfa" />
+  </g>
+  <text x="640" y="540" fill="#f8fafc" fill-opacity="0.78" text-anchor="middle" font-family="ui-serif, Georgia, serif" font-weight="300" font-size="38" letter-spacing="10">KUDOS</text>
+  <text x="640" y="582" fill="#f8fafc" fill-opacity="0.42" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" letter-spacing="6">MEMORIA · VIVA</text>
+</svg>
