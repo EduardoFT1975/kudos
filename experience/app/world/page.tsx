@@ -1,20 +1,21 @@
 /**
- * /world - KUDOS Map MVP - PROMPT 3/6.
+ * /world · KUDOS Mapa Real (T6.4.A swap atomico)
  *
- * Pantalla cinematografica de mapa: imagen aerea Roma nocturna + POIs
- * flotantes con halos + carousel inferior. NO usa Leaflet.
+ * Antes apuntaba a MapMVP (mapa fake con imagen aerea Roma).
+ * Ahora apunta a WorldUniversalLayer: WorldEngine v2 (Leaflet + OSM + POIs
+ * Wikidata reales) + capa universal (POIs personales + capsulas localStorage).
  *
- * El WorldEngine anterior queda congelado en _postlaunch/world-engine
- * (preservado, no importado).
+ * El mapa fake MapMVP queda en components/screens/map/v1/ pero NO se importa
+ * desde ninguna ruta activa. Pendiente eliminacion en T6.5.
  */
 import type { Metadata } from "next";
-import { MapMVP } from "@/components/screens/map/v1/MapMVP";
+import { WorldUniversalLayer } from "@/components/screens/poi/universal/WorldUniversalLayer";
 
 export const metadata: Metadata = {
   title: "KUDOS - Mapa",
-  description: "Roma nocturna iluminada por historias.",
+  description: "El mundo en sus coordenadas reales. Todo lugar es un nodo de memoria.",
 };
 
 export default function WorldPage() {
-  return <MapMVP />;
+  return <WorldUniversalLayer />;
 }

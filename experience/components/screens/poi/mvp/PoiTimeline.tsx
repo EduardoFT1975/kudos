@@ -86,24 +86,33 @@ export function PoiTimeline({ poiId, poiImageUrl, milestones }: Props) {
       </div>
 
       <div style={GALLERY}>
-        {data.map((m, i) => (
-          <div key={i} style={{ ...GALLERY_CARD, ...(i === active ? GALLERY_CARD_ACTIVE : null) }}>
-            <div
-              style={{
-                ...GALLERY_HERO,
-                backgroundImage: m.image_url
-                  ? `linear-gradient(180deg, rgba(0,0,0,0.0) 50%, rgba(10,8,20,0.85) 100%), url(${m.image_url})`
-                  : poiImageUrl
-                    ? `linear-gradient(180deg, rgba(0,0,0,0.0) 50%, rgba(10,8,20,0.85) 100%), url(${poiImageUrl})`
+        {data.map((m, i) => {
+          const baseImg = m.image_url || poiImageUrl;
+          const eraFilter = filterForEra(m.era, i === active);
+          return (
+            <div key={i} style={{ ...GALLERY_CARD, ...(i === active ? GALLERY_CARD_ACTIVE : null) }}>
+              <div
+                style={{
+                  ...GALLERY_HERO,
+                  backgroundImage: baseImg
+                    ? `linear-gradient(180deg, rgba(0,0,0,0.0) 45%, rgba(10,8,20,0.88) 100%), url(${baseImg})`
                     : "linear-gradient(135deg, #2a1542, #1a0f2e)",
-                filter: i === active ? "none" : "sepia(0.3) brightness(0.85)",
-              }}
-            >
-              <span style={GALLERY_ERA}>{m.era}</span>
+                  filter: eraFilter,
+                  border: i === active
+                    ? "1px solid rgba(201,169,97,0.45)"
+                    : "1px solid rgba(255,255,255,0.06)",
+                  boxShadow: i === active
+                    ? "0 6px 22px rgba(201,169,97,0.18)"
+                    : "0 2px 10px rgba(0,0,0,0.35)",
+                }}
+              >
+                <span style={GALLERY_ERA}>{m.era}</span>
+                {!baseImg && <span style={GALLERY_ICON_FALLBACK}>◐</span>}
+              </div>
+              <div style={GALLERY_LABEL}>{m.label}</div>
             </div>
-            <div style={GALLERY_LABEL}>{m.label}</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
@@ -185,6 +194,7 @@ const GALLERY_HERO: React.CSSProperties = {
   backgroundSize: "cover",
   backgroundPosition: "center",
   border: "1px solid rgba(255,255,255,0.06)",
+  transition: "filter 320ms ease, box-shadow 320ms ease, border 320ms ease",
 };
 const GALLERY_ERA: React.CSSProperties = {
   position: "absolute",
@@ -201,3 +211,21 @@ const GALLERY_LABEL: React.CSSProperties = {
   color: "rgba(255,255,255,0.75)",
   lineHeight: 1.3,
 };
+const GALLERY_ICON_FALLBACK: React.CSSProperties = {
+  position: "absolute" as const,
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  fontSize: 28,
+  color: "rgba(255,255,255,0.45)",
+};
+
+function filterForEra(era: string, isActive: boolean): string {
+  const e = era.toLowerCase();
+  if (e.includes("hoy")) return isActive ? "none" : "brightness(0.85)";
+  if (e.includes("a.c.") || e.includes("ac")) return isActive ? "sepia(0.6) saturate(1.15) brightness(1.05)" : "sepia(0.5) brightness(0.78)";
+  if (e.includes("d.c.") || e.includes("dc")) return isActive ? "sepia(0.45) hue-rotate(-8deg)" : "sepia(0.4) brightness(0.78)";
+  if (/1[3-6]\d{2}/.test(e)) return isActive ? "grayscale(0.55) sepia(0.35) brightness(0.92)" : "grayscale(0.7) brightness(0.7)";
+  if (/1[7-9]\d{2}/.test(e)) return isActive ? "sepia(0.5) contrast(1.08) brightness(0.96)" : "sepia(0.5) brightness(0.75)";
+  return isActive ? "none" : "sepia(0.3) brightness(0.82)";
+}

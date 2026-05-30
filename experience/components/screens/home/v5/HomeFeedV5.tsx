@@ -84,16 +84,20 @@ export function HomeFeedV5() {
       )}
 
       {error && (
-        <div style={ERR_BOX}>
-          <strong>No se pudo cargar el feed.</strong>
-          <br />
-          <code style={{ fontSize: 11, color: "rgba(255,255,255,0.65)" }}>{error}</code>
+        <div style={SOFT_EMPTY}>
+          <p style={SOFT_EMPTY_TITLE}>El mundo se está despertando.</p>
+          <p style={SOFT_EMPTY_SUB}>Vuelve en un momento. Las historias están en camino.</p>
+          <details style={SOFT_EMPTY_DETAILS}>
+            <summary style={SOFT_EMPTY_SUMMARY}>Detalles técnicos</summary>
+            <code style={SOFT_EMPTY_CODE}>{error}</code>
+          </details>
         </div>
       )}
 
       {!loading && !error && !data?.featured && (
-        <div style={ERR_BOX}>
-          La API respondio OK pero sin datos. Verifica /api/discover/ desde el navegador.
+        <div style={SOFT_EMPTY}>
+          <p style={SOFT_EMPTY_TITLE}>Aún no hay historias destacadas.</p>
+          <p style={SOFT_EMPTY_SUB}>Explora el mapa para descubrir lugares por tu cuenta.</p>
         </div>
       )}
 
@@ -142,16 +146,50 @@ const ROOT: React.CSSProperties = {
   fontFamily: '"Poppins", system-ui, sans-serif',
   color: "#fff",
 };
-const ERR_BOX: React.CSSProperties = {
-  margin: "18px 16px",
-  padding: "12px 14px",
-  background: "rgba(168,88,88,0.12)",
-  border: "1px solid rgba(168,88,88,0.25)",
-  borderRadius: 10,
-  color: "rgba(255,255,255,0.85)",
+const SOFT_EMPTY: React.CSSProperties = {
+  margin: "28px 20px",
+  padding: "26px 22px",
+  background: "rgba(139,107,255,0.06)",
+  border: "1px solid rgba(139,107,255,0.18)",
+  borderRadius: 16,
+  textAlign: "center" as const,
+};
+const SOFT_EMPTY_TITLE: React.CSSProperties = {
+  margin: "0 0 6px",
+  fontFamily: 'var(--kudos-font-display, "Cormorant Garamond", Georgia, serif)',
+  fontSize: 20,
+  fontWeight: 500,
+  color: "rgba(245,240,232,0.95)",
+  lineHeight: 1.25,
+};
+const SOFT_EMPTY_SUB: React.CSSProperties = {
+  margin: "0 0 12px",
   fontSize: 13,
-  lineHeight: 1.5,
-  overflowWrap: "break-word",
+  color: "rgba(245,240,232,0.6)",
+  fontStyle: "italic",
+  fontFamily: "Georgia, serif",
+};
+const SOFT_EMPTY_DETAILS: React.CSSProperties = {
+  marginTop: 14,
+  textAlign: "left" as const,
+};
+const SOFT_EMPTY_SUMMARY: React.CSSProperties = {
+  fontSize: 10,
+  letterSpacing: "0.18em",
+  textTransform: "uppercase",
+  color: "rgba(245,240,232,0.4)",
+  cursor: "pointer",
+  paddingBottom: 6,
+};
+const SOFT_EMPTY_CODE: React.CSSProperties = {
+  display: "block",
+  fontSize: 10,
+  color: "rgba(245,240,232,0.5)",
+  fontFamily: "monospace",
+  padding: 8,
+  background: "rgba(0,0,0,0.25)",
+  borderRadius: 6,
+  overflowWrap: "break-word" as const,
 };
 const LOAD_BOX: React.CSSProperties = {
   margin: "18px 16px",
