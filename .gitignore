@@ -82,8 +82,15 @@ deployment_log.txt
 *.mp3
 # EXCEPCION · capsulas servidas por el frontend Next.js (small files).
 # Son los .mp4 0:15 que se sirven directamente desde el static.
+# T6.4.E · ampliado para incluir subcarpetas /wd-Q.../capsule.mp4
 !experience/public/capsules/*.mp4
 !experience/public/capsules/*.webm
+!experience/public/capsules/**/*.mp4
+!experience/public/capsules/**/*.webm
+!experience/public/capsules/**/*.json
+!experience/public/capsules/**/*.vtt
+!experience/public/capsules/**/*.jpg
+!experience/public/capsules/**/*.png
 *.wav
 *.flac
 
