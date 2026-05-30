@@ -27,7 +27,11 @@ export function PoiCapsule({
 }: Props) {
   const [playing, setPlaying] = React.useState(false);
   const [videoError, setVideoError] = React.useState(false);
-  const videoUrl = `/capsules/${poiId}/capsule.mp4`;
+  // T6.4.F · Servir desde GitHub Raw porque Render free no sirve archivos
+  // pesados del deploy. Fallback local para dev.
+  const videoUrl = process.env.NODE_ENV === "production"
+    ? `https://raw.githubusercontent.com/EduardoFT1975/kudos/master/experience/public/capsules/${poiId}/capsule.mp4`
+    : `/capsules/${poiId}/capsule.mp4`;
 
   React.useEffect(() => {
     if (autoPlay) setPlaying(true);
