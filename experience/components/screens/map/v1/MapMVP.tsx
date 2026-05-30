@@ -37,14 +37,26 @@ export function MapMVP() {
   const [era, setEra] = React.useState<MapEra>("hoy");
   const [filter, setFilter] = React.useState<MapCategory | null>(null);
 
+  const [searchOpen, setSearchOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [hintVisible, setHintVisible] = React.useState(true);
+
+  // Ocultar hint tras 4 segundos
+  React.useEffect(() => {
+    const t = setTimeout(() => setHintVisible(false), 4500);
+    return () => clearTimeout(t);
+  }, []);
+
   const visiblePois = React.useMemo(
     () =>
       ROMA_POIS.filter(
         (p) =>
           p.visible_in.includes(era) &&
-          (filter === null || p.category === filter)
+          (filter === null || p.category === filter) &&
+          (searchQuery.trim() === "" ||
+            p.name.toLowerCase().includes(searchQuery.toLowerCase().trim()))
       ),
-    [era, filter]
+    [era, filter, searchQuery]
   );
 
   return (
@@ -64,15 +76,58 @@ export function MapMVP() {
 
       {/* === Top controles === */}
       <header style={TOPBAR}>
-        <button style={SEARCH_BTN} aria-label="Buscar">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <circle cx="11" cy="11" r="7" stroke="#fff" strokeWidth="1.7" />
-            <path d="M21 21l-4-4" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" />
-          </svg>
-        </button>
-        <div style={TOP_TITLE}>KUDOS</div>
-        <button style={AVATAR_BTN} aria-label="Perfil" />
+        {searchOpen ? (
+          <div style={SEARCH_INPUT_WRAP}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ marginRight: 8 }}>
+              <circle cx="11" cy="11" r="7" stroke="rgba(255,255,255,0.7)" strokeWidth="1.7" />
+              <path d="M21 21l-4-4" stroke="rgba(255,255,255,0.7)" strokeWidth="1.7" strokeLinecap="round" />
+            </svg>
+            <input
+              type="text"
+              autoFocus
+              placeholder="Buscar lugar en Roma..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={SEARCH_INPUT}
+            />
+            <button
+              onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+              style={SEARCH_CLOSE}
+              aria-label="Cerrar busqueda"
+            >✕</button>
+          </div>
+        ) : (
+          <>
+            <button
+              style={SEARCH_BTN}
+              onClick={() => setSearchOpen(true)}
+              aria-label="Buscar"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <circle cx="11" cy="11" r="7" stroke="#fff" strokeWidth="1.7" />
+                <path d="M21 21l-4-4" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" />
+              </svg>
+            </button>
+            <div style={TOP_TITLE}>KUDOS</div>
+            <button style={AVATAR_BTN} aria-label="Perfil" />
+          </>
+        )}
       </header>
+
+      {/* Hint visual: invita a tocar un punto */}
+      {hintVisible && !searchOpen && (
+        <div style={HINT_BOX}>
+          <span style={HINT_DOT} />
+          Toca un punto luminoso para descubrir
+        </div>
+      )}
+
+      {/* Si no hay POIs visibles tras filtro/search, mostrar mensaje */}
+      {visiblePois.length === 0 && searchQuery && (
+        <div style={EMPTY_SEARCH}>
+          Sin resultados para "<strong>{searchQuery}</strong>".
+        </div>
+      )}
 
       <TimeSelector era={era} onChange={setEra} />
 
@@ -259,4 +314,71 @@ const FC_CHIP_ACTIVE: React.CSSProperties = {
   background: "rgba(139,107,255,0.85)",
   color: "#fff",
   border: "1px solid #8B6BFF",
+};
+
+// === SPRINT FINAL #5: search + hint ===
+const SEARCH_INPUT_WRAP: React.CSSProperties = {
+  flex: 1,
+  display: "flex",
+  alignItems: "center",
+  padding: "8px 14px",
+  background: "rgba(15,10,31,0.85)",
+  border: "1px solid rgba(255,255,255,0.18)",
+  borderRadius: 999,
+  backdropFilter: "blur(12px)",
+};
+const SEARCH_INPUT: React.CSSProperties = {
+  flex: 1,
+  background: "transparent",
+  border: "none",
+  color: "#fff",
+  fontSize: 13,
+  outline: "none",
+  fontFamily: "inherit",
+};
+const SEARCH_CLOSE: React.CSSProperties = {
+  background: "transparent",
+  border: "none",
+  color: "rgba(255,255,255,0.6)",
+  fontSize: 14,
+  cursor: "pointer",
+  padding: "0 4px",
+};
+const HINT_BOX: React.CSSProperties = {
+  position: "absolute" as const,
+  top: 220,
+  left: "50%",
+  transform: "translateX(-50%)",
+  zIndex: 12,
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 8,
+  padding: "8px 14px",
+  background: "rgba(139,107,255,0.85)",
+  color: "#fff",
+  fontSize: 12,
+  fontWeight: 500,
+  borderRadius: 999,
+  boxShadow: "0 6px 22px rgba(139,107,255,0.4)",
+};
+const HINT_DOT: React.CSSProperties = {
+  width: 8,
+  height: 8,
+  borderRadius: "50%",
+  background: "#fff",
+  boxShadow: "0 0 8px rgba(255,255,255,0.7)",
+};
+const EMPTY_SEARCH: React.CSSProperties = {
+  position: "absolute" as const,
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  zIndex: 15,
+  padding: "14px 22px",
+  background: "rgba(15,10,31,0.85)",
+  border: "1px solid rgba(255,255,255,0.12)",
+  borderRadius: 14,
+  color: "rgba(255,255,255,0.85)",
+  fontSize: 13,
+  backdropFilter: "blur(10px)",
 };

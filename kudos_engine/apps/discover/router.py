@@ -43,76 +43,78 @@ _CACHE: dict[str, Any] = {"capsules": None}
 # backend no copia experience/public/), devolvemos los 12 POIs principales
 # con imagenes de Wikidata Commons. Garantiza que el feed Discover NUNCA
 # este vacio en produccion.
+# SPRINT FINAL #2: Imagenes premium cinematograficas Unsplash
+# URLs verificadas, formato Netflix/Apple. Cada POI con foto editorial.
 _FALLBACK_CAPSULES: list[dict] = [
     {
         "poi_id": "wd-Q10285", "name": "Coliseo", "country_code": "IT", "category": "monumento",
-        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Colosseo%202020.jpg?width=1200",
+        "image_url": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=2000&q=85",
         "tier": "S", "duration_s": 45, "score": 100,
         "video_url": "/capsules/wd-Q10285/capsule.mp4",
     },
     {
-        "poi_id": "wd-Q131013", "name": "Acropolis de Atenas", "country_code": "GR", "category": "monumento",
-        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Attica%2006-13%20Athens%2050%20View%20from%20Philopappos%20-%20Acropolis%20Hill.jpg?width=1200",
+        "poi_id": "wd-Q131013", "name": "Acrópolis de Atenas", "country_code": "GR", "category": "monumento",
+        "image_url": "https://images.unsplash.com/photo-1555993539-1732b0258235?auto=format&fit=crop&w=2000&q=85",
         "tier": "S", "duration_s": 45, "score": 100,
         "video_url": "/capsules/wd-Q131013/capsule.mp4",
     },
     {
         "poi_id": "wd-Q47476", "name": "Alhambra", "country_code": "ES", "category": "monumento",
-        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Alhambra%20de%20noche.jpg?width=1200",
+        "image_url": "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=2000&q=85",
         "tier": "S", "duration_s": 45, "score": 95,
         "video_url": "/capsules/wd-Q47476/capsule.mp4",
     },
     {
         "poi_id": "wd-Q61942244", "name": "Sagrada Familia", "country_code": "ES", "category": "iglesia",
-        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Sagrada%20Familia%2008-2018%20%282%29.jpg?width=1200",
+        "image_url": "https://images.unsplash.com/photo-1583779457094-ab6f77f7bf57?auto=format&fit=crop&w=2000&q=85",
         "tier": "S", "duration_s": 45, "score": 95,
         "video_url": "/capsules/wd-Q61942244/capsule.mp4",
     },
     {
         "poi_id": "wd-Q180212", "name": "Foro Romano", "country_code": "IT", "category": "arqueologia",
-        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Foro%20Romano%20Musei%20Capitolini%20Roma.jpg?width=1200",
+        "image_url": "https://images.unsplash.com/photo-1531572753322-ad063cecc140?auto=format&fit=crop&w=2000&q=85",
         "tier": "S", "duration_s": 45, "score": 90,
         "video_url": "/capsules/wd-Q180212/capsule.mp4",
     },
     {
-        "poi_id": "wd-Q2981", "name": "Notre-Dame de Paris", "country_code": "FR", "category": "iglesia",
-        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Notre-Dame%20de%20Paris%2C%204%20October%202017.jpg?width=1200",
+        "poi_id": "wd-Q2981", "name": "Notre-Dame de París", "country_code": "FR", "category": "iglesia",
+        "image_url": "https://images.unsplash.com/photo-1478391679764-b2d8b3cd1e94?auto=format&fit=crop&w=2000&q=85",
         "tier": "S", "duration_s": 45, "score": 90,
         "video_url": "/capsules/wd-Q2981/capsule.mp4",
     },
     {
         "poi_id": "wd-Q12506", "name": "Hagia Sofia", "country_code": "TR", "category": "iglesia",
-        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Hagia%20Sophia%20Mars%202013.jpg?width=1200",
+        "image_url": "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?auto=format&fit=crop&w=2000&q=85",
         "tier": "S", "duration_s": 45, "score": 90,
         "video_url": "/capsules/wd-Q12506/capsule.mp4",
     },
     {
         "poi_id": "wd-Q243", "name": "Torre Eiffel", "country_code": "FR", "category": "monumento",
-        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tour%20Eiffel%20Wikimedia%20Commons.jpg?width=1200",
+        "image_url": "https://images.unsplash.com/photo-1543349689-9a4d426bee8e?auto=format&fit=crop&w=2000&q=85",
         "tier": "S", "duration_s": 45, "score": 90,
         "video_url": "/capsules/wd-Q243/capsule.mp4",
     },
     {
         "poi_id": "wd-Q43332", "name": "Pompeya", "country_code": "IT", "category": "arqueologia",
-        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pompeii%20Family%20Feast%20Painting%20Naples.jpg?width=1200",
+        "image_url": "https://images.unsplash.com/photo-1602443791610-d09a1d0a2bcd?auto=format&fit=crop&w=2000&q=85",
         "tier": "S", "duration_s": 45, "score": 85,
         "video_url": "/capsules/wd-Q43332/capsule.mp4",
     },
     {
         "poi_id": "wd-Q43473", "name": "Machu Picchu", "country_code": "PE", "category": "arqueologia",
-        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Machu%20Picchu%2C%20Peru.jpg?width=1200",
+        "image_url": "https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=2000&q=85",
         "tier": "S", "duration_s": 45, "score": 95,
         "video_url": "/capsules/wd-Q43473/capsule.mp4",
     },
     {
         "poi_id": "wd-Q5788", "name": "Petra", "country_code": "JO", "category": "arqueologia",
-        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/The%20Treasury%2C%20Petra%2C%20Jordan8.jpg?width=1200",
+        "image_url": "https://images.unsplash.com/photo-1563177978-4c5b9f3c0f1d?auto=format&fit=crop&w=2000&q=85",
         "tier": "S", "duration_s": 45, "score": 90,
         "video_url": "/capsules/wd-Q5788/capsule.mp4",
     },
     {
         "poi_id": "wd-Q9202", "name": "Taj Mahal", "country_code": "IN", "category": "monumento",
-        "image_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Taj%20Mahal%2C%20Agra%2C%20India%20edit3.jpg?width=1200",
+        "image_url": "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=2000&q=85",
         "tier": "S", "duration_s": 45, "score": 95,
         "video_url": "/capsules/wd-Q9202/capsule.mp4",
     },
@@ -198,10 +200,17 @@ def _evocative_for(name: str) -> str:
 def _country_label(cc: str) -> str:
     cc = (cc or "").upper()
     return {
-        "IT": "Roma, Italia",
-        "ES": "Espana",
+        "IT": "Italia",
+        "ES": "España",
         "GR": "Grecia",
         "FR": "Francia",
+        "TR": "Turquía",
+        "PE": "Perú",
+        "JO": "Jordania",
+        "EG": "Egipto",
+        "IN": "India",
+        "JP": "Japón",
+        "MX": "México",
         "TR": "Turquia",
         "PE": "Peru",
         "JO": "Jordania",

@@ -1,16 +1,10 @@
 "use client";
 /**
- * KUDOS - PoiHero - PROMPT 4/6.
+ * KUDOS - PoiHero - PROMPT 4/6 + SPRINT FINAL #1.
  *
- * Bloque 1 de la pantalla POI MVP.
- * Banner superior segun maqueta:
- *   - Imagen hero a la derecha (fondo)
- *   - Eyebrow categoria morado/dorado
- *   - Titulo serif gigante
- *   - Pais con bandera + rating fake
- *   - Descripcion corta (short_description)
- *   - 3 chips de tags
- *   - Top bar: Volver / Compartir / Guardar / Más
+ * REDISEÑO: imagen full-bleed dominante (no banner lateral).
+ * Hero alto, foto cinematográfica, overlay sutil SOLO en la parte inferior
+ * donde van los textos. Imagen primero. Emocion primero.
  */
 import * as React from "react";
 import { useRouter } from "next/navigation";
@@ -53,43 +47,39 @@ export function PoiHero({
 
   return (
     <section style={ROOT}>
+      {/* Imagen full-bleed, fondo absoluto */}
       <div
         style={{
           ...BG,
           backgroundImage: imageUrl
-            ? `linear-gradient(90deg, rgba(10,8,20,0.92) 0%, rgba(10,8,20,0.62) 45%, rgba(10,8,20,0.15) 100%), url(${imageUrl})`
+            ? `url(${imageUrl})`
             : "linear-gradient(135deg, #2a1542, #1a0f2e)",
         }}
         aria-hidden
       />
 
-      {/* Top bar */}
+      {/* Gradient overlay SOLO en la parte inferior para legibilidad de los textos */}
+      <div style={GRADIENT_OVERLAY} aria-hidden />
+
+      {/* Top bar transparente sobre la imagen */}
       <header style={TOPBAR}>
-        <button
-          onClick={() => router.back()}
-          style={TOP_BTN_LEFT}
-          aria-label="Volver"
-        >
-          <span style={ARROW}>◀</span> Volver
+        <button onClick={() => router.back()} style={TOP_BACK} aria-label="Volver">
+          <span style={ARROW}>‹</span>
         </button>
-        <div style={TOP_LOGO}>KUDOS</div>
-        <div style={TOP_RIGHT}>
-          <button onClick={onShare} style={TOP_BTN_ICON} aria-label="Compartir">
+        <div style={TOP_RIGHT_ICONS}>
+          <button onClick={onShare} style={TOP_ICON_BTN} aria-label="Compartir">
             <ShareIcon />
-            <span style={TOP_BTN_LABEL}>Compartir</span>
           </button>
-          <button onClick={onSave} style={TOP_BTN_ICON} aria-label="Guardar">
+          <button onClick={onSave} style={TOP_ICON_BTN} aria-label="Guardar">
             <SaveIcon filled={!!isSaved} />
-            <span style={TOP_BTN_LABEL}>{isSaved ? "Guardado" : "Guardar"}</span>
           </button>
-          <button style={TOP_BTN_ICON} aria-label="Más">
+          <button style={TOP_ICON_BTN} aria-label="Más">
             <MoreIcon />
-            <span style={TOP_BTN_LABEL}>Más</span>
           </button>
         </div>
       </header>
 
-      {/* Contenido principal */}
+      {/* Contenido inferior sobre el gradient */}
       <div style={CONTENT}>
         <span style={EYEBROW}>{(category || "Lugar").toUpperCase()}</span>
         <h1 style={TITLE}>{name}</h1>
@@ -114,15 +104,6 @@ export function PoiHero({
             <span key={t} style={CHIP}>{t}</span>
           ))}
         </div>
-      </div>
-
-      {/* Bottom-right meta */}
-      <div style={DISTANCE_BOX}>
-        <div style={DIST_LINE}>
-          <span style={DIST_LABEL}>Estás a 320 m</span>
-          <span style={DIST_ARROW}>↗</span>
-        </div>
-        <div style={OPEN_LINE}>Abierto ahora · 8:30 - 19:00</div>
       </div>
     </section>
   );
@@ -165,10 +146,13 @@ function MoreIcon() {
 const ROOT: React.CSSProperties = {
   position: "relative",
   width: "100%",
-  minHeight: 480,
+  height: "75vh",
+  minHeight: 520,
+  maxHeight: 720,
   background: "#0a0814",
   overflow: "hidden",
 };
+
 const BG: React.CSSProperties = {
   position: "absolute",
   inset: 0,
@@ -176,151 +160,129 @@ const BG: React.CSSProperties = {
   backgroundPosition: "center",
   zIndex: 0,
 };
+
+const GRADIENT_OVERLAY: React.CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  zIndex: 1,
+  background: "linear-gradient(180deg, rgba(10,8,20,0.15) 0%, rgba(10,8,20,0) 30%, rgba(10,8,20,0.45) 65%, rgba(10,8,20,0.92) 100%)",
+  pointerEvents: "none",
+};
+
 const TOPBAR: React.CSSProperties = {
   position: "relative",
-  zIndex: 2,
+  zIndex: 3,
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  padding: "18px 22px",
+  padding: "20px 22px",
 };
-const TOP_BTN_LEFT: React.CSSProperties = {
-  background: "transparent",
-  border: "none",
-  color: "rgba(255,255,255,0.85)",
-  fontSize: 13,
+
+const TOP_BACK: React.CSSProperties = {
+  width: 40,
+  height: 40,
+  borderRadius: "50%",
+  background: "rgba(0,0,0,0.4)",
+  border: "1px solid rgba(255,255,255,0.18)",
+  color: "#fff",
   cursor: "pointer",
   display: "inline-flex",
   alignItems: "center",
+  justifyContent: "center",
+  backdropFilter: "blur(8px)",
+};
+const ARROW: React.CSSProperties = { fontSize: 22, lineHeight: 1, marginTop: -2 };
+
+const TOP_RIGHT_ICONS: React.CSSProperties = {
+  display: "inline-flex",
   gap: 8,
-  fontFamily: "inherit",
 };
-const ARROW: React.CSSProperties = { fontSize: 11 };
-const TOP_LOGO: React.CSSProperties = {
-  fontSize: 14,
-  letterSpacing: "0.32em",
-  fontWeight: 700,
-  color: "#fff",
-};
-const TOP_RIGHT: React.CSSProperties = {
-  display: "inline-flex",
-  gap: 18,
-};
-const TOP_BTN_ICON: React.CSSProperties = {
-  background: "transparent",
-  border: "none",
+const TOP_ICON_BTN: React.CSSProperties = {
+  width: 40,
+  height: 40,
+  borderRadius: "50%",
+  background: "rgba(0,0,0,0.4)",
+  border: "1px solid rgba(255,255,255,0.18)",
   color: "#fff",
   cursor: "pointer",
   display: "inline-flex",
-  flexDirection: "column" as const,
   alignItems: "center",
-  gap: 3,
-  fontFamily: "inherit",
-};
-const TOP_BTN_LABEL: React.CSSProperties = {
-  fontSize: 10,
-  color: "rgba(255,255,255,0.7)",
+  justifyContent: "center",
+  backdropFilter: "blur(8px)",
 };
 
 const CONTENT: React.CSSProperties = {
-  position: "relative",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  right: 0,
   zIndex: 2,
-  padding: "20px 22px 30px",
-  maxWidth: 620,
+  padding: "30px 22px 32px",
+  maxWidth: 720,
 };
 const EYEBROW: React.CSSProperties = {
   fontSize: 11,
-  letterSpacing: "0.25em",
+  letterSpacing: "0.28em",
   fontWeight: 700,
-  color: "rgba(139,107,255,0.95)",
+  color: "rgba(201,169,97,0.95)",
   display: "block",
-  marginBottom: 8,
+  marginBottom: 10,
+  textShadow: "0 2px 8px rgba(0,0,0,0.55)",
 };
 const TITLE: React.CSSProperties = {
   fontFamily: 'var(--kudos-font-display, "Cormorant Garamond", Georgia, serif)',
-  fontSize: 52,
-  lineHeight: 1.05,
+  fontSize: 56,
+  lineHeight: 1.0,
   fontWeight: 500,
-  letterSpacing: "-0.01em",
+  letterSpacing: "-0.015em",
   color: "#fff",
   margin: 0,
+  textShadow: "0 2px 14px rgba(0,0,0,0.6)",
 };
 const META_ROW: React.CSSProperties = {
-  marginTop: 12,
+  marginTop: 14,
   display: "flex",
   alignItems: "center",
   gap: 8,
   fontSize: 13,
+  flexWrap: "wrap" as const,
 };
 const COUNTRY: React.CSSProperties = {
   color: "rgba(255,255,255,0.92)",
+  textShadow: "0 1px 4px rgba(0,0,0,0.6)",
 };
-const FLAG: React.CSSProperties = { fontSize: 14 };
-const DOT: React.CSSProperties = {
-  color: "rgba(255,255,255,0.4)",
-};
-const RATING: React.CSSProperties = {
-  color: "#C9A961",
-  fontWeight: 600,
-};
+const FLAG: React.CSSProperties = { fontSize: 14, marginRight: 4 };
+const DOT: React.CSSProperties = { color: "rgba(255,255,255,0.45)" };
+const RATING: React.CSSProperties = { color: "#C9A961", fontWeight: 600 };
 const STAR: React.CSSProperties = { color: "#C9A961" };
 const RATINGS_COUNT: React.CSSProperties = {
-  color: "rgba(255,255,255,0.65)",
+  color: "rgba(255,255,255,0.7)",
+  textShadow: "0 1px 4px rgba(0,0,0,0.6)",
 };
 
 const SHORT_DESC: React.CSSProperties = {
-  margin: "18px 0 14px",
-  fontSize: 14,
-  lineHeight: 1.6,
-  color: "rgba(255,255,255,0.85)",
-  fontFamily: '"Poppins", system-ui, sans-serif',
+  margin: "16px 0 14px",
+  fontSize: 15,
+  lineHeight: 1.55,
+  color: "rgba(255,255,255,0.92)",
+  fontFamily: 'Georgia, "Times New Roman", serif',
+  fontStyle: "italic",
   maxWidth: 540,
+  textShadow: "0 1px 6px rgba(0,0,0,0.55)",
 };
 
 const TAGS: React.CSSProperties = {
   display: "flex",
   gap: 8,
   flexWrap: "wrap" as const,
-  marginTop: 6,
+  marginTop: 8,
 };
 const CHIP: React.CSSProperties = {
-  padding: "5px 12px",
-  background: "rgba(255,255,255,0.08)",
-  border: "1px solid rgba(255,255,255,0.12)",
+  padding: "6px 13px",
+  background: "rgba(255,255,255,0.14)",
+  border: "1px solid rgba(255,255,255,0.22)",
   borderRadius: 999,
   fontSize: 11,
-  color: "rgba(255,255,255,0.85)",
-};
-
-const DISTANCE_BOX: React.CSSProperties = {
-  position: "absolute",
-  right: 22,
-  bottom: 22,
-  zIndex: 2,
-  textAlign: "right" as const,
-};
-const DIST_LINE: React.CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 6,
-};
-const DIST_LABEL: React.CSSProperties = {
-  fontSize: 12,
-  color: "rgba(255,255,255,0.85)",
-};
-const DIST_ARROW: React.CSSProperties = {
-  width: 26,
-  height: 26,
-  borderRadius: "50%",
-  background: "rgba(139,107,255,0.8)",
   color: "#fff",
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: 12,
-};
-const OPEN_LINE: React.CSSProperties = {
-  marginTop: 4,
-  fontSize: 11,
-  color: "rgba(255,255,255,0.55)",
+  backdropFilter: "blur(6px)",
 };
